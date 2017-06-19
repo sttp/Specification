@@ -9,8 +9,8 @@
 | 3 | [Protocol Overview](Overview.md) |
 | ? | {balance of sections) |
 | ~20 | [References and Notes](References.md) |
-| ~21 | [Contributors and Reviewers](AUTHORS) |
+| ~21 | [Contributors and Reviewers](../AUTHORS) |
 | ~22 | [Revision History](History.md) |
-| A | [Appendix A - STTP API Reference ](#appendixA) |
-| B | [Appendix B - Reference Implementation - IEEE C37.118 Transformation](#appendixB) |
-| C | [Appendix C](#appendixC) |
+| A | [Appendix A - STTP API Reference ](APIReference.md) |
+| B | [Appendix B - Reference Implementation - IEEE C37.118 Transformation](IEEE_C37.118Mapping.md) |
+| C | [Appendix C - To-Do List](ToDoList.md) |
