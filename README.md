@@ -23,11 +23,9 @@
 - [ASP Project Overview](http://www.naspi.org/sites/default/files/2017-03/gpa_robertson_asp_doe_20170322.pdf)
 - [Gateway Exchange Protocol (GEP)](http://gridprotectionalliance.org/docs/products/gsf/gep-overview.pdf) - used as a model for STTP
 - [GEP Study by Peak RC](https://www.naspi.org/naspi/sites/default/files/2017-03/PRSP_Phasor_Gateway_Whitepaper_Final_with_disclaimer_Final.pdf)
+- [Projected Project Timeline](Sections/Images/ASPProjectTimeline.png).
 
 #### Primary Project Participants
 ![Project Participants](Sections/Images/ParticipantLogos.png)
 
 ![Project Participant Matrix](Sections/Images/ParticipantMatrix.png)
-
-#### Projected Project Timeline
-![Project Timeline](Sections/Images/ASPProjectTimeline.png)
