@@ -5,3 +5,9 @@ Use of synchrophasors by U.S. utilities continues to grow following the jump sta
 As a result, the ASP project ...
 
 more ...
+
+#### Scope of this Document
+
+Purpose of doc, audience, etc.
+
+Body text
