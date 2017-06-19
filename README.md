@@ -14,7 +14,7 @@
 
 **Format:** This document is separated into multiple files where each section is its own markdown file in the *Sections* folder. At regular intervals, a complete single document will be published for download.  You can start navigating documentation by clicking the link to the table of contents below, which is the default README of the *Sections* folder:
 
-### [Table of Contents](Sections/README.md)
+### [Table of Contents](Sections)
 
 ### Other Links
 
@@ -23,7 +23,7 @@
 - [ASP Project Overview](http://www.naspi.org/sites/default/files/2017-03/gpa_robertson_asp_doe_20170322.pdf)
 - [Gateway Exchange Protocol (GEP)](http://gridprotectionalliance.org/docs/products/gsf/gep-overview.pdf) - used as a model for STTP
 - [GEP Study by Peak RC](https://www.naspi.org/naspi/sites/default/files/2017-03/PRSP_Phasor_Gateway_Whitepaper_Final_with_disclaimer_Final.pdf)
-- [Projected Project Timeline](Sections/Images/ASPProjectTimeline.png).
+- [Projected Project Timeline](Sections/Images/ASPProjectTimeline.png)
 
 #### Primary Project Participants
 ![Project Participants](Sections/Images/ParticipantLogos.png)
