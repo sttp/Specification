@@ -1,4 +1,6 @@
-# Streaming Telemetry Transport Protocol (STTP) Specification
+![STTP](Sections/Images/ASPProject.png)
+
+## STTP Specification
 
 **Version:** 0.0.0 - June 19, 2017
 
@@ -10,17 +12,22 @@
 
 **License:** This specification is free software and it can be redistributed and/or modified under the terms of the [MIT License](LICENSE). This Specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-### Table of Contents
+**Format:** This document is separated into multiple files where each section is its own markdown file in the *Sections* folder. At regular intervals, a complete single document will be published for download.  You can start navigating documentation by clicking the link to the table of contents below, which is the default README of the *Sections* folder:
 
-| Section |  |
-|----:|-----|
-| 1 | [Introduction](Sections/Introduction.md) |
-| 2 | [Definitions and Nomenclature](#nomenclature) |
-| 3 | [Protocol Overview](#overview) |
-| ? | {balance of sections) |
-| 20 | [References and Notes](#references) |
-| 21 | [Contributors and Reviewers](#contributors) |
-| 22 | [Revision History](#history) |
-| A | [Appendix A - STTP API Reference ](#appendixA) |
-| B | [Appendix B - Reference Implementation - IEEE C37-118 Transformation](#appendixB) |
-| C | [Appendix C](#appendixC) |
+### [Table of Contents](Sections/README.md)
+
+### Other Links
+
+- [Contributing to STTP](CONTRIBUTING.md)
+- [STTP Authors](AUTHORS) - as self reported
+- [ASP Project Overview](http://www.naspi.org/sites/default/files/2017-03/gpa_robertson_asp_doe_20170322.pdf)
+- [Gateway Exchange Protocol (GEP)](http://gridprotectionalliance.org/docs/products/gsf/gep-overview.pdf) - used as a model for STTP
+- [GEP Study by Peak RC](https://www.naspi.org/naspi/sites/default/files/2017-03/PRSP_Phasor_Gateway_Whitepaper_Final_with_disclaimer_Final.pdf)
+
+#### Primary Project Participants
+![Project Participants](Sections/Images/ParticipantLogos.png)
+
+![Project Participant Matrix](Sections/Images/ParticipantMatrix.png)
+
+#### Projected Project Timeline
+![Project Timeline](Sections/Images/ASPProjectTimeline.png)
