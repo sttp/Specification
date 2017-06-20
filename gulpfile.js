@@ -66,20 +66,27 @@ function replaceAll(sourceText, findText, replaceWith, ignoreCase) {
         replaceWith.replace(/\$/g, "$$$$") : replaceWith);
 }
 
-function updateSectionLinks(html) {
-  for (var i = 0; i < sectionLinks.length; i++) {
-    findText = sectionLinks[i][0];
-    replaceWith = sectionLinks[i][1];
-    html = replaceAll(html, findText, replaceWith);
-  }
+function updateSectionLinks() {
+  return through.obj(function(file, encoding, cb) {
+    var sourceMarkdown = file.contents.toString();
 
-  return html;
+    for (var i = 0; i < sectionLinks.length; i++) {
+      findText = sectionLinks[i][0];
+      replaceWith = sectionLinks[i][1];
+      sourceMarkdown = replaceAll(sourceMarkdown, findText, replaceWith);
+    }
+
+    file.contents = new Buffer(sourceMarkdown);
+    this.push(file);
+
+    cb(null, file);
+  });
 }
 
 function markdown2html() {
   return through.obj(function(file, encoding, cb) {
     var converter = new showdown.Converter({ extensions: [emojis] });
-    var sourceMarkdown = updateSectionLinks(file.contents.toString());
+    var sourceMarkdown = file.contents.toString();
     var destinationHtml = converter.makeHtml(sourceMarkdown);
 
     // Convert local image links to non-relative permanent paths
@@ -123,6 +130,7 @@ gulp.task("merge-markdown", [ "copy-to-output" ], function() {
 
   return gulp.src(sections)
     .pipe(concat("README.md"))
+    .pipe(updateSectionLinks())
     .pipe(gulp.dest("Output/"));
 });
 
