@@ -45,7 +45,8 @@ var sections = [
 // Define map of markdown file links to intra-page section headers, note
 // that GitHub makes all header links lowercase and spaces become dashes:
 var sectionLinks = [
-  [ "(Preface.md)", "(#sttp-specification)" ],
+  [ "(TitlePage.md)", "(#title-page)" ],
+  [ "(Preface.md)", "(#disclaimer)" ],
   [ "(README.md)", "(#table-of-contents)" ],
   [ "(Introduction.md)", "(#introduction)" ],
   [ "(Definitions.md)", "(#definitions-and-nomenclature)" ],

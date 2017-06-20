@@ -2,6 +2,7 @@
 
 | Section | Title |
 |:-------:|---------|
+|   | [Title Page](TitlePage.md) |
 |   | [Preface](Preface.md) |
 | 1 | [Introduction](Introduction.md) |
 | 2 | [Definitions and Nomenclature](Definitions.md) |
