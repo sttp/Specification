@@ -8,7 +8,7 @@ Please note that as the protocol moves beyond initial its draft stages, we inten
 
 ### Section Editing
 
-When adding new sections, make sure to modify `gulpfile.js` to include the new section markdown file and its associated header mapping so that it can be combined into a single overall document in the nightly build process. Also, new sections should be added to the table of contents which is located in the `Sections/README.md` file.
+When adding new sections, make sure to modify [gulpfile.js](gulpfile.js) to include the new section markdown file and its associated header mapping so that it can be combined into a single overall document in the nightly build process. Also, new sections should be added to the table of contents which is located in the [Sections/README.md](Sections/README.md) file.
 
 ### Contributor Recognition
 
