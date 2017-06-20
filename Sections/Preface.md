@@ -1,5 +1,3 @@
-![STTP](Images/ASPProject.png)
-
 ## STTP Specification
 
 **Version:** 0.0.0 - June 19, 2017

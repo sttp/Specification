@@ -27,6 +27,7 @@ var html2pdf = require('gulp-html2pdf');
 // Define the section files in the order that they should appear
 // in the target single combined markdown document:
 var sections = [
+  "Sections/TitlePage.md",
   "Sections/Preface.md",
   "Sections/README.md" /* TOC */,
   "Sections/Introduction.md",
