@@ -1,3 +1,4 @@
+<a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
 **Status:** Initial Development
