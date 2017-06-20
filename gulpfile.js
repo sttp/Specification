@@ -6,6 +6,7 @@
 //   Install wkhtmltopdf: https://wkhtmltopdf.org/downloads.html
 //   Add "C:\Program Files\wkhtmltopdf\bin" to your path
 //   From command line after NPM install:
+//     npm install gulp
 //     npm install --global gulp-cli
 //     npm install gulp-clean
 //     npm install gulp-concat
