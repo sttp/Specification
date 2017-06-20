@@ -12,6 +12,6 @@
 
 
 #### Primary Project Participants
-![Project Participants](Sections/Images/ParticipantLogos.png)
+![Project Participants](Images/ParticipantLogos.png)
 
-![Project Participant Matrix](Sections/Images/ParticipantMatrix.png)
+![Project Participant Matrix](Images/ParticipantMatrix.png)
