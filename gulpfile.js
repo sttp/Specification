@@ -107,7 +107,7 @@ function incrementDocumentVersion() {
       cb(null, file);
     }
     else {
-      cb("Error: failed to find version pattern: \"**Version:** #.#.#\"...");
+      cb(new Error("Failed to find version pattern: \"**Version:** #.#.#\""));
     }
   });
 }
