@@ -1,4 +1,4 @@
-![STTP](Sections/Images/ASPProject.png)
+![STTP](Sections/Images/sttp-logo-with-title.png)
 
 ### Compiled Specification
 
