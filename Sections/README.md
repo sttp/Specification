@@ -13,4 +13,4 @@
 | ~22 | [Revision History](History.md) |
 | A | [Appendix A - STTP API Reference ](APIReference.md) |
 | B | [Appendix B - IEEE C37.118 Mapping](IEEE_C37.118Mapping.md) |
-| C | [Appendix C - To-Do List](ToDoList.md) |
+|   | [Spec To-Do List](ToDoList.md) |
