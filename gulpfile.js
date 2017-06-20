@@ -53,7 +53,7 @@ var sectionLinks = [
   [ "(Overview.md)", "(#protocol-overview)" ],
   [ "(References.md)", "(#references-and-notes)" ],
   [ "(Contributors.md)", "(#contributors)" ],
-  [ "(History.md)", "(#version-history)" ],
+  [ "(History.md)", "(#major-version-history)" ],
   [ "(APIReference.md)", "(#appendix-a---sttp-api-reference)" ],
   [ "(IEEE_C37.118Mapping.md)", "(#appendix-b---ieee-c37-118-mapping)" ],
   [ "(ToDoList.md)", "(#specification-development-to-do-list)" ],
