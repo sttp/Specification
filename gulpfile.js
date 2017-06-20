@@ -45,7 +45,8 @@ var sections = [
 // Define map of markdown file links to intra-page section headers, note
 // that GitHub makes all header links lowercase and spaces become dashes:
 var sectionLinks = [
-  [ "(Preface.md)", "(#sttp-specification)" ],
+  [ "(TitlePage.md)", "(#title-page)" ],
+  [ "(Preface.md)", "(#disclaimer)" ],
   [ "(README.md)", "(#table-of-contents)" ],
   [ "(Introduction.md)", "(#introduction)" ],
   [ "(Definitions.md)", "(#definitions-and-nomenclature)" ],
@@ -163,7 +164,7 @@ gulp.task("clear-output", function() {
 gulp.task("increment-version", [ "clear-output" ], function() {
   console.log("Incrementing document version number...")
 
-  return gulp.src("Sections/Preface.md")
+  return gulp.src("Sections/TitlePage.md")
     .pipe(incrementDocumentVersion())
     .pipe(gulp.dest("Sections/"));
 });

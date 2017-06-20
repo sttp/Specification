@@ -1,17 +1,17 @@
 ### Contributors
 
-#### Corporate Copyright Statements
+The following individuals actively participated in the development of this standard.
 
-- Copyright &copy; 2017, Grid Protection Alliance
-
-#### Contributors
-
-- J. Ritchie Carroll
-- F. Russell Robertson
-- Stephen C. Wills
+- J. Ritchie Carroll, GPA
+- F. Russell Robertson, GPA
+- Stephen C. Wills, GPA
 
 
-#### Primary Project Participants
-![Project Participants](Images/ParticipantLogos.png)
+#### ASP Project Participants
+![Project Participants](Images/participant-logos.png)
 
-![Project Participant Matrix](Images/ParticipantMatrix.png)
+![Project Participant Matrix](Images/participant-matrix.png)
+
+#### Copyright Statement
+
+- Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.

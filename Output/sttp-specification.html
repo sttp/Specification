@@ -8,13 +8,17 @@
 </style>
 </head>
 <body>
-<p><img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/ASPProject.png" alt="STTP" /></p>
-<h2 id="sttp-specification">STTP Specification</h2>
-<p><strong>Version:</strong> 0.0.1 - June 20, 2017</p>
-<p><strong>Status:</strong> Preliminary Development</p>
-<p><strong>Abstract:</strong> This specification defines a publish-subscribe data communication protocol that has been optimized for the exchange of real-time and historical streaming data such as synchrophasor data.  It includes a x, y and z as well as guide on use of an API coded in multiple languages as well as a reference on use of API.</p>
-<p><strong>Disclaimer:</strong> This document was prepared as a part of work sponsored by an agency of the United States Government (DE-OE-0000859).  Neither the United States Government nor any agency thereof, nor any of their employees, makes any warranty, express or implied, or assumes any legal liability or responsibility for the accuracy, completeness, or usefulness of any information, apparatus, product, or process disclosed, or represents that its use would not infringe privately owned rights.  Reference herein to any specific commercial product, process, or service by trade name, trademark, manufacturer, or otherwise does not necessarily constitute or imply its endorsement, recommendation, or favoring by the United States Government or any agency thereof.  The views and opinions of authors expressed herein do not necessarily state or reflect those of the United States Government or any agency thereof.</p>
-<p><strong>License:</strong> This specification is free software and it can be redistributed and/or modified under the terms of the <a href="https://github.com/sttp/Specification/blob/master/LICENSE">MIT License</a>. This specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.</p>
+<p><a name="title-page"></a><br />
+<img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
+<p><strong>Version:</strong> 0.0.2 - June 20, 2017</p>
+<p><strong>Status:</strong> Initial Development</p>
+<p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time-series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time-series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time-series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
+<p><br/><br/><br />
+Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
+<h4 id="disclaimer">Disclaimer</h4>
+<p>This document was prepared as a part of work sponsored by an agency of the United States Government (DE-OE-0000859).  Neither the United States Government nor any agency thereof, nor any of their employees, makes any warranty, express or implied, or assumes any legal liability or responsibility for the accuracy, completeness, or usefulness of any information, apparatus, product, or process disclosed, or represents that its use would not infringe privately owned rights.  Reference herein to any specific commercial product, process, or service by trade name, trademark, manufacturer, or otherwise does not necessarily constitute or imply its endorsement, recommendation, or favoring by the United States Government or any agency thereof.  The views and opinions of authors expressed herein do not necessarily state or reflect those of the United States Government or any agency thereof.</p>
+<h4 id="license">License</h4>
+<p>This specification is free software and it can be redistributed and/or modified under the terms of the <a href="https://github.com/sttp/Specification/blob/master/LICENSE">MIT License</a>. This specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.</p>
 <h2 id="table-of-contents">Table of Contents</h2>
 <table>
 <thead>
@@ -26,7 +30,11 @@
 <tbody>
 <tr>
 <td style="text-align:center;"></td>
-<td><a href="#sttp-specification">Preface</a></td>
+<td><a href="#title-page">Title Page</a></td>
+</tr>
+<tr>
+<td style="text-align:center;"></td>
+<td><a href="#disclaimer">Preface</a></td>
 </tr>
 <tr>
 <td style="text-align:center;">1</td>
@@ -65,8 +73,8 @@
 <td><a href="#appendix-b---ieee-c37-118-mapping">Appendix B - IEEE C37.118 Mapping</a></td>
 </tr>
 <tr>
-<td style="text-align:center;">C</td>
-<td><a href="#specification-development-to-do-list">Appendix C - To-Do List</a></td>
+<td style="text-align:center;"></td>
+<td><a href="#specification-development-to-do-list">Spec To-Do List</a></td>
 </tr>
 </tbody>
 </table>
@@ -195,20 +203,20 @@ Include sub-section titles ( 4# items) as needed</p>
 <li>...</li>
 </ol>
 <h3 id="contributors">Contributors</h3>
-<h4 id="corporate-copyright-statements">Corporate Copyright Statements</h4>
+<p>The following individuals actively participated in the development of this standard.</p>
 <ul>
-<li>Copyright &copy; 2017, Grid Protection Alliance</li>
+<li>J. Ritchie Carroll, GPA</li>
+<li>F. Russell Robertson, GPA</li>
+<li>Stephen C. Wills, GPA</li>
 </ul>
-<h4 id="contributors-1">Contributors</h4>
+<h4 id="asp-project-participants">ASP Project Participants</h4>
+<p><img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/participant-logos.png" alt="Project Participants" /></p>
+<p><img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/participant-matrix.png" alt="Project Participant Matrix" /></p>
+<h4 id="copyright-statement">Copyright Statement</h4>
 <ul>
-<li>J. Ritchie Carroll</li>
-<li>F. Russell Robertson</li>
-<li>Stephen C. Wills</li>
+<li>Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</li>
 </ul>
-<h4 id="primary-project-participants">Primary Project Participants</h4>
-<p><img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/ParticipantLogos.png" alt="Project Participants" /></p>
-<p><img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/ParticipantMatrix.png" alt="Project Participant Matrix" /></p>
-<h3 id="version-history">Version History</h3>
+<h3 id="major-version-history">Major Version History</h3>
 <table>
 <thead>
 <tr>
@@ -220,12 +228,12 @@ Include sub-section titles ( 4# items) as needed</p>
 <tbody>
 <tr>
 <td style="text-align:right;">0.1</td>
-<td>July 15, 2017</td>
-<td style="text-align:left;">Discussion draft for validation of specification components</td>
+<td>TBD, 2017</td>
+<td style="text-align:left;">Initial draft for validation of use of markdown</td>
 </tr>
 <tr>
 <td style="text-align:right;">0.0</td>
-<td>June 19, 2017</td>
+<td>June 15, 2017</td>
 <td style="text-align:left;">Specification template</td>
 </tr>
 </tbody>

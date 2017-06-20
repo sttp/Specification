@@ -1,22 +1,29 @@
-![STTP](Images/ASPProject.png)
+<a name="title-page"></a>
+![STTP](Images/sttp-logo-with-participants.png)
 
-## STTP Specification
+**Version:** 0.0.2 - June 20, 2017
 
-**Version:** 0.0.1 - June 20, 2017
+**Status:** Initial Development
 
-**Status:** Preliminary Development
+**Abstract:** This specification defines a [publish-subscribe](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) data transfer protocol that has been optimized for exchanging streaming [time-series](https://en.wikipedia.org/wiki/Time_series) style data, such as [synchrophasor](https://en.wikipedia.org/wiki/Phasor_measurement_unit) data that is used in the electric power industry, over [Internet Protocol](https://en.wikipedia.org/wiki/Internet_Protocol) (IP). The protocol supports transferring both real-time and historical time-series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time-series [data points](https://en.wikipedia.org/wiki/Data_point) at high speed, such as, hundreds of times per second per data point.
 
-**Abstract:** This specification defines a publish-subscribe data communication protocol that has been optimized for the exchange of real-time and historical streaming data such as synchrophasor data.  It includes a x, y and z as well as guide on use of an API coded in multiple languages as well as a reference on use of API.
+<br/><br/>
+Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.
 
-**Disclaimer:** This document was prepared as a part of work sponsored by an agency of the United States Government (DE-OE-0000859).  Neither the United States Government nor any agency thereof, nor any of their employees, makes any warranty, express or implied, or assumes any legal liability or responsibility for the accuracy, completeness, or usefulness of any information, apparatus, product, or process disclosed, or represents that its use would not infringe privately owned rights.  Reference herein to any specific commercial product, process, or service by trade name, trademark, manufacturer, or otherwise does not necessarily constitute or imply its endorsement, recommendation, or favoring by the United States Government or any agency thereof.  The views and opinions of authors expressed herein do not necessarily state or reflect those of the United States Government or any agency thereof.
+#### Disclaimer
 
-**License:** This specification is free software and it can be redistributed and/or modified under the terms of the [MIT License](https://github.com/sttp/Specification/blob/master/LICENSE). This specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+This document was prepared as a part of work sponsored by an agency of the United States Government (DE-OE-0000859).  Neither the United States Government nor any agency thereof, nor any of their employees, makes any warranty, express or implied, or assumes any legal liability or responsibility for the accuracy, completeness, or usefulness of any information, apparatus, product, or process disclosed, or represents that its use would not infringe privately owned rights.  Reference herein to any specific commercial product, process, or service by trade name, trademark, manufacturer, or otherwise does not necessarily constitute or imply its endorsement, recommendation, or favoring by the United States Government or any agency thereof.  The views and opinions of authors expressed herein do not necessarily state or reflect those of the United States Government or any agency thereof.
+
+#### License
+
+This specification is free software and it can be redistributed and/or modified under the terms of the [MIT License](https://github.com/sttp/Specification/blob/master/LICENSE). This specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 ## Table of Contents
 
 | Section | Title |
 |:-------:|---------|
-|   | [Preface](#sttp-specification) |
+|   | [Title Page](#title-page) |
+|   | [Preface](#disclaimer) |
 | 1 | [Introduction](#introduction) |
 | 2 | [Definitions and Nomenclature](#definitions-and-nomenclature) |
 | 3 | [Protocol Overview](#protocol-overview) |
@@ -26,7 +33,7 @@
 | ~22 | [Revision History](#version-history) |
 | A | [Appendix A - STTP API Reference ](#appendix-a---sttp-api-reference) |
 | B | [Appendix B - IEEE C37.118 Mapping](#appendix-b---ieee-c37-118-mapping) |
-| C | [Appendix C - To-Do List](#specification-development-to-do-list) |
+|   | [Spec To-Do List](#specification-development-to-do-list) |
 
 ### Introduction
 
@@ -117,28 +124,28 @@ body text
 
 ### Contributors
 
-#### Corporate Copyright Statements
+The following individuals actively participated in the development of this standard.
 
-- Copyright &copy; 2017, Grid Protection Alliance
-
-#### Contributors
-
-- J. Ritchie Carroll
-- F. Russell Robertson
-- Stephen C. Wills
+- J. Ritchie Carroll, GPA
+- F. Russell Robertson, GPA
+- Stephen C. Wills, GPA
 
 
-#### Primary Project Participants
-![Project Participants](Images/ParticipantLogos.png)
+#### ASP Project Participants
+![Project Participants](Images/participant-logos.png)
 
-![Project Participant Matrix](Images/ParticipantMatrix.png)
+![Project Participant Matrix](Images/participant-matrix.png)
 
-### Version History
+#### Copyright Statement
+
+- Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.
+
+### Major Version History
 
 | Version | Date | Notes |
 |--------:|------|:------|
-| 0.1 | July 15, 2017 | Discussion draft for validation of specification components |
-| 0.0 | June 19, 2017 | Specification template |
+| 0.1 | TBD, 2017 | Initial draft for validation of use of markdown |
+| 0.0 | June 15, 2017 | Specification template |
 
 ### Appendix A - STTP API Reference
 
