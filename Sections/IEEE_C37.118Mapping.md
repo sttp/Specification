@@ -1,4 +1,4 @@
-### Appendix B - Reference Implementation - IEEE C37-118 Transformation
+### Appendix B - IEEE C37-118 Mapping
 appendix body
 
 appendix body

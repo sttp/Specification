@@ -17,7 +17,8 @@ Introduce the each of topical sections that follow.
 body text
 
 > **Ritchie** We're going to need a place to post and update images on the web.  Ideally we should use GitHub as well for these images so others can post new images.  Ideas??  
-> **Russell** I created an *Images* folder, i.e., `Section/Images/` relative to `STTP/Specification` that should work...
+> **Russell** I created an *Images* folder, i.e., `Section/Images/` relative to `STTP/Specification` that should work, e.g.:
+> ![Example Image](Images/ecaAPI.png)
 
 ### Topic 2
 

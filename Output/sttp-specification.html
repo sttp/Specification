@@ -1,0 +1,249 @@
+<html>
+<head>
+<style>
+.emoji-img {
+    height: 16px;
+    width: 16px;
+}
+</style>
+</head>
+<body>
+<p><img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/ASPProject.png" alt="STTP" /></p>
+<h2 id="sttp-specification">STTP Specification</h2>
+<p><strong>Version:</strong> 0.0.0 - June 19, 2017</p>
+<p><strong>Status:</strong> Preliminary Development</p>
+<p><strong>Abstract:</strong> This specification defines a publish-subscribe data communication protocol that has been optimized for the exchange of real-time and historical streaming data such as synchrophasor data.  It includes a x, y and z as well as guide on use of an API coded in multiple languages as well as a reference on use of API.</p>
+<p><strong>Disclaimer:</strong> This document was prepared as a part of work sponsored by an agency of the United States Government (DE-OE-0000859).  Neither the United States Government nor any agency thereof, nor any of their employees, makes any warranty, express or implied, or assumes any legal liability or responsibility for the accuracy, completeness, or usefulness of any information, apparatus, product, or process disclosed, or represents that its use would not infringe privately owned rights.  Reference herein to any specific commercial product, process, or service by trade name, trademark, manufacturer, or otherwise does not necessarily constitute or imply its endorsement, recommendation, or favoring by the United States Government or any agency thereof.  The views and opinions of authors expressed herein do not necessarily state or reflect those of the United States Government or any agency thereof.</p>
+<p><strong>License:</strong> This specification is free software and it can be redistributed and/or modified under the terms of the <a href="LICENSE">MIT License</a>. This specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.</p>
+<h2 id="table-of-contents">Table of Contents</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">Section</th>
+<th>Title</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;"></td>
+<td><a href="#sttp-specification">Preface</a></td>
+</tr>
+<tr>
+<td style="text-align:center;">1</td>
+<td><a href="#introduction">Introduction</a></td>
+</tr>
+<tr>
+<td style="text-align:center;">2</td>
+<td><a href="#definitions-and-nomenclature">Definitions and Nomenclature</a></td>
+</tr>
+<tr>
+<td style="text-align:center;">3</td>
+<td><a href="#protocol-overview">Protocol Overview</a></td>
+</tr>
+<tr>
+<td style="text-align:center;">?</td>
+<td>(balance of sections)</td>
+</tr>
+<tr>
+<td style="text-align:center;">~20</td>
+<td><a href="#references-and-notes">References and Notes</a></td>
+</tr>
+<tr>
+<td style="text-align:center;">~21</td>
+<td><a href="#contributors">Contributors and Reviewers</a></td>
+</tr>
+<tr>
+<td style="text-align:center;">~22</td>
+<td><a href="#version-history">Revision History</a></td>
+</tr>
+<tr>
+<td style="text-align:center;">A</td>
+<td><a href="#appendix-a---sttp-api-reference">Appendix A - STTP API Reference </a></td>
+</tr>
+<tr>
+<td style="text-align:center;">B</td>
+<td><a href="#appendix-b---ieee-c37-118-mapping">Appendix B - IEEE C37.118 Mapping</a></td>
+</tr>
+<tr>
+<td style="text-align:center;">C</td>
+<td><a href="#specification-development-to-do-list">Appendix C - To-Do List</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="introduction">Introduction</h3>
+<p>Use of synchrophasors by U.S. utilities continues to grow following the jump start provided by the Smart Grid Investment Grants.   Even so, the dominant method to exchange synchrophasor data remains the IEEE C37.118-2005 [<a href="#ref2">2</a>] protocol that was designed for and continues to be the preferred solution for substation-to-control room communications.  It achieves its advantages through use of an ordered set (a frame) of information that is associated with a specific measurement time.  When IEEE C37.118 is used for PDC-to-PDC communication or for PDC-to-Application communication, large data frames are typically distributed to multiple systems.  To address the challenges presented by these large frame sizes, many utilities implement purpose-built networks for synchrophasor data only.  Even with these purpose-built networks, large frame sizes result in an increased probability of UDP frame loss, or in the case of TCP, increased communication latency.  In addition, IEEE C37.118 has only prescriptive methods for the management of measurement metadata which is well-suited for substation-to-control-center use but which becomes difficult to manage as this metadata spans analytic solutions and is used by multiple configuration owners in a wide-area context.</p>
+<p>As a result, the ASP project ...</p>
+<p>more ...</p>
+<h4 id="scope-of-this-document">Scope of this Document</h4>
+<p>Purpose of doc, audience, etc.</p>
+<p>Body text</p>
+<h3 id="definitions-and-nomenclature">Definitions and Nomenclature</h3>
+<p>The styles used to show code, notes, etc.  </p>
+<blockquote>
+  <p>To spice up the formatting of the spec, GitHub offers a library of emogi's.  some that we might want to play into nomenclature  <img src="https://github.global.ssl.fastly.net/images/icons/emoji/mag.png?v5" alt=":mag:" title=":mag:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/computer.png?v5" alt=":computer:" title=":computer:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/file_folder.png?v5" alt=":file_folder:" title=":file_folder:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/package.png?v5" alt=":package:" title=":package:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/pushpin.png?v5" alt=":pushpin:" title=":pushpin:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/new.png?v5" alt=":new:" title=":new:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/arrow_right.png?v5" alt=":arrow_right:" title=":arrow_right:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/arrow_forward.png?v5" alt=":arrow_forward:" title=":arrow_forward:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/arrows_counterclockwise.png?v5" alt=":arrows_counterclockwise:" title=":arrows_counterclockwise:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/hash.png?v5" alt=":hash:" title=":hash:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/soon.png?v5" alt=":soon:" title=":soon:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/heavy_plus_sign.png?v5" alt=":heavy_plus_sign:" title=":heavy_plus_sign:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/black_small_square.png?v5" alt=":black_small_square:" title=":black_small_square:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/paperclip.png?v5" alt=":paperclip:" title=":paperclip:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/warning.png?v5" alt=":warning:" title=":warning:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/page_facing_up.png?v5" alt=":page_facing_up:" title=":page_facing_up:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/bar_chart.png?v5" alt=":bar_chart:" title=":bar_chart:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/earth_americas.png?v5" alt=":earth_americas:" title=":earth_americas:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/globe_with_meridians.png?v5" alt=":globe_with_meridians:" title=":globe_with_meridians:" class="emoji-img emoji">  From use of the atom editor, it Looks like some are unique to GitHub and others are part of more standard collections.  Or we could make some custom ones that would be included as images.</p>
+</blockquote>
+<p>For example,</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> This is an instructional note in the spec.</p>
+</blockquote>
+<p>or for example,</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/warning.png?v5" alt=":warning:" title=":warning:" class="emoji-img emoji"> This is a very important note in the spec.</p>
+</blockquote>
+<h4 id="definition-of-key-terms">Definition of key terms</h4>
+<p>The words "must", "must not", "required", "shall", "shall not", "should", "should not", "recommended", "may", and "optional" in this document are to be interpreted as described in <a href="https://tools.ietf.org/html/rfc2119">RFC 2119</a></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:right;">Term</th>
+<th style="text-align:left;">Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;"><strong>phasor</strong></td>
+<td style="text-align:left;">A complex equivalent of a simple cosine wave quantity such that the complex modulus is the cosine wave amplitude and the complex angle (in polar form) is the cosine wave phase angle.</td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>synchrophasor</strong></td>
+<td style="text-align:left;">A phasor calculated from data samples using a standard time signal as the reference for the measurement. Synchronized phasors from remote sites have a defined common phase relationship.</td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>term</strong></td>
+<td style="text-align:left;">definition</td>
+</tr>
+</tbody>
+</table>
+<h4 id="acronyms">Acronyms</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align:right;">Term</th>
+<th style="text-align:left;">Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;"><strong>API</strong></td>
+<td style="text-align:left;">Application Program Interface</td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>DOE</strong></td>
+<td style="text-align:left;">U.S. Department of Energy</td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>GEP</strong></td>
+<td style="text-align:left;">Gateway Exchange Protocol</td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>GPA</strong></td>
+<td style="text-align:left;">Grid Protection Alliance, Inc.</td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>PDC</strong></td>
+<td style="text-align:left;">Phasor Data Concentrator</td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>PMU</strong></td>
+<td style="text-align:left;">Phasor Measurement Unit</td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>STTP</strong></td>
+<td style="text-align:left;">Streaming Telemetry Transport Protocol</td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>TCP</strong></td>
+<td style="text-align:left;"></td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>UDP</strong></td>
+<td style="text-align:left;"></td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>UTC</strong></td>
+<td style="text-align:left;">Universal Time Coordinated</td>
+</tr>
+</tbody>
+</table>
+<h3 id="protocol-overview">Protocol Overview</h3>
+<p>Purpose of protocol, fundamentals of how it works (command and data)<br />
+Include sub-section titles ( 4# items) as needed</p>
+<h4 id="protocol-feature-summary">Protocol Feature Summary</h4>
+<ul>
+<li>this is the protocol promotional section that includes</li>
+<li>a bulleted list of the "value points" for the protocol</li>
+</ul>
+<p>Introduce the each of topical sections that follow.</p>
+<blockquote>
+  <p><strong>Candidate major topic headings:</strong>  (3# items) Command channel, data channel, compression, security, filter expressions, metadata, ....</p>
+</blockquote>
+<h3 id="topic-1">Topic 1</h3>
+<p>body text</p>
+<blockquote>
+  <p><strong>Ritchie</strong> We're going to need a place to post and update images on the web.  Ideally we should use GitHub as well for these images so others can post new images.  Ideas??  <br />
+  <strong>Russell</strong> I created an <em>Images</em> folder, i.e., <code>Section/Images/</code> relative to <code>STTP/Specification</code> that should work, e.g.:<br />
+  <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/ecaAPI.png" alt="Example Image" /></p>
+</blockquote>
+<h3 id="topic-2">Topic 2</h3>
+<p>body text</p>
+<h3 id="references-and-notes">References and Notes</h3>
+<ol>
+<li><a href="https://opensource.org/licenses/MIT">The MIT Open Source Software License</a></li>
+<li><a href="https://standards.ieee.org/findstds/standard/C37.118.2-2011.html">IEEE Standard C37.118™, Standard for Synchrophasors for Power Systems</a></li>
+<li><a href="https://tools.ietf.org/html/rfc2119">RFC 2119, Current Best Practice</a> Scott Bradner, Harvard University, 1997</li>
+<li><a href="https://github.com/sttp">STTP repository on GitHub</a></li>
+<li>...</li>
+</ol>
+<h3 id="contributors">Contributors</h3>
+<h4 id="corporate-copyright-statements">Corporate Copyright Statements</h4>
+<ul>
+<li>Copyright &copy; 2017, Grid Protection Alliance</li>
+</ul>
+<h4 id="contributors-1">Contributors</h4>
+<ul>
+<li>J. Ritchie Carroll</li>
+<li>F. Russell Robertson</li>
+<li>Stephen C. Wills</li>
+</ul>
+<h4 id="primary-project-participants">Primary Project Participants</h4>
+<p><img src="Sections/Images/ParticipantLogos.png" alt="Project Participants" /></p>
+<p><img src="Sections/Images/ParticipantMatrix.png" alt="Project Participant Matrix" /></p>
+<h3 id="version-history">Version History</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:right;">Version</th>
+<th>Date</th>
+<th style="text-align:left;">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">0.1</td>
+<td>July 15, 2017</td>
+<td style="text-align:left;">Discussion draft for validation of specification components</td>
+</tr>
+<tr>
+<td style="text-align:right;">0.0</td>
+<td>June 19, 2017</td>
+<td style="text-align:left;">Specification template</td>
+</tr>
+</tbody>
+</table>
+<h3 id="appendix-a---sttp-api-reference">Appendix A - STTP API Reference</h3>
+<p>appendix body</p>
+<p>appendix body</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> Links to language specific auto-generated XML code comment based API documentation would be useful.</p>
+</blockquote>
+<h3 id="appendix-b---ieee-c37-118-mapping">Appendix B - IEEE C37-118 Mapping</h3>
+<p>appendix body</p>
+<p>appendix body</p>
+<h3 id="specification-development-to-do-list">Specification Development To-Do List</h3>
+<ul>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Determine the location for posting images ( June 19, 2017 )</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Sample item 2 ( date )</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Sample item 3 ( date )</li>
+</ul>
+</body>
+</html>

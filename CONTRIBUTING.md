@@ -6,6 +6,10 @@ If you are not associated with the ASP project and would still like to contribut
 
 Please note that as the protocol moves beyond initial its draft stages, we intend to move to a PR based model for making modifications to the specification with a reduced set of participants that can approve any pull requests.
 
+### Section Editing
+
+When adding new sections, make sure to modify `gulpfile.js` to include the new section markdown file and its associated header mapping so that it can be combined into a single overall document in the nightly build process. Also, new sections should be added to the table of contents which is located in the `Sections/README.md` file.
+
 ### Contributor Recognition
 
-The specification contributors are listed in the [AUTHORS](AUTHORS) file. If you are providing critical review or updates to the specification, please add yourself to this file.
+The specification contributors are listed in the [Contributors](Sections/Contributors.md) file. If you are providing critical review or updates to the specification, please add yourself to this file.
