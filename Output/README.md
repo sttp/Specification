@@ -1,14 +1,15 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.0.3 - June 20, 2017
+**Version:** 0.0.4 - June 20, 2017
 
 **Status:** Initial Development
 
 **Abstract:** This specification defines a [publish-subscribe](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) data transfer protocol that has been optimized for exchanging streaming [time-series](https://en.wikipedia.org/wiki/Time_series) style data, such as [synchrophasor](https://en.wikipedia.org/wiki/Phasor_measurement_unit) data that is used in the electric power industry, over [Internet Protocol](https://en.wikipedia.org/wiki/Internet_Protocol) (IP). The protocol supports transferring both real-time and historical time-series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time-series [data points](https://en.wikipedia.org/wiki/Data_point) at high speed, such as, hundreds of times per second per data point.
 
-<br/><br/>
+<br/>
 Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.
+<hr/>
 
 #### Disclaimer
 
@@ -30,7 +31,7 @@ This specification is free software and it can be redistributed and/or modified 
 | ? | (balance of sections) |
 | ~20 | [References and Notes](#references-and-notes) |
 | ~21 | [Contributors and Reviewers](#contributors) |
-| ~22 | [Revision History](#version-history) |
+| ~22 | [Revision History](#major-version-history) |
 | A | [Appendix A - STTP API Reference ](#appendix-a---sttp-api-reference) |
 | B | [Appendix B - IEEE C37.118 Mapping](#appendix-b---ieee-c37-118-mapping) |
 |   | [Spec To-Do List](#specification-development-to-do-list) |
