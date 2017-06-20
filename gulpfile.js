@@ -55,7 +55,8 @@ var sectionLinks = [
   [ "(History.md)", "(#version-history)" ],
   [ "(APIReference.md)", "(#appendix-a---sttp-api-reference)" ],
   [ "(IEEE_C37.118Mapping.md)", "(#appendix-b---ieee-c37-118-mapping)" ],
-  [ "(ToDoList.md)", "(#specification-development-to-do-list)" ]
+  [ "(ToDoList.md)", "(#specification-development-to-do-list)" ],
+  [ "(../LICENSE)", "(https://github.com/sttp/Specification/blob/master/LICENSE)" ]
 ]
 
 showdown.setFlavor("github");
@@ -65,6 +66,49 @@ function replaceAll(sourceText, findText, replaceWith, ignoreCase) {
     findText.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g, "\\$&"),
       (ignoreCase ? "gi" : "g")), (typeof replaceWith == "string") ?
         replaceWith.replace(/\$/g, "$$$$") : replaceWith);
+}
+
+function getLongDate(date) {
+  var monthNames = [
+    "January", "February", "March", "April", "May", "June", "July",
+    "August", "September", "October", "November", "December"
+  ];
+
+  if (!date)
+    date = new Date();
+
+  var day = date.getDate();
+  var monthIndex = date.getMonth();
+  var year = date.getFullYear();
+
+  return monthNames[monthIndex] + " " + day + ", " + year;
+}
+
+function incrementDocumentVersion() {
+  return through.obj(function(file, encoding, cb) {
+    var sourceMarkdown = file.contents.toString();
+    var versionPattern = /^\*\*Version:\*\*\s+\d+\.\d+\.\d+.*$/gm;
+    var versionLineMatch = sourceMarkdown.match(versionPattern);
+
+    if (versionLineMatch) {
+      var versionNumberMatch = versionLineMatch[0].match(/\d+\.\d+\.\d+/);
+      var versionNumber = versionNumberMatch[0];
+      var lastDotIndex = versionNumber.lastIndexOf(".");
+      var revision = parseInt(versionNumber.substring(lastDotIndex + 1)) + 1;
+
+      sourceMarkdown = sourceMarkdown.replace(versionPattern,
+        "**Version:** " + versionNumber.substr(0, lastDotIndex) +
+        "." + revision + " - " + getLongDate());
+
+      file.contents = new Buffer(sourceMarkdown);
+      this.push(file);
+
+      cb(null, file);
+    }
+    else {
+      cb("Error: failed to find version pattern: \"**Version:** #.#.#\"...");
+    }
+  });
 }
 
 function updateSectionLinks() {
@@ -116,7 +160,15 @@ gulp.task("clear-output", function() {
     .pipe(clean());
 })
 
-gulp.task("copy-to-output", [ "clear-output" ], function() {
+gulp.task("increment-version", [ "clear-output" ], function() {
+  console.log("Incrementing document version number...")
+
+  return gulp.src("Sections/Preface.md")
+    .pipe(incrementDocumentVersion())
+    .pipe(gulp.dest("Sections/"));
+});
+
+gulp.task("copy-to-output", [ "increment-version" ], function() {
   console.log("Copying target files to output folder...");
 
   gulp.src("Sections/Images/*")
