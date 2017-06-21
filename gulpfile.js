@@ -160,11 +160,11 @@ function checkForUpdates() {
     if (stdout && stdout.length > 0) {
       gulp.src("Sections/TitlePage.md")
         .pipe(pushUpdates());
-
-      this.push(file);
-
-      cb(null, file);
     }
+
+    this.push(file);
+
+    cb(null, file);
   });
 }
 
@@ -181,11 +181,7 @@ function pushUpdates() {
         .pipe(exec("\"%git%\" commit -m \"Updated compiled document\""))
         .pipe(exec.reporter(reportOptions))
         .pipe(exec("\"%git%\" tag -f v" + versionNumber))
-        .pipe(exec.reporter(reportOptions));
-
-      console.log("Push change to remote repository...");
-
-      gulp.src("README.md")
+        .pipe(exec.reporter(reportOptions))
         .pipe(exec("\"%git%\" push"))
         .pipe(exec.reporter(reportOptions));
 
