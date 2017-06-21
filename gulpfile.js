@@ -153,12 +153,12 @@ function pushChanges() {
 
     if (versionNumber) {
       console.log("Tagging local repo with new version number...");
-      exec("%git% add .", logOutput);
-      exec("%git% commit -m \"Updated compiled document\"", logOutput);
-      exec("%git% tag -f v" + versionNumber, logOutput);
+      exec("\"%git%\" add .", logOutput);
+      exec("\"%git%\" commit -m \"Updated compiled document\"", logOutput);
+      exec("\"%git%\" tag -f v" + versionNumber, logOutput);
 
       console.log("Push change to remote repository...");
-      exec("%git% push", logOutput);
+      exec("\"%git%\" push", logOutput);
     }
   })
 }
@@ -289,7 +289,7 @@ gulp.task("default", [ "clean-up" ]);
 gulp.task("push-changes", [ "clean-up" ],  function() {
   console.log("Checking for updates...");
 
-  childProcess.exec("%git% log v" + originalVersionNumber + "..",
+  childProcess.exec("\"%git%\" log v" + originalVersionNumber + "..",
     function(err, stdout, stderr) {
       console.log(stdout);
       console.log(stderr);
@@ -307,8 +307,8 @@ gulp.task("push-changes", [ "clean-up" ],  function() {
 gulp.task("update-repo", function() {
   console.log("Updating local repo...");
 
-  exec("%git% gc", logOutput);
-  exec("%git% fetch", logOutput);
-  exec("%git% reset --hard origin/master", logOutput);
-  exec("%git% clean -f -d -x", logOutput);
+  exec("\"%git%\" gc", logOutput);
+  exec("\"%git%\" fetch", logOutput);
+  exec("\"%git%\" reset --hard origin/master", logOutput);
+  exec("\"%git%\" clean -f -d -x", logOutput);
 });
