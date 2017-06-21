@@ -14,6 +14,7 @@
 //     npm install --save showdown-emoji
 //     npm install gulp-html2pdf
 //     npm install gulp-exec
+//     npm install gulp-notify
 //
 // To execute, just type "gulp" from command window
 
@@ -26,6 +27,13 @@ const gutil = require("gulp-util");
 const through = require("through2");
 const html2pdf = require('gulp-html2pdf');
 const exec = require("gulp-exec");
+const notify = require("gulp-notify");
+
+// Define non-relative URL root path for any relative paths
+const rootPath = "https://raw.githubusercontent.com/sttp/Specification/master";
+
+// Define section file that contains version number
+const versionFile = "Sections/TitlePage.md";
 
 // Define the section files in the order that they should appear
 // in the target single combined markdown document:
@@ -60,17 +68,20 @@ const sectionLinks = [
   [ "(APIReference.md)", "(#appendix-a---sttp-api-reference)" ],
   [ "(IEEE_C37.118Mapping.md)", "(#appendix-b---ieee-c37-118-mapping)" ],
   [ "(ToDoList.md)", "(#specification-development-to-do-list)" ],
-  [ "(../LICENSE)", "(https://github.com/sttp/Specification/blob/master/LICENSE)" ]
+  [ "(../LICENSE)", "(" + rootPath + "/LICENSE)" ]
 ];
 
+// Any git functionality expects existing "git" environmental variable
+const git = "\"%git%\"";
 const versionPattern = /^\*\*Version:\*\*\s+\d+\.\d+\.\d+.*$/gm;
-const reportOptions = {
+const execReportOptions = {
     err: true,    // default = true, false means don't write err
     stderr: true, // default = true, false means don't write stderr
     stdout: false // default = true, false means don't write stdout
 };
 
-var originalVersionNumber = null;
+var currentVersion = null;
+var updatedVersion = null;
 
 showdown.setFlavor("github");
 
@@ -97,55 +108,17 @@ function getLongDate(date) {
   return monthNames[monthIndex] + " " + day + ", " + year;
 }
 
-function logOutput(err, stdout, stderr) {
-  if (stderr && stderr.length > 0)
-    console.log("ERROR: ", stderr);
-}
-
-function getDocumentVersion(sourceMarkdown) {
-  const versionLineMatch = sourceMarkdown.match(versionPattern);
-
-  if (versionLineMatch) {
-    const versionNumberMatch = versionLineMatch[0].match(/\d+\.\d+\.\d+/);
-    return versionNumberMatch[0];
-  }
-
-  return null;
-}
-
 function checkDocumentVersion() {
   return through.obj(function(file, encoding, cb) {
-    const versionNumber = getDocumentVersion(file.contents.toString());
+    const versionLineMatch = file.contents.toString().match(versionPattern);
 
-    if (versionNumber) {
+    if (versionLineMatch) {
+      const versionNumber = versionLineMatch[0].match(/\d+\.\d+\.\d+/)[0];
       console.log("Current version number = " + versionNumber);
-      originalVersionNumber = versionNumber;
-    }
-    else {
-      console.log("No version number found in \"" + file.path + "\".");
-    }
 
-    this.push(file);
-    cb(null, file);
-  });
-}
+      currentVersion = versionNumber;
 
-function incrementDocumentVersion() {
-  return through.obj(function(file, encoding, cb) {
-    var sourceMarkdown = file.contents.toString();
-    const versionNumber = getDocumentVersion(sourceMarkdown);
-
-    if (versionNumber) {
-      const lastDotIndex = versionNumber.lastIndexOf(".");
-      const revision = parseInt(versionNumber.substring(lastDotIndex + 1)) + 1;
-
-      sourceMarkdown = sourceMarkdown.replace(versionPattern,
-        "**Version:** " + versionNumber.substr(0, lastDotIndex) +
-        "." + revision + " - " + getLongDate());
-
-      file.contents = new Buffer(sourceMarkdown);
       this.push(file);
-
       cb(null, file);
     }
     else {
@@ -154,42 +127,47 @@ function incrementDocumentVersion() {
   });
 }
 
-function checkForUpdates() {
+function incrementDocumentVersion() {
   return through.obj(function(file, encoding, cb) {
-    const stdout = file.contents.toString();
+    const lastDotIndex = currentVersion.lastIndexOf(".");
+    const revision = parseInt(currentVersion.substring(lastDotIndex + 1)) + 1;
 
-    if (stdout && stdout.length > 0) {
-      gulp.src("Sections/TitlePage.md")
-        .pipe(pushUpdates());
-    }
+    updatedVersion = currentVersion.substr(0, lastDotIndex) + "." + revision;
 
+    const updatedMarkdown = file.contents.toString().replace(versionPattern,
+      "**Version:** " + updatedVersion + " - " + getLongDate());
+
+    file.contents = new Buffer(updatedMarkdown);
     this.push(file);
-
     cb(null, file);
   });
 }
 
 function pushUpdates() {
   return through.obj(function(file, encoding, cb) {
-    const versionNumber = getDocumentVersion(file.contents.toString());
+    const stdout = file.contents.toString();
 
-    if (versionNumber) {
-      console.log("Tagging local repo with new version number...");
+    // Any git log info past current version constitutes an update
+    if (stdout && stdout.length > 0) {
+      console.log("Committing new compiled documents to local repo...");
+
+      const message = "Updated compiled documents - version " + updatedVersion;
 
       gulp.src("README.md")
-        .pipe(exec("\"%git%\" add ."))
-        .pipe(exec.reporter(reportOptions))
-        .pipe(exec("\"%git%\" commit -m \"Updated compiled document\""))
-        .pipe(exec.reporter(reportOptions))
-        .pipe(exec("\"%git%\" tag -f v" + versionNumber))
-        .pipe(exec.reporter(reportOptions))
-        .pipe(exec("\"%git%\" push"))
-        .pipe(exec.reporter(reportOptions));
-
-      this.push(file);
-
-      cb(null, file);
+        .pipe(exec(git + " add ."))
+        .pipe(exec.reporter(execReportOptions))
+        .pipe(exec(git + " commit -m \"" + message + "\""))
+        .pipe(exec.reporter(execReportOptions))
+        .pipe(notify("Tagging local repo with new version number..."))
+        .pipe(exec(git + " tag -f v" + updatedVersion))
+        .pipe(exec.reporter(execReportOptions))
+        .pipe(notify("Pushing updates to remote repo..."))
+        .pipe(exec(git + " push"))
+        .pipe(exec.reporter(execReportOptions));
     }
+
+    this.push(file);
+    cb(null, file);
   });
 }
 
@@ -205,7 +183,6 @@ function updateSectionLinks() {
 
     file.contents = new Buffer(sourceMarkdown);
     this.push(file);
-
     cb(null, file);
   });
 }
@@ -220,13 +197,12 @@ function markdown2html() {
     destinationHtml = replaceAll(
       destinationHtml,
       "<img src=\"Images/",
-      "<img src=\"https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/"
+      "<img src=\"" + rootPath + "/Output/Images/"
     );
 
     file.contents = new Buffer(destinationHtml);
     file.path = gutil.replaceExtension(file.path, ".html");
     this.push(file);
-
     cb(null, file);
   });
 }
@@ -234,7 +210,7 @@ function markdown2html() {
 gulp.task("check-version", [], function() {
   console.log("Checking document version...");
 
-  return gulp.src("Sections/TitlePage.md")
+  return gulp.src(versionFile)
     .pipe(checkDocumentVersion());
 });
 
@@ -252,7 +228,7 @@ gulp.task("clear-output", [ "check-version" ], function() {
 gulp.task("increment-version", [ "clear-output" ], function() {
   console.log("Incrementing document version number...")
 
-  return gulp.src("Sections/TitlePage.md")
+  return gulp.src(versionFile)
     .pipe(incrementDocumentVersion())
     .pipe(gulp.dest("Sections/"));
 });
@@ -314,28 +290,32 @@ gulp.task("clean-up", [ "convert-to-pdf" ], function() {
   .pipe(clean());
 });
 
+// This task will recompile output documents and increment the version
 gulp.task("default", [ "clean-up" ]);
 
-gulp.task("push-changes", [ "clean-up" ],  function() {
-  console.log("Checking for updates...");
+// This task will recompile output documents, increment the version and
+// push the updated files if there have been any remote check-ins
+gulp.task("push-changes", [ "clean-up" ], function() {
+  console.log("Checking for remote updates...");
 
   const options = { pipeStdout: true };
 
   gulp.src("README.md")
-    .pipe(exec("\"%git%\" log v" + originalVersionNumber + "..", options))
-    .pipe(checkForUpdates());
+    .pipe(exec(git + " log v" + currentVersion + "..", options))
+    .pipe(pushUpdates());
 });
 
+// This task will reset the local repository to the remote - be careful
 gulp.task("update-repo", function() {
   console.log("Updating local repo...");
 
   gulp.src("README.md")
-    .pipe(exec("\"%git%\" gc"))
-    .pipe(exec.reporter(reportOptions))
-    .pipe(exec("\"%git%\" fetch"))
-    .pipe(exec.reporter(reportOptions))
-    .pipe(exec("\"%git%\" reset --hard origin/master"))
-    .pipe(exec.reporter(reportOptions))
-    .pipe(exec("\"%git%\" clean -f -d -x"))
-    .pipe(exec.reporter(reportOptions));
+    .pipe(exec(git + " gc"))
+    .pipe(exec.reporter(execReportOptions))
+    .pipe(exec(git + " fetch"))
+    .pipe(exec.reporter(execReportOptions))
+    .pipe(exec(git + " reset --hard origin/master"))
+    .pipe(exec.reporter(execReportOptions))
+    .pipe(exec(git + " clean -f -d -x"))
+    .pipe(exec.reporter(execReportOptions));
 });
