@@ -2,7 +2,7 @@
 
 ### Compiled Specification
 
-Merged single file copies of the specification can be found in the [Output](Output) folder in markdown, HTML and PDF formats. These compiled outputs will be updated regularly.
+Merged single file copies of the specification can be found in the [Output](Output) folder in markdown, HTML and PDF formats. These compiled outputs will be updated on a regular schedule, at least daily when any updates are checked into this repository - automated build occurs at the end of the day in the Eastern time zone.
 
 ### Specification Source
 
