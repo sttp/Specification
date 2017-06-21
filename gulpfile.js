@@ -24,7 +24,7 @@ const emojis = require("showdown-emoji");
 const gutil = require("gulp-util");
 const through = require("through2");
 const html2pdf = require('gulp-html2pdf');
-const childProcess = require("child_process");
+const exec = require("child_process").exec;
 
 // Define the section files in the order that they should appear
 // in the target single combined markdown document:
@@ -289,7 +289,7 @@ gulp.task("default", [ "clean-up" ]);
 gulp.task("push-changes", [ "clean-up" ],  function() {
   console.log("Checking for updates...");
 
-  childProcess.exec("\"%git%\" log v" + originalVersionNumber + "..",
+  exec("\"%git%\" log v" + originalVersionNumber + "..",
     function(err, stdout, stderr) {
       console.log(stdout);
       console.log(stderr);
