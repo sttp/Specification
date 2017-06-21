@@ -91,8 +91,8 @@ function getLongDate(date) {
 }
 
 function logOutput(err, stdout, stderr) {
-  console.log(stdout);
-  console.error(stderr);
+  if (stderr && stderr.length > 0)
+    console.log("ERROR: ", stderr);
 }
 
 function getDocumentVersion(sourceMarkdown) {
@@ -148,19 +148,24 @@ function incrementDocumentVersion() {
 }
 
 function pushChanges() {
-  through.obj(function(file, encoding, cb) {
+  return through.obj(function(file, encoding, cb) {
     var versionNumber = getDocumentVersion(file.contents.toString());
 
     if (versionNumber) {
       console.log("Tagging local repo with new version number...");
+
       exec("\"%git%\" add .", logOutput);
       exec("\"%git%\" commit -m \"Updated compiled document\"", logOutput);
       exec("\"%git%\" tag -f v" + versionNumber, logOutput);
 
       console.log("Push change to remote repository...");
+
       exec("\"%git%\" push", logOutput);
+      this.push(file);
+
+      cb(null, file);
     }
-  })
+  });
 }
 
 function updateSectionLinks() {
@@ -291,14 +296,13 @@ gulp.task("push-changes", [ "clean-up" ],  function() {
 
   exec("\"%git%\" log v" + originalVersionNumber + "..",
     function(err, stdout, stderr) {
-      console.log(stdout);
-      console.log(stderr);
-
       if (stdout && stdout.length > 0) {
         console.log("Pushing updates to remote repository...");
 
         gulp.src("Sections/TitlePage.md")
           .pipe(pushChanges());
+      } else if (stderr && stderr.length > 0) {
+        console.log("ERROR: ", stderr);
       }
     }
   );
