@@ -13,19 +13,18 @@
 //     npm install showdown
 //     npm install --save showdown-emoji
 //     npm install gulp-html2pdf
-//     npm install gulp-exec
 //
 // To execute, just type "gulp" from command window
 
-var gulp = require("gulp");
-var clean = require('gulp-clean');
-var concat = require("gulp-concat");
-var showdown = require("showdown");
-var emojis = require("showdown-emoji");
-var util = require("gulp-util");
-var through = require("through2");
-var html2pdf = require('gulp-html2pdf');
-var exec = require("gulp-exec");
+const gulp = require("gulp");
+const clean = require('gulp-clean');
+const concat = require("gulp-concat");
+const showdown = require("showdown");
+const emojis = require("showdown-emoji");
+const gutil = require("gulp-util");
+const through = require("through2");
+const html2pdf = require('gulp-html2pdf');
+const childProcess = require("child_process");
 
 // Define the section files in the order that they should appear
 // in the target single combined markdown document:
@@ -64,7 +63,7 @@ var sectionLinks = [
 ];
 
 var versionPattern = /^\*\*Version:\*\*\s+\d+\.\d+\.\d+.*$/gm;
-var updateBuild = false;
+var originalVersionNumber = null;
 
 showdown.setFlavor("github");
 
@@ -112,9 +111,11 @@ function checkDocumentVersion() {
     var versionNumber = getDocumentVersion(file.contents.toString());
 
     if (versionNumber) {
-      exec("%git% log v" + versionNumber + "..", function(err, stdout, stderr) {
-        updateBuild = (stdout && stdout.length > 0);
-      });
+      console.log("Current version number = " + versionNumber);
+      originalVersionNumber = versionNumber;
+    }
+    else {
+      console.log("No version number found in \"" + file.path + "\".");
     }
 
     this.push(file);
@@ -193,7 +194,7 @@ function markdown2html() {
     );
 
     file.contents = new Buffer(destinationHtml);
-    file.path = util.replaceExtension(file.path, ".html");
+    file.path = gutil.replaceExtension(file.path, ".html");
     this.push(file);
 
     cb(null, file);
@@ -286,10 +287,21 @@ gulp.task("clean-up", [ "convert-to-pdf" ], function() {
 gulp.task("default", [ "clean-up" ]);
 
 gulp.task("push-changes", [ "clean-up" ],  function() {
-  if (updateBuild) {
-    gulp.src("Sections/TitlePage.md")
-      .pipe(pushChanges());
-  }
+  console.log("Checking for updates...");
+
+  childProcess.exec("%git% log v" + originalVersionNumber + "..",
+    function(err, stdout, stderr) {
+      console.log(stdout);
+      console.log(stderr);
+
+      if (stdout && stdout.length > 0) {
+        console.log("Pushing updates to remote repository...");
+
+        gulp.src("Sections/TitlePage.md")
+          .pipe(pushChanges());
+      }
+    }
+  );
 });
 
 gulp.task("update-repo", function() {
