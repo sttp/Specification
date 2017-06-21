@@ -29,7 +29,7 @@ const exec = require("gulp-exec");
 
 // Define the section files in the order that they should appear
 // in the target single combined markdown document:
-var sections = [
+const sections = [
   "Sections/TitlePage.md",
   "Sections/Preface.md",
   "Sections/README.md" /* TOC */,
@@ -47,7 +47,7 @@ var sections = [
 
 // Define map of markdown file links to intra-page section headers, note
 // that GitHub makes all header links lowercase and spaces become dashes:
-var sectionLinks = [
+const sectionLinks = [
   [ "(TitlePage.md)", "(#title-page)" ],
   [ "(Preface.md)", "(#disclaimer)" ],
   [ "(README.md)", "(#table-of-contents)" ],
@@ -63,13 +63,14 @@ var sectionLinks = [
   [ "(../LICENSE)", "(https://github.com/sttp/Specification/blob/master/LICENSE)" ]
 ];
 
-var versionPattern = /^\*\*Version:\*\*\s+\d+\.\d+\.\d+.*$/gm;
-var originalVersionNumber = null;
-var reportOptions = {
+const versionPattern = /^\*\*Version:\*\*\s+\d+\.\d+\.\d+.*$/gm;
+const reportOptions = {
     err: true,    // default = true, false means don't write err
     stderr: true, // default = true, false means don't write stderr
     stdout: false // default = true, false means don't write stdout
 };
+
+var originalVersionNumber = null;
 
 showdown.setFlavor("github");
 
@@ -81,7 +82,7 @@ function replaceAll(sourceText, findText, replaceWith, ignoreCase) {
 }
 
 function getLongDate(date) {
-  var monthNames = [
+  const monthNames = [
     "January", "February", "March", "April", "May", "June", "July",
     "August", "September", "October", "November", "December"
   ];
@@ -89,9 +90,9 @@ function getLongDate(date) {
   if (!date)
     date = new Date();
 
-  var day = date.getDate();
-  var monthIndex = date.getMonth();
-  var year = date.getFullYear();
+  const day = date.getDate();
+  const monthIndex = date.getMonth();
+  const year = date.getFullYear();
 
   return monthNames[monthIndex] + " " + day + ", " + year;
 }
@@ -102,10 +103,10 @@ function logOutput(err, stdout, stderr) {
 }
 
 function getDocumentVersion(sourceMarkdown) {
-  var versionLineMatch = sourceMarkdown.match(versionPattern);
+  const versionLineMatch = sourceMarkdown.match(versionPattern);
 
   if (versionLineMatch) {
-    var versionNumberMatch = versionLineMatch[0].match(/\d+\.\d+\.\d+/);
+    const versionNumberMatch = versionLineMatch[0].match(/\d+\.\d+\.\d+/);
     return versionNumberMatch[0];
   }
 
@@ -114,7 +115,7 @@ function getDocumentVersion(sourceMarkdown) {
 
 function checkDocumentVersion() {
   return through.obj(function(file, encoding, cb) {
-    var versionNumber = getDocumentVersion(file.contents.toString());
+    const versionNumber = getDocumentVersion(file.contents.toString());
 
     if (versionNumber) {
       console.log("Current version number = " + versionNumber);
@@ -132,11 +133,11 @@ function checkDocumentVersion() {
 function incrementDocumentVersion() {
   return through.obj(function(file, encoding, cb) {
     var sourceMarkdown = file.contents.toString();
-    var versionNumber = getDocumentVersion(sourceMarkdown);
+    const versionNumber = getDocumentVersion(sourceMarkdown);
 
     if (versionNumber) {
-      var lastDotIndex = versionNumber.lastIndexOf(".");
-      var revision = parseInt(versionNumber.substring(lastDotIndex + 1)) + 1;
+      const lastDotIndex = versionNumber.lastIndexOf(".");
+      const revision = parseInt(versionNumber.substring(lastDotIndex + 1)) + 1;
 
       sourceMarkdown = sourceMarkdown.replace(versionPattern,
         "**Version:** " + versionNumber.substr(0, lastDotIndex) +
@@ -155,7 +156,7 @@ function incrementDocumentVersion() {
 
 function checkForUpdates() {
   return through.obj(function(file, encoding, cb) {
-    var stdout = file.contents.toString();
+    const stdout = file.contents.toString();
 
     if (stdout && stdout.length > 0) {
       gulp.src("Sections/TitlePage.md")
@@ -170,7 +171,7 @@ function checkForUpdates() {
 
 function pushUpdates() {
   return through.obj(function(file, encoding, cb) {
-    var versionNumber = getDocumentVersion(file.contents.toString());
+    const versionNumber = getDocumentVersion(file.contents.toString());
 
     if (versionNumber) {
       console.log("Tagging local repo with new version number...");
@@ -196,7 +197,7 @@ function updateSectionLinks() {
   return through.obj(function(file, encoding, cb) {
     var sourceMarkdown = file.contents.toString();
 
-    for (var i = 0; i < sectionLinks.length; i++) {
+    for (let i = 0; i < sectionLinks.length; i++) {
       findText = sectionLinks[i][0];
       replaceWith = sectionLinks[i][1];
       sourceMarkdown = replaceAll(sourceMarkdown, findText, replaceWith);
@@ -211,8 +212,8 @@ function updateSectionLinks() {
 
 function markdown2html() {
   return through.obj(function(file, encoding, cb) {
-    var converter = new showdown.Converter({ extensions: [emojis] });
-    var sourceMarkdown = file.contents.toString();
+    const converter = new showdown.Converter({ extensions: [emojis] });
+    const sourceMarkdown = file.contents.toString();
     var destinationHtml = converter.makeHtml(sourceMarkdown);
 
     // Convert local image links to non-relative permanent paths
@@ -318,7 +319,7 @@ gulp.task("default", [ "clean-up" ]);
 gulp.task("push-changes", [ "clean-up" ],  function() {
   console.log("Checking for updates...");
 
-  var options = { pipeStdout: true };
+  const options = { pipeStdout: true };
 
   gulp.src("README.md")
     .pipe(exec("\"%git%\" log v" + originalVersionNumber + "..", options))
