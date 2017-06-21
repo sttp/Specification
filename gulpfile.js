@@ -13,6 +13,7 @@
 //     npm install showdown
 //     npm install --save showdown-emoji
 //     npm install gulp-html2pdf
+//     npm install gulp-exec
 //
 // To execute, just type "gulp" from command window
 
@@ -24,7 +25,7 @@ const emojis = require("showdown-emoji");
 const gutil = require("gulp-util");
 const through = require("through2");
 const html2pdf = require('gulp-html2pdf');
-const exec = require("child_process").exec;
+const exec = require("gulp-exec");
 
 // Define the section files in the order that they should appear
 // in the target single combined markdown document:
@@ -64,6 +65,11 @@ var sectionLinks = [
 
 var versionPattern = /^\*\*Version:\*\*\s+\d+\.\d+\.\d+.*$/gm;
 var originalVersionNumber = null;
+var reportOptions = {
+    err: true,    // default = true, false means don't write err
+    stderr: true, // default = true, false means don't write stderr
+    stdout: false // default = true, false means don't write stdout
+};
 
 showdown.setFlavor("github");
 
@@ -147,20 +153,42 @@ function incrementDocumentVersion() {
   });
 }
 
-function pushChanges() {
+function checkForUpdates() {
+  return through.obj(function(file, encoding, cb) {
+    var stdout = file.contents.toString();
+
+    if (stdout && stdout.length > 0) {
+      gulp.src("Sections/TitlePage.md")
+        .pipe(pushUpdates());
+
+      this.push(file);
+
+      cb(null, file);
+    }
+  });
+}
+
+function pushUpdates() {
   return through.obj(function(file, encoding, cb) {
     var versionNumber = getDocumentVersion(file.contents.toString());
 
     if (versionNumber) {
       console.log("Tagging local repo with new version number...");
 
-      exec("\"%git%\" add .", logOutput);
-      exec("\"%git%\" commit -m \"Updated compiled document\"", logOutput);
-      exec("\"%git%\" tag -f v" + versionNumber, logOutput);
+      gulp.src("README.md")
+        .pipe(exec("\"%git%\" add ."))
+        .pipe(exec.reporter(reportOptions))
+        .pipe(exec("\"%git%\" commit -m \"Updated compiled document\""))
+        .pipe(exec.reporter(reportOptions))
+        .pipe(exec("\"%git%\" tag -f v" + versionNumber))
+        .pipe(exec.reporter(reportOptions));
 
       console.log("Push change to remote repository...");
 
-      exec("\"%git%\" push", logOutput);
+      gulp.src("README.md")
+        .pipe(exec("\"%git%\" push"))
+        .pipe(exec.reporter(reportOptions));
+
       this.push(file);
 
       cb(null, file);
@@ -294,25 +322,23 @@ gulp.task("default", [ "clean-up" ]);
 gulp.task("push-changes", [ "clean-up" ],  function() {
   console.log("Checking for updates...");
 
-  exec("\"%git%\" log v" + originalVersionNumber + "..",
-    function(err, stdout, stderr) {
-      if (stdout && stdout.length > 0) {
-        console.log("Pushing updates to remote repository...");
+  var options = { pipeStdout: true };
 
-        gulp.src("Sections/TitlePage.md")
-          .pipe(pushChanges());
-      } else if (stderr && stderr.length > 0) {
-        console.log("ERROR: ", stderr);
-      }
-    }
-  );
+  gulp.src("README.md")
+    .pipe(exec("\"%git%\" log v" + originalVersionNumber + "..", options))
+    .pipe(checkForUpdates());
 });
 
 gulp.task("update-repo", function() {
   console.log("Updating local repo...");
 
-  exec("\"%git%\" gc", logOutput);
-  exec("\"%git%\" fetch", logOutput);
-  exec("\"%git%\" reset --hard origin/master", logOutput);
-  exec("\"%git%\" clean -f -d -x", logOutput);
+  gulp.src("README.md")
+    .pipe(exec("\"%git%\" gc"))
+    .pipe(exec.reporter(reportOptions))
+    .pipe(exec("\"%git%\" fetch"))
+    .pipe(exec.reporter(reportOptions))
+    .pipe(exec("\"%git%\" reset --hard origin/master"))
+    .pipe(exec.reporter(reportOptions))
+    .pipe(exec("\"%git%\" clean -f -d -x"))
+    .pipe(exec.reporter(reportOptions));
 });
