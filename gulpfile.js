@@ -13,6 +13,7 @@
 //     npm install showdown
 //     npm install --save showdown-emoji
 //     npm install gulp-html2pdf
+//     npm install gulp-exec
 //
 // To execute, just type "gulp" from command window
 
@@ -24,6 +25,7 @@ var emojis = require("showdown-emoji");
 var util = require("gulp-util");
 var through = require("through2");
 var html2pdf = require('gulp-html2pdf');
+var exec = require("gulp-exec");
 
 // Define the section files in the order that they should appear
 // in the target single combined markdown document:
@@ -59,7 +61,10 @@ var sectionLinks = [
   [ "(IEEE_C37.118Mapping.md)", "(#appendix-b---ieee-c37-118-mapping)" ],
   [ "(ToDoList.md)", "(#specification-development-to-do-list)" ],
   [ "(../LICENSE)", "(https://github.com/sttp/Specification/blob/master/LICENSE)" ]
-]
+];
+
+var versionPattern = /^\*\*Version:\*\*\s+\d+\.\d+\.\d+.*$/gm;
+var updateBuild = false;
 
 showdown.setFlavor("github");
 
@@ -86,15 +91,40 @@ function getLongDate(date) {
   return monthNames[monthIndex] + " " + day + ", " + year;
 }
 
+function logOutput(err, stdout, stderr) {
+  console.log(stdout);
+  console.error(stderr);
+}
+
+function getDocumentVersion(sourceMarkdown) {
+  var versionLineMatch = sourceMarkdown.match(versionPattern);
+
+  if (versionLineMatch) {
+    var versionNumberMatch = versionLineMatch[0].match(/\d+\.\d+\.\d+/);
+    return versionNumberMatch[0];
+  }
+
+  return null;
+}
+
+function checkDocumentVersion() {
+  through.obj(function(file, encoding, cb) {
+    var versionNumber = getDocumentVersion(file.contents.toString());
+
+    if (versionNumber) {
+      exec("git log v" + versionNumber + "..", function(err, stdout, stderr) {
+        updateBuild = (stdout && stdout.length > 0);
+      });
+    }
+  })
+}
+
 function incrementDocumentVersion() {
   return through.obj(function(file, encoding, cb) {
     var sourceMarkdown = file.contents.toString();
-    var versionPattern = /^\*\*Version:\*\*\s+\d+\.\d+\.\d+.*$/gm;
-    var versionLineMatch = sourceMarkdown.match(versionPattern);
+    var versionNumber = getDocumentVersion(sourceMarkdown);
 
-    if (versionLineMatch) {
-      var versionNumberMatch = versionLineMatch[0].match(/\d+\.\d+\.\d+/);
-      var versionNumber = versionNumberMatch[0];
+    if (versionNumber) {
       var lastDotIndex = versionNumber.lastIndexOf(".");
       var revision = parseInt(versionNumber.substring(lastDotIndex + 1)) + 1;
 
@@ -111,6 +141,22 @@ function incrementDocumentVersion() {
       cb(new Error("Failed to find version pattern: \"**Version:** #.#.#\""));
     }
   });
+}
+
+function pushChanges() {
+  through.obj(function(file, encoding, cb) {
+    var versionNumber = getDocumentVersion(file.contents.toString());
+
+    if (versionNumber) {
+      console.log("Tagging local repo with new version number...");
+      exec("%git% add .", logOutput);
+      exec("%git% commit -m \"Updated compiled document\"", logOutput);
+      exec("%git% tag -f v" + versionNumber, logOutput);
+
+      console.log("Push change to remote repository...");
+      exec("%git% push", logOutput);
+    }
+  })
 }
 
 function updateSectionLinks() {
@@ -151,7 +197,12 @@ function markdown2html() {
   });
 }
 
-gulp.task("clear-output", function() {
+gulp.task("check-version", function() {
+  return gulp.src("Sections/TitlePage.md")
+    .pipe(checkDocumentVersion());
+});
+
+gulp.task("clear-output", [ "check-version" ] function() {
   console.log("Clearing output folder...");
 
   return gulp.src([
@@ -228,3 +279,19 @@ gulp.task("clean-up", [ "convert-to-pdf" ], function() {
 });
 
 gulp.task("default", [ "clean-up" ]);
+
+gulp.task("push-changes", [ "clean-up" ],  function() {
+  if (updateBuild) {
+    gulp.src("Sections/TitlePage.md")
+      .pipe(pushChanges());
+  }
+});
+
+gulp.task("update-repo", function() {
+  console.log("Updating local repo...");
+
+  exec("%git% gc", logOutput);
+  exec("%git% fetch", logOutput);
+  exec("%git% reset --hard origin/master", logOutput);
+  exec("%git% clean -f -d -x", logOutput);
+});
