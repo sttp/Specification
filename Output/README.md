@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.0.8 - June 21, 2017
+**Version:** 0.0.9 - June 21, 2017
 
 **Status:** Initial Development
 
@@ -17,7 +17,7 @@ This document was prepared as a part of work sponsored by an agency of the Unite
 
 #### License
 
-This specification is free software and it can be redistributed and/or modified under the terms of the [MIT License](https://github.com/sttp/Specification/blob/master/LICENSE). This specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+This specification is free software and it can be redistributed and/or modified under the terms of the [MIT License](https://raw.githubusercontent.com/sttp/Specification/master/LICENSE). This specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 ## Table of Contents
 
