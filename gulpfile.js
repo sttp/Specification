@@ -108,15 +108,18 @@ function getDocumentVersion(sourceMarkdown) {
 }
 
 function checkDocumentVersion() {
-  through.obj(function(file, encoding, cb) {
+  return through.obj(function(file, encoding, cb) {
     var versionNumber = getDocumentVersion(file.contents.toString());
 
     if (versionNumber) {
-      exec("git log v" + versionNumber + "..", function(err, stdout, stderr) {
+      exec("%git% log v" + versionNumber + "..", function(err, stdout, stderr) {
         updateBuild = (stdout && stdout.length > 0);
       });
     }
-  })
+
+    this.push(file);
+    cb(null, file);
+  });
 }
 
 function incrementDocumentVersion() {
@@ -197,12 +200,14 @@ function markdown2html() {
   });
 }
 
-gulp.task("check-version", function() {
+gulp.task("check-version", [], function() {
+  console.log("Checking document version...");
+
   return gulp.src("Sections/TitlePage.md")
     .pipe(checkDocumentVersion());
 });
 
-gulp.task("clear-output", [ "check-version" ] function() {
+gulp.task("clear-output", [ "check-version" ], function() {
   console.log("Clearing output folder...");
 
   return gulp.src([
@@ -211,7 +216,7 @@ gulp.task("clear-output", [ "check-version" ] function() {
       "Output/*"
     ], { read: false })
     .pipe(clean());
-})
+});
 
 gulp.task("increment-version", [ "clear-output" ], function() {
   console.log("Incrementing document version number...")
