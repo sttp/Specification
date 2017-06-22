@@ -15,7 +15,8 @@ Information on this page:
 ---
 ### Section Editing
 
-All document sections are defined as GitHub markdown, i.e., `*.md` files, in the [Sections](Sections) folder.
+All document sections are defined as GitHub markdown, i.e., `*.md` files, in the [Sections](Sections) folder. When linking one section to another, link to the file name using a relative path, e.g.:
+`For more information, see [API reference](APIReference.md))` - this allows section pages to link together when rendered and also the nightly build process can manage the translation from `file.md` links to `#header-links`.
 
 When adding new sections, make sure to modify [gulpfile.js](gulpfile.js) to include the new section markdown file and its associated header mapping so that it can be combined into a single overall document in the nightly build process. Also, new sections should be added to the table of contents which is located in the [Sections/README.md](Sections/README.md) file.
 
