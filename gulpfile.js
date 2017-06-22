@@ -8,6 +8,7 @@
 //   From command line after NPM install:
 //     npm install gulp
 //     npm install --global gulp-cli
+//     npm install gulp-util
 //     npm install gulp-clean
 //     npm install gulp-concat
 //     npm install showdown
@@ -72,7 +73,8 @@ const sectionLinks = [
 ];
 
 // Any git functionality expects existing "git" environmental variable
-const git = "\"%git%\"";
+const isWin = /^win/.test(process.platform);
+const git = isWin ? "\"%git%\"" : "#git#";
 const versionPattern = /^\*\*Version:\*\*\s+\d+\.\d+\.\d+.*$/gm;
 const execReportOptions = {
     err: true,    // default = true, false means don't write err

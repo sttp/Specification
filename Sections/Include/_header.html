@@ -516,6 +516,11 @@ body table {
     overflow: auto
 }
 
+/* Prevents table page-wrapping issues in PDF conversion */
+body table thead,body table tfoot {
+  display: table-row-group
+}
+
 body table th {
     font-weight: 600
 }
