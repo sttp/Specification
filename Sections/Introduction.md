@@ -16,4 +16,4 @@ In the [Overview](Overview.md) section of this specification, high-level feature
 
 [Appendix B - IEEE C37.118 Mapping](IEEE_C37.118Mapping.md) provides a detailed look at the process of transforming IEEE C37.118 into STTP as well as creating IEEE C37.118 streams from STTP.
 
-While the format and structure of this document is different than that used by standards bodies in order to facilitate collaboration, it is hoped that the content within this document can meet all the information requirements to enable repackaging of this specification into draft standard formats.
+While the format and structure of this document, established to facilitate collaboration, is different than that used by standards bodies, it is hoped that the content within this document can meet all the information requirements needed to enable repackaging of this specification into draft standard formats.
