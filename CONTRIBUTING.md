@@ -10,6 +10,9 @@ As the protocol moves beyond initial its draft stages, we intend to move to a PR
 
 When adding new sections, make sure to modify [gulpfile.js](gulpfile.js) to include the new section markdown file and its associated header mapping so that it can be combined into a single overall document in the nightly build process. Also, new sections should be added to the table of contents which is located in the [Sections/README.md](Sections/README.md) file.
 
+Please see the following guide for useful notes on developing GitHub flavored markdown:
+https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
+
 #### Highlighting Information
 
 When developing new content where instructional notes or contextual information should be highlighted, use the following format:
@@ -26,6 +29,6 @@ For very important notes or information that is deemed critical to understanding
 Which gets rendered as:
 > :warning: This is a very important note in the spec.
 
-### Contributor Recognition
+### Contributor Attribution
 
-The specification contributors are listed in the [Contributors](Sections/Contributors.md) file. If you are providing critical review or updates to the specification, please add yourself to this file.
+The specification contributors are listed in the [Contributors.md](Sections/Contributors.md) file. If you are providing critical review or updates to the specification, please add yourself to this file.
