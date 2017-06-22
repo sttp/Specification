@@ -10,7 +10,7 @@ To address these issues, the Advanced Synchrophasor Protocol (ASP) Project was p
 
 The purpose of this document is to define STTP and to include, as appendices, descriptions as to how to use its supporting software tools.  This STTP specification is focused on effective "streaming data" delivery of which synchrophasor data is a very important use case.
 
-In the [Overview](Overview.md) section of this specification, high-level features and the business value of STTP are presented.  It is written   The balance of the sections of the specification provide the details of protocol design.
+In the [Overview](Overview.md) section of this specification, high-level features and the business value of STTP are presented. The balance of the sections of the specification provide the details of protocol design.
 
 [Appendix A - STTP API Reference](APIReference.md) provides instructions to enable software developers to integrate and use of STTP within other software systems.
 
