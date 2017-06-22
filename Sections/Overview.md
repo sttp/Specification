@@ -59,6 +59,7 @@ All commands must be sent over the command channel.
 | 0x02 | Subscribe | Subscriber | Defines desired set of data-points to begin receiving. |
 | 0x03 | Unsubscribe | Subscriber | Requests publisher terminate current subscription. |
 | 0x0n | etc. | | | |
+| 0xFF | NoOp | Any | Periodic message to allow validation of connectivity. |
 
 ##### Set Operational modes
 
@@ -66,7 +67,7 @@ This must be the first command sent after a successful connection - the command 
 
 The subscriber must send the command and the publisher must await its reception. If the publisher does not receive the command in a timely fashion (time interval controlled by configuration), it will disconnect the channel.
 
-* Wire Format
+* Wire Format: Binary
 * Requested operational mode negotiations
   * String encoding
   * Compression modes
@@ -74,19 +75,27 @@ The subscriber must send the command and the publisher must await its reception.
 
 ##### Metadata Refresh
 
-* Wire Format
+* Wire Format: Binary
   * Includes current metadata version number
 
 ##### Subscribe
 
-* Wire Format
+* Wire Format: Binary
   * Includes metadata expression and/or individual Guids for desired data-points
+
+##### Unsubscribe
+
+  * Wire Format: Binary
+
+##### NoOp
+
+No operation keep-alive ping. It is possible for the command channel to remain quiet for some time if most data is being transmitted over the data channel, this command allows a periodic test of client connectivity.
+
+* Wire Format: Binary
 
 #### Responses
 
 Responses are sent over a designated channel based on the nature of the response.
-
-> :information_source: For the table below, when a response is destined for the data channel, it should be understood that a connection can be established where both the command and data channel use the same TCP connection.
 
 | Code | Response | Source | Channel | Description |
 |:----:|----------|:------:|:-------:|-------------|
@@ -95,8 +104,9 @@ Responses are sent over a designated channel based on the nature of the response
 | 0x82 | Data-point Packet | Any | Data | Response contains data-points. |
 | 0x83 | Signal Mapping | Any | Command | Response contains data-point Guid to run-time ID mappings. |
 | 0x8n | etc. | | | | |
-| 0xFF | NoOp | Any | Command | Period message to allow validation of connectivity. |
 
+> :information_source: For the response table above, when a response is destined for the data channel, it should be understood that a connection can be established where both the command and data channel use the same TCP connection.
+>
 ##### Succeeded Response
 
 * Wire Format: Binary (header)
