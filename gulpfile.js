@@ -300,7 +300,10 @@ gulp.task("default", [ "clean-up" ]);
 gulp.task("push-changes", [ "clean-up" ], function() {
   console.log("Checking for remote updates...");
 
-  const options = { pipeStdout: true };
+  const options = {
+    continueOnError: true,
+    pipeStdout: true
+  };
 
   gulp.src("README.md")
     .pipe(exec(git + " log v" + currentVersion + "..", options))
