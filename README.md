@@ -1,5 +1,7 @@
 ![STTP](Sections/Images/sttp-logo-with-title.png)
 
+This specification defines a [publish-subscribe](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) data transfer protocol that has been optimized for exchanging streaming [time-series](https://en.wikipedia.org/wiki/Time_series) style data, such as [synchrophasor](https://en.wikipedia.org/wiki/Phasor_measurement_unit) data that is used in the electric power industry, over [Internet Protocol](https://en.wikipedia.org/wiki/Internet_Protocol) (IP). The protocol supports transferring both real-time and historical time-series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time-series [data points](https://en.wikipedia.org/wiki/Data_point) at high speed, such as, hundreds of times per second per data point.
+
 ### Compiled Specification
 
 Merged single file copies of the specification can be found in the [Output](Output) folder in markdown, HTML and PDF formats. These compiled outputs will be updated on a regular schedule, at least daily when any updates are checked into this repository - automated build occurs at the end of the day in the Eastern time zone.
