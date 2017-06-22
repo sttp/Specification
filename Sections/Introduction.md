@@ -4,16 +4,16 @@ Use of synchrophasors by U.S. utilities continues to grow following the jump sta
 
 To address these issues, the Advanced Synchrophasor Protocol (ASP) Project was proposed to DOE in response to FOA-1492. In this project proposal, the argument was made for a new protocol that overcomes the limitations of IEEE C37.118 for large-scale synchrophasor data system deployments.  The new protocol proposed leveraged the successful design elements of the secure Gateway Exchange Protocol (GEP) that was originally developed by the Grid Protection Alliance (GPA) as part of SIEGate project (DE-OE-536).   
 
- On May 1, 2017, a DOE grant (DE-OE-859) was awarded to GPA and the other 25 collaborators on ASP Project (see [Contributors](#cpntributors)) to develop: (1) a detailed definition of new publish-subscribe protocol, now called the Streaming Time-series Transport Protocol (STTP) and (2) software to support it including  production-grade implementations of STTP API's in multiple development platforms along with a collection of tools to test and validate the new protocol.  
+ On May 1, 2017, a DOE grant (DE-OE-859) was awarded to GPA and the other 25 collaborators on ASP Project (see [Contributors](Contributors.md)) to develop: (1) a detailed definition of new publish-subscribe protocol, now called the Streaming Time-series Transport Protocol (STTP) and (2) software to support it including  production-grade implementations of STTP API's in multiple development platforms along with a collection of tools to test and validate the new protocol.  
 
 #### Scope of this Document
 
 The purpose of this document is to define STTP and to include, as appendices, descriptions as to how to use its supporting software tools.  This STTP specification is focused on effective "streaming data" delivery of which synchrophasor data is a very important use case.
 
-In the [Overview](#overview) section of this specification, high-level features and the business value of STTP are presented.  It is written   The balance of the sections of the specification provide the details of protocol design.
+In the [Overview](Overview.md) section of this specification, high-level features and the business value of STTP are presented.  It is written   The balance of the sections of the specification provide the details of protocol design.
 
-[Appendix A - STTP API Reference](#appendix-a---sttp-api-reference) provides instructions to enable software developers to integrate and use of STTP within other software systems.
+[Appendix A - STTP API Reference](APIReference.md) provides instructions to enable software developers to integrate and use of STTP within other software systems.
 
-[Appendix B - IEEE C37-118 Mapping](#appendix-b-ieee-c37-118-mapping) provides a detailed look at the process of transforming C37.118 into STTP as well as creating IEEE C38-118 streams from STTP.
+[Appendix B - IEEE C37-118 Mapping](IEEE_C37.118Mapping.md) provides a detailed look at the process of transforming C37.118 into STTP as well as creating IEEE C38-118 streams from STTP.
 
 While the format and structure of this document is different than that used by standards bodies in order to enable collaboration, it is hoped that the content within this document is sufficient to enable the easy repackaging of this specification into draft standard format.
