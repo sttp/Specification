@@ -6,12 +6,20 @@ If you are not associated with the ASP project and would still like to contribut
 
 As the protocol moves beyond initial its draft stages, we intend to move to a PR based model for making modifications to the specification with a reduced set of participants that can approve any pull requests.
 
+Information on this page:
+- [Section Editing](#section-editing)
+ - [Highlighting Information](#highlighting-information)
+ - [Markdown Editing](#markdown-editing)
+- [Contributor Attribution](#contributor-attribution)
+
+---
 ### Section Editing
+
+All document sections are defined as GitHub markdown, i.e., `*.md` files, in the [Sections](Sections) folder.
 
 When adding new sections, make sure to modify [gulpfile.js](gulpfile.js) to include the new section markdown file and its associated header mapping so that it can be combined into a single overall document in the nightly build process. Also, new sections should be added to the table of contents which is located in the [Sections/README.md](Sections/README.md) file.
 
-Please see the following guide for useful notes on developing GitHub flavored markdown:
-https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
+New to markdown? See [markdown editing](#markdown-editing) section below.
 
 #### Highlighting Information
 
@@ -28,6 +36,20 @@ For very important notes or information that is deemed critical to understanding
 
 Which gets rendered as:
 > :warning: This is a very important note in the spec.
+
+#### Markdown Editing
+
+The official guide to developing GitHub flavored markdown can be found here:
+https://guides.github.com/features/mastering-markdown/
+
+The following site contains a very concise set of notes on developing markdown for GitHub:
+https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
+
+As markdown exists as simple text files, most any text editor can be used to develop content. The markdown can even be directly edited on the GitHub site by clicking the pencil :pencil: icon on the top right of the page when navigating to a source page, for example, find the editing icon on the [README.md](https://github.com/sttp/Specification/blob/master/Sections/README.md) page. This web based editor includes a preview mode to show you exactly how the markdown will look when rendered.
+
+If you are looking for a standalone editor, the [Atom Editor](https://atom.io/) does a very good job of rendering a preview of developed markdown to show you how it will look when posted to GitHub and includes the ability to stage and commit check-ins to your local repository from within the tool - as of writing, you'll need another tool to directly sync to GitHub, e.g., [GitHub Desktop](https://desktop.github.com/). There are also useful plug-ins for developing markdown, e.g.: [markdown-writer](https://atom.io/packages/markdown-writer) and [tool-bar-markdown-writer](https://atom.io/packages/tool-bar-markdown-writer).
+
+If you develop code as well as documentation, [Visual Studio](https://www.visualstudio.com/free-developer-offers/) is an excellent editor. You can also install a markdown editing tool through `Extensions and Updates`, e.g., the [MarkdownEditor](https://github.com/madskristensen/MarkdownEditor) which will provide a rendering of the markdown as it is entered. Visual Studio also has very good [GitHub integration](https://visualstudio.github.com/) to allow any edits to be synchronized to GitHub, minimizing any hassles around your local repository.
 
 ### Contributor Attribution
 
