@@ -9,4 +9,4 @@
 
 <br/>
 Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.
-<hr/>
+***
