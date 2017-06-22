@@ -7,10 +7,10 @@ If you are not associated with the ASP project and would still like to contribut
 As the protocol moves beyond initial its draft stages, we intend to move to a PR based model for making modifications to the specification with a reduced set of participants that can approve any pull requests.
 
 Information on this page:
-- [Section Editing](#section-editing)
- - [Highlighting Information](#highlighting-information)
- - [Markdown Editing](#markdown-editing)
-- [Contributor Attribution](#contributor-attribution)
+* [Section Editing](#section-editing)
+  * [Highlighting Information](#highlighting-information)
+  * [Markdown Editing](#markdown-editing)
+* [Contributor Attribution](#contributor-attribution)
 
 ---
 ### Section Editing
