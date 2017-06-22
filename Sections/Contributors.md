@@ -12,6 +12,6 @@ The following individuals actively participated in the development of this stand
 
 ![Project Participant Matrix](Images/participant-matrix.png)
 
-#### Copyright Statement
+#### Specification Copyright Statement
 
 - Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.
