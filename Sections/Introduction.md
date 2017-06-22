@@ -2,12 +2,18 @@
 
 Use of synchrophasors by U.S. utilities continues to grow following the jump start provided by the Smart Grid Investment Grants.   Even so, the dominant method to exchange synchrophasor data remains the IEEE C37.118-2005 [[2](#ref2)] protocol that was designed for and continues to be the preferred solution for substation-to-control room communications.  It achieves its advantages through use of an ordered set (a frame) of information that is associated with a specific measurement time.  When IEEE C37.118 is used for PDC-to-PDC communication or for PDC-to-Application communication, large data frames are typically distributed to multiple systems.  To address the challenges presented by these large frame sizes, many utilities implement purpose-built networks for synchrophasor data only.  Even with these purpose-built networks, large frame sizes result in an increased probability of UDP frame loss, or in the case of TCP, increased communication latency.  In addition, IEEE C37.118 has only prescriptive methods for the management of measurement metadata which is well-suited for substation-to-control-center use but which becomes difficult to manage as this metadata spans analytic solutions and is used by multiple configuration owners in a wide-area context.
 
-As a result, the ASP project ...
+To address these issues, the Advanced Synchrophasor Protocol (ASP) Project was proposed to DOE in response to FOA-1492. In this project proposal, the argument was made for a new protocol that overcomes the limitations of IEEE C37.118 for large-scale synchrophasor data system deployments.  The new protocol proposed leveraged the successful design elements of the secure Gateway Exchange Protocol (GEP) that was originally developed by the Grid Protection Alliance (GPA) as part of SIEGate project (DE-OE-536).   
 
-more ...
+ On May 1, 2017, a DOE grant (DE-OE-859) was awarded to GPA and the other 25 collaborators on ASP Project (see [Contributors](#cpntributors)) to develop: (1) a detailed definition of new publish-subscribe protocol, now called the Streaming Time-series Transport Protocol (STTP) and (2) software to support it including  production-grade implementations of STTP API's in multiple development platforms along with a collection of tools to test and validate the new protocol.  
 
 #### Scope of this Document
 
-Purpose of doc, audience, etc.
+The purpose of this document is to define STTP and to include, as appendices, descriptions as to how to use its supporting software tools.  This STTP specification is focused on effective "streaming data" delivery of which synchrophasor data is a very important use case.
 
-Body text
+In the [Overview](#overview) section of this specification, high-level features and the business value of STTP are presented.  It is written   The balance of the sections of the specification provide the details of protocol design.
+
+[Appendix A - STTP API Reference](#appendix-a---sttp-api-reference) provides instructions to enable software developers to integrate and use of STTP within other software systems.
+
+[Appendix B - IEEE C37-118 Mapping](#appendix-b-ieee-c37-118-mapping) provides a detailed look at the process of transforming C37.118 into STTP as well as creating IEEE C38-118 streams from STTP.
+
+While the format and structure of this document is different than that used by standards bodies in order to enable collaboration, it is hoped that the content within this document is sufficient to enable the easy repackaging of this specification into draft standard format.
