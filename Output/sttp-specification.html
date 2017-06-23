@@ -733,12 +733,12 @@ body pre code::before,body pre code::after,body pre tt::before,body pre tt::afte
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.0.11 - June 22, 2017</p>
+<p><strong>Version:</strong> 0.0.12 - June 23, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time-series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time-series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time-series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
 Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
-<hr/>
+<hr />
 <h4 id="disclaimer">Disclaimer</h4>
 <p>This document was prepared as a part of work sponsored by an agency of the United States Government (DE-OE-0000859).  Neither the United States Government nor any agency thereof, nor any of their employees, makes any warranty, express or implied, or assumes any legal liability or responsibility for the accuracy, completeness, or usefulness of any information, apparatus, product, or process disclosed, or represents that its use would not infringe privately owned rights.  Reference herein to any specific commercial product, process, or service by trade name, trademark, manufacturer, or otherwise does not necessarily constitute or imply its endorsement, recommendation, or favoring by the United States Government or any agency thereof.  The views and opinions of authors expressed herein do not necessarily state or reflect those of the United States Government or any agency thereof.</p>
 <h4 id="license">License</h4>
@@ -794,7 +794,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </tr>
 <tr>
 <td style="text-align:center;">B</td>
-<td><a href="#appendix-b---ieee-c37-118-mapping">Appendix B - IEEE C37.118 Mapping</a></td>
+<td><a href="#appendix-b---ieee-c37.118-mapping">Appendix B - IEEE C37.118 Mapping</a></td>
 </tr>
 <tr>
 <td style="text-align:center;"></td>
@@ -803,16 +803,19 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </tbody>
 </table>
 <h3 id="introduction">Introduction</h3>
-<p>Use of synchrophasors by U.S. utilities continues to grow following the jump start provided by the Smart Grid Investment Grants.   Even so, the dominant method to exchange synchrophasor data remains the IEEE C37.118-2005 [<a href="#ref2">2</a>] protocol that was designed for and continues to be the preferred solution for substation-to-control room communications.  It achieves its advantages through use of an ordered set (a frame) of information that is associated with a specific measurement time.  When IEEE C37.118 is used for PDC-to-PDC communication or for PDC-to-Application communication, large data frames are typically distributed to multiple systems.  To address the challenges presented by these large frame sizes, many utilities implement purpose-built networks for synchrophasor data only.  Even with these purpose-built networks, large frame sizes result in an increased probability of UDP frame loss, or in the case of TCP, increased communication latency.  In addition, IEEE C37.118 has only prescriptive methods for the management of measurement metadata which is well-suited for substation-to-control-center use but which becomes difficult to manage as this metadata spans analytic solutions and is used by multiple configuration owners in a wide-area context.</p>
-<p>As a result, the ASP project ...</p>
-<p>more ...</p>
+<p>Use of synchrophasors by U.S. utilities continues to grow following the jump start provided by the Smart Grid Investment Grants. Even so, the dominant method to exchange synchrophasor data remains the IEEE C37.118-2005 [<a href="#ref2">2</a>] protocol that was designed for and continues to be the preferred solution for substation-to-control room communications.  It achieves its advantages through use of an ordered set (a frame) of information that is associated with a specific measurement time.  When IEEE C37.118 is used for PDC-to-PDC communication or for PDC-to-Application communication, large data frames are typically distributed to multiple systems.  To address the challenges presented by these large frame sizes, many utilities implement purpose-built networks for synchrophasor data only.  Even with these purpose-built networks, large frame sizes result in an increased probability of UDP frame loss, or in the case of TCP, increased communication latency.  In addition, IEEE C37.118 has only prescriptive methods for the management of measurement metadata which is well-suited for substation-to-control-center use but which becomes difficult to manage as this metadata spans analytic solutions and is used by multiple configuration owners in a wide-area context.</p>
+<p>To address these issues, the Advanced Synchrophasor Protocol (ASP) Project was proposed to DOE in response to FOA-1492. In this project proposal, the argument was made for a new protocol that overcomes the limitations of IEEE C37.118 for large-scale synchrophasor data system deployments.  The new protocol proposed leveraged the successful design elements of the secure Gateway Exchange Protocol (GEP) that was originally developed by the Grid Protection Alliance (GPA) as part of the SIEGate project (DE-OE-536).</p>
+<p>On May 1, 2017, a DOE grant (DE-OE-859) was awarded to GPA and the other 25 collaborators on ASP Project (see <a href="#contributors">Contributors</a>) to develop: (1) a detailed definition of new publish-subscribe protocol, now called the Streaming Time-series Transport Protocol (STTP) and (2) software to support it including production-grade implementations of STTP API's in multiple development platforms along with a collection of tools to test and validate the new protocol.</p>
 <h4 id="scope-of-this-document">Scope of this Document</h4>
-<p>Purpose of doc, audience, etc.</p>
-<p>Body text</p>
+<p>The purpose of this document is to define STTP and to include, as appendices, descriptions as to how to use its supporting software tools.  This STTP specification is focused on effective "streaming data" delivery of which synchrophasor data is a very important use case.</p>
+<p>In the <a href="#protocol-overview">Overview</a> section of this specification, high-level features and the business value of STTP are presented. The balance of the sections of the specification provide the details of protocol design.</p>
+<p><a href="#appendix-a---sttp-api-reference">Appendix A - STTP API Reference</a> provides instructions to enable software developers to integrate and use of STTP within other software systems.</p>
+<p><a href="#appendix-b---ieee-c37.118-mapping">Appendix B - IEEE C37.118 Mapping</a> provides a detailed look at the process of transforming IEEE C37.118 into STTP as well as creating IEEE C37.118 streams from STTP.</p>
+<p>While the format and structure of this document, established to facilitate collaboration, is different than that used by standards bodies, it is hoped that the content within this document can meet all the information requirements needed to enable repackaging of this specification into draft standard formats.</p>
 <h3 id="definitions-and-nomenclature">Definitions and Nomenclature</h3>
 <p>The styles used to show code, notes, etc.  </p>
 <blockquote>
-  <p>To spice up the formatting of the spec, GitHub offers a library of emogi's.  some that we might want to play into nomenclature  <img src="https://github.global.ssl.fastly.net/images/icons/emoji/mag.png?v5" alt=":mag:" title=":mag:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/computer.png?v5" alt=":computer:" title=":computer:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/file_folder.png?v5" alt=":file_folder:" title=":file_folder:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/package.png?v5" alt=":package:" title=":package:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/pushpin.png?v5" alt=":pushpin:" title=":pushpin:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/new.png?v5" alt=":new:" title=":new:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/arrow_right.png?v5" alt=":arrow_right:" title=":arrow_right:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/arrow_forward.png?v5" alt=":arrow_forward:" title=":arrow_forward:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/arrows_counterclockwise.png?v5" alt=":arrows_counterclockwise:" title=":arrows_counterclockwise:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/hash.png?v5" alt=":hash:" title=":hash:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/soon.png?v5" alt=":soon:" title=":soon:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/heavy_plus_sign.png?v5" alt=":heavy_plus_sign:" title=":heavy_plus_sign:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/black_small_square.png?v5" alt=":black_small_square:" title=":black_small_square:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/paperclip.png?v5" alt=":paperclip:" title=":paperclip:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/warning.png?v5" alt=":warning:" title=":warning:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/page_facing_up.png?v5" alt=":page_facing_up:" title=":page_facing_up:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/bar_chart.png?v5" alt=":bar_chart:" title=":bar_chart:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/earth_americas.png?v5" alt=":earth_americas:" title=":earth_americas:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/globe_with_meridians.png?v5" alt=":globe_with_meridians:" title=":globe_with_meridians:" class="emoji-img emoji">  From use of the atom editor, it Looks like some are unique to GitHub and others are part of more standard collections.  Or we could make some custom ones that would be included as images.</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> To spice up the formatting of the spec, GitHub offers a library of emogi's.  some that we might want to play into nomenclature  <img src="https://github.global.ssl.fastly.net/images/icons/emoji/mag.png?v5" alt=":mag:" title=":mag:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/computer.png?v5" alt=":computer:" title=":computer:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/file_folder.png?v5" alt=":file_folder:" title=":file_folder:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/package.png?v5" alt=":package:" title=":package:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/pushpin.png?v5" alt=":pushpin:" title=":pushpin:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/new.png?v5" alt=":new:" title=":new:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/arrow_right.png?v5" alt=":arrow_right:" title=":arrow_right:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/arrow_forward.png?v5" alt=":arrow_forward:" title=":arrow_forward:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/arrows_counterclockwise.png?v5" alt=":arrows_counterclockwise:" title=":arrows_counterclockwise:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/hash.png?v5" alt=":hash:" title=":hash:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/soon.png?v5" alt=":soon:" title=":soon:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/heavy_plus_sign.png?v5" alt=":heavy_plus_sign:" title=":heavy_plus_sign:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/black_small_square.png?v5" alt=":black_small_square:" title=":black_small_square:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/paperclip.png?v5" alt=":paperclip:" title=":paperclip:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/warning.png?v5" alt=":warning:" title=":warning:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/page_facing_up.png?v5" alt=":page_facing_up:" title=":page_facing_up:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/bar_chart.png?v5" alt=":bar_chart:" title=":bar_chart:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/earth_americas.png?v5" alt=":earth_americas:" title=":earth_americas:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/globe_with_meridians.png?v5" alt=":globe_with_meridians:" title=":globe_with_meridians:" class="emoji-img emoji">  From use of the atom editor, it Looks like some are unique to GitHub and others are part of more standard collections.  Or we could make some custom ones that would be included as images.</p>
 </blockquote>
 <p>For example,</p>
 <blockquote>
@@ -833,11 +836,19 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:right;"><strong>phasor</strong></td>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Data_point"><strong>data-point</strong></a></td>
+<td style="text-align:left;">A measurement on a single member of a statistical population.</td>
+</tr>
+<tr>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Phasor"><strong>phasor</strong></a></td>
 <td style="text-align:left;">A complex equivalent of a simple cosine wave quantity such that the complex modulus is the cosine wave amplitude and the complex angle (in polar form) is the cosine wave phase angle.</td>
 </tr>
 <tr>
-<td style="text-align:right;"><strong>synchrophasor</strong></td>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern"><strong>publish/subscribe</strong></a></td>
+<td style="text-align:left;">A messaging pattern where senders of messages, called publishers, do not program the messages to be sent directly to specific receivers, called subscribers, but instead characterize published messages into classes without knowledge of which subscribers, if any, there may be.</td>
+</tr>
+<tr>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit"><strong>synchrophasor</strong></a></td>
 <td style="text-align:left;">A phasor calculated from data samples using a standard time signal as the reference for the measurement. Synchronized phasors from remote sites have a defined common phase relationship.</td>
 </tr>
 <tr>
@@ -872,6 +883,10 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <td style="text-align:left;">Grid Protection Alliance, Inc.</td>
 </tr>
 <tr>
+<td style="text-align:right;"><strong>IP</strong></td>
+<td style="text-align:left;">Internet Protocol</td>
+</tr>
+<tr>
 <td style="text-align:right;"><strong>PDC</strong></td>
 <td style="text-align:left;">Phasor Data Concentrator</td>
 </tr>
@@ -885,11 +900,11 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>TCP</strong></td>
-<td style="text-align:left;"></td>
+<td style="text-align:left;">Transmission Control Protocol</td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>UDP</strong></td>
-<td style="text-align:left;"></td>
+<td style="text-align:left;">User Datagram Protocol</td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>UTC</strong></td>
@@ -898,26 +913,328 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </tbody>
 </table>
 <h3 id="protocol-overview">Protocol Overview</h3>
-<p>Purpose of protocol, fundamentals of how it works (command and data)<br />
-Include sub-section titles ( 4# items) as needed</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Purpose of protocol, fundamentals of how it works (command and data) - include sub-section titles ( 4# items) as needed</p>
+  <p>Describe what protocol is and is not - how it could operate with ZeroMQ, DDS, etc. as a transport layer - how it is different than thrift, protobuf, etc., i.e., atomized approach to native-type data vs serializing and deserializing data structures - why this has benefit at scale (i.e., very large structures)</p>
+</blockquote>
+<p>Data transport requires the use of a command channel using TCP/IP for reliable delivery of important commands. Optionally a secondary data channel can be established using UDP/IP for the transport of data that can tolerate loss. When no secondary UDP/IP is used, both commands and data will share use of the TCP/IP channel for communications.</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> JRC: <em>The question has been raised if a UDP only transport should be allowed? In this mode, any critical commands and responses would basically be sent over UDP. Thought would need to be given to commands and/or responses that never arrive and the consequences thereof.</em></p>
+</blockquote>
+<p><em>more</em></p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> Although not precluded from use over other data transports, the design of this protocol is targeted and optimized for use over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a>, specifically TCP/IP and UDP/IP. Even so, since the command/response implementation and data packet distribution of the STTP protocol is fairly simple, it is expected that commonly available middleware data transport layers, such as <a href="http://zeromq.org/">ZeroMQ</a> or <a href="http://www.omg.org/spec/DDS/">Data Distribution Service</a> (DDS), could easily support and transmit data using the STTP protocol should any of the messaging distribution and management benefits of these transport layers be useful to a particular deployment environment. However, these types of deployments are outside the scope of this documentation. If needed, STTP integrations with middleware layers should be added as reference implementation repositories to the <a href="https://github.com/sttp/">STTP organizational site</a>.</p>
+</blockquote>
 <h4 id="protocol-feature-summary">Protocol Feature Summary</h4>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> This is the protocol promotional section that includes a bulleted list of the "value points" for the protocol</p>
+</blockquote>
 <ul>
-<li>this is the protocol promotional section that includes</li>
-<li>a bulleted list of the "value points" for the protocol</li>
+<li>Perform at high volume / large scale</li>
+<li>Minimize data losses (e.g., over UDP)</li>
+<li>Lower bandwidth requirements (e.g., over TCP)</li>
+<li>Optimized for the performant delivery of individual data-points</li>
+<li>Automated exchange of metadata (no centralized registry required)</li>
+<li>Detect and expose communication issues</li>
+<li>Security and availability features that enable use on critical systems to support critical operations</li>
+<li>Publish/subscribe at data-point level</li>
+<li>API implemented in multiple languages on multiple platforms</li>
 </ul>
-<p>Introduce the each of topical sections that follow.</p>
 <blockquote>
-  <p><strong>Candidate major topic headings:</strong>  (3# items) Command channel, data channel, compression, security, filter expressions, metadata, ....</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Introduce the each of topical sections that follow.  <em>Candidate major topic headings:</em>  (3# items) Command channel, data channel, compression, security, filter expressions, metadata,</p>
+  <p>06/22/2017 JRC brain dump follows - note these will need to become formal sections once the headings are better established:</p>
 </blockquote>
-<h3 id="topic-1">Topic 1</h3>
-<p>body text</p>
+<h3 id="design-philosophies">Design Philosophies</h3>
+<ul>
+<li>Minimize external libraries and dependencies for reference implementations</li>
+<li>Keep portability in mind with all protocol design work</li>
+<li>Target smallest possible API functionality –specialized use cases will be handled by example</li>
+<li>Set design mantra to be “keep it simple” <em>as possible</em></li>
+</ul>
+<h3 id="data-point-structure">Data-point Structure</h3>
+<ul>
+<li>Contents:<ul>
+<li>Identification - maps to 128-bit Guid, transport mapping should be small</li>
+<li>Timestamp (required? could simply be a auto-incrementing counter)</li>
+<li>Value - multiple native types supports</li>
+<li>Flags - standardize minimal set of simple flags, complex state can be new data-point</li></ul></li>
+</ul>
+<h3 id="commands-and-responses">Commands and Responses</h3>
+<h4 id="commands">Commands</h4>
+<p>All commands must be sent over the command channel.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">Code</th>
+<th>Command</th>
+<th style="text-align:center;">Source</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">0x00</td>
+<td>Set Operational Modes</td>
+<td style="text-align:center;">Subscriber</td>
+<td>Defines desired set of operational modes.</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x01</td>
+<td>Metadata Refresh</td>
+<td style="text-align:center;">Subscriber</td>
+<td>Requests publisher send updated metadata.</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x02</td>
+<td>Subscribe</td>
+<td style="text-align:center;">Subscriber</td>
+<td>Defines desired set of data-points to begin receiving.</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x03</td>
+<td>Unsubscribe</td>
+<td style="text-align:center;">Subscriber</td>
+<td>Requests publisher terminate current subscription.</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x0n</td>
+<td>etc.</td>
+<td style="text-align:center;"></td>
+<td></td>
+</tr>
+<tr>
+<td style="text-align:center;">0xFF</td>
+<td>NoOp</td>
+<td style="text-align:center;">Any</td>
+<td>Periodic message to allow validation of connectivity.</td>
+</tr>
+</tbody>
+</table>
+<h5 id="set-operational-modes">Set Operational modes</h5>
+<p>This must be the first command sent after a successful connection - the command must be sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. The rule for this operational mode negotiation is that once these modes have been established, they will not change for the lifetime of the connection.</p>
+<p>The subscriber must send the command and the publisher must await its reception. If the publisher does not receive the command in a timely fashion (time interval controlled by configuration), it will disconnect the channel.</p>
+<ul>
+<li>Wire Format: Binary</li>
+<li>Requested operational mode negotiations<ul>
+<li>String encoding</li>
+<li>Compression modes</li>
+<li>UDP data channel usage / port</li></ul></li>
+</ul>
+<h5 id="metadata-refresh">Metadata Refresh</h5>
+<ul>
+<li>Wire Format: Binary<ul>
+<li>Includes current metadata version number</li></ul></li>
+</ul>
+<h5 id="subscribe">Subscribe</h5>
+<ul>
+<li>Wire Format: Binary<ul>
+<li>Includes metadata expression and/or individual Guids for desired data-points</li></ul></li>
+</ul>
+<h5 id="unsubscribe">Unsubscribe</h5>
+<ul>
+<li>Wire Format: Binary</li>
+</ul>
+<h5 id="noop">NoOp</h5>
+<p>No operation keep-alive ping. It is possible for the command channel to remain quiet for some time if most data is being transmitted over the data channel, this command allows a periodic test of client connectivity.</p>
+<ul>
+<li>Wire Format: Binary</li>
+</ul>
+<h4 id="responses">Responses</h4>
+<p>Responses are sent over a designated channel based on the nature of the response.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">Code</th>
+<th>Response</th>
+<th style="text-align:center;">Source</th>
+<th style="text-align:center;">Channel</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">0x80</td>
+<td>Succeeded</td>
+<td style="text-align:center;">Publisher</td>
+<td style="text-align:center;">Command</td>
+<td>Command request succeeded. Response details follow.</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x81</td>
+<td>Failed</td>
+<td style="text-align:center;">Publisher</td>
+<td style="text-align:center;">Command</td>
+<td>Command request failed. Response error details follow.</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x82</td>
+<td>Data-point Packet</td>
+<td style="text-align:center;">Any</td>
+<td style="text-align:center;">Data</td>
+<td>Response contains data-points.</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x83</td>
+<td>Signal Mapping</td>
+<td style="text-align:center;">Any</td>
+<td style="text-align:center;">Command</td>
+<td>Response contains data-point Guid to run-time ID mappings.</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x8n</td>
+<td>etc.</td>
+<td style="text-align:center;"></td>
+<td style="text-align:center;"></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 <blockquote>
-  <p><strong>Ritchie</strong> We're going to need a place to post and update images on the web.  Ideally we should use GitHub as well for these images so others can post new images.  Ideas??  <br />
-  <strong>Russell</strong> I created an <em>Images</em> folder, i.e., <code>Section/Images/</code> relative to <code>STTP/Specification</code> that should work, e.g.:<br />
-  <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/ecaAPI.png" alt="Example Image" /></p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> For the response table above, when a response is destined for the data channel, it should be understood that a connection can be established where both the command and data channel use the same TCP connection.</p>
+  <h5 id="succeeded-response">Succeeded Response</h5>
 </blockquote>
-<h3 id="topic-2">Topic 2</h3>
-<p>body text</p>
+<ul>
+<li>Wire Format: Binary (header)<ul>
+<li>Base wire format includes <em>in-response-to</em> command code</li>
+<li>Can include response that is specific to source command:</li></ul></li>
+</ul>
+<h6 id="succeeded-response-for-metadata-refresh">Succeeded Response for Metadata Refresh</h6>
+<ul>
+<li>Wire Format: String + Binary<ul>
+<li>Includes response message with stats like size, number of tables etc.</li>
+<li>Includes temporal data-point ID for "chunked" metadata responses</li>
+<li>Includes number of metadata data-points to be expected</li></ul></li>
+</ul>
+<h6 id="succeeded-response-for-subscribe">Succeeded Response for Subscribe</h6>
+<p>Subscriber will need to wait for</p>
+<ul>
+<li>Wire Format: String + Binary<ul>
+<li>Includes response message with stats like number of actual points subscribed,  <br />
+count may not match requested points due to rights or points may no longer exist, etc.</li>
+<li>Includes temporal data-point ID for "chunked" signal mapping responses</li>
+<li>Includes number of signal mapping data-points to be expected</li></ul></li>
+</ul>
+<h6 id="succeeded-response-for-unsubscribe">Succeeded Response for Unsubscribe</h6>
+<ul>
+<li>Wire Format: String<ul>
+<li>Includes message as to successful unsubscribe with stats like connection time</li></ul></li>
+</ul>
+<h5 id="failed-response">Failed Response</h5>
+<ul>
+<li>Wire Format: String + Binary (header)<ul>
+<li>Base wire format includes <em>in-response-to</em> command code</li>
+<li>Includes error message as why command request failed</li>
+<li>Can include response that is specific to source command:</li></ul></li>
+</ul>
+<h6 id="failed-response-for-set-operational-modes">Failed Response for Set Operational Modes</h6>
+<p>Failed responses to operational modes usually indicate lack of support by publisher. Failure response should include, per failed operational mode option, what options the publisher supports so that the operational modes can be re-negotiated by resending operational modes with a set of <em>supported</em> options.</p>
+<ul>
+<li>Wire Format: Binary<ul>
+<li>Includes operational mode that failed followed by available operational mode options</li></ul></li>
+</ul>
+<h5 id="data-point-packet">Data-point Packet</h5>
+<ul>
+<li>Wire Format: Binary<ul>
+<li>Includes a byte flag indicating content, e.g.:</li>
+<li>Data compression mode, if any</li>
+<li>Total data-points in packet</li>
+<li>Includes serialized data-points</li></ul></li>
+</ul>
+<h5 id="signal-mapping">Signal Mapping</h5>
+<ul>
+<li>Wire Format: Binary<ul>
+<li>Includes a mapping of data-point Guids to run-time signal IDs</li>
+<li>Includes per data-point ownership state, rights and delivery characteristic details</li></ul></li>
+</ul>
+<h3 id="data-point-delivery-characteristics">Data-point Delivery Characteristics</h3>
+<ul>
+<li>Priority (e.g., control over data delivery priority)</li>
+<li>Reliability (e.g., must be sent over TCP channel)</li>
+<li>Verification (e.g., notification of successful transport)</li>
+<li>Exception (e.g., delivery on change)</li>
+<li>Resolution (e.g., down-sampling)</li>
+</ul>
+<h3 id="metadata">Metadata</h3>
+<ul>
+<li>Wire Format: Tabular XML format (XML) - highly compressible</li>
+<li>Primary data-point identifier is Guid (define)</li>
+<li>Extensibility</li>
+<li>Rights based content restriction</li>
+</ul>
+<h4 id="dataset-contents">Dataset Contents</h4>
+<ul>
+<li>Minimum required dataset for STTP operation</li>
+<li>Industry specific dataset extensions (outside scope of this doc)</li>
+</ul>
+<h4 id="dataset-filtering">Dataset Filtering</h4>
+<ul>
+<li>Format of expressions that work against metadata<ul>
+<li>SQL style expressions</li>
+<li>Regex style expressions</li></ul></li>
+<li>Application of expressions<ul>
+<li>Metadata reduction</li>
+<li>Data-point access security</li></ul></li>
+</ul>
+<h4 id="dataset-versioning">Dataset Versioning</h4>
+<ul>
+<li>Versioned</li>
+<li>Difference based publication</li>
+</ul>
+<h4 id="dataset-serialization">Dataset Serialization</h4>
+<ul>
+<li>Serialization for transport<ul>
+<li>Packet based publication using temporal data-point</li>
+<li>Publisher reduction by access rights and diff-version</li>
+<li>Subscriber reduction by filter expression</li></ul></li>
+<li>Serialization to local repository<ul>
+<li>Merging considerations</li>
+<li>Conflict resolution</li>
+<li>Ownership control</li></ul></li>
+</ul>
+<h3 id="compression">Compression</h3>
+<ul>
+<li>Types of compression<ul>
+<li>Stateful data compression (TCP)</li>
+<li>Per-packet data compression (UDP)</li>
+<li>Metadata compression (GZip)</li></ul></li>
+<li>Compression algorithm extensibility<ul>
+<li>Negotiating desired compression algorithm</li></ul></li>
+</ul>
+<h3 id="security">Security</h3>
+<ul>
+<li>Access control list (ACL) security is always on</li>
+</ul>
+<h4 id="encrypted-communications">Encrypted Communications</h4>
+<ul>
+<li>Transport layer security (TLS) over TCP command channel</li>
+<li>UDP data channel traffic secured via AES keys exchanged over TCL command channel</li>
+</ul>
+<h4 id="strong-identity-validation">Strong Identity Validation</h4>
+<ul>
+<li>X.509 certificates</li>
+<li>Self-signed certificates</li>
+</ul>
+<h4 id="publisher-initiated-security-considerations">Publisher Initiated Security Considerations</h4>
+<p>How does publisher initiated connection, to cross security zones in desired direction, affect identity validation and TLS?</p>
+<h4 id="access-control-lists">Access Control Lists</h4>
+<ul>
+<li>Allow/deny for specific points (data-point explicit)</li>
+<li>Allow/deny for group with specific points (group explicit)</li>
+<li>Allow/deny for filter expression (filter implicit)</li>
+<li>Allow/deny for group with filter expression (group implicit)</li>
+</ul>
+<h5 id="expression-based-access-control">Expression based Access Control</h5>
+<ul>
+<li>Expressions can be used to define filters and groups</li>
+<li>How do filters work against extensible metadata, missing columns?</li>
+</ul>
+<h5 id="access-control-precedence">Access Control Precedence</h5>
+<ul>
+<li>(1) Data Point Explicit</li>
+<li>(2) Group Explicit</li>
+<li>(3) Filter Implicit</li>
+<li>(4) Group Implicit</li>
+</ul>
 <h3 id="references-and-notes">References and Notes</h3>
 <ol>
 <li><a href="https://opensource.org/licenses/MIT">The MIT Open Source Software License</a></li>
@@ -936,7 +1253,7 @@ Include sub-section titles ( 4# items) as needed</p>
 <h4 id="asp-project-participants">ASP Project Participants</h4>
 <p><img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/participant-logos.png" alt="Project Participants" /></p>
 <p><img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/participant-matrix.png" alt="Project Participant Matrix" /></p>
-<h4 id="copyright-statement">Copyright Statement</h4>
+<h4 id="specification-copyright-statement">Specification Copyright Statement</h4>
 <ul>
 <li>Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</li>
 </ul>
@@ -968,7 +1285,7 @@ Include sub-section titles ( 4# items) as needed</p>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> Links to language specific auto-generated XML code comment based API documentation would be useful.</p>
 </blockquote>
-<h3 id="appendix-b---ieee-c37-118-mapping">Appendix B - IEEE C37-118 Mapping</h3>
+<h3 id="appendix-b---ieee-c37118-mapping">Appendix B - IEEE C37.118 Mapping</h3>
 <p>appendix body</p>
 <p>appendix body</p>
 <h3 id="specification-development-to-do-list">Specification Development To-Do List</h3>
