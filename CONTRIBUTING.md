@@ -38,6 +38,32 @@ For very important notes or information that is deemed critical to understanding
 Which gets rendered as:
 > :warning: This is a very important note in the spec.
 
+#### Adding Questions and Responses
+
+While we are drafting the documentation, in order to make it easier to ask questions or make comments about a particular subject in-line to the text, we will support the following style for questions and associated responses:
+
+`> :tomato::question: author-initials: _question to be asked?_`
+
+`> :bulb: responder-initials: explanatory response...`
+
+`> :thumbsup: responder-initials: positive response...`
+
+`> :thumbsdown: responder-initials: negative response...`
+
+Which gets rendered as:
+
+> :tomato::question: author-initials: _question to be asked?_
+
+> :bulb: responder-initials: explanatory response...
+
+> :thumbsup: responder-initials: positive response...
+
+> :thumbsdown: responder-initials: negative response...
+
+Please keep the questions and responses close to topic area of concern. If the questions and responses get lengthy, we will move content to a new issue (see [STTP Issue Tracker](https://github.com/sttp/Specification/issues)) for further discussion and simply add a link the new issue from within the documentation text.
+
+Note that all questions and answers will be removed from the documentation at various publication points, but will be preserved for posterity in a stand-alone section that will not be part of the main-line compiled document.
+
 #### Markdown Editing
 
 The official guide to developing GitHub flavored markdown can be found here:
