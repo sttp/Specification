@@ -8,7 +8,9 @@ As the protocol moves beyond initial its draft stages, we intend to move to a PR
 
 Information on this page:
 * [Section Editing](#section-editing)
+  * [Naming Conventions](#naming-conventions)
   * [Highlighting Information](#highlighting-information)
+  * [Adding Questions and Responses](#adding-questions-and-responses)
   * [Markdown Editing](#markdown-editing)
 * [Contributor Attribution](#contributor-attribution)
 
@@ -21,6 +23,16 @@ All document sections are defined as GitHub markdown, i.e., `*.md` files, in the
 When adding new sections, make sure to modify [gulpfile.js](gulpfile.js) to include the new section markdown file and its associated header mapping so that it can be combined into a single overall document in the nightly build process. Also, new sections should be added to the table of contents which is located in the [Sections/README.md](Sections/README.md) file.
 
 New to markdown? See [markdown editing](#markdown-editing) section below.
+
+#### Naming Conventions
+
+##### Section File Names
+
+File names for sections, see [Sections](Sections) folder, are expected to be in [UpperCamelCase](https://en.wikipedia.org/wiki/Camel_case) (a.k.a., Pascal case), that is new words in the file name are capitalized with the remainder of the word's letters being lower-case. Abbreviations are generally to be avoided except for well known acronyms. Do not use spaces or dashes and only use underscores when a space is absolutely necessary for readability or visual clarity.
+
+##### Image File Names
+
+File names for images, see [Sections/Images](Sections/Images) folder, are expected to be in all lower [kebab-case](https://en.wikipedia.org/wiki/Letter_case#Special_case_styles) (a.k.a., spinal case), that is new words in the file name are separated by dashes. Abbreviations are generally to be avoided except for well known acronyms, but should remain lower-case. Do not use spaces or underscores, only dashes. All images are expected to by in [PNG](https://en.wikipedia.org/wiki/Portable_Network_Graphics) format with a `.png` extension.
 
 #### Highlighting Information
 
