@@ -84,6 +84,7 @@ const execReportOptions = {
 
 var currentVersion = null;
 var updatedVersion = null;
+var forcePush = false;
 
 showdown.setFlavor("github");
 
@@ -145,12 +146,12 @@ function incrementDocumentVersion() {
   });
 }
 
-function pushUpdates() {
+function pushDocumentUpdates() {
   return through.obj(function(file, encoding, cb) {
     const stdout = file.contents.toString();
 
     // Any git log info past current version constitutes an update
-    if (stdout && stdout.length > 0) {
+    if (forcePush || (stdout && stdout.length > 0)) {
       console.log("Committing new compiled documents to local repo...");
 
       const message = "Updated compiled documents - version " + updatedVersion;
@@ -296,10 +297,32 @@ gulp.task("clean-up", [ "convert-to-pdf" ], function() {
 gulp.task("default", [ "clean-up" ]);
 
 // This task will recompile output documents, increment the version and
-// push the updated files if there have been any remote check-ins
+// push the updated files
 gulp.task("push-changes", [ "clean-up" ], function() {
+  forcePush = true;
+
+  gulp.src("README.md")
+    .pipe(pushDocumentUpdates());
+});
+
+// This task will recompile output documents, increment the version and
+// push the updated files if there have been any remote check-ins - this
+// is useful for an automated nightly-build operation that should only
+// run when there have been changes pushed to the remote repository.
+// When scheduling this task to run, the "update-repo" task should be
+// called before calling the "push-changes-if-remote-updated" task - this
+// assumes that the automated build repostory will not be the source of
+// any content updates besides incrementing the version number and
+// compiling the new documents. To use this functionality it will be
+// necessary to "kick-start" the local git repository with a new tag that
+// is set to the actual current file version. The git command to initially
+// tag the local repository with the current version should look like:
+// >  git tag v0.1.99
+gulp.task("push-changes-if-remote-updated", [ "clean-up" ], function() {
   console.log("Checking for remote updates...");
 
+  // Pipe stdout to Gulp file contents on pipe-line - any stdout from
+  // git log represent updates to repository since the last tag
   const options = {
     continueOnError: true,
     pipeStdout: true
@@ -307,7 +330,7 @@ gulp.task("push-changes", [ "clean-up" ], function() {
 
   gulp.src("README.md")
     .pipe(exec(git + " log v" + currentVersion + "..", options))
-    .pipe(pushUpdates());
+    .pipe(pushDocumentUpdates());
 });
 
 // This task will reset the local repository to the remote - be careful
