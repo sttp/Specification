@@ -1,4 +1,4 @@
-## How to Contribute
+# How to Contribute
 
 During the early stages of protocol development we will allow direct check-in's from recognized participants on the DOE [Advanced Synchrophasor Protocol](https://energy.gov/oe/articles/oe-announces-investment-new-research-improve-grid-reliability-through-enhanced-0) (ASP) project (see [formal list](Sections/Images/participant-matrix.png)). If you are a participant in the ASP project and would like to assist with drafting the specification, please provide your GitHub account name to the [Grid Protection Alliance](https://www.gridprotectionalliance.org/) (GPA) and we will provide you with write access to the repository.
 
@@ -7,34 +7,47 @@ If you are not associated with the ASP project and would still like to contribut
 As the protocol moves beyond initial its draft stages, we intend to move to a PR based model for making modifications to the specification with a reduced set of participants that can approve any pull requests.
 
 Information on this page:
+* [Site Design](#site-design)
 * [Section Editing](#section-editing)
   * [Naming Conventions](#naming-conventions)
   * [Highlighting Information](#highlighting-information)
+  * [Style and Formatting](#style-and-formatting)
   * [Adding Questions and Responses](#adding-questions-and-responses)
-  * [Markdown Editing](#markdown-editing)
+* [Markdown Editing](#markdown-editing)
 * [Contributor Attribution](#contributor-attribution)
 
 ---
-### Section Editing
+
+## Site Design
+
+The design of this is site has been established to facilitate collaboration. The "source code" of the site exists as each of the primary specification document sections separated into multiple files. It is hoped that having multiple source files will reduce contention and merging conflicts while contributors are simultaneously adding content.
+
+The source code "language" for the site is GitHub flavored [markdown](https://en.wikipedia.org/wiki/Markdown). Since this technical documentation may become the basis for other technical specifications or standards bodies, markdown is an ideal choice for the text. Markdown is a very simple, readable, plain-text based document formatting language with minimal syntax to learn.
+
+> :information_source: New to markdown? See [markdown editing](#markdown-editing) section below.
+
+A nightly "build" process has been established that will check if any changes have been committed to this public repository during the day and will combine all the individual section files into a single combined document, thus "compiling" the source code. This process will also convert the markdown files into [HTML](https://en.wikipedia.org/wiki/HTML) and [PDF](https://en.wikipedia.org/wiki/Portable_Document_Format) formats - see [Output](Output) folder for latest builds.
+
+Since this site is a [git](https://en.wikipedia.org/wiki/Git) based repository, all document updates and associated history will be archived in perpetuity making it easier to manage and track changes over time.
+
+## Section Editing
 
 All document sections are defined as GitHub markdown, i.e., `*.md` files, in the [Sections](Sections) folder. When linking one section to another, link to the file name using a relative path, e.g.:
 `For more information, see [API reference](APIReference.md))` - this allows section pages to link together when rendered and enables the nightly build process to manage the translation from `file.md` links to `#header-links` when combining the sections into a single file.
 
-When adding new sections, make sure to modify [gulpfile.js](gulpfile.js) to include the new section markdown file and its associated header mapping so that it can be combined into a single overall document in the nightly build process. Also, new sections should be added to the table of contents which is located in the [Sections/README.md](Sections/README.md) file.
+When new sections are added, the "make file" used for compiling the sections will need be modified. The script used for this process is the [Gulp](http://gulpjs.com/) based [gulpfile.js](gulpfile.js) - this file will need to be updated to include the markdown file name for the new section and its associated header mapping so that it can be combined into a single overall document in the nightly build process. Also, links to new major sections should be added to the table of contents which is located in the [Sections/README.md](Sections/README.md) file.
 
-New to markdown? See [markdown editing](#markdown-editing) section below.
+### Naming Conventions
 
-#### Naming Conventions
-
-##### Section File Names
+#### Section File Names
 
 File names for sections, see [Sections](Sections) folder, are expected to be in [UpperCamelCase](https://en.wikipedia.org/wiki/Camel_case) (a.k.a., Pascal case), that is new words in the file name are capitalized with the remainder of the word's letters being lower-case. Abbreviations are generally to be avoided except for well known acronyms. Do not use spaces or dashes and only use underscores when a space is absolutely necessary for readability or visual clarity.
 
-##### Image File Names
+#### Image File Names
 
 File names for images, see [Sections/Images](Sections/Images) folder, are expected to be in all lower [kebab-case](https://en.wikipedia.org/wiki/Letter_case#Special_case_styles) (a.k.a., spinal case), that is new words in the file name are separated by dashes. Abbreviations are generally to be avoided except for well known acronyms, but should remain lower-case. Do not use spaces or underscores, only dashes. All images are expected to by in [PNG](https://en.wikipedia.org/wiki/Portable_Network_Graphics) format with a `.png` extension.
 
-#### Highlighting Information
+### Highlighting Information
 
 When developing new content where instructional notes or contextual information should be highlighted, use the following format:
 
@@ -50,7 +63,44 @@ For very important notes or information that is deemed critical to understanding
 Which gets rendered as:
 > :warning: This is a very important note in the spec.
 
-#### Adding Questions and Responses
+### Style and Formatting
+
+#### Header Formatting
+
+New major sections should start at heading level 2, or `## New Heading`. Sub-sections of heading level 2 should start at heading level 3, or `### New Sub-Heading` - and so forth. This is necessary for consistency when combining all the sections into a single document. Starting at level 2 was chosen since heading level 1 is reserved for title page sized headings.
+
+#### Custom Page Breaks
+
+For the automated conversion of the specification to PDF, all heading level 2 sections are marked to start on a new page.
+
+If you need more control over page breaks, the following [CSS](https://en.wikipedia.org/wiki/Cascading_Style_Sheets) classes have been defined that can be used anywhere in the document - note that these _only_ get applied in the final compiled PDF document:
+
+* page-break-before
+* page-break-after
+* page-break-before-avoid
+* page-break-after-avoid
+* page-break-inside-avoid
+
+To apply the page break control style, add an HTML [`<span>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/span) tag to the document that includes the desired class, for example:
+
+`<span class="page-break-after"></span>`
+
+Note that use of the `page-break-inside-avoid` class can be used to _wrap_ a portion of text, for example:
+
+```
+<span class="page-break-inside-avoid">
+
+| Col1 | Col2 | Col3 |
+|------|------|------|
+|  A1  |  B2  |  C3  |
+|  D1  |  E2  |  F3  |
+
+</span>
+```
+
+> :information_source: These CSS classes have been established as markers for the PDF [conversion tool](https://wkhtmltopdf.org/). The conversion tool will use these markers as suggestions; use is not a guarantee of desired page break control.
+
+### Adding Questions and Responses
 
 While we are drafting the documentation, in order to make it easier to ask questions or make comments about a particular subject in-line to the text, we will support the following style for questions and associated responses:
 
@@ -76,15 +126,17 @@ Please keep the questions and responses close to topic area of concern. If the q
 
 Note that all questions and answers will be removed from the documentation at various publication points, but will be preserved for posterity in a stand-alone section that will not be part of the main-line compiled document.
 
-#### Markdown Editing
+## Markdown Editing
 
 The official guide to developing GitHub flavored markdown can be found here:
 https://guides.github.com/features/mastering-markdown/
 
-The following site contains a very concise set of notes on developing markdown for GitHub:
+In addition, the following site contains a very concise set of notes, i.e., a _cheat-sheet_, on developing markdown for GitHub:
 https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
 
-As markdown exists as simple text files, most any text editor can be used to develop content. The markdown can even be directly edited on the GitHub site by clicking the pencil :pencil: icon on the top right of the page when navigating to a source page, for example, if you have write-access to this repository, you will see the editing icon on the [README.md](https://github.com/sttp/Specification/blob/master/Sections/README.md) page. This web based editor includes a preview mode to show you exactly how the markdown will look when rendered.
+As markdown exists as simple text files, most any text editor can be used to develop content. The markdown can even be directly edited on the GitHub site by clicking the pencil ![pencil-edit](Sections/Images/github-pencil-edit.png) icon on the top right of the page when navigating to a source page (_if you have write-access to this repository you will see the editing icon on this contributing page_). This web based editor includes a preview mode to show you exactly how the markdown will look when rendered.
+
+### Free Editing Tools
 
 If you are looking for a standalone editor, the [Atom Editor](https://atom.io/) does a very good job of rendering a preview of developed markdown to show you how it will look when posted to GitHub and includes the ability to stage and commit check-ins to your local repository from within the tool - as of writing, you'll need another tool to directly sync to GitHub, e.g., [GitHub Desktop](https://desktop.github.com/). There are also useful plug-ins for developing markdown, e.g.: the [markdown-writer](https://atom.io/packages/markdown-writer) and [tool-bar-markdown-writer](https://atom.io/packages/tool-bar-markdown-writer).
 
@@ -92,6 +144,6 @@ If you develop code on Windows, [Visual Studio](https://www.visualstudio.com/fre
 
 Another free tool is [Visual Studio Code](https://code.visualstudio.com/), this is a cross-platform code / editing tool that feels a lot like Atom and also includes all the bells and whistles, like [markdown editing](https://code.visualstudio.com/docs/languages/markdown) and [git integration](https://code.visualstudio.com/docs/setup/additional-components).
 
-### Contributor Attribution
+## Contributor Attribution
 
 The specification contributors are listed in the [Contributors.md](Sections/Contributors.md) file. If you are providing critical review or updates to the specification, please add yourself to this file.

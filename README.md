@@ -8,7 +8,7 @@ Merged single file copies of the specification can be found in the [Output](Outp
 
 ### Specification Source
 
-The specification source documentation on this site is separated into multiple files where each section is its own markdown file in the [Sections](Sections) folder. Navigation into the source documentation starts at the table of contents which is the default README of the `Sections` folder:
+The specification source documentation on this site is separated into multiple files where each section is its own markdown file in the [Sections](Sections) folder. Navigation into the source documentation starts at the table of contents which is the default README of the `Sections` folder. See [Site Design](CONTRIBUTING.md#site-design) for more details.
 
 ### Other Links
 
