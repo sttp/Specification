@@ -1,8 +1,8 @@
-### Commands and Responses
+## Commands and Responses
 
 > :construction: Purpose of command/response structure, fundamentals of how it works, why it is needed
 
-#### Commands
+### Commands
 
 All commands must be sent over the command channel.
 
@@ -15,7 +15,7 @@ All commands must be sent over the command channel.
 | 0x0n | etc. | | | |
 | 0xFF | [NoOp](#noop-command) | Any | Periodic message to allow validation of connectivity. |
 
-##### Set Operational Modes Command
+#### Set Operational Modes Command
 
 This must be the first command sent after a successful connection - the command must be sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. The rule for this operational mode negotiation is that once these modes have been established, they will not change for the lifetime of the connection.
 
@@ -29,27 +29,27 @@ The subscriber must send the command and the publisher must await its reception.
   * Compression modes
   * UDP data channel usage / port
 
-##### Metadata Refresh Command
+#### Metadata Refresh Command
 
 * Wire Format: Binary
   * Includes current metadata version number
 
-##### Subscribe Command
+#### Subscribe Command
 
 * Wire Format: Binary
   * Includes metadata expression and/or individual Guids for desired data-points
 
-##### Unsubscribe Command
+#### Unsubscribe Command
 
   * Wire Format: Binary
 
-##### NoOp Command
+#### NoOp Command
 
 No operation keep-alive ping. It is possible for the command channel to remain quiet for some time if most data is being transmitted over the data channel, this command allows a periodic test of client connectivity.
 
 * Wire Format: Binary
 
-#### Responses
+### Responses
 
 Responses are sent over a designated channel based on the nature of the response.
 
@@ -63,20 +63,20 @@ Responses are sent over a designated channel based on the nature of the response
 
 > :information_source: For the response table above, when a response is destined for the data channel, it should be understood that a connection can be established where both the command and data channel use the same TCP connection.
 
-##### Succeeded Response
+#### Succeeded Response
 
 * Wire Format: Binary (header)
   * Base wire format includes _in-response-to_ command code
   * Can include response that is specific to source command:
 
-###### Succeeded Response for Metadata Refresh
+##### Succeeded Response for Metadata Refresh
 
 * Wire Format: String + Binary
   * Includes response message with stats like size, number of tables etc.
   * Includes temporal data-point ID for "chunked" metadata responses
   * Includes number of metadata data-points to be expected
 
-###### Succeeded Response for Subscribe
+##### Succeeded Response for Subscribe
 
 Subscriber will need to wait for
 
@@ -86,26 +86,26 @@ Subscriber will need to wait for
   * Includes temporal data-point ID for "chunked" signal mapping responses
   * Includes number of signal mapping data-points to be expected
 
-###### Succeeded Response for Unsubscribe
+##### Succeeded Response for Unsubscribe
 
 * Wire Format: String
   * Includes message as to successful unsubscribe with stats like connection time
 
-##### Failed Response
+#### Failed Response
 
 * Wire Format: String + Binary (header)
   * Base wire format includes _in-response-to_ command code
   * Includes error message as why command request failed
   * Can include response that is specific to source command:
 
-###### Failed Response for Set Operational Modes
+##### Failed Response for Set Operational Modes
 
 Failed responses to operational modes usually indicate lack of support by publisher. Failure response should include, per failed operational mode option, what options the publisher supports so that the operational modes can be re-negotiated by resending operational modes with a set of _supported_ options.
 
   * Wire Format: Binary
     * Includes operational mode that failed followed by available operational mode options
 
-##### Data-point Packet Response
+#### Data-point Packet Response
 
 * Wire Format: Binary
   * Includes a byte flag indicating content, e.g.:
@@ -115,7 +115,7 @@ Failed responses to operational modes usually indicate lack of support by publis
 
 :information_source: The data-point packet is technically classified as a response to a `subscribe` command. However, unlike most responses that operate as a sole response to a parent command, data-packet responses will continue to flow for available measurements until an `unsubscribe` command is issued.
 
-##### Signal Mapping Response
+#### Signal Mapping Response
 
 * Wire Format: Binary
   * Includes a mapping of data-point Guids to run-time signal IDs

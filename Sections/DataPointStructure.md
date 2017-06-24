@@ -1,5 +1,4 @@
-
-### Data-point Structure
+## Data-point Structure
 
 * Contents:
   * Identification - maps to 128-bit Guid, transport mapping should be small

@@ -1,4 +1,4 @@
-### Protocol Overview
+## Protocol Overview
 
 > :construction: Purpose of protocol, fundamentals of how it works (command and data) - include sub-section titles ( 4# items) as needed
 
@@ -12,8 +12,7 @@ _more_
 
 > :information_source: Although not precluded from use over other data transports, the design of this protocol is targeted and optimized for use over [Internet Protocol](https://en.wikipedia.org/wiki/Internet_Protocol), specifically TCP/IP and UDP/IP. Even so, since the command/response implementation and data packet distribution of the STTP protocol is fairly simple, it is expected that commonly available middleware data transport layers, such as [ZeroMQ](http://zeromq.org/) or [Data Distribution Service](http://www.omg.org/spec/DDS/) (DDS), could easily support and transmit data using the STTP protocol should any of the messaging distribution and management benefits of these transport layers be useful to a particular deployment environment. However, these types of deployments are outside the scope of this documentation. If needed, STTP integrations with middleware layers should be added as reference implementation repositories to the [STTP organizational site](https://github.com/sttp/).
 
-
-#### Protocol Feature Summary
+### Protocol Feature Summary
 
 > :construction: This is the protocol promotional section that includes a bulleted list of the "value points" for the protocol
 

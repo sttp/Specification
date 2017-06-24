@@ -1,4 +1,4 @@
-### Contributors
+## Contributors
 
 The following individuals actively participated in the development of this standard.
 
@@ -7,11 +7,11 @@ The following individuals actively participated in the development of this stand
 - Stephen C. Wills, GPA
 
 
-#### ASP Project Participants
+### ASP Project Participants
 ![Project Participants](Images/participant-logos.png)
 
 ![Project Participant Matrix](Images/participant-matrix.png)
 
-#### Specification Copyright Statement
+### Specification Copyright Statement
 
 - Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.

@@ -1,4 +1,4 @@
-### Compression
+## Compression
 
 * Types of compression
   * Stateful data compression (TCP)

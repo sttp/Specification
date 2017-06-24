@@ -1,4 +1,4 @@
-### Design Philosophies
+## Design Philosophies
 
 * Minimize external libraries and dependencies for reference implementations
 * Keep portability in mind with all protocol design work

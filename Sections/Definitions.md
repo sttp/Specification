@@ -1,4 +1,4 @@
-### Definitions and Nomenclature
+## Definitions and Nomenclature
 
 The styles used to show code, notes, etc.  
 
@@ -12,7 +12,7 @@ or for example,
 
 > :warning: This is a very important note in the spec.
 
-#### Definition of key terms
+### Definition of key terms
 
 The words "must", "must not", "required", "shall", "shall not", "should", "should not", "recommended", "may", and "optional" in this document are to be interpreted as described in [RFC 2119](https://tools.ietf.org/html/rfc2119)
 
@@ -24,7 +24,7 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 | [**synchrophasor**](https://en.wikipedia.org/wiki/Phasor_measurement_unit) | A phasor calculated from data samples using a standard time signal as the reference for the measurement. Synchronized phasors from remote sites have a defined common phase relationship. |
 | **term** | definition |
 
-#### Acronyms
+### Acronyms
 
 | Term | Definition |
 |-----:|:-----------|

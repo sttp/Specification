@@ -1,4 +1,4 @@
-### Major Version History
+## Major Version History
 
 | Version | Date | Notes |
 |--------:|------|:------|

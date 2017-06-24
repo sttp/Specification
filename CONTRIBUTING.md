@@ -75,27 +75,27 @@ For the automated conversion of the specification to PDF, all heading level 2 se
 
 If you need more control over page breaks, the following [CSS](https://en.wikipedia.org/wiki/Cascading_Style_Sheets) classes have been defined that can be used anywhere in the document - note that these _only_ get applied in the final compiled PDF document:
 
-* page-break-before
-* page-break-after
-* page-break-before-avoid
-* page-break-after-avoid
-* page-break-inside-avoid
+* insert-page-break-before
+* insert-page-break-after
+* avoid-page-break-before
+* avoid-page-break-after
+* avoid-page-break-inside
 
-To apply the page break control style, add an HTML [`<span>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/span) tag to the document that includes the desired class, for example:
+To apply the page break control style, add an HTML paragraph tag, i.e.,  [`<p>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/p), to the document that includes the desired class, for example:
 
-`<span class="page-break-after"></span>`
+`<p class="insert-page-break-after"></p>`
 
-Note that use of the `page-break-inside-avoid` class can be used to _wrap_ a portion of text, for example:
+Note that use of the `avoid-page-break-inside` class can be used to _wrap_ a portion of text, for example:
 
 ```
-<span class="page-break-inside-avoid">
+<p class="avoid-page-break-inside">
 
 | Col1 | Col2 | Col3 |
 |------|------|------|
 |  A1  |  B2  |  C3  |
 |  D1  |  E2  |  F3  |
 
-</span>
+</p>
 ```
 
 > :information_source: These CSS classes have been established as markers for the PDF [conversion tool](https://wkhtmltopdf.org/). The conversion tool will use these markers as suggestions; use is not a guarantee of desired page break control.
