@@ -727,13 +727,38 @@ body pre code::before,body pre code::after,body pre tt::before,body pre tt::afte
     height: 18px;
     width: 18px;
 }
+
+/*! Page break clsses used during PDF conversion - not part of normalize.css */
+h2 {
+    page-break-before: always;
+}
+
+.page-break-before {
+    page-break-before: always !important;
+}
+
+.page-break-after {
+    page-break-after: always !important;
+}
+
+.page-break-before-avoid {
+    page-break-before: avoid !important;
+}
+
+.page-break-after-avoid {
+    page-break-after: avoid !important;
+}
+
+.page-break-inside-avoid {
+    page-break-inside: avoid !important;
+}
 </style>
 </head>
 <body>
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.0.13 - June 23, 2017</p>
+<p><strong>Version:</strong> 0.0.14 - June 24, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time-series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time-series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time-series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -743,7 +768,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <p>This document was prepared as a part of work sponsored by an agency of the United States Government (DE-OE-0000859).  Neither the United States Government nor any agency thereof, nor any of their employees, makes any warranty, express or implied, or assumes any legal liability or responsibility for the accuracy, completeness, or usefulness of any information, apparatus, product, or process disclosed, or represents that its use would not infringe privately owned rights.  Reference herein to any specific commercial product, process, or service by trade name, trademark, manufacturer, or otherwise does not necessarily constitute or imply its endorsement, recommendation, or favoring by the United States Government or any agency thereof.  The views and opinions of authors expressed herein do not necessarily state or reflect those of the United States Government or any agency thereof.</p>
 <h4 id="license">License</h4>
 <p>This specification is free software and it can be redistributed and/or modified under the terms of the <a href="https://raw.githubusercontent.com/sttp/Specification/master/LICENSE">MIT License</a>. This specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.</p>
-<h2 id="table-of-contents">Table of Contents</h2>
+<h3 id="table-of-contents">Table of Contents</h3>
 <table>
 <thead>
 <tr>
@@ -771,6 +796,34 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <tr>
 <td style="text-align:center;">3</td>
 <td><a href="#protocol-overview">Protocol Overview</a></td>
+</tr>
+<tr>
+<td style="text-align:center;">4</td>
+<td><a href="#design-philosophies">Design Philosophies</a></td>
+</tr>
+<tr>
+<td style="text-align:center;">5</td>
+<td><a href="#data-point-structure">Data-point Structure</a></td>
+</tr>
+<tr>
+<td style="text-align:center;">6</td>
+<td><a href="#commands-and-responses">Commands and Responses</a></td>
+</tr>
+<tr>
+<td style="text-align:center;">7</td>
+<td><a href="#data-point-characteristics">Data-point Characteristics</a></td>
+</tr>
+<tr>
+<td style="text-align:center;">8</td>
+<td><a href="#metadata">Metadata</a></td>
+</tr>
+<tr>
+<td style="text-align:center;">9</td>
+<td><a href="#compression">Compression</a></td>
+</tr>
+<tr>
+<td style="text-align:center;">10</td>
+<td><a href="#security">Security</a></td>
 </tr>
 <tr>
 <td style="text-align:center;">?</td>
@@ -815,7 +868,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <h3 id="definitions-and-nomenclature">Definitions and Nomenclature</h3>
 <p>The styles used to show code, notes, etc.  </p>
 <blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> To spice up the formatting of the spec, GitHub offers a library of emogi's.  some that we might want to play into nomenclature  <img src="https://github.global.ssl.fastly.net/images/icons/emoji/mag.png?v5" alt=":mag:" title=":mag:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/computer.png?v5" alt=":computer:" title=":computer:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/file_folder.png?v5" alt=":file_folder:" title=":file_folder:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/package.png?v5" alt=":package:" title=":package:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/pushpin.png?v5" alt=":pushpin:" title=":pushpin:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/new.png?v5" alt=":new:" title=":new:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/arrow_right.png?v5" alt=":arrow_right:" title=":arrow_right:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/arrow_forward.png?v5" alt=":arrow_forward:" title=":arrow_forward:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/arrows_counterclockwise.png?v5" alt=":arrows_counterclockwise:" title=":arrows_counterclockwise:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/hash.png?v5" alt=":hash:" title=":hash:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/soon.png?v5" alt=":soon:" title=":soon:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/heavy_plus_sign.png?v5" alt=":heavy_plus_sign:" title=":heavy_plus_sign:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/black_small_square.png?v5" alt=":black_small_square:" title=":black_small_square:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/paperclip.png?v5" alt=":paperclip:" title=":paperclip:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/warning.png?v5" alt=":warning:" title=":warning:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/page_facing_up.png?v5" alt=":page_facing_up:" title=":page_facing_up:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/bar_chart.png?v5" alt=":bar_chart:" title=":bar_chart:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/earth_americas.png?v5" alt=":earth_americas:" title=":earth_americas:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/globe_with_meridians.png?v5" alt=":globe_with_meridians:" title=":globe_with_meridians:" class="emoji-img emoji">  From use of the atom editor, it Looks like some are unique to GitHub and others are part of more standard collections.  Or we could make some custom ones that would be included as images.</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> To spice up the formatting of the spec, GitHub offers a library of emogi's. Some that we might want to play into nomenclature  <img src="https://github.global.ssl.fastly.net/images/icons/emoji/mag.png?v5" alt=":mag:" title=":mag:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/computer.png?v5" alt=":computer:" title=":computer:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/file_folder.png?v5" alt=":file_folder:" title=":file_folder:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/package.png?v5" alt=":package:" title=":package:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/pushpin.png?v5" alt=":pushpin:" title=":pushpin:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/new.png?v5" alt=":new:" title=":new:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/arrow_right.png?v5" alt=":arrow_right:" title=":arrow_right:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/arrow_forward.png?v5" alt=":arrow_forward:" title=":arrow_forward:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/arrows_counterclockwise.png?v5" alt=":arrows_counterclockwise:" title=":arrows_counterclockwise:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/hash.png?v5" alt=":hash:" title=":hash:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/soon.png?v5" alt=":soon:" title=":soon:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/heavy_plus_sign.png?v5" alt=":heavy_plus_sign:" title=":heavy_plus_sign:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/black_small_square.png?v5" alt=":black_small_square:" title=":black_small_square:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/paperclip.png?v5" alt=":paperclip:" title=":paperclip:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/warning.png?v5" alt=":warning:" title=":warning:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/page_facing_up.png?v5" alt=":page_facing_up:" title=":page_facing_up:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/bar_chart.png?v5" alt=":bar_chart:" title=":bar_chart:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/earth_americas.png?v5" alt=":earth_americas:" title=":earth_americas:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/globe_with_meridians.png?v5" alt=":globe_with_meridians:" title=":globe_with_meridians:" class="emoji-img emoji">  From use of the atom editor, it looks like some are unique to GitHub and others are part of more standard collections.  Or we could make some custom ones that would be included as images. Here's a link to full available set: <a href="https://gist.github.com/rxaviers/7360908">https://gist.github.com/rxaviers/7360908</a></p>
 </blockquote>
 <p>For example,</p>
 <blockquote>
@@ -940,10 +993,6 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <li>Publish/subscribe at data-point level</li>
 <li>API implemented in multiple languages on multiple platforms</li>
 </ul>
-<blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Introduce the each of topical sections that follow.  <em>Candidate major topic headings:</em>  (3# items) Command channel, data channel, compression, security, filter expressions, metadata,</p>
-  <p>06/22/2017 JRC brain dump follows - note these will need to become formal sections once the headings are better established:</p>
-</blockquote>
 <h3 id="design-philosophies">Design Philosophies</h3>
 <ul>
 <li>Minimize external libraries and dependencies for reference implementations</li>
@@ -960,6 +1009,9 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <li>Flags - standardize minimal set of simple flags, complex state can be new data-point</li></ul></li>
 </ul>
 <h3 id="commands-and-responses">Commands and Responses</h3>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Purpose of command/response structure, fundamentals of how it works, why it is needed</p>
+</blockquote>
 <h4 id="commands">Commands</h4>
 <p>All commands must be sent over the command channel.</p>
 <table>
@@ -974,25 +1026,25 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <tbody>
 <tr>
 <td style="text-align:center;">0x00</td>
-<td>Set Operational Modes</td>
+<td><a href="#set-operational-modes-command">Set Operational Modes</a></td>
 <td style="text-align:center;">Subscriber</td>
 <td>Defines desired set of operational modes.</td>
 </tr>
 <tr>
 <td style="text-align:center;">0x01</td>
-<td>Metadata Refresh</td>
+<td><a href="#metadata-refresh-command">Metadata Refresh</a></td>
 <td style="text-align:center;">Subscriber</td>
 <td>Requests publisher send updated metadata.</td>
 </tr>
 <tr>
 <td style="text-align:center;">0x02</td>
-<td>Subscribe</td>
+<td><a href="#subscribe-command">Subscribe</a></td>
 <td style="text-align:center;">Subscriber</td>
 <td>Defines desired set of data-points to begin receiving.</td>
 </tr>
 <tr>
 <td style="text-align:center;">0x03</td>
-<td>Unsubscribe</td>
+<td><a href="#unsubscribe-command">Unsubscribe</a></td>
 <td style="text-align:center;">Subscriber</td>
 <td>Requests publisher terminate current subscription.</td>
 </tr>
@@ -1004,15 +1056,18 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </tr>
 <tr>
 <td style="text-align:center;">0xFF</td>
-<td>NoOp</td>
+<td><a href="#noop-command">NoOp</a></td>
 <td style="text-align:center;">Any</td>
 <td>Periodic message to allow validation of connectivity.</td>
 </tr>
 </tbody>
 </table>
-<h5 id="set-operational-modes">Set Operational modes</h5>
+<h5 id="set-operational-modes-command">Set Operational Modes Command</h5>
 <p>This must be the first command sent after a successful connection - the command must be sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. The rule for this operational mode negotiation is that once these modes have been established, they will not change for the lifetime of the connection.</p>
-<p>The subscriber must send the command and the publisher must await its reception. If the publisher does not receive the command in a timely fashion (time interval controlled by configuration), it will disconnect the channel.</p>
+<p>The subscriber must send the command and the publisher must await its reception. If the publisher does not receive the command in a timely fashion (time interval controlled by configuration), it will disconnect the subscriber.</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> In modes of operations where the publisher is initiating the connection, the publisher will still be waiting for subscriber to initiate communications with a <code>Set Operational Modes</code> command.</p>
+</blockquote>
 <ul>
 <li>Wire Format: Binary</li>
 <li>Requested operational mode negotiations<ul>
@@ -1020,21 +1075,21 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <li>Compression modes</li>
 <li>UDP data channel usage / port</li></ul></li>
 </ul>
-<h5 id="metadata-refresh">Metadata Refresh</h5>
+<h5 id="metadata-refresh-command">Metadata Refresh Command</h5>
 <ul>
 <li>Wire Format: Binary<ul>
 <li>Includes current metadata version number</li></ul></li>
 </ul>
-<h5 id="subscribe">Subscribe</h5>
+<h5 id="subscribe-command">Subscribe Command</h5>
 <ul>
 <li>Wire Format: Binary<ul>
 <li>Includes metadata expression and/or individual Guids for desired data-points</li></ul></li>
 </ul>
-<h5 id="unsubscribe">Unsubscribe</h5>
+<h5 id="unsubscribe-command">Unsubscribe Command</h5>
 <ul>
 <li>Wire Format: Binary</li>
 </ul>
-<h5 id="noop">NoOp</h5>
+<h5 id="noop-command">NoOp Command</h5>
 <p>No operation keep-alive ping. It is possible for the command channel to remain quiet for some time if most data is being transmitted over the data channel, this command allows a periodic test of client connectivity.</p>
 <ul>
 <li>Wire Format: Binary</li>
@@ -1054,28 +1109,28 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <tbody>
 <tr>
 <td style="text-align:center;">0x80</td>
-<td>Succeeded</td>
+<td><a href="#succeeded-response">Succeeded</a></td>
 <td style="text-align:center;">Publisher</td>
 <td style="text-align:center;">Command</td>
 <td>Command request succeeded. Response details follow.</td>
 </tr>
 <tr>
 <td style="text-align:center;">0x81</td>
-<td>Failed</td>
+<td><a href="#failed-response">Failed</a></td>
 <td style="text-align:center;">Publisher</td>
 <td style="text-align:center;">Command</td>
 <td>Command request failed. Response error details follow.</td>
 </tr>
 <tr>
 <td style="text-align:center;">0x82</td>
-<td>Data-point Packet</td>
+<td><a href="#data-point-packet-response">Data-point Packet</a></td>
 <td style="text-align:center;">Any</td>
 <td style="text-align:center;">Data</td>
 <td>Response contains data-points.</td>
 </tr>
 <tr>
 <td style="text-align:center;">0x83</td>
-<td>Signal Mapping</td>
+<td><a href="#signal-mapping-response">Signal Mapping</a></td>
 <td style="text-align:center;">Any</td>
 <td style="text-align:center;">Command</td>
 <td>Response contains data-point Guid to run-time ID mappings.</td>
@@ -1091,8 +1146,8 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </table>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> For the response table above, when a response is destined for the data channel, it should be understood that a connection can be established where both the command and data channel use the same TCP connection.</p>
-  <h5 id="succeeded-response">Succeeded Response</h5>
 </blockquote>
+<h5 id="succeeded-response">Succeeded Response</h5>
 <ul>
 <li>Wire Format: Binary (header)<ul>
 <li>Base wire format includes <em>in-response-to</em> command code</li>
@@ -1132,7 +1187,7 @@ count may not match requested points due to rights or points may no longer exist
 <li>Wire Format: Binary<ul>
 <li>Includes operational mode that failed followed by available operational mode options</li></ul></li>
 </ul>
-<h5 id="data-point-packet">Data-point Packet</h5>
+<h5 id="data-point-packet-response">Data-point Packet Response</h5>
 <ul>
 <li>Wire Format: Binary<ul>
 <li>Includes a byte flag indicating content, e.g.:</li>
@@ -1140,13 +1195,14 @@ count may not match requested points due to rights or points may no longer exist
 <li>Total data-points in packet</li>
 <li>Includes serialized data-points</li></ul></li>
 </ul>
-<h5 id="signal-mapping">Signal Mapping</h5>
+<p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> The data-point packet is technically classified as a response to a <code>subscribe</code> command. However, unlike most responses that operate as a sole response to a parent command, data-packet responses will continue to flow for available measurements until an <code>unsubscribe</code> command is issued.</p>
+<h5 id="signal-mapping-response">Signal Mapping Response</h5>
 <ul>
 <li>Wire Format: Binary<ul>
 <li>Includes a mapping of data-point Guids to run-time signal IDs</li>
 <li>Includes per data-point ownership state, rights and delivery characteristic details</li></ul></li>
 </ul>
-<h3 id="data-point-delivery-characteristics">Data-point Delivery Characteristics</h3>
+<h3 id="data-point-characteristics">Data-point Characteristics</h3>
 <ul>
 <li>Priority (e.g., control over data delivery priority)</li>
 <li>Reliability (e.g., must be sent over TCP channel)</li>

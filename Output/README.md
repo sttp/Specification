@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.0.13 - June 23, 2017
+**Version:** 0.0.14 - June 24, 2017
 
 **Status:** Initial Development
 
@@ -20,7 +20,7 @@ This document was prepared as a part of work sponsored by an agency of the Unite
 
 This specification is free software and it can be redistributed and/or modified under the terms of the [MIT License](https://raw.githubusercontent.com/sttp/Specification/master/LICENSE). This specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-## Table of Contents
+### Table of Contents
 
 | Section | Title |
 |:-------:|---------|
@@ -29,13 +29,20 @@ This specification is free software and it can be redistributed and/or modified 
 | 1 | [Introduction](#introduction) |
 | 2 | [Definitions and Nomenclature](#definitions-and-nomenclature) |
 | 3 | [Protocol Overview](#protocol-overview) |
+| 4 | [Design Philosophies](#design-philosophies) |
+| 5 | [Data-point Structure](#data-point-structure) |
+| 6 | [Commands and Responses](#commands-and-responses) |
+| 7 | [Data-point Characteristics](#data-point-characteristics) |
+| 8 | [Metadata](#metadata) |
+| 9 | [Compression](#compression) |
+| 10 | [Security](#security) |
 | ? | (balance of sections) |
 | ~20 | [References and Notes](#references-and-notes) |
 | ~21 | [Contributors and Reviewers](#contributors) |
 | ~22 | [Revision History](#major-version-history) |
-| A | [Appendix A - STTP API Reference ](#appendix-a---sttp-api-reference) |
-| B | [Appendix B - IEEE C37.118 Mapping](#appendix-b---ieee-c37.118-mapping) |
-|   | [Spec To-Do List](#specification-development-to-do-list) |
+|  A | [Appendix A - STTP API Reference ](#appendix-a---sttp-api-reference) |
+|  B | [Appendix B - IEEE C37.118 Mapping](#appendix-b---ieee-c37.118-mapping) |
+|    | [Spec To-Do List](#specification-development-to-do-list) |
 
 ### Introduction
 
@@ -61,7 +68,7 @@ While the format and structure of this document, established to facilitate colla
 
 The styles used to show code, notes, etc.  
 
-> :construction: To spice up the formatting of the spec, GitHub offers a library of emogi's.  some that we might want to play into nomenclature  :mag: :bulb: :computer: :wrench: :file_folder: :package: :pushpin: :new: :arrow_right: :arrow_forward: :arrows_counterclockwise: :hash: :soon: :heavy_plus_sign: :black_small_square: :paperclip: :warning: :information_source: :page_facing_up: :bar_chart: :earth_americas: :globe_with_meridians:  From use of the atom editor, it Looks like some are unique to GitHub and others are part of more standard collections.  Or we could make some custom ones that would be included as images.
+> :construction: To spice up the formatting of the spec, GitHub offers a library of emogi's. Some that we might want to play into nomenclature  :mag: :bulb: :computer: :wrench: :file_folder: :package: :pushpin: :new: :arrow_right: :arrow_forward: :arrows_counterclockwise: :hash: :soon: :heavy_plus_sign: :black_small_square: :paperclip: :warning: :information_source: :page_facing_up: :bar_chart: :earth_americas: :globe_with_meridians:  From use of the atom editor, it looks like some are unique to GitHub and others are part of more standard collections.  Or we could make some custom ones that would be included as images. Here's a link to full available set: https://gist.github.com/rxaviers/7360908
 
 For example,
 
@@ -128,16 +135,13 @@ _more_
 * Publish/subscribe at data-point level
 * API implemented in multiple languages on multiple platforms
 
-> :construction: Introduce the each of topical sections that follow.  _Candidate major topic headings:_  (3# items) Command channel, data channel, compression, security, filter expressions, metadata,
-
-> 06/22/2017 JRC brain dump follows - note these will need to become formal sections once the headings are better established:
-
 ### Design Philosophies
 
 * Minimize external libraries and dependencies for reference implementations
 * Keep portability in mind with all protocol design work
 * Target smallest possible API functionality –specialized use cases will be handled by example
 * Set design mantra to be “keep it simple” _as possible_
+
 
 ### Data-point Structure
 
@@ -149,24 +153,28 @@ _more_
 
 ### Commands and Responses
 
+> :construction: Purpose of command/response structure, fundamentals of how it works, why it is needed
+
 #### Commands
 
 All commands must be sent over the command channel.
 
 | Code | Command | Source | Description |
 |:----:|---------|:------:|-------------|
-| 0x00 | Set Operational Modes | Subscriber | Defines desired set of operational modes. |
-| 0x01 | Metadata Refresh | Subscriber | Requests publisher send updated metadata. |
-| 0x02 | Subscribe | Subscriber | Defines desired set of data-points to begin receiving. |
-| 0x03 | Unsubscribe | Subscriber | Requests publisher terminate current subscription. |
+| 0x00 | [Set Operational Modes](#set-operational-modes-command) | Subscriber | Defines desired set of operational modes. |
+| 0x01 | [Metadata Refresh](#metadata-refresh-command) | Subscriber | Requests publisher send updated metadata. |
+| 0x02 | [Subscribe](#subscribe-command) | Subscriber | Defines desired set of data-points to begin receiving. |
+| 0x03 | [Unsubscribe](#unsubscribe-command) | Subscriber | Requests publisher terminate current subscription. |
 | 0x0n | etc. | | | |
-| 0xFF | NoOp | Any | Periodic message to allow validation of connectivity. |
+| 0xFF | [NoOp](#noop-command) | Any | Periodic message to allow validation of connectivity. |
 
-##### Set Operational modes
+##### Set Operational Modes Command
 
 This must be the first command sent after a successful connection - the command must be sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. The rule for this operational mode negotiation is that once these modes have been established, they will not change for the lifetime of the connection.
 
-The subscriber must send the command and the publisher must await its reception. If the publisher does not receive the command in a timely fashion (time interval controlled by configuration), it will disconnect the channel.
+The subscriber must send the command and the publisher must await its reception. If the publisher does not receive the command in a timely fashion (time interval controlled by configuration), it will disconnect the subscriber.
+
+> :information_source: In modes of operations where the publisher is initiating the connection, the publisher will still be waiting for subscriber to initiate communications with a `Set Operational Modes` command.
 
 * Wire Format: Binary
 * Requested operational mode negotiations
@@ -174,21 +182,21 @@ The subscriber must send the command and the publisher must await its reception.
   * Compression modes
   * UDP data channel usage / port
 
-##### Metadata Refresh
+##### Metadata Refresh Command
 
 * Wire Format: Binary
   * Includes current metadata version number
 
-##### Subscribe
+##### Subscribe Command
 
 * Wire Format: Binary
   * Includes metadata expression and/or individual Guids for desired data-points
 
-##### Unsubscribe
+##### Unsubscribe Command
 
   * Wire Format: Binary
 
-##### NoOp
+##### NoOp Command
 
 No operation keep-alive ping. It is possible for the command channel to remain quiet for some time if most data is being transmitted over the data channel, this command allows a periodic test of client connectivity.
 
@@ -200,14 +208,14 @@ Responses are sent over a designated channel based on the nature of the response
 
 | Code | Response | Source | Channel | Description |
 |:----:|----------|:------:|:-------:|-------------|
-| 0x80 | Succeeded | Publisher | Command | Command request succeeded. Response details follow. |
-| 0x81 | Failed | Publisher | Command | Command request failed. Response error details follow. |
-| 0x82 | Data-point Packet | Any | Data | Response contains data-points. |
-| 0x83 | Signal Mapping | Any | Command | Response contains data-point Guid to run-time ID mappings. |
+| 0x80 | [Succeeded](#succeeded-response) | Publisher | Command | Command request succeeded. Response details follow. |
+| 0x81 | [Failed](#failed-response) | Publisher | Command | Command request failed. Response error details follow. |
+| 0x82 | [Data-point Packet](#data-point-packet-response) | Any | Data | Response contains data-points. |
+| 0x83 | [Signal Mapping](#signal-mapping-response) | Any | Command | Response contains data-point Guid to run-time ID mappings. |
 | 0x8n | etc. | | | | |
 
 > :information_source: For the response table above, when a response is destined for the data channel, it should be understood that a connection can be established where both the command and data channel use the same TCP connection.
->
+
 ##### Succeeded Response
 
 * Wire Format: Binary (header)
@@ -250,7 +258,7 @@ Failed responses to operational modes usually indicate lack of support by publis
   * Wire Format: Binary
     * Includes operational mode that failed followed by available operational mode options
 
-##### Data-point Packet
+##### Data-point Packet Response
 
 * Wire Format: Binary
   * Includes a byte flag indicating content, e.g.:
@@ -258,13 +266,15 @@ Failed responses to operational modes usually indicate lack of support by publis
     * Total data-points in packet
   * Includes serialized data-points
 
-##### Signal Mapping
+:information_source: The data-point packet is technically classified as a response to a `subscribe` command. However, unlike most responses that operate as a sole response to a parent command, data-packet responses will continue to flow for available measurements until an `unsubscribe` command is issued.
+
+##### Signal Mapping Response
 
 * Wire Format: Binary
   * Includes a mapping of data-point Guids to run-time signal IDs
   * Includes per data-point ownership state, rights and delivery characteristic details
 
-### Data-point Delivery Characteristics
+### Data-point Characteristics
 
 * Priority (e.g., control over data delivery priority)
 * Reliability (e.g., must be sent over TCP channel)
