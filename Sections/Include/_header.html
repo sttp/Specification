@@ -727,6 +727,31 @@ body pre code::before,body pre code::after,body pre tt::before,body pre tt::afte
     height: 18px;
     width: 18px;
 }
+
+/*! Page break clsses used during PDF conversion - not part of normalize.css */
+h2 {
+    page-break-before: always;
+}
+
+.page-break-before {
+    page-break-before: always !important;
+}
+
+.page-break-after {
+    page-break-after: always !important;
+}
+
+.page-break-before-avoid {
+    page-break-before: avoid !important;
+}
+
+.page-break-after-avoid {
+    page-break-after: avoid !important;
+}
+
+.page-break-inside-avoid {
+    page-break-inside: avoid !important;
+}
 </style>
 </head>
 <body>
