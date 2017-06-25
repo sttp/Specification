@@ -137,7 +137,7 @@ https://guides.github.com/features/mastering-markdown/
 In addition, the following site contains a very concise set of notes, i.e., a _cheat-sheet_, on developing markdown for GitHub:
 https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
 
-As markdown exists as simple text files, most any text editor can be used to develop content. The markdown can even be directly edited on the GitHub site by clicking the pencil icon ![pencil-edit](Sections/Images/github-pencil-edit.png) on the top right of the page when navigating to a source page (_if you have write-access to this repository you, will see the editing icon on this contributing page_). This web based editor includes a preview mode to show you exactly how the markdown will look when rendered.
+As markdown exists as simple text files, most any text editor can be used to develop content. The markdown can even be directly edited on the GitHub site by clicking the pencil icon ![pencil-edit](Sections/Images/github-pencil-edit.png) on the top right of the page when navigating to a source page (_if you have write-access to this repository, you will see the editing icon on this contributing page_). This web based editor includes a preview mode to show you exactly how the markdown will look when rendered.
 
 ### Free Editing Tools
 
@@ -152,7 +152,7 @@ Another free tool is [Visual Studio Code](https://code.visualstudio.com/), this 
 There are many "_getting starting_" documents, tutorials and videos that can help you begin using git, the official guide can be found here:
 https://git-scm.com/book/en/v1/Git-Basics
 
-If you are not familiar with git, the following will help highlight some of the initial concepts and helpful workflow patterns that can help get you started.
+If you are not familiar with git, the following information will help highlight some of the initial concepts and helpful workflow patterns that can help get you started quickly.
 
 One important distinction with git as compared to other source code management systems is that when you clone a repository from GitHub onto your local system, you are getting a full copy of the entire revision history onto your local system. All this history ends up in the hidden `.git` folder in the current working directory along with all the source files. You can think of this folder like a small database that stores file differences over time. As you might suspect, this is a very critical folder - this folder _is_ the git repository.
 
@@ -164,7 +164,7 @@ Once a set of files have been selected to be added to history, you need to [`com
 
 You can continue to commit changes to your local repository as needed, but keep in mind the more your local repository _differs_ from the one hosted on GitHub, the more likely there are to be conflicts that may need to be resolved - this is because other people can be making changes too. At some point you will need to [`push`](https://git-scm.com/docs/git-push) your changes back to GitHub.
 
-If someone else has already pushed changes to GitHub when you decide to push your updates, it may be necessary to [`merge`](https://git-scm.com/docs/git-merge) your changes into the updated GitHub repository. Most of the time, this can be avoided it you [`pull`](https://git-scm.com/docs/git-pull) any new remote updates before you push your changes.
+If someone else has already pushed changes to GitHub when you decide to push your updates, it may be necessary to [`merge`](https://git-scm.com/docs/git-merge) your changes into the updated GitHub repository. Most of the time, this can be avoided if you [`pull`](https://git-scm.com/docs/git-pull) any new remote updates before you push your changes.
 
 Most of the GitHub tools that are available, such as the standalone GitHub Desktop or the ones that are integrated within source code editing tools (see [Free Editing Tools](#free-editing-tools)), will help you negotiate these more complex merging tasks - usually by making a [`sync`](https://help.github.com/desktop/guides/contributing/syncing-your-branch/) button available. These tools typically also have user interfaces to help with any conflict resolution, i.e., when two users have made changes to the same file, the tool will allow proper merging and editing of conflicting edits allowing user resolution before committing the merge back to GitHub.
 
