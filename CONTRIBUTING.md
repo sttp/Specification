@@ -11,9 +11,10 @@ Information on this page:
 * [Section Editing](#section-editing)
   * [Naming Conventions](#naming-conventions)
   * [Highlighting Information](#highlighting-information)
-  * [Style and Formatting](#style-and-formatting)
   * [Adding Questions and Responses](#adding-questions-and-responses)
+  * [Style and Formatting](#style-and-formatting)
 * [Markdown Editing](#markdown-editing)
+* [Git Workflow](#git-workflow)
 * [Contributor Attribution](#contributor-attribution)
 
 ---
@@ -63,43 +64,6 @@ For very important notes or information that is deemed critical to understanding
 Which gets rendered as:
 > :warning: This is a very important note in the spec.
 
-### Style and Formatting
-
-#### Header Formatting
-
-New major sections should start at heading level 2, or `## New Heading`. Sub-sections of heading level 2 should start at heading level 3, or `### New Sub-Heading` - and so forth. This is necessary for consistency when combining all the sections into a single document. Starting at level 2 was chosen since heading level 1 is reserved for title page sized headings.
-
-#### Custom Page Breaks
-
-For the automated conversion of the specification to PDF, all heading level 2 sections are marked to start on a new page.
-
-If you need more control over page breaks, the following [CSS](https://en.wikipedia.org/wiki/Cascading_Style_Sheets) classes have been defined that can be used anywhere in the document - note that these _only_ get applied in the final compiled PDF document:
-
-* insert-page-break-before
-* insert-page-break-after
-* avoid-page-break-before
-* avoid-page-break-after
-* avoid-page-break-inside
-
-To apply the page break control style, add an HTML paragraph tag, i.e.,  [`<p>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/p), to the document that includes the desired class, for example:
-
-`<p class="insert-page-break-after"></p>`
-
-Note that use of the `avoid-page-break-inside` class can be used to _wrap_ a portion of text, for example:
-
-```
-<p class="avoid-page-break-inside">
-
-| Col1 | Col2 | Col3 |
-|------|------|------|
-|  A1  |  B2  |  C3  |
-|  D1  |  E2  |  F3  |
-
-</p>
-```
-
-> :information_source: These CSS classes have been established as markers for the PDF [conversion tool](https://wkhtmltopdf.org/). The conversion tool will use these markers as suggestions; use is not a guarantee of desired page break control.
-
 ### Adding Questions and Responses
 
 While we are drafting the documentation, in order to make it easier to ask questions or make comments about a particular subject in-line to the text, we will support the following style for questions and associated responses:
@@ -126,6 +90,45 @@ Please keep the questions and responses close to topic area of concern. If the q
 
 Note that all questions and answers will be removed from the documentation at various publication points, but will be preserved for posterity in a stand-alone section that will not be part of the main-line compiled document.
 
+### Style and Formatting
+
+#### Header Formatting
+
+New major sections should start at heading level 2, or `## New Heading`. Sub-sections of heading level 2 should start at heading level 3, or `### New Sub-Heading` - and so forth. This is necessary for consistency when combining all the sections into a single document. Starting at level 2 was chosen since heading level 1 is reserved for title page sized headings.
+
+#### Custom Page Breaks
+
+For the automated conversion of the specification to PDF, all heading level 2 sections are marked to start on a new page.
+
+If you need more control over page breaks, the following [CSS](https://en.wikipedia.org/wiki/Cascading_Style_Sheets) classes have been defined that can be used anywhere in the document - note that these _only_ get applied in the final compiled PDF document:
+
+* insert-page-break-before
+* insert-page-break-after
+* avoid-page-break-before
+* avoid-page-break-after
+* avoid-page-break-inside
+
+To apply the page break control style, add an HTML paragraph tag, i.e.,  [`<p>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/p), to the document that includes the desired class, for example:
+
+`<p class="insert-page-break-after"></p>`
+
+Make sure to separate the HTML paragraph tags from the markdown by at least one blank line, otherwise the GitHub markdown engine may not properly render the markdown that is next to the `<p>` tag.
+
+Note that use of the `avoid-page-break-inside` class can be used to _wrap_ a portion of text, for example:
+
+```
+<p class="avoid-page-break-inside">
+
+| Col1 | Col2 | Col3 |
+|------|------|------|
+|  A1  |  B2  |  C3  |
+|  D1  |  E2  |  F3  |
+
+</p>
+```
+
+> :information_source: These CSS classes have been established as markers for the PDF [conversion tool](https://wkhtmltopdf.org/). The conversion tool will use these markers as suggestions; its use does not guarantee desired page break control.
+
 ## Markdown Editing
 
 The official guide to developing GitHub flavored markdown can be found here:
@@ -134,7 +137,7 @@ https://guides.github.com/features/mastering-markdown/
 In addition, the following site contains a very concise set of notes, i.e., a _cheat-sheet_, on developing markdown for GitHub:
 https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
 
-As markdown exists as simple text files, most any text editor can be used to develop content. The markdown can even be directly edited on the GitHub site by clicking the pencil ![pencil-edit](Sections/Images/github-pencil-edit.png) icon on the top right of the page when navigating to a source page (_if you have write-access to this repository you will see the editing icon on this contributing page_). This web based editor includes a preview mode to show you exactly how the markdown will look when rendered.
+As markdown exists as simple text files, most any text editor can be used to develop content. The markdown can even be directly edited on the GitHub site by clicking the pencil icon ![pencil-edit](Sections/Images/github-pencil-edit.png) on the top right of the page when navigating to a source page (_if you have write-access to this repository you, will see the editing icon on this contributing page_). This web based editor includes a preview mode to show you exactly how the markdown will look when rendered.
 
 ### Free Editing Tools
 
@@ -143,6 +146,27 @@ If you are looking for a standalone editor, the [Atom Editor](https://atom.io/) 
 If you develop code on Windows, [Visual Studio](https://www.visualstudio.com/free-developer-offers/) is an excellent editor. You can also install a markdown editing tool through `Extensions and Updates`, e.g., the [MarkdownEditor](https://github.com/madskristensen/MarkdownEditor) which will provide a rendering of the markdown as it is entered. Visual Studio also has very good [GitHub integration](https://visualstudio.github.com/) to allow any edits to be synchronized to GitHub, minimizing any hassles around your local repository.
 
 Another free tool is [Visual Studio Code](https://code.visualstudio.com/), this is a cross-platform code / editing tool that feels a lot like Atom and also includes all the bells and whistles, like [markdown editing](https://code.visualstudio.com/docs/languages/markdown) and [git integration](https://code.visualstudio.com/docs/setup/additional-components).
+
+## Git Workflow
+
+There are many "_getting starting_" documents, tutorials and videos that can help you begin using git, the official guide can be found here:
+https://git-scm.com/book/en/v1/Git-Basics
+
+If you are not familiar with git, the following will help highlight some of the initial concepts and helpful workflow patterns that can help get you started.
+
+One important distinction with git as compared to other source code management systems is that when you clone a repository from GitHub onto your local system, you are getting a full copy of the entire revision history onto your local system. All this history ends up in the hidden `.git` folder in the current working directory along with all the source files. You can think of this folder like a small database that stores file differences over time. As you might suspect, this is a very critical folder - this folder _is_ the git repository.
+
+Since all the history lives locally, without being online you can [`checkout`](https://git-scm.com/docs/git-checkout) an older version of the history and the git tools will extract the files from that point into your working folder - if the files at that point in history are very different than the current version, the change in the local files can be very disconcerting.
+
+The workflow with git is to make changes to the files in your working directory as desired. Once you have made the desired updates you need to [`stage`](https://git-scm.com/docs/git-add) the changes - this basically selects the changed files you want to add to the git history - you can choose to stage all changes.
+
+Once a set of files have been selected to be added to history, you need to [`commit`](https://git-scm.com/docs/git-commit) the changes along with a relevant commit message. Committing changes to the repository marks a new point in the revision history of files that can be returned to at a later point.
+
+You can continue to commit changes to your local repository as needed, but keep in mind the more your local repository _differs_ from the one hosted on GitHub, the more likely there are to be conflicts that may need to be resolved - this is because other people can be making changes too. At some point you will need to [`push`](https://git-scm.com/docs/git-push) your changes back to GitHub.
+
+If someone else has already pushed changes to GitHub when you decide to push your updates, it may be necessary to [`merge`](https://git-scm.com/docs/git-merge) your changes into the updated GitHub repository. Most of the time, this can be avoided it you [`pull`](https://git-scm.com/docs/git-pull) any new remote updates before you push your changes.
+
+Most of the GitHub tools that are available, such as the standalone GitHub Desktop or the ones that are integrated within source code editing tools (see [Free Editing Tools](#free-editing-tools)), will help you negotiate these more complex merging tasks - usually by making a [`sync`](https://help.github.com/desktop/guides/contributing/syncing-your-branch/) button available. These tools typically also have user interfaces to help with any conflict resolution, i.e., when two users have made changes to the same file, the tool will allow proper merging and editing of conflicting edits allowing user resolution before committing the merge back to GitHub.
 
 ## Contributor Attribution
 
