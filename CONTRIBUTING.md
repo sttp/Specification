@@ -10,6 +10,7 @@ Information on this page:
 * [Site Design](#site-design)
 * [Section Editing](#section-editing)
   * [Naming Conventions](#naming-conventions)
+  * [Handling References](#handling-references)
   * [Highlighting Information](#highlighting-information)
   * [Adding Questions and Responses](#adding-questions-and-responses)
   * [Style and Formatting](#style-and-formatting)
@@ -47,6 +48,24 @@ File names for sections, see [Sections](Sections) folder, are expected to be in 
 #### Image File Names
 
 File names for images, see [Sections/Images](Sections/Images) folder, are expected to be in all lower [kebab-case](https://en.wikipedia.org/wiki/Letter_case#Special_case_styles) (a.k.a., spinal case), that is new words in the file name are separated by dashes. Abbreviations are generally to be avoided except for well known acronyms, but should remain lower-case. Do not use spaces or underscores, only dashes. All images are expected to by in [PNG](https://en.wikipedia.org/wiki/Portable_Network_Graphics) format with a `.png` extension.
+
+### Handling References
+
+All document references are enumerated in the [Sections/References.md](Sections/References.md) file.  When adding a new reference, use an HTML bookmark using an anchor tag, i.e.,  [`<a>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a), with a unique `name` element for the listing, for example:
+
+`4. <a name="ref4"></a>[STTP Repositories on GitHub](https://github.com/sttp), Various specification documents and reference implementations.`
+
+Bookmark names should be prefixed with `ref` and be numbered sequentially.
+
+> :warning: Since multiple documents may be linked to the reference by number, any renumbering of the references will impact many documents.
+
+When GitHub encounters user added bookmarks, it automatically prefixes the bookmark name with `user-content-` to ensure uniqueness of the bookmark on the page when rendered. As a result, any time you need to link to the numbered reference, the markdown should look like the following:
+
+`The STTP organizational site [[4](References.md#user-content-ref4)] of GitHub maintains the versioned source for the specification as well as operational reference implementations for the protocol.`
+
+Which gets rendered as:
+
+The STTP organizational site [[4](References.md#user-content-ref4)] of GitHub maintains the versioned source for the specification as well as operational reference implementations for the protocol.
 
 ### Highlighting Information
 
