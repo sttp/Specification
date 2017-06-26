@@ -36,6 +36,9 @@ const rootPath = "https://raw.githubusercontent.com/sttp/Specification/master";
 // Define section file that contains version number
 const versionFile = "Sections/TitlePage.md";
 
+// Define primary footer title for PDF - will be suffixed with updated version
+const footerTitle = "STTP Draft Specification - v";
+
 // Define the section files in the order that they should appear
 // in the target single combined markdown document:
 const sections = [
@@ -299,8 +302,22 @@ gulp.task("complete-html", [ "convert-to-html" ], function() {
 gulp.task("convert-to-pdf", [ "complete-html" ], function() {
   console.log("Converting HTML to PDF...");
 
+  const options = {
+    marginLeft: 20,
+    marginRight: 20,
+    marginTop: 20,
+    marginBottom: 20,
+    footerSpacing: 5,
+    footerFontName: "Segoe UI",
+    footerFontSize: 8,
+    footerLeft: getLongDate(),
+    footerCenter: footerTitle + updatedVersion,
+    footerRight: "[page] / [toPage]",
+    footerLine: false
+  };
+
   return gulp.src("Output/sttp-specification.html")
-    .pipe(html2pdf())
+    .pipe(html2pdf(options))
     .pipe(gulp.dest("Output/"));
 });
 
