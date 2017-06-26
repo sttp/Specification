@@ -88,6 +88,7 @@ const sectionLinks = [
   [ "(Security.md)", "(#security)" ],
   /* Balance of sections */
   [ "(References.md)", "(#references-and-notes)" ],
+  [ "(References.md#", "(#" ], /* Handle specific references */
   [ "(Contributors.md)", "(#contributors)" ],
   [ "(History.md)", "(#major-version-history)" ],
   [ "(APIReference.md)", "(#appendix-a---sttp-api-reference)" ],
