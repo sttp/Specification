@@ -4,4 +4,4 @@ This document was prepared as a part of work sponsored by an agency of the Unite
 
 #### License
 
-This specification is free software and it can be redistributed and/or modified under the terms of the [MIT License](../LICENSE). This specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+This specification is free software and it can be redistributed and/or modified under the terms of the MIT License [[2](References.md#user-content-ref2)]. This specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
