@@ -1,10 +1,13 @@
 ## Data Point Structure
 
-* Contents:
-  * Identification - maps to 128-bit Guid, transport mapping should be small
-  * Timestamp (required? could simply be a auto-incrementing counter)
-  * Value - multiple native types supports
-  * Flags - standardize minimal set of simple flags, complex state can be new data point
+> :construction: Lead with paragraph on purpose / value of the section - (1) what is a data point structure and (2) why have a data point structure / value? Next paragraph would be contents of section...
+
+... this section includes:
+
+* Identification - maps to 128-bit Guid, transport mapping should be small
+* Timestamp (required? could simply be a auto-incrementing counter)
+* Value - multiple native types supports
+* Flags - standardize minimal set of simple flags, complex state can be new data point
 
 ### Data Point Value Types
 
