@@ -26,11 +26,11 @@ The design of this is site has been established to facilitate collaboration. The
 
 The source code "language" for the site is GitHub flavored [markdown](https://en.wikipedia.org/wiki/Markdown). Since this technical documentation may become the basis for other technical specifications or standards bodies, markdown is an ideal choice for the text. Markdown is a very simple, readable, plain-text based document formatting language with minimal syntax to learn.
 
-> :information_source: New to markdown? See [markdown editing](#markdown-editing) section below.
+> :information_source: New to markdown? See the [markdown editing](#markdown-editing) section below.
 
 A nightly "build" process has been established that will check if any changes have been committed to this public repository during the day and will combine all the individual section files into a single combined document, thus "compiling" the source code. This process will also convert the markdown files into [HTML](https://en.wikipedia.org/wiki/HTML) and [PDF](https://en.wikipedia.org/wiki/Portable_Document_Format) formats - see [Output](Output) folder for latest builds.
 
-Since this site is a [git](https://en.wikipedia.org/wiki/Git) based repository, all document updates and associated history will be archived in perpetuity making it easier to manage and track changes over time.
+Since this site is a [git](https://en.wikipedia.org/wiki/Git) based repository, all document updates and associated history will be archived in perpetuity making it easier to manage and track changes over time. See the [git workflow](#git-workflow) section below to start contributing updates.
 
 ## Section Editing
 
@@ -168,7 +168,7 @@ Another free tool is [Visual Studio Code](https://code.visualstudio.com/), this 
 
 ## Git Workflow
 
-There are many "_getting starting_" documents, tutorials and videos that can help you begin using git, the official guide can be found here:
+There are many "_getting starting_" documents, tutorials and videos that can help you begin using git - the official guide can be found here:
 https://git-scm.com/book/en/v1/Git-Basics
 
 If you are not familiar with git, the following information will help highlight some of the initial concepts and helpful workflow patterns that can help get you started quickly.
@@ -177,7 +177,7 @@ One important distinction with git as compared to other source code management s
 
 Since all the history lives locally, without being online you can [`checkout`](https://git-scm.com/docs/git-checkout) an older version of the history and the git tools will extract the files from that point into your working folder - if the files at that point in history are very different than the current version, the change in the local files can be very disconcerting.
 
-The workflow with git is to make changes to the files in your working directory as desired. Once you have made the desired updates you need to [`stage`](https://git-scm.com/docs/git-add) the changes - this basically selects the changed files you want to add to the git history - you can choose to stage all changes.
+The workflow with git is to make changes to the files in your working directory as desired. Once you have made the desired updates, you need to [`stage`](https://git-scm.com/docs/git-add) the changes - this basically selects the changed files you want to add to the git history - you can choose to stage all changes.
 
 Once a set of files have been selected to be added to history, you need to [`commit`](https://git-scm.com/docs/git-commit) the changes along with a relevant commit message. Committing changes to the repository marks a new point in the revision history of files that can be returned to at a later point.
 
