@@ -1,4 +1,4 @@
-## Data-point Characteristics
+## Data Point Characteristics
 
 * Priority (e.g., control over data delivery priority)
 * Reliability (e.g., must be sent over TCP channel)

@@ -19,9 +19,9 @@ _more_
 * Perform at high volume / large scale
 * Minimize data losses (e.g., over UDP)
 * Lower bandwidth requirements (e.g., over TCP)
-* Optimized for the performant delivery of individual data-points
+* Optimized for the performant delivery of individual data points
 * Automated exchange of metadata (no centralized registry required)
 * Detect and expose communication issues
 * Security and availability features that enable use on critical systems to support critical operations
-* Publish/subscribe at data-point level
+* Publish/subscribe at data point level
 * API implemented in multiple languages on multiple platforms

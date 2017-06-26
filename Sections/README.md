@@ -8,9 +8,9 @@
 | 2 | [Definitions and Nomenclature](Definitions.md) |
 | 3 | [Protocol Overview](Overview.md) |
 | 4 | [Design Philosophies](DesignPhilosophies.md) |
-| 5 | [Data-point Structure](DataPointStructure.md) |
+| 5 | [Data Point Structure](DataPointStructure.md) |
 | 6 | [Commands and Responses](CommandsAndResponses.md) |
-| 7 | [Data-point Characteristics](DataPointCharacteristics.md) |
+| 7 | [Data Point Characteristics](DataPointCharacteristics.md) |
 | 8 | [Metadata](Metadata.md) |
 | 9 | [Compression](Compression.md) |
 | 10 | [Security](Security.md) |

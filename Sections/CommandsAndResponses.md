@@ -10,7 +10,7 @@ All commands must be sent over the command channel.
 |:----:|---------|:------:|-------------|
 | 0x00 | [Set Operational Modes](#set-operational-modes-command) | Subscriber | Defines desired set of operational modes. |
 | 0x01 | [Metadata Refresh](#metadata-refresh-command) | Subscriber | Requests publisher send updated metadata. |
-| 0x02 | [Subscribe](#subscribe-command) | Subscriber | Defines desired set of data-points to begin receiving. |
+| 0x02 | [Subscribe](#subscribe-command) | Subscriber | Defines desired set of data points to begin receiving. |
 | 0x03 | [Unsubscribe](#unsubscribe-command) | Subscriber | Requests publisher terminate current subscription. |
 | 0x0n | etc. | | | |
 | 0xFF | [NoOp](#noop-command) | Any | Periodic message to allow validation of connectivity. |
@@ -37,7 +37,7 @@ The subscriber must send the command and the publisher must await its reception.
 #### Subscribe Command
 
 * Wire Format: Binary
-  * Includes metadata expression and/or individual Guids for desired data-points
+  * Includes metadata expression and/or individual Guids for desired data points
 
 #### Unsubscribe Command
 
@@ -57,8 +57,8 @@ Responses are sent over a designated channel based on the nature of the response
 |:----:|----------|:------:|:-------:|-------------|
 | 0x80 | [Succeeded](#succeeded-response) | Publisher | Command | Command request succeeded. Response details follow. |
 | 0x81 | [Failed](#failed-response) | Publisher | Command | Command request failed. Response error details follow. |
-| 0x82 | [Data-point Packet](#data-point-packet-response) | Any | Data | Response contains data-points. |
-| 0x83 | [Signal Mapping](#signal-mapping-response) | Any | Command | Response contains data-point Guid to run-time ID mappings. |
+| 0x82 | [Data Point Packet](#data-point-packet-response) | Any | Data | Response contains data points. |
+| 0x83 | [Signal Mapping](#signal-mapping-response) | Any | Command | Response contains data point Guid to run-time ID mappings. |
 | 0x8n | etc. | | | | |
 
 > :information_source: For the response table above, when a response is destined for the data channel, it should be understood that a connection can be established where both the command and data channel use the same TCP connection.
@@ -73,8 +73,8 @@ Responses are sent over a designated channel based on the nature of the response
 
 * Wire Format: String + Binary
   * Includes response message with stats like size, number of tables etc.
-  * Includes temporal data-point ID for "chunked" metadata responses
-  * Includes number of metadata data-points to be expected
+  * Includes temporal data point ID for "chunked" metadata responses
+  * Includes number of metadata data points to be expected
 
 ##### Succeeded Response for Subscribe
 
@@ -83,8 +83,8 @@ Subscriber will need to wait for
 * Wire Format: String + Binary
   * Includes response message with stats like number of actual points subscribed,  
     count may not match requested points due to rights or points may no longer exist, etc.
-  * Includes temporal data-point ID for "chunked" signal mapping responses
-  * Includes number of signal mapping data-points to be expected
+  * Includes temporal data point ID for "chunked" signal mapping responses
+  * Includes number of signal mapping data points to be expected
 
 ##### Succeeded Response for Unsubscribe
 
@@ -105,18 +105,18 @@ Failed responses to operational modes usually indicate lack of support by publis
   * Wire Format: Binary
     * Includes operational mode that failed followed by available operational mode options
 
-#### Data-point Packet Response
+#### Data Point Packet Response
 
 * Wire Format: Binary
   * Includes a byte flag indicating content, e.g.:
     * Data compression mode, if any
-    * Total data-points in packet
-  * Includes serialized data-points
+    * Total data points in packet
+  * Includes serialized data points
 
-:information_source: The data-point packet is technically classified as a response to a `subscribe` command. However, unlike most responses that operate as a sole response to a parent command, data-packet responses will continue to flow for available measurements until an `unsubscribe` command is issued.
+:information_source: The data point packet is technically classified as a response to a `subscribe` command. However, unlike most responses that operate as a sole response to a parent command, data-packet responses will continue to flow for available measurements until an `unsubscribe` command is issued.
 
 #### Signal Mapping Response
 
 * Wire Format: Binary
-  * Includes a mapping of data-point Guids to run-time signal IDs
-  * Includes per data-point ownership state, rights and delivery characteristic details
+  * Includes a mapping of data point Guids to run-time signal IDs
+  * Includes per data point ownership state, rights and delivery characteristic details

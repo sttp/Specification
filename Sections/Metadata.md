@@ -1,7 +1,7 @@
 ## Metadata
 
 *  Wire Format: Tabular XML format (XML) - highly compressible
-* Primary data-point identifier is Guid (define)
+* Primary data point identifier is Guid (define)
 * Extensibility
 * Rights based content restriction
 
@@ -17,7 +17,7 @@
   * Regex style expressions
 * Application of expressions
   * Metadata reduction
-  * Data-point access security
+  * Data point access security
 
 ### Dataset Versioning
 
@@ -27,7 +27,7 @@
 ### Dataset Serialization
 
 * Serialization for transport
-  * Packet based publication using temporal data-point
+  * Packet based publication using temporal data point
   * Publisher reduction by access rights and diff-version
   * Subscriber reduction by filter expression
 * Serialization to local repository

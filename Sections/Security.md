@@ -18,7 +18,7 @@ How does publisher initiated connection, to cross security zones in desired dire
 
 ### Access Control Lists
 
-* Allow/deny for specific points (data-point explicit)
+* Allow/deny for specific points (data point explicit)
 * Allow/deny for group with specific points (group explicit)
 * Allow/deny for filter expression (filter implicit)
 * Allow/deny for group with filter expression (group implicit)
