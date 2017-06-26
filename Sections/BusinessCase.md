@@ -27,7 +27,7 @@ STTP offers both short-term cost savings and strategic value in that it is:
 
 #### An Enabling Technology
 
-* It's possible that a protocol like STTP which allows secure, low-latency, high-volume data exchange among utilities at low cost can be a major factor in driving rapid change in the industry.  New forms of intra-utility interaction will be possible.  New approaches for providing utility information services will be possible.
+* It's possible that a protocol like STTP which allows secure, low-latency, high-volume data exchange among utilities at low cost can be a major factor in driving rapid change in the industry.  New forms of inter-utility interaction will be possible.  New approaches for providing utility information services will be possible.
 
 #### Built Upon A Proven Approach
 * STTP will enhance the successful design elements of the Gateway Exchange Protocol (GEP) as a foundation – and improve upon it.
