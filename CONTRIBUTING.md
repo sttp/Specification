@@ -65,7 +65,7 @@ When GitHub encounters user added bookmarks, it automatically prefixes the bookm
 
 Which gets rendered as:
 
-The STTP organizational site [[4](References.md#user-content-ref4)] of GitHub maintains the versioned source for the specification as well as operational reference implementations for the protocol.
+The STTP organizational site [[4](Sections/References.md#user-content-ref4)] of GitHub maintains the versioned source for the specification as well as operational reference implementations for the protocol.
 
 ### Highlighting Information
 
