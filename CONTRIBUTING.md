@@ -39,6 +39,8 @@ All document sections are defined as GitHub markdown, i.e., `*.md` files, in the
 
 When new sections are added, the "make file" used for compiling the sections will need be modified. The script used for this process is the [Gulp](http://gulpjs.com/) based [gulpfile.js](gulpfile.js) - this file will need to be updated to include the markdown file name for the new section and its associated header mapping so that it can be combined into a single overall document in the nightly build process. Also, links to new major sections should be added to the table of contents which is located in the [Sections/README.md](Sections/README.md) file.
 
+> :warning: When pasting content into section documents from other sources, please note that word processors and presentation software often use extended character sets for quotes, commas and dashes. These extended characters do not always render properly when the text is converted to its final PDF format. Always make sure to paste in plain-text, replacing any extended characters with their most simple forms.
+
 ### Naming Conventions
 
 #### Section File Names
