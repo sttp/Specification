@@ -7,6 +7,7 @@
 | 1 | [Introduction](Introduction.md) |
 | 2 | [Definitions and Nomenclature](Definitions.md) |
 | 3 | [Protocol Overview](Overview.md) |
+| 4 | [Business Case](BusinessCase.md) |
 | 4 | [Design Philosophies](DesignPhilosophies.md) |
 | 5 | [Data Point Structure](DataPointStructure.md) |
 | 6 | [Commands and Responses](CommandsAndResponses.md) |

@@ -13,7 +13,7 @@ The specification source documentation on this site is separated into multiple f
 ### Other Links
 
 - [Contributing to the Draft STTP Specification](CONTRIBUTING.md)
-- [Latest STTP Draft Specification](https://github.com/sttp/Specification/raw/master/Output/sttp-specification.pdf) - nightly build
+- [Latest STTP **Draft Specification**](https://github.com/sttp/Specification/raw/master/Output/sttp-specification.pdf) - nightly build
 - [STTP Authors](Sections/Contributors.md) - as self reported
 - [ASP Project Overview](http://www.naspi.org/sites/default/files/2017-03/gpa_robertson_asp_doe_20170322.pdf)
 - [Gateway Exchange Protocol (GEP)](http://gridprotectionalliance.org/docs/products/gsf/gep-overview.pdf) - used as a model for STTP
