@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.0.16 - June 26, 2017
+**Version:** 0.0.17 - June 26, 2017
 
 **Status:** Initial Development
 
@@ -29,13 +29,14 @@ This specification is free software and it can be redistributed and/or modified 
 | 1 | [Introduction](#introduction) |
 | 2 | [Definitions and Nomenclature](#definitions-and-nomenclature) |
 | 3 | [Protocol Overview](#protocol-overview) |
-| 4 | [Design Philosophies](#design-philosophies) |
-| 5 | [Data-point Structure](#data-point-structure) |
-| 6 | [Commands and Responses](#commands-and-responses) |
-| 7 | [Data-point Characteristics](#data-point-characteristics) |
-| 8 | [Metadata](#metadata) |
-| 9 | [Compression](#compression) |
-| 10 | [Security](#security) |
+| 4 | [Business Case](#business-case) |
+| 5 | [Design Philosophies](#design-philosophies) |
+| 6 | [Data Point Structure](#data-point-structure) |
+| 7 | [Commands and Responses](#commands-and-responses) |
+| 8 | [Data Point Characteristics](#data-point-characteristics) |
+| 9 | [Metadata](#metadata) |
+| 10 | [Compression](#compression) |
+| 11 | [Security](#security) |
 | ? | (balance of sections) |
 | ~20 | [References and Notes](#references-and-notes) |
 | ~21 | [Contributors and Reviewers](#contributors) |
@@ -84,7 +85,7 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 
 | Term | Definition |
 |-----:|:-----------|
-| [**data-point**](https://en.wikipedia.org/wiki/Data_point) | A measurement on a single member of a statistical population. |
+| [**data point**](https://en.wikipedia.org/wiki/Data_point) | A measurement on a single member of a statistical population. |
 | [**phasor**](https://en.wikipedia.org/wiki/Phasor) | A complex equivalent of a simple cosine wave quantity such that the complex modulus is the cosine wave amplitude and the complex angle (in polar form) is the cosine wave phase angle. |
 | [**publish/subscribe**](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) | A messaging pattern where senders of messages, called publishers, do not program the messages to be sent directly to specific receivers, called subscribers, but instead characterize published messages into classes without knowledge of which subscribers, if any, there may be. |
 | [**synchrophasor**](https://en.wikipedia.org/wiki/Phasor_measurement_unit) | A phasor calculated from data samples using a standard time signal as the reference for the measurement. Synchronized phasors from remote sites have a defined common phase relationship. |
@@ -127,12 +128,16 @@ _more_
 * Perform at high volume / large scale
 * Minimize data losses (e.g., over UDP)
 * Lower bandwidth requirements (e.g., over TCP)
-* Optimized for the performant delivery of individual data-points
+* Optimized for the performant delivery of individual data points
 * Automated exchange of metadata (no centralized registry required)
 * Detect and expose communication issues
 * Security and availability features that enable use on critical systems to support critical operations
-* Publish/subscribe at data-point level
+* Publish/subscribe at data point level
 * API implemented in multiple languages on multiple platforms
+
+## Business case
+
+details...
 
 ## Design Philosophies
 
@@ -141,13 +146,41 @@ _more_
 * Target smallest possible API functionality –specialized use cases will be handled by example
 * Set design mantra to be “keep it simple” _as possible_
 
-## Data-point Structure
+## Data Point Structure
 
-* Contents:
-  * Identification - maps to 128-bit Guid, transport mapping should be small
-  * Timestamp (required? could simply be a auto-incrementing counter)
-  * Value - multiple native types supports
-  * Flags - standardize minimal set of simple flags, complex state can be new data-point
+> :construction: Lead with paragraph on purpose / value of the section - (1) what is a data point structure and (2) why have a data point structure / value? Next paragraph would be contents of section...
+
+... this section includes:
+
+* Identification - maps to 128-bit Guid, transport mapping should be small
+* Timestamp (required? could simply be a auto-incrementing counter)
+* Value - multiple native types supports
+* Flags - standardize minimal set of simple flags, complex state can be new data point
+
+### Data Point Value Types
+
+* Null
+* Byte
+* Int16
+* Int32
+* Int64
+* UInt16
+* UInt32
+* UInt64
+* Decimal
+* Double
+* Single
+* DateTime (need some thought on proper encoding, perhaps options)
+* TimeSpan (Tick level resolution, or better, would be ideal)
+* Char (2-byte Unicode)
+* Bool
+* Guid
+* String (encoding support for UTF-16, UTF-8, ANSI and ASCII)
+* Byte[]
+
+> :construction: Need to determine safe maximum upper limit of per-packet strings and byte[] data, especially since implementation could simply _span_ multiple data points to collate a larger string or buffer back together.
+
+> :tomato::question: _Should API automatically handle collation of larger data types, e.g., strings and buffers?_
 
 ## Commands and Responses
 
@@ -161,7 +194,7 @@ All commands must be sent over the command channel.
 |:----:|---------|:------:|-------------|
 | 0x00 | [Set Operational Modes](#set-operational-modes-command) | Subscriber | Defines desired set of operational modes. |
 | 0x01 | [Metadata Refresh](#metadata-refresh-command) | Subscriber | Requests publisher send updated metadata. |
-| 0x02 | [Subscribe](#subscribe-command) | Subscriber | Defines desired set of data-points to begin receiving. |
+| 0x02 | [Subscribe](#subscribe-command) | Subscriber | Defines desired set of data points to begin receiving. |
 | 0x03 | [Unsubscribe](#unsubscribe-command) | Subscriber | Requests publisher terminate current subscription. |
 | 0x0n | etc. | | | |
 | 0xFF | [NoOp](#noop-command) | Any | Periodic message to allow validation of connectivity. |
@@ -188,7 +221,7 @@ The subscriber must send the command and the publisher must await its reception.
 #### Subscribe Command
 
 * Wire Format: Binary
-  * Includes metadata expression and/or individual Guids for desired data-points
+  * Includes metadata expression and/or individual Guids for desired data points
 
 #### Unsubscribe Command
 
@@ -208,8 +241,8 @@ Responses are sent over a designated channel based on the nature of the response
 |:----:|----------|:------:|:-------:|-------------|
 | 0x80 | [Succeeded](#succeeded-response) | Publisher | Command | Command request succeeded. Response details follow. |
 | 0x81 | [Failed](#failed-response) | Publisher | Command | Command request failed. Response error details follow. |
-| 0x82 | [Data-point Packet](#data-point-packet-response) | Any | Data | Response contains data-points. |
-| 0x83 | [Signal Mapping](#signal-mapping-response) | Any | Command | Response contains data-point Guid to run-time ID mappings. |
+| 0x82 | [Data Point Packet](#data-point-packet-response) | Any | Data | Response contains data points. |
+| 0x83 | [Signal Mapping](#signal-mapping-response) | Any | Command | Response contains data point Guid to run-time ID mappings. |
 | 0x8n | etc. | | | | |
 
 > :information_source: For the response table above, when a response is destined for the data channel, it should be understood that a connection can be established where both the command and data channel use the same TCP connection.
@@ -224,8 +257,8 @@ Responses are sent over a designated channel based on the nature of the response
 
 * Wire Format: String + Binary
   * Includes response message with stats like size, number of tables etc.
-  * Includes temporal data-point ID for "chunked" metadata responses
-  * Includes number of metadata data-points to be expected
+  * Includes temporal data point ID for "chunked" metadata responses
+  * Includes number of metadata data points to be expected
 
 ##### Succeeded Response for Subscribe
 
@@ -234,8 +267,8 @@ Subscriber will need to wait for
 * Wire Format: String + Binary
   * Includes response message with stats like number of actual points subscribed,  
     count may not match requested points due to rights or points may no longer exist, etc.
-  * Includes temporal data-point ID for "chunked" signal mapping responses
-  * Includes number of signal mapping data-points to be expected
+  * Includes temporal data point ID for "chunked" signal mapping responses
+  * Includes number of signal mapping data points to be expected
 
 ##### Succeeded Response for Unsubscribe
 
@@ -256,23 +289,23 @@ Failed responses to operational modes usually indicate lack of support by publis
   * Wire Format: Binary
     * Includes operational mode that failed followed by available operational mode options
 
-#### Data-point Packet Response
+#### Data Point Packet Response
 
 * Wire Format: Binary
   * Includes a byte flag indicating content, e.g.:
     * Data compression mode, if any
-    * Total data-points in packet
-  * Includes serialized data-points
+    * Total data points in packet
+  * Includes serialized data points
 
-:information_source: The data-point packet is technically classified as a response to a `subscribe` command. However, unlike most responses that operate as a sole response to a parent command, data-packet responses will continue to flow for available measurements until an `unsubscribe` command is issued.
+:information_source: The data point packet is technically classified as a response to a `subscribe` command. However, unlike most responses that operate as a sole response to a parent command, data-packet responses will continue to flow for available measurements until an `unsubscribe` command is issued.
 
 #### Signal Mapping Response
 
 * Wire Format: Binary
-  * Includes a mapping of data-point Guids to run-time signal IDs
-  * Includes per data-point ownership state, rights and delivery characteristic details
+  * Includes a mapping of data point Guids to run-time signal IDs
+  * Includes per data point ownership state, rights and delivery characteristic details
 
-## Data-point Characteristics
+## Data Point Characteristics
 
 * Priority (e.g., control over data delivery priority)
 * Reliability (e.g., must be sent over TCP channel)
@@ -283,7 +316,7 @@ Failed responses to operational modes usually indicate lack of support by publis
 ## Metadata
 
 *  Wire Format: Tabular XML format (XML) - highly compressible
-* Primary data-point identifier is Guid (define)
+* Primary data point identifier is Guid (define)
 * Extensibility
 * Rights based content restriction
 
@@ -299,7 +332,7 @@ Failed responses to operational modes usually indicate lack of support by publis
   * Regex style expressions
 * Application of expressions
   * Metadata reduction
-  * Data-point access security
+  * Data point access security
 
 ### Dataset Versioning
 
@@ -309,7 +342,7 @@ Failed responses to operational modes usually indicate lack of support by publis
 ### Dataset Serialization
 
 * Serialization for transport
-  * Packet based publication using temporal data-point
+  * Packet based publication using temporal data point
   * Publisher reduction by access rights and diff-version
   * Subscriber reduction by filter expression
 * Serialization to local repository
@@ -346,7 +379,7 @@ How does publisher initiated connection, to cross security zones in desired dire
 
 ### Access Control Lists
 
-* Allow/deny for specific points (data-point explicit)
+* Allow/deny for specific points (data point explicit)
 * Allow/deny for group with specific points (group explicit)
 * Allow/deny for filter expression (filter implicit)
 * Allow/deny for group with filter expression (group implicit)
@@ -411,6 +444,6 @@ appendix body
 
 ## Specification Development To-Do List
 
-- [x] Determine the location for posting images ( June 19, 2017 )
-- [ ] Sample item 2 ( date )
+- [x] Determine the location for posting images ( June 18, 2017 )
+- [x] Create script to automate markdown merge ( June 19, 2017 )
 - [ ] Sample item 3 ( date )

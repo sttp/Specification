@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.0.16 - June 26, 2017</p>
+<p><strong>Version:</strong> 0.0.17 - June 26, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time-series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time-series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time-series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -799,30 +799,34 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </tr>
 <tr>
 <td style="text-align:center;">4</td>
-<td><a href="#design-philosophies">Design Philosophies</a></td>
+<td><a href="#business-case">Business Case</a></td>
 </tr>
 <tr>
 <td style="text-align:center;">5</td>
-<td><a href="#data-point-structure">Data-point Structure</a></td>
+<td><a href="#design-philosophies">Design Philosophies</a></td>
 </tr>
 <tr>
 <td style="text-align:center;">6</td>
-<td><a href="#commands-and-responses">Commands and Responses</a></td>
+<td><a href="#data-point-structure">Data Point Structure</a></td>
 </tr>
 <tr>
 <td style="text-align:center;">7</td>
-<td><a href="#data-point-characteristics">Data-point Characteristics</a></td>
+<td><a href="#commands-and-responses">Commands and Responses</a></td>
 </tr>
 <tr>
 <td style="text-align:center;">8</td>
-<td><a href="#metadata">Metadata</a></td>
+<td><a href="#data-point-characteristics">Data Point Characteristics</a></td>
 </tr>
 <tr>
 <td style="text-align:center;">9</td>
-<td><a href="#compression">Compression</a></td>
+<td><a href="#metadata">Metadata</a></td>
 </tr>
 <tr>
 <td style="text-align:center;">10</td>
+<td><a href="#compression">Compression</a></td>
+</tr>
+<tr>
+<td style="text-align:center;">11</td>
 <td><a href="#security">Security</a></td>
 </tr>
 <tr>
@@ -889,7 +893,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Data_point"><strong>data-point</strong></a></td>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Data_point"><strong>data point</strong></a></td>
 <td style="text-align:left;">A measurement on a single member of a statistical population.</td>
 </tr>
 <tr>
@@ -986,13 +990,15 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <li>Perform at high volume / large scale</li>
 <li>Minimize data losses (e.g., over UDP)</li>
 <li>Lower bandwidth requirements (e.g., over TCP)</li>
-<li>Optimized for the performant delivery of individual data-points</li>
+<li>Optimized for the performant delivery of individual data points</li>
 <li>Automated exchange of metadata (no centralized registry required)</li>
 <li>Detect and expose communication issues</li>
 <li>Security and availability features that enable use on critical systems to support critical operations</li>
-<li>Publish/subscribe at data-point level</li>
+<li>Publish/subscribe at data point level</li>
 <li>API implemented in multiple languages on multiple platforms</li>
 </ul>
+<h2 id="business-case">Business case</h2>
+<p>details...</p>
 <h2 id="design-philosophies">Design Philosophies</h2>
 <ul>
 <li>Minimize external libraries and dependencies for reference implementations</li>
@@ -1000,14 +1006,42 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <li>Target smallest possible API functionality –specialized use cases will be handled by example</li>
 <li>Set design mantra to be “keep it simple” <em>as possible</em></li>
 </ul>
-<h2 id="data-point-structure">Data-point Structure</h2>
+<h2 id="data-point-structure">Data Point Structure</h2>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Lead with paragraph on purpose / value of the section - (1) what is a data point structure and (2) why have a data point structure / value? Next paragraph would be contents of section...</p>
+</blockquote>
+<p>... this section includes:</p>
 <ul>
-<li>Contents:<ul>
 <li>Identification - maps to 128-bit Guid, transport mapping should be small</li>
 <li>Timestamp (required? could simply be a auto-incrementing counter)</li>
 <li>Value - multiple native types supports</li>
-<li>Flags - standardize minimal set of simple flags, complex state can be new data-point</li></ul></li>
+<li>Flags - standardize minimal set of simple flags, complex state can be new data point</li>
 </ul>
+<h3 id="data-point-value-types">Data Point Value Types</h3>
+<ul>
+<li>Null</li>
+<li>Byte</li>
+<li>Int16</li>
+<li>Int32</li>
+<li>Int64</li>
+<li>UInt16</li>
+<li>UInt32</li>
+<li>UInt64</li>
+<li>Decimal</li>
+<li>Double</li>
+<li>Single</li>
+<li>DateTime (need some thought on proper encoding, perhaps options)</li>
+<li>TimeSpan (Tick level resolution, or better, would be ideal)</li>
+<li>Char (2-byte Unicode)</li>
+<li>Bool</li>
+<li>Guid</li>
+<li>String (encoding support for UTF-16, UTF-8, ANSI and ASCII)</li>
+<li>Byte[]</li>
+</ul>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Need to determine safe maximum upper limit of per-packet strings and byte[] data, especially since implementation could simply <em>span</em> multiple data points to collate a larger string or buffer back together.</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> <em>Should API automatically handle collation of larger data types, e.g., strings and buffers?</em></p>
+</blockquote>
 <h2 id="commands-and-responses">Commands and Responses</h2>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Purpose of command/response structure, fundamentals of how it works, why it is needed</p>
@@ -1040,7 +1074,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <td style="text-align:center;">0x02</td>
 <td><a href="#subscribe-command">Subscribe</a></td>
 <td style="text-align:center;">Subscriber</td>
-<td>Defines desired set of data-points to begin receiving.</td>
+<td>Defines desired set of data points to begin receiving.</td>
 </tr>
 <tr>
 <td style="text-align:center;">0x03</td>
@@ -1083,7 +1117,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <h4 id="subscribe-command">Subscribe Command</h4>
 <ul>
 <li>Wire Format: Binary<ul>
-<li>Includes metadata expression and/or individual Guids for desired data-points</li></ul></li>
+<li>Includes metadata expression and/or individual Guids for desired data points</li></ul></li>
 </ul>
 <h4 id="unsubscribe-command">Unsubscribe Command</h4>
 <ul>
@@ -1123,17 +1157,17 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </tr>
 <tr>
 <td style="text-align:center;">0x82</td>
-<td><a href="#data-point-packet-response">Data-point Packet</a></td>
+<td><a href="#data-point-packet-response">Data Point Packet</a></td>
 <td style="text-align:center;">Any</td>
 <td style="text-align:center;">Data</td>
-<td>Response contains data-points.</td>
+<td>Response contains data points.</td>
 </tr>
 <tr>
 <td style="text-align:center;">0x83</td>
 <td><a href="#signal-mapping-response">Signal Mapping</a></td>
 <td style="text-align:center;">Any</td>
 <td style="text-align:center;">Command</td>
-<td>Response contains data-point Guid to run-time ID mappings.</td>
+<td>Response contains data point Guid to run-time ID mappings.</td>
 </tr>
 <tr>
 <td style="text-align:center;">0x8n</td>
@@ -1157,8 +1191,8 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <ul>
 <li>Wire Format: String + Binary<ul>
 <li>Includes response message with stats like size, number of tables etc.</li>
-<li>Includes temporal data-point ID for "chunked" metadata responses</li>
-<li>Includes number of metadata data-points to be expected</li></ul></li>
+<li>Includes temporal data point ID for "chunked" metadata responses</li>
+<li>Includes number of metadata data points to be expected</li></ul></li>
 </ul>
 <h5 id="succeeded-response-for-subscribe">Succeeded Response for Subscribe</h5>
 <p>Subscriber will need to wait for</p>
@@ -1166,8 +1200,8 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <li>Wire Format: String + Binary<ul>
 <li>Includes response message with stats like number of actual points subscribed,  <br />
 count may not match requested points due to rights or points may no longer exist, etc.</li>
-<li>Includes temporal data-point ID for "chunked" signal mapping responses</li>
-<li>Includes number of signal mapping data-points to be expected</li></ul></li>
+<li>Includes temporal data point ID for "chunked" signal mapping responses</li>
+<li>Includes number of signal mapping data points to be expected</li></ul></li>
 </ul>
 <h5 id="succeeded-response-for-unsubscribe">Succeeded Response for Unsubscribe</h5>
 <ul>
@@ -1187,22 +1221,22 @@ count may not match requested points due to rights or points may no longer exist
 <li>Wire Format: Binary<ul>
 <li>Includes operational mode that failed followed by available operational mode options</li></ul></li>
 </ul>
-<h4 id="data-point-packet-response">Data-point Packet Response</h4>
+<h4 id="data-point-packet-response">Data Point Packet Response</h4>
 <ul>
 <li>Wire Format: Binary<ul>
 <li>Includes a byte flag indicating content, e.g.:</li>
 <li>Data compression mode, if any</li>
-<li>Total data-points in packet</li>
-<li>Includes serialized data-points</li></ul></li>
+<li>Total data points in packet</li>
+<li>Includes serialized data points</li></ul></li>
 </ul>
-<p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> The data-point packet is technically classified as a response to a <code>subscribe</code> command. However, unlike most responses that operate as a sole response to a parent command, data-packet responses will continue to flow for available measurements until an <code>unsubscribe</code> command is issued.</p>
+<p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> The data point packet is technically classified as a response to a <code>subscribe</code> command. However, unlike most responses that operate as a sole response to a parent command, data-packet responses will continue to flow for available measurements until an <code>unsubscribe</code> command is issued.</p>
 <h4 id="signal-mapping-response">Signal Mapping Response</h4>
 <ul>
 <li>Wire Format: Binary<ul>
-<li>Includes a mapping of data-point Guids to run-time signal IDs</li>
-<li>Includes per data-point ownership state, rights and delivery characteristic details</li></ul></li>
+<li>Includes a mapping of data point Guids to run-time signal IDs</li>
+<li>Includes per data point ownership state, rights and delivery characteristic details</li></ul></li>
 </ul>
-<h2 id="data-point-characteristics">Data-point Characteristics</h2>
+<h2 id="data-point-characteristics">Data Point Characteristics</h2>
 <ul>
 <li>Priority (e.g., control over data delivery priority)</li>
 <li>Reliability (e.g., must be sent over TCP channel)</li>
@@ -1213,7 +1247,7 @@ count may not match requested points due to rights or points may no longer exist
 <h2 id="metadata">Metadata</h2>
 <ul>
 <li>Wire Format: Tabular XML format (XML) - highly compressible</li>
-<li>Primary data-point identifier is Guid (define)</li>
+<li>Primary data point identifier is Guid (define)</li>
 <li>Extensibility</li>
 <li>Rights based content restriction</li>
 </ul>
@@ -1229,7 +1263,7 @@ count may not match requested points due to rights or points may no longer exist
 <li>Regex style expressions</li></ul></li>
 <li>Application of expressions<ul>
 <li>Metadata reduction</li>
-<li>Data-point access security</li></ul></li>
+<li>Data point access security</li></ul></li>
 </ul>
 <h3 id="dataset-versioning">Dataset Versioning</h3>
 <ul>
@@ -1239,7 +1273,7 @@ count may not match requested points due to rights or points may no longer exist
 <h3 id="dataset-serialization">Dataset Serialization</h3>
 <ul>
 <li>Serialization for transport<ul>
-<li>Packet based publication using temporal data-point</li>
+<li>Packet based publication using temporal data point</li>
 <li>Publisher reduction by access rights and diff-version</li>
 <li>Subscriber reduction by filter expression</li></ul></li>
 <li>Serialization to local repository<ul>
@@ -1274,7 +1308,7 @@ count may not match requested points due to rights or points may no longer exist
 <p>How does publisher initiated connection, to cross security zones in desired direction, affect identity validation and TLS?</p>
 <h3 id="access-control-lists">Access Control Lists</h3>
 <ul>
-<li>Allow/deny for specific points (data-point explicit)</li>
+<li>Allow/deny for specific points (data point explicit)</li>
 <li>Allow/deny for group with specific points (group explicit)</li>
 <li>Allow/deny for filter expression (filter implicit)</li>
 <li>Allow/deny for group with filter expression (group implicit)</li>
@@ -1346,8 +1380,8 @@ count may not match requested points due to rights or points may no longer exist
 <p>appendix body</p>
 <h2 id="specification-development-to-do-list">Specification Development To-Do List</h2>
 <ul>
-<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Determine the location for posting images ( June 19, 2017 )</li>
-<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Sample item 2 ( date )</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Determine the location for posting images ( June 18, 2017 )</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Create script to automate markdown merge ( June 19, 2017 )</li>
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Sample item 3 ( date )</li>
 </ul>
 </body>
