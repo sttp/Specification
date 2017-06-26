@@ -76,7 +76,8 @@ The STTP organizational site [[4](Sections/References.md#user-content-ref4)] of 
     "prefix": "specref"
     "body": "[[${1:1}](References.md#user-content-ref${1:1})]"
 ```
-As soon you add the snippet and save the file, you can type `specref` from within any markdown document and press `Tab` to insert a new reference link. The reference index will be highlighted and can be set to the desired value.
+
+> As soon you add the snippet and save the file, you can type `specref` from within any markdown document and press `Tab` to insert a new reference link. The reference index will be highlighted and can be set to the desired value.
 
 ### Highlighting Information
 
