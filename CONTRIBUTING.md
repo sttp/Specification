@@ -193,4 +193,4 @@ Most of the GitHub tools that are available, such as the standalone GitHub Deskt
 
 ## Contributor Attribution
 
-The specification contributors are listed in the [Contributors.md](Sections/Contributors.md) file. If you are providing critical review or updates to the specification, please add yourself to this file.
+The specification contributors are listed in the [Sections/Contributors.md](Sections/Contributors.md) file. If you are providing critical review or updates to the specification, please add yourself to this file.
