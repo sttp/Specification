@@ -70,13 +70,13 @@ Which gets rendered as:
 The STTP organizational site [[4](Sections/References.md#user-content-ref4)] of GitHub maintains the versioned source for the specification as well as operational reference implementations for the protocol.
 
 > :information_source: If you use the [Atom Editor](https://atom.io/), you can add a [snippet](http://flight-manual.atom.io/using-atom/sections/snippets/) to make it easier to add new references. Just open up the snippets file by selecting `File > Snippets` from the Atom menu, then copy and paste in the following snippet script:
-```javascript
+> ```javascript
 ".source.gfm":
   "Insert Specification Reference":
     "prefix": "specref"
     "body": "[[${1:1}](References.md#user-content-ref${1:1})]"
 ```
-As soon you add the snippet and save the file, you can type `specref` from within any markdown document and press `Tab` to insert a new reference link. The reference index will be highlighted and can be set to the desired value.
+> As soon you add the snippet and save the file, you can type `specref` from within any markdown document and press `Tab` to insert a new reference link. The reference index will be highlighted and can be set to the desired value.
 
 ### Highlighting Information
 
