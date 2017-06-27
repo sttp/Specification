@@ -1,7 +1,7 @@
 ## Metadata
 
 *  Wire Format: Tabular XML format (XML) - highly compressible
-* Primary data point identifier is Guid (define)
+* Primary data point identifier is Guid (describe)
 * Extensibility
 * Rights based content restriction
 
