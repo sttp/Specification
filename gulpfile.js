@@ -92,7 +92,7 @@ const sectionLinks = [
   [ "(Contributors.md)", "(#contributors)" ],
   [ "(History.md)", "(#major-version-history)" ],
   [ "(APIReference.md)", "(#appendix-a---sttp-api-reference)" ],
-  [ "(IEEE_C37.118Mapping.md)", "(#appendix-b---ieee-c37.118-mapping)" ],
+  [ "(IEEE_C37.118Mapping.md)", "(#appendix-b---ieee-c37118-mapping)" ],
   [ "(ToDoList.md)", "(#specification-development-to-do-list)" ],
   [ "(../LICENSE)", "(" + rootPath + "/LICENSE)" ]
 ];
