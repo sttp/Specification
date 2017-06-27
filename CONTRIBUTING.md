@@ -124,7 +124,7 @@ Which gets rendered as:
 
 Please keep the questions and responses close to topic area of concern. If the questions and responses get lengthy, we will move content to a new issue (see [STTP Issue Tracker](https://github.com/sttp/Specification/issues)) for further discussion and simply add a link the new issue from within the documentation text.
 
-Note that all questions and answers will be removed from the documentation at various publication points, but will be preserved for posterity in a stand-alone section that will not be part of the main-line compiled document.
+Note that all questions and answers will be removed from the documentation at various publication points, but will be preserved for posterity in the [Sections/QuestionsSummary.md](Sections/QuestionsSummary.md) file, a stand-alone section that does not exist as part of the main-line compiled document.
 
 ### Style and Formatting
 
