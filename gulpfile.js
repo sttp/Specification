@@ -30,8 +30,9 @@ const html2pdf = require('gulp-html2pdf');
 const exec = require("gulp-exec");
 const notify = require("gulp-notify");
 
-// Define non-relative URL root path for any relative paths
-const rootPath = "https://raw.githubusercontent.com/sttp/Specification/master/";
+// Define non-relative URL paths for any relative paths
+const rawPath = "https://raw.githubusercontent.com/sttp/Specification/master/";
+const viewPath = "https://github.com/sttp/Specification/blob/master/";
 
 // Define section file that contains version number
 const versionFile = "Sections/TitlePage.md";
@@ -70,6 +71,7 @@ const sections = [
 // Define map of markdown file links to intra-page section headers, note
 // that GitHub makes all header links lowercase and spaces become dashes:
 const sectionLinks = [
+  /* Section link mappings */
   [ "(TitlePage.md)", "(#user-content-title-page)" ],
   [ "(Preface.md)", "(#disclaimer)" ],
   [ "(README.md)", "(#table-of-contents)" ],
@@ -88,13 +90,15 @@ const sectionLinks = [
   [ "(Security.md)", "(#security)" ],
   /* Balance of sections */
   [ "(References.md)", "(#references-and-notes)" ],
-  [ "(References.md#", "(#" ], /* Handle specific references */
   [ "(Contributors.md)", "(#contributors)" ],
   [ "(History.md)", "(#major-version-history)" ],
   [ "(APIReference.md)", "(#appendix-a---sttp-api-reference)" ],
   [ "(IEEE_C37.118Mapping.md)", "(#appendix-b---ieee-c37118-mapping)" ],
   [ "(ToDoList.md)", "(#specification-development-to-do-list)" ],
-  [ "(../LICENSE)", "(" + rootPath + "LICENSE)" ]
+  /* Special replacements */
+  [ "(References.md#", "(#" ], /* Handle specific references */
+  [ "(QuestionsSummary.md)", "(" + viewPath + "QuestionsSummary.md)" ],
+  [ "(../LICENSE)", "(" + viewPath + "LICENSE)" ]
 ];
 
 // Any git functionality expects existing "git" environmental variable
@@ -229,7 +233,7 @@ function markdown2html() {
     destinationHtml = replaceAll(
       destinationHtml,
       "<img src=\"Images/",
-      "<img src=\"" + rootPath + "Output/Images/"
+      "<img src=\"" + rawPath + "Output/Images/"
     );
 
     // Remove "#user-content-" prefixes for page level bookmarks
