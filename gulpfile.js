@@ -173,10 +173,15 @@ function incrementDocumentVersion() {
 
 function pushDocumentUpdates() {
   return through.obj(function(file, encoding, cb) {
-    const stdout = file.contents.toString();
+    const stdout = file.exec.stdout;
+    const stderr = file.exec.stderr;
+    const pushUpdates =
+      forcePush ||
+      (stdout && stdout.length > 0) ||
+      (stderr && stderr.length > 0);
 
     // Any git log info past current version constitutes an update
-    if (forcePush || (stdout && stdout.length > 0)) {
+    if (pushUpdates) {
       console.log("Committing new compiled documents to local repo...");
 
       const message = "Updated compiled documents - version " + updatedVersion;
@@ -352,20 +357,13 @@ gulp.task("push-changes", [ "clean-up" ], function() {
 // called before calling the "push-changes-if-remote-updated" task - this
 // assumes that the automated build repostory will not be the source of
 // any content updates besides incrementing the version number and
-// compiling the new documents. To use this functionality it will be
-// necessary to "kick-start" the local git repository with a new tag that
-// is set to the actual current file version. The git command to initially
-// tag the local repository with the current version should look like:
-// >  git tag v0.1.99
+// compiling the new documents.
 gulp.task("push-changes-if-remote-updated", [ "clean-up" ], function() {
   console.log("Checking for remote updates...");
 
   // Pipe stdout to Gulp file contents on pipe-line - any stdout from
   // git log represent updates to repository since the last tag
-  const options = {
-    continueOnError: true,
-    pipeStdout: true
-  };
+  const options = { continueOnError: true };
 
   gulp.src("README.md")
     .pipe(exec(git + " log v" + currentVersion + "..", options))
