@@ -1,11 +1,11 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.0.18 - June 27, 2017
+**Version:** 0.0.19 - June 27, 2017
 
 **Status:** Initial Development
 
-**Abstract:** This specification defines a [publish-subscribe](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) data transfer protocol that has been optimized for exchanging streaming [time-series](https://en.wikipedia.org/wiki/Time_series) style data, such as [synchrophasor](https://en.wikipedia.org/wiki/Phasor_measurement_unit) data that is used in the electric power industry, over [Internet Protocol](https://en.wikipedia.org/wiki/Internet_Protocol) (IP). The protocol supports transferring both real-time and historical time-series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time-series [data points](https://en.wikipedia.org/wiki/Data_point) at high speed, such as, hundreds of times per second per data point.
+**Abstract:** This specification defines a [publish-subscribe](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) data transfer protocol that has been optimized for exchanging streaming [time series](https://en.wikipedia.org/wiki/Time_series) style data, such as [synchrophasor](https://en.wikipedia.org/wiki/Phasor_measurement_unit) data that is used in the electric power industry, over [Internet Protocol](https://en.wikipedia.org/wiki/Internet_Protocol) (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series [data points](https://en.wikipedia.org/wiki/Data_point) at high speed, such as, hundreds of times per second per data point.
 
 <br/>
 Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.
@@ -24,7 +24,7 @@ This specification is free software and it can be redistributed and/or modified 
 
 | Section | Title |
 |:-------:|---------|
-|   | [Title Page](#title-page) |
+|   | [Title Page](#user-content-title-page) |
 |   | [Preface](#disclaimer) |
 | 1 | [Introduction](#introduction) |
 | 2 | [Definitions and Nomenclature](#definitions-and-nomenclature) |
@@ -42,12 +42,12 @@ This specification is free software and it can be redistributed and/or modified 
 | ~21 | [Contributors and Reviewers](#contributors) |
 | ~22 | [Revision History](#major-version-history) |
 |  A | [Appendix A - STTP API Reference ](#appendix-a---sttp-api-reference) |
-|  B | [Appendix B - IEEE C37.118 Mapping](#appendix-b---ieee-c37.118-mapping) |
+|  B | [Appendix B - IEEE C37.118 Mapping](#appendix-b---ieee-c37118-mapping) |
 |    | [Spec To-Do List](#specification-development-to-do-list) |
 
 ## Introduction
 
-Use of synchrophasors by U.S. utilities continues to grow following the jump start provided by the Smart Grid Investment Grants. Even so, the dominant method to exchange synchrophasor data remains the IEEE C37.118-2005 [[2](#ref2)] protocol that was designed for and continues to be the preferred solution for substation-to-control room communications.  It achieves its advantages through use of an ordered set (a frame) of information that is associated with a specific measurement time.  When IEEE C37.118 is used for PDC-to-PDC communication or for PDC-to-Application communication, large data frames are typically distributed to multiple systems.  To address the challenges presented by these large frame sizes, many utilities implement purpose-built networks for synchrophasor data only.  Even with these purpose-built networks, large frame sizes result in an increased probability of UDP frame loss, or in the case of TCP, increased communication latency.  In addition, IEEE C37.118 has only prescriptive methods for the management of measurement metadata which is well-suited for substation-to-control-center use but which becomes difficult to manage as this metadata spans analytic solutions and is used by multiple configuration owners in a wide-area context.
+Use of synchrophasors by U.S. utilities continues to grow following the jump start provided by the Smart Grid Investment Grants. Even so, the dominant method to exchange synchrophasor data remains the IEEE C37.118-2005 [[1](#user-content-ref1)] protocol that was designed for and continues to be the preferred solution for substation-to-control room communications.  It achieves its advantages through use of an ordered set (a frame) of information that is associated with a specific measurement time.  When IEEE C37.118 is used for PDC-to-PDC communication or for PDC-to-Application communication, large data frames are typically distributed to multiple systems.  To address the challenges presented by these large frame sizes, many utilities implement purpose-built networks for synchrophasor data only.  Even with these purpose-built networks, large frame sizes result in an increased probability of UDP frame loss, or in the case of TCP, increased communication latency.  In addition, IEEE C37.118 has only prescriptive methods for the management of measurement metadata which is well-suited for substation-to-control-center use but which becomes difficult to manage as this metadata spans analytic solutions and is used by multiple configuration owners in a wide-area context.
 
 To address these issues, the Advanced Synchrophasor Protocol (ASP) Project was proposed to DOE in response to FOA-1492. In this project proposal, the argument was made for a new protocol that overcomes the limitations of IEEE C37.118 for large-scale synchrophasor data system deployments.  The new protocol proposed leveraged the successful design elements of the secure Gateway Exchange Protocol (GEP) that was originally developed by the Grid Protection Alliance (GPA) as part of the SIEGate project (DE-OE-536).
 
@@ -61,51 +61,74 @@ In the [Overview](#protocol-overview) section of this specification, high-level 
 
 [Appendix A - STTP API Reference](#appendix-a---sttp-api-reference) provides instructions to enable software developers to integrate and use of STTP within other software systems.
 
-[Appendix B - IEEE C37.118 Mapping](#appendix-b---ieee-c37.118-mapping) provides a detailed look at the process of transforming IEEE C37.118 into STTP as well as creating IEEE C37.118 streams from STTP.
+[Appendix B - IEEE C37.118 Mapping](#appendix-b---ieee-c37118-mapping) provides a detailed look at the process of transforming IEEE C37.118 into STTP as well as creating IEEE C37.118 streams from STTP.
 
 While the format and structure of this document, established to facilitate collaboration, is different than that used by standards bodies, it is hoped that the content within this document can meet all the information requirements needed to enable repackaging of this specification into draft standard formats.
 
 ## Definitions and Nomenclature
 
-The styles used to show code, notes, etc.  
+> :construction: Please add liberally to this section as terms are introduced in the spec
 
-> :construction: To spice up the formatting of the spec, GitHub offers a library of emogi's. Some that we might want to play into nomenclature  :mag: :bulb: :computer: :wrench: :file_folder: :package: :pushpin: :new: :arrow_right: :arrow_forward: :arrows_counterclockwise: :hash: :soon: :heavy_plus_sign: :black_small_square: :paperclip: :warning: :information_source: :page_facing_up: :bar_chart: :earth_americas: :globe_with_meridians:  From use of the atom editor, it looks like some are unique to GitHub and others are part of more standard collections.  Or we could make some custom ones that would be included as images. Here's a link to full available set: https://gist.github.com/rxaviers/7360908
-
-For example,
-
-> :information_source: This is an instructional note in the spec.
-
-or for example,
-
-> :warning: This is a very important note in the spec.
-
-### Definition of key terms
+### Definition of Key Terms
 
 The words "must", "must not", "required", "shall", "shall not", "should", "should not", "recommended", "may", and "optional" in this document are to be interpreted as described in [RFC 2119](https://tools.ietf.org/html/rfc2119)
+
+>:information_source: All the terms below are hyperlinked to a key source for the definition or to a reference where more information is available.
 
 | Term | Definition |
 |-----:|:-----------|
 | [**data point**](https://en.wikipedia.org/wiki/Data_point) | A measurement on a single member of a statistical population. |
+| **frame** | |
+| **measurement** | |
 | [**phasor**](https://en.wikipedia.org/wiki/Phasor) | A complex equivalent of a simple cosine wave quantity such that the complex modulus is the cosine wave amplitude and the complex angle (in polar form) is the cosine wave phase angle. |
 | [**publish/subscribe**](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) | A messaging pattern where senders of messages, called publishers, do not program the messages to be sent directly to specific receivers, called subscribers, but instead characterize published messages into classes without knowledge of which subscribers, if any, there may be. |
+| **signal** | |
 | [**synchrophasor**](https://en.wikipedia.org/wiki/Phasor_measurement_unit) | A phasor calculated from data samples using a standard time signal as the reference for the measurement. Synchronized phasors from remote sites have a defined common phase relationship. |
+| [**time series**]((https://en.wikipedia.org/wiki/Time_series) | A series of data points indexed in time order, most commonly measured as a sequence taken at successive equally spaced points in time. |
 | **term** | definition |
 
 ### Acronyms
 
 | Term | Definition |
 |-----:|:-----------|
-| **API** | Application Program Interface |
-| **DOE** | U.S. Department of Energy |
-| **GEP** | Gateway Exchange Protocol |
-| **GPA** | Grid Protection Alliance, Inc. |
-| **IP** | Internet Protocol |
-| **PDC** | Phasor Data Concentrator |
-| **PMU** | Phasor Measurement Unit |
-| **STTP** | Streaming Telemetry Transport Protocol |
-| **TCP** | Transmission Control Protocol |
-| **UDP** | User Datagram Protocol |
-| **UTC** | Universal Time Coordinated |
+| **API** | [Application Program Interface](https://en.wikipedia.org/wiki/Application_programming_interface) |
+| **DOE** | [United States Department of Energy](https://en.wikipedia.org/wiki/United_States_Department_of_Energy) |
+| **DDS** | [Data Distribution Service](https://en.wikipedia.org/wiki/Data_Distribution_Service) |
+| **GEP** | [Gateway Exchange Protocol](http://gridprotectionalliance.org/docs/products/gsf/gep-overview.pdf) |
+| **GPA** | [Grid Protection Alliance, Inc.](https://www.gridprotectionalliance.org/) |
+| **GUID** | [Globally Unique Identifer](https://en.wikipedia.org/wiki/Universally_unique_identifier) |
+| **IP** | [Internet Protocol](https://en.wikipedia.org/wiki/Internet_Protocol) |
+| **MTU** | [Maximum Transmission Unit](https://en.wikipedia.org/wiki/Maximum_transmission_unit) |
+| **PDC** | [Phasor Data Concentrator](http://en.openei.org/wiki/Definition:Phasor_Data_Concentrator_%28PDC%29) |
+| **PMU** | [Phasor Measurement Unit](https://en.wikipedia.org/wiki/Phasor_measurement_unit) |
+| **STTP** | [Streaming Telemetry Transport Protocol](https://github.com/sttp/) |
+| **TCP** | [Transmission Control Protocol](https://en.wikipedia.org/wiki/Transmission_Control_Protocol) |
+| **UDP** | [User Datagram Protocol](https://en.wikipedia.org/wiki/User_Datagram_Protocol) |
+| **UTC** | [Coordinated Universal Time](https://en.wikipedia.org/wiki/Coordinated_Universal_Time) |
+| **ZeroMQ** | [Brokerless Messaging Queuing and Distribution Library](https://en.wikipedia.org/wiki/ZeroMQ) |
+
+### Document Conventions
+
+Markdown notes in combination with the [Github Emogi](https://gist.github.com/rxaviers/7360908) images are used as callouts.  The standard callouts are:
+
+
+> :information_source: This is a call out in the spec to provide background, instruction or additional information
+
+> :warning: This note use used to highlight important or critical information.
+
+> :construction: A informal note to document authors to facilitate specification development
+
+> :tomato::question: (author's initials): May be used by anyone to toss out questions and comments that are temporal.  These may be inserted at any point in any of the markdown documents.  These questions will preserved as they are migrated to "QuestionsSummmary.md" from time-to-time.
+
+Code blocks are shown as:
+```C#
+    public function void DisplayHelloWorld()
+    {
+        Console.WriteLine("Hello world!");
+    }
+```
+
+Code is also shown `inline` as well.
 
 ## Protocol Overview
 
@@ -171,7 +194,7 @@ STTP offers both short-term cost savings and strategic value in that it is:
 
 ### Built Upon A Proven Approach
 
-* STTP will enhance the successful design elements of the Gateway Exchange Protocol (GEP) as a foundation – and improve upon it.
+* STTP will enhance the successful design elements of the Gateway Exchange Protocol (GEP) as a foundation and improve upon it.
 
 * GEP is in n production use by Dominion, Entergy, MISO, PeakRC, TVA, FP&L, Southern Company and others.
 
@@ -352,7 +375,7 @@ Failed responses to operational modes usually indicate lack of support by publis
 ## Metadata
 
 *  Wire Format: Tabular XML format (XML) - highly compressible
-* Primary data point identifier is Guid (define)
+* Primary data point identifier is Guid (describe)
 * Extensibility
 * Rights based content restriction
 
@@ -439,7 +462,6 @@ How does publisher initiated connection, to cross security zones in desired dire
 3. <a name="ref3"></a>[RFC 2119, Current Best Practice](https://tools.ietf.org/html/rfc2119) Scott Bradner, Harvard University, 1997
 4. <a name="ref4"></a>[STTP Repositories on GitHub](https://github.com/sttp), Various specification documents and reference implementations.
 5. <a name="ref5"></a>[New Technology Value, Phasor Gateway](https://www.naspi.org/naspi/sites/default/files/2017-03/PRSP_Phasor_Gateway_Whitepaper_Final_with_disclaimer_Final.pdf), Peak Reliability, September 2016, Task 7 Data Delivery Efficiency Improvements, DE-OE-701.
-6. <a name="ref6"></a>More ...
 
 ## Contributors
 

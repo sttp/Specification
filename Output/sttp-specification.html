@@ -758,9 +758,9 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.0.18 - June 27, 2017</p>
+<p><strong>Version:</strong> 0.0.19 - June 27, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
-<p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time-series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time-series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time-series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
+<p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
 Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <hr />
@@ -779,7 +779,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <tbody>
 <tr>
 <td style="text-align:center;"></td>
-<td><a href="#title-page">Title Page</a></td>
+<td><a href="#user-content-title-page">Title Page</a></td>
 </tr>
 <tr>
 <td style="text-align:center;"></td>
@@ -851,7 +851,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </tr>
 <tr>
 <td style="text-align:center;">B</td>
-<td><a href="#appendix-b---ieee-c37.118-mapping">Appendix B - IEEE C37.118 Mapping</a></td>
+<td><a href="#appendix-b---ieee-c37118-mapping">Appendix B - IEEE C37.118 Mapping</a></td>
 </tr>
 <tr>
 <td style="text-align:center;"></td>
@@ -860,30 +860,24 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </tbody>
 </table>
 <h2 id="introduction">Introduction</h2>
-<p>Use of synchrophasors by U.S. utilities continues to grow following the jump start provided by the Smart Grid Investment Grants. Even so, the dominant method to exchange synchrophasor data remains the IEEE C37.118-2005 [<a href="#ref2">2</a>] protocol that was designed for and continues to be the preferred solution for substation-to-control room communications.  It achieves its advantages through use of an ordered set (a frame) of information that is associated with a specific measurement time.  When IEEE C37.118 is used for PDC-to-PDC communication or for PDC-to-Application communication, large data frames are typically distributed to multiple systems.  To address the challenges presented by these large frame sizes, many utilities implement purpose-built networks for synchrophasor data only.  Even with these purpose-built networks, large frame sizes result in an increased probability of UDP frame loss, or in the case of TCP, increased communication latency.  In addition, IEEE C37.118 has only prescriptive methods for the management of measurement metadata which is well-suited for substation-to-control-center use but which becomes difficult to manage as this metadata spans analytic solutions and is used by multiple configuration owners in a wide-area context.</p>
+<p>Use of synchrophasors by U.S. utilities continues to grow following the jump start provided by the Smart Grid Investment Grants. Even so, the dominant method to exchange synchrophasor data remains the IEEE C37.118-2005 [<a href="#user-content-ref1">1</a>] protocol that was designed for and continues to be the preferred solution for substation-to-control room communications.  It achieves its advantages through use of an ordered set (a frame) of information that is associated with a specific measurement time.  When IEEE C37.118 is used for PDC-to-PDC communication or for PDC-to-Application communication, large data frames are typically distributed to multiple systems.  To address the challenges presented by these large frame sizes, many utilities implement purpose-built networks for synchrophasor data only.  Even with these purpose-built networks, large frame sizes result in an increased probability of UDP frame loss, or in the case of TCP, increased communication latency.  In addition, IEEE C37.118 has only prescriptive methods for the management of measurement metadata which is well-suited for substation-to-control-center use but which becomes difficult to manage as this metadata spans analytic solutions and is used by multiple configuration owners in a wide-area context.</p>
 <p>To address these issues, the Advanced Synchrophasor Protocol (ASP) Project was proposed to DOE in response to FOA-1492. In this project proposal, the argument was made for a new protocol that overcomes the limitations of IEEE C37.118 for large-scale synchrophasor data system deployments.  The new protocol proposed leveraged the successful design elements of the secure Gateway Exchange Protocol (GEP) that was originally developed by the Grid Protection Alliance (GPA) as part of the SIEGate project (DE-OE-536).</p>
 <p>On May 1, 2017, a DOE grant (DE-OE-859) was awarded to GPA and the other 25 collaborators on ASP Project (see <a href="#contributors">Contributors</a>) to develop: (1) a detailed definition of new publish-subscribe protocol, now called the Streaming Time-series Transport Protocol (STTP) and (2) software to support it including production-grade implementations of STTP API's in multiple development platforms along with a collection of tools to test and validate the new protocol.</p>
 <h3 id="scope-of-this-document">Scope of this Document</h3>
 <p>The purpose of this document is to define STTP and to include, as appendices, descriptions as to how to use its supporting software tools.  This STTP specification is focused on effective "streaming data" delivery of which synchrophasor data is a very important use case.</p>
 <p>In the <a href="#protocol-overview">Overview</a> section of this specification, high-level features and the business value of STTP are presented. The balance of the sections of the specification provide the details of protocol design.</p>
 <p><a href="#appendix-a---sttp-api-reference">Appendix A - STTP API Reference</a> provides instructions to enable software developers to integrate and use of STTP within other software systems.</p>
-<p><a href="#appendix-b---ieee-c37.118-mapping">Appendix B - IEEE C37.118 Mapping</a> provides a detailed look at the process of transforming IEEE C37.118 into STTP as well as creating IEEE C37.118 streams from STTP.</p>
+<p><a href="#appendix-b---ieee-c37118-mapping">Appendix B - IEEE C37.118 Mapping</a> provides a detailed look at the process of transforming IEEE C37.118 into STTP as well as creating IEEE C37.118 streams from STTP.</p>
 <p>While the format and structure of this document, established to facilitate collaboration, is different than that used by standards bodies, it is hoped that the content within this document can meet all the information requirements needed to enable repackaging of this specification into draft standard formats.</p>
 <h2 id="definitions-and-nomenclature">Definitions and Nomenclature</h2>
-<p>The styles used to show code, notes, etc.  </p>
 <blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> To spice up the formatting of the spec, GitHub offers a library of emogi's. Some that we might want to play into nomenclature  <img src="https://github.global.ssl.fastly.net/images/icons/emoji/mag.png?v5" alt=":mag:" title=":mag:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/computer.png?v5" alt=":computer:" title=":computer:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/file_folder.png?v5" alt=":file_folder:" title=":file_folder:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/package.png?v5" alt=":package:" title=":package:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/pushpin.png?v5" alt=":pushpin:" title=":pushpin:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/new.png?v5" alt=":new:" title=":new:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/arrow_right.png?v5" alt=":arrow_right:" title=":arrow_right:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/arrow_forward.png?v5" alt=":arrow_forward:" title=":arrow_forward:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/arrows_counterclockwise.png?v5" alt=":arrows_counterclockwise:" title=":arrows_counterclockwise:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/hash.png?v5" alt=":hash:" title=":hash:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/soon.png?v5" alt=":soon:" title=":soon:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/heavy_plus_sign.png?v5" alt=":heavy_plus_sign:" title=":heavy_plus_sign:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/black_small_square.png?v5" alt=":black_small_square:" title=":black_small_square:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/paperclip.png?v5" alt=":paperclip:" title=":paperclip:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/warning.png?v5" alt=":warning:" title=":warning:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/page_facing_up.png?v5" alt=":page_facing_up:" title=":page_facing_up:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/bar_chart.png?v5" alt=":bar_chart:" title=":bar_chart:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/earth_americas.png?v5" alt=":earth_americas:" title=":earth_americas:" class="emoji-img emoji"> <img src="https://github.global.ssl.fastly.net/images/icons/emoji/globe_with_meridians.png?v5" alt=":globe_with_meridians:" title=":globe_with_meridians:" class="emoji-img emoji">  From use of the atom editor, it looks like some are unique to GitHub and others are part of more standard collections.  Or we could make some custom ones that would be included as images. Here's a link to full available set: <a href="https://gist.github.com/rxaviers/7360908">https://gist.github.com/rxaviers/7360908</a></p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Please add liberally to this section as terms are introduced in the spec</p>
 </blockquote>
-<p>For example,</p>
-<blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> This is an instructional note in the spec.</p>
-</blockquote>
-<p>or for example,</p>
-<blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/warning.png?v5" alt=":warning:" title=":warning:" class="emoji-img emoji"> This is a very important note in the spec.</p>
-</blockquote>
-<h3 id="definition-of-key-terms">Definition of key terms</h3>
+<h3 id="definition-of-key-terms">Definition of Key Terms</h3>
 <p>The words "must", "must not", "required", "shall", "shall not", "should", "should not", "recommended", "may", and "optional" in this document are to be interpreted as described in <a href="https://tools.ietf.org/html/rfc2119">RFC 2119</a></p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> All the terms below are hyperlinked to a key source for the definition or to a reference where more information is available.</p>
+</blockquote>
 <table>
 <thead>
 <tr>
@@ -897,6 +891,14 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <td style="text-align:left;">A measurement on a single member of a statistical population.</td>
 </tr>
 <tr>
+<td style="text-align:right;"><strong>frame</strong></td>
+<td style="text-align:left;"></td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>measurement</strong></td>
+<td style="text-align:left;"></td>
+</tr>
+<tr>
 <td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Phasor"><strong>phasor</strong></a></td>
 <td style="text-align:left;">A complex equivalent of a simple cosine wave quantity such that the complex modulus is the cosine wave amplitude and the complex angle (in polar form) is the cosine wave phase angle.</td>
 </tr>
@@ -905,8 +907,16 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <td style="text-align:left;">A messaging pattern where senders of messages, called publishers, do not program the messages to be sent directly to specific receivers, called subscribers, but instead characterize published messages into classes without knowledge of which subscribers, if any, there may be.</td>
 </tr>
 <tr>
+<td style="text-align:right;"><strong>signal</strong></td>
+<td style="text-align:left;"></td>
+</tr>
+<tr>
 <td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit"><strong>synchrophasor</strong></a></td>
 <td style="text-align:left;">A phasor calculated from data samples using a standard time signal as the reference for the measurement. Synchronized phasors from remote sites have a defined common phase relationship.</td>
+</tr>
+<tr>
+<td style="text-align:right;"><a href="(https://en.wikipedia.org/wiki/Time_series"><strong>time series</strong></a></td>
+<td style="text-align:left;">A series of data points indexed in time order, most commonly measured as a sequence taken at successive equally spaced points in time.</td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>term</strong></td>
@@ -925,50 +935,80 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <tbody>
 <tr>
 <td style="text-align:right;"><strong>API</strong></td>
-<td style="text-align:left;">Application Program Interface</td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Application_programming_interface">Application Program Interface</a></td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>DOE</strong></td>
-<td style="text-align:left;">U.S. Department of Energy</td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/United_States_Department_of_Energy">United States Department of Energy</a></td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>DDS</strong></td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Data_Distribution_Service">Data Distribution Service</a></td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>GEP</strong></td>
-<td style="text-align:left;">Gateway Exchange Protocol</td>
+<td style="text-align:left;"><a href="http://gridprotectionalliance.org/docs/products/gsf/gep-overview.pdf">Gateway Exchange Protocol</a></td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>GPA</strong></td>
-<td style="text-align:left;">Grid Protection Alliance, Inc.</td>
+<td style="text-align:left;"><a href="https://www.gridprotectionalliance.org/">Grid Protection Alliance, Inc.</a></td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>GUID</strong></td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">Globally Unique Identifer</a></td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>IP</strong></td>
-<td style="text-align:left;">Internet Protocol</td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a></td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>MTU</strong></td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Maximum_transmission_unit">Maximum Transmission Unit</a></td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>PDC</strong></td>
-<td style="text-align:left;">Phasor Data Concentrator</td>
+<td style="text-align:left;"><a href="http://en.openei.org/wiki/Definition:Phasor_Data_Concentrator_%28PDC%29">Phasor Data Concentrator</a></td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>PMU</strong></td>
-<td style="text-align:left;">Phasor Measurement Unit</td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">Phasor Measurement Unit</a></td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>STTP</strong></td>
-<td style="text-align:left;">Streaming Telemetry Transport Protocol</td>
+<td style="text-align:left;"><a href="https://github.com/sttp/">Streaming Telemetry Transport Protocol</a></td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>TCP</strong></td>
-<td style="text-align:left;">Transmission Control Protocol</td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Transmission_Control_Protocol">Transmission Control Protocol</a></td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>UDP</strong></td>
-<td style="text-align:left;">User Datagram Protocol</td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/User_Datagram_Protocol">User Datagram Protocol</a></td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>UTC</strong></td>
-<td style="text-align:left;">Universal Time Coordinated</td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Coordinated_Universal_Time">Coordinated Universal Time</a></td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>ZeroMQ</strong></td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/ZeroMQ">Brokerless Messaging Queuing and Distribution Library</a></td>
 </tr>
 </tbody>
 </table>
+<h3 id="document-conventions">Document Conventions</h3>
+<p>Markdown notes in combination with the <a href="https://gist.github.com/rxaviers/7360908">Github Emogi</a> images are used as callouts.  The standard callouts are:</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> This is a call out in the spec to provide background, instruction or additional information</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/warning.png?v5" alt=":warning:" title=":warning:" class="emoji-img emoji"> This note use used to highlight important or critical information.</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> A informal note to document authors to facilitate specification development</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> (author's initials): May be used by anyone to toss out questions and comments that are temporal.  These may be inserted at any point in any of the markdown documents.  These questions will preserved as they are migrated to "QuestionsSummmary.md" from time-to-time.</p>
+</blockquote>
+<p>Code blocks are shown as:</p>
+<pre><code class="C# language-C#">    public function void DisplayHelloWorld()
+    {
+        Console.WriteLine("Hello world!");
+    }</code></pre>
+<p>Code is also shown <code>inline</code> as well.</p>
 <h2 id="protocol-overview">Protocol Overview</h2>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Purpose of protocol, fundamentals of how it works (command and data) - include sub-section titles ( 4# items) as needed</p>
@@ -1026,7 +1066,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </ul>
 <h3 id="built-upon-a-proven-approach">Built Upon A Proven Approach</h3>
 <ul>
-<li><p>STTP will enhance the successful design elements of the Gateway Exchange Protocol (GEP) as a foundation – and improve upon it.</p></li>
+<li><p>STTP will enhance the successful design elements of the Gateway Exchange Protocol (GEP) as a foundation and improve upon it.</p></li>
 <li><p>GEP is in n production use by Dominion, Entergy, MISO, PeakRC, TVA, FP&amp;L, Southern Company and others.</p></li>
 </ul>
 <h2 id="design-philosophies">Design Philosophies</h2>
@@ -1277,7 +1317,7 @@ count may not match requested points due to rights or points may no longer exist
 <h2 id="metadata">Metadata</h2>
 <ul>
 <li>Wire Format: Tabular XML format (XML) - highly compressible</li>
-<li>Primary data point identifier is Guid (define)</li>
+<li>Primary data point identifier is Guid (describe)</li>
 <li>Extensibility</li>
 <li>Rights based content restriction</li>
 </ul>
@@ -1362,7 +1402,6 @@ count may not match requested points due to rights or points may no longer exist
 <li><a name="ref3"></a><a href="https://tools.ietf.org/html/rfc2119">RFC 2119, Current Best Practice</a> Scott Bradner, Harvard University, 1997</li>
 <li><a name="ref4"></a><a href="https://github.com/sttp">STTP Repositories on GitHub</a>, Various specification documents and reference implementations.</li>
 <li><a name="ref5"></a><a href="https://www.naspi.org/naspi/sites/default/files/2017-03/PRSP_Phasor_Gateway_Whitepaper_Final_with_disclaimer_Final.pdf">New Technology Value, Phasor Gateway</a>, Peak Reliability, September 2016, Task 7 Data Delivery Efficiency Improvements, DE-OE-701.</li>
-<li><a name="ref6"></a>More ...</li>
 </ol>
 <h2 id="contributors">Contributors</h2>
 <p>The following individuals actively participated in the development of this standard.</p>
