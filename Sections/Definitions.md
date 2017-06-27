@@ -11,8 +11,11 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 | Term | Definition |
 |-----:|:-----------|
 | [**data point**](https://en.wikipedia.org/wiki/Data_point) | A measurement on a single member of a statistical population. |
+| **frame** | |
+| **measurement** | |
 | [**phasor**](https://en.wikipedia.org/wiki/Phasor) | A complex equivalent of a simple cosine wave quantity such that the complex modulus is the cosine wave amplitude and the complex angle (in polar form) is the cosine wave phase angle. |
 | [**publish/subscribe**](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) | A messaging pattern where senders of messages, called publishers, do not program the messages to be sent directly to specific receivers, called subscribers, but instead characterize published messages into classes without knowledge of which subscribers, if any, there may be. |
+| **signal** | |
 | [**synchrophasor**](https://en.wikipedia.org/wiki/Phasor_measurement_unit) | A phasor calculated from data samples using a standard time signal as the reference for the measurement. Synchronized phasors from remote sites have a defined common phase relationship. |
 | **term** | definition |
 
@@ -22,9 +25,11 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 |-----:|:-----------|
 | **API** | Application Program Interface |
 | **DOE** | U.S. Department of Energy |
+| **DDS** | Data Distribution Service |
 | **GEP** | Gateway Exchange Protocol |
 | **GPA** | Grid Protection Alliance, Inc. |
 | **IP** | Internet Protocol |
+| **MTU** |  |
 | **PDC** | Phasor Data Concentrator |
 | **PMU** | Phasor Measurement Unit |
 | **STTP** | Streaming Telemetry Transport Protocol |
