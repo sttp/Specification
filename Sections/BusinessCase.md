@@ -34,6 +34,6 @@ STTP offers both short-term cost savings and strategic value in that it is:
 
 ### Built Upon A Proven Approach
 
-* STTP will enhance the successful design elements of the Gateway Exchange Protocol (GEP) as a foundation – and improve upon it.
+* STTP will enhance the successful design elements of the Gateway Exchange Protocol (GEP) as a foundation and improve upon it.
 
 * GEP is in n production use by Dominion, Entergy, MISO, PeakRC, TVA, FP&L, Southern Company and others.
