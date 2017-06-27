@@ -232,6 +232,9 @@ function markdown2html() {
       "<img src=\"" + rootPath + "Output/Images/"
     );
 
+    // Remove "#user-content-" prefixes for page level bookmarks
+    destinationHtml = replaceAll(destinationHtml, "#user-content-", "#");
+
     file.contents = new Buffer(destinationHtml);
     file.path = gutil.replaceExtension(file.path, ".html");
     this.push(file);
