@@ -4,7 +4,7 @@
 
 ### Definition of Key Terms
 
-The words "must", "must not", "required", "shall", "shall not", "should", "should not", "recommended", "may", and "optional" in this document are to be interpreted as described in [RFC 2119](https://tools.ietf.org/html/rfc2119)
+The words "must", "must not", "required", "shall", "shall not", "should", "should not", "recommended", "may", and "optional" in this document are to be interpreted as described in RFC 2119 [[3](References.md#user-content-ref3)].
 
 >:information_source: All the terms below are hyperlinked to a key source for the definition or to a reference where more information is available.
 
