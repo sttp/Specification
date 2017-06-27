@@ -1,20 +1,12 @@
 ## Definitions and Nomenclature
 
-The styles used to show code, notes, etc.  
-
-> :construction: To spice up the formatting of the spec, GitHub offers a library of emogi's. Some that we might want to play into nomenclature  :mag: :bulb: :computer: :wrench: :file_folder: :package: :pushpin: :new: :arrow_right: :arrow_forward: :arrows_counterclockwise: :hash: :soon: :heavy_plus_sign: :black_small_square: :paperclip: :warning: :information_source: :page_facing_up: :bar_chart: :earth_americas: :globe_with_meridians:  From use of the atom editor, it looks like some are unique to GitHub and others are part of more standard collections.  Or we could make some custom ones that would be included as images. Here's a link to full available set: https://gist.github.com/rxaviers/7360908
-
-For example,
-
-> :information_source: This is an instructional note in the spec.
-
-or for example,
-
-> :warning: This is a very important note in the spec.
+> :construction: Please add liberally to this section as terms are introduced in the spec
 
 ### Definition of key terms
 
 The words "must", "must not", "required", "shall", "shall not", "should", "should not", "recommended", "may", and "optional" in this document are to be interpreted as described in [RFC 2119](https://tools.ietf.org/html/rfc2119)
+
+>:information_source: All the terms below are hyperlinked to a key source for the definition or to a reference where more information is available.
 
 | Term | Definition |
 |-----:|:-----------|
@@ -39,3 +31,25 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 | **TCP** | Transmission Control Protocol |
 | **UDP** | User Datagram Protocol |
 | **UTC** | Universal Time Coordinated |
+
+### Document Conventions
+
+Markdown notes in combination with the [Github Emogi](https://gist.github.com/rxaviers/7360908) images are used as callouts.  The standard callouts are:
+
+
+> :information_source: This is a call out in the spec to provide background, instruction or additional information
+
+> :warning: This note use used to highlight important or critical information.
+
+> :construction: A informal note to document authors to facilitate specification development
+
+> :tomato::question: (author's initials): May be used by anyone to toss out questions and comments that are temporal.  These may be inserted at any point in any of the markdown documents.  These questions will preserved as they are migrated to "QuestionsSummmary.md" from time-to-time.
+
+Code blocks are shown as:
+```C#
+    code example;
+    more code;
+    more code;
+```
+
+Code is also shown `inline` as well.
