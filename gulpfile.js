@@ -180,7 +180,6 @@ function pushDocumentUpdates() {
       (stdout && stdout.length > 0) ||
       (stderr && stderr.length > 0);
 
-    // Any git log info past current version constitutes an update
     if (pushUpdates) {
       console.log("Committing new compiled documents to local repo...");
 
@@ -361,8 +360,6 @@ gulp.task("push-changes", [ "clean-up" ], function() {
 gulp.task("push-changes-if-remote-updated", [ "clean-up" ], function() {
   console.log("Checking for remote updates...");
 
-  // Pipe stdout to Gulp file contents on pipe-line - any stdout from
-  // git log represent updates to repository since the last tag
   const options = { continueOnError: true };
 
   gulp.src("README.md")
