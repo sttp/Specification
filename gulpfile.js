@@ -31,7 +31,7 @@ const exec = require("gulp-exec");
 const notify = require("gulp-notify");
 
 // Define non-relative URL root path for any relative paths
-const rootPath = "https://raw.githubusercontent.com/sttp/Specification/master";
+const rootPath = "https://raw.githubusercontent.com/sttp/Specification/master/";
 
 // Define section file that contains version number
 const versionFile = "Sections/TitlePage.md";
@@ -94,7 +94,7 @@ const sectionLinks = [
   [ "(APIReference.md)", "(#appendix-a---sttp-api-reference)" ],
   [ "(IEEE_C37.118Mapping.md)", "(#appendix-b---ieee-c37118-mapping)" ],
   [ "(ToDoList.md)", "(#specification-development-to-do-list)" ],
-  [ "(../LICENSE)", "(" + rootPath + "/LICENSE)" ]
+  [ "(../LICENSE)", "(" + rootPath + "LICENSE)" ]
 ];
 
 // Any git functionality expects existing "git" environmental variable
@@ -225,7 +225,7 @@ function markdown2html() {
     destinationHtml = replaceAll(
       destinationHtml,
       "<img src=\"Images/",
-      "<img src=\"" + rootPath + "/Output/Images/"
+      "<img src=\"" + rootPath + "Output/Images/"
     );
 
     file.contents = new Buffer(destinationHtml);
