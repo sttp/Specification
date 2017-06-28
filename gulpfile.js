@@ -96,7 +96,8 @@ const sectionLinks = [
   [ "(IEEE_C37.118Mapping.md)", "(#appendix-b---ieee-c37118-mapping)" ],
   [ "(ToDoList.md)", "(#specification-development-to-do-list)" ],
   /* Special replacements */
-  [ "(References.md#", "(#" ], /* Handle specific references */
+  [ "(Definitions.md#", "(#" ],
+  [ "(References.md#", "(#" ],
   [ "(QuestionsSummary.md)", "(" + viewPath + "QuestionsSummary.md)" ],
   [ "(../LICENSE)", "(" + viewPath + "LICENSE)" ]
 ];

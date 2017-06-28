@@ -11,6 +11,7 @@ Information on this page:
 * [Section Editing](#section-editing)
   * [Naming Conventions](#naming-conventions)
   * [Handling References](#handling-references)
+  * [Handling Acronyms](#handling-acronyms)
   * [Highlighting Information](#highlighting-information)
   * [Adding Questions and Responses](#adding-questions-and-responses)
   * [Style and Formatting](#style-and-formatting)
@@ -67,7 +68,11 @@ When GitHub encounters user added bookmarks, it automatically prefixes the bookm
 
 Which gets rendered as:
 
+<p style="border:1px solid #005cb9; padding: 1em">
+
 The STTP organizational site [[4](Sections/References.md#user-content-ref4)] of GitHub maintains the versioned source for the specification as well as operational reference implementations for the protocol.
+
+</p>
 
 > :information_source: If you use the [Atom Editor](https://atom.io/), you can add a [snippet](http://flight-manual.atom.io/using-atom/sections/snippets/) to make it easier to add new references. Just open up the snippets file by selecting `File > Snippets` from the Atom menu, then copy and paste in the following snippet script:
 
@@ -80,17 +85,42 @@ The STTP organizational site [[4](Sections/References.md#user-content-ref4)] of 
   "Add New Specification Reference":
     "prefix": "newspecref"
     "body": "${1:1}. <a name=\"ref${1:1}\"></a>[${2:Reference Name}](${3:http://www.reference.url})"
+```
 
+> As soon you add the snippet and save the file, you can type `specref` from within any markdown document and press `Tab` to insert a new reference link. The reference index will be highlighted and can be set to the desired value. This script also defines a snippet for creating new references in the references section, just type `newspecref` from the `Sections/References.md` file and press tab to insert a new reference.
+
+### Handling Acronyms
+
+All general definitions and acronyms used in the specification are listed in the [Sections/Definitions.md](Sections/Definitions.md) file. Since the specification may be read from any location, any use of an acronym should be linked back to its definition. When adding a new acronym, use an HTML bookmark using an anchor tag, i.e.,  [`<a>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a), with the acronym defined in the `name` element, for example:
+
+`| <a name="API"></a>**API** | [Application Program Interface](https://en.wikipedia.org/wiki/Application_programming_interface) |`
+
+When GitHub encounters user added bookmarks, it automatically prefixes the bookmark name with `user-content-` to ensure uniqueness of the bookmark on the page when rendered. As a result, any time you need to link to the acronym, the markdown should look like the following:
+
+`The following section defines the [[API](Definitions.md#user-content-API)] for STTP.`
+
+Which gets rendered as:
+
+<p style="border:1px solid #005cb9; padding: 1em">
+
+The following section defines the [API](Sections/Definitions.md#user-content-API) for STTP.
+
+</p>
+
+> :information_source: If you use the [Atom Editor](https://atom.io/), you can add a [snippet](http://flight-manual.atom.io/using-atom/sections/snippets/) to make it easier to add new acronyms. Just open up the snippets file by selecting `File > Snippets` from the Atom menu, then copy and paste in the following snippet script:
+
+```javascript
+".source.gfm":
   "Insert Specification Acronym Link":
     "prefix": "specacronym"
-    "body": "[[${1:Acronym}](Definitions.md#user-content-${1:Acronym})]"
+    "body": "[${1:Acronym}](Definitions.md#user-content-${1:Acronym})"
 
   "Add New Specification Acronym":
     "prefix": "newspecacronym"
     "body": "| <a name=\"${1:Acronym}\"></a>**${1:Acronym}** | [${2:Description}](${3:http://www.acronym.url}) |"
 ```
 
-> As soon you add the snippet and save the file, you can type `specref` from within any markdown document and press `Tab` to insert a new reference link. The reference index will be highlighted and can be set to the desired value. This script also defines a snippet for creating new references in the references section, just type `newspecref` from the `Sections\References.md` file and press tab to insert a new reference. Snippets are also included for creating new acronym and links, i.e., `specacronym` and `newspecacronym`.
+> As soon you add the snippet and save the file, you can type `specacronym` from within any markdown document and press `Tab` to insert a new acronym link. The acronym name will be highlighted and can be set to the desired text. This script also defines a snippet for creating new acronyms in the definitions section, just type `newspecacronym` from the `Sections/Definitions.md` file and press tab to add a new acronym to the table.
 
 ### Highlighting Information
 
