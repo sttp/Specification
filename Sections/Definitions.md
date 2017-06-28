@@ -11,8 +11,11 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 | Term | Definition |
 |-----:|:-----------|
 | [**data point**](https://en.wikipedia.org/wiki/Data_point) | A measurement on a single member of a statistical population. |
-| **frame** | |
+| **frame** | A data-structure composed of primitive data types that has been serialized into a discrete binary package. |
+| [**endianess**](https://en.wikipedia.org/wiki/Endianness) | The hardware prescribed ordinal direction of the bits used to represent a numerical value in computer memory; usually noted as either _big_ or _little_. |
+| [**Ethernet**](https://en.wikipedia.org/wiki/Ethernet) | Frame based data transmission technology used in local area networks. |
 | **measurement** | |
+| [**packet**](https://en.wikipedia.org/wiki/Network_packet) | A frame of data carried by a network whose size is dictated by the MTU |
 | [**phasor**](https://en.wikipedia.org/wiki/Phasor) | A complex equivalent of a simple cosine wave quantity such that the complex modulus is the cosine wave amplitude and the complex angle (in polar form) is the cosine wave phase angle. |
 | [**publish/subscribe**](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) | A messaging pattern where senders of messages, called publishers, do not program the messages to be sent directly to specific receivers, called subscribers, but instead characterize published messages into classes without knowledge of which subscribers, if any, there may be. |
 | **signal** | |
@@ -25,15 +28,17 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 | Term | Definition |
 |-----:|:-----------|
 | **API** | [Application Program Interface](https://en.wikipedia.org/wiki/Application_programming_interface) |
+| **BES** | [Bulk Electric System](http://www.nerc.com/pa/RAPA/Pages/BES.aspx) |
 | **DOE** | [United States Department of Energy](https://en.wikipedia.org/wiki/United_States_Department_of_Energy) |
 | **DDS** | [Data Distribution Service](https://en.wikipedia.org/wiki/Data_Distribution_Service) |
 | **GEP** | [Gateway Exchange Protocol](http://gridprotectionalliance.org/docs/products/gsf/gep-overview.pdf) |
 | **GPA** | [Grid Protection Alliance, Inc.](https://www.gridprotectionalliance.org/) |
+| **GPS** | [Global Positioning System](https://en.wikipedia.org/wiki/Global_Positioning_System) |
 | **GUID** | [Globally Unique Identifer](https://en.wikipedia.org/wiki/Universally_unique_identifier) |
 | **IP** | [Internet Protocol](https://en.wikipedia.org/wiki/Internet_Protocol) |
 | **MTU** | [Maximum Transmission Unit](https://en.wikipedia.org/wiki/Maximum_transmission_unit) |
-| </a>**PDC** | [Phasor Data Concentrator](http://en.openei.org/wiki/Definition:Phasor_Data_Concentrator_%28PDC%29) |
-| </a>**PMU** | [Phasor Measurement Unit](https://en.wikipedia.org/wiki/Phasor_measurement_unit) |
+| **PDC** | [Phasor Data Concentrator](http://en.openei.org/wiki/Definition:Phasor_Data_Concentrator_%28PDC%29) |
+| **PMU** | [Phasor Measurement Unit](https://en.wikipedia.org/wiki/Phasor_measurement_unit) |
 | **STTP** | [Streaming Telemetry Transport Protocol](https://github.com/sttp/) |
 | **TCP** | [Transmission Control Protocol](https://en.wikipedia.org/wiki/Transmission_Control_Protocol) |
 | **UDP** | [User Datagram Protocol](https://en.wikipedia.org/wiki/User_Datagram_Protocol) |
