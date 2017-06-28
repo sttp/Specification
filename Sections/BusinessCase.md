@@ -18,7 +18,7 @@ STTP offers both short-term cost savings and strategic value in that it is:
 
 ### Reduces First Cost
 
-* GEP has been measured [[5](References.md#user-content-ref5)] to have less than half the band width requirements of IEEE C37.118 [[1](References.md#user-content-ref1)] when used with TCP and simple methods for lossless compression.  With the compression, a single signal or measurement point (i.e., an identifier, timestamp, value and quality code) requires only 2.5 bytes. By comparison, IEEE C37.118 requires 4.5 bytes per measurement on average.
+* GEP has been measured <sup>[[5](References.md#user-content-ref5)]</sup> to have less than half the band width requirements of IEEE C37.118 <sup>[[1](References.md#user-content-ref1)]</sup> when used with TCP and simple methods for lossless compression.  With the compression, a single signal or measurement point (i.e., an identifier, timestamp, value and quality code) requires only 2.5 bytes. By comparison, IEEE C37.118 requires 4.5 bytes per measurement on average.
 
 * The signal-based GEP protocol incorporates Pub/Sub data exchange methods so that unnecessary data points need not be exchanged – thereby further reducing overall bandwidth requirements as compared to IEEE C37.118.
 
