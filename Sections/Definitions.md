@@ -24,21 +24,21 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 
 | Term | Definition |
 |-----:|:-----------|
-| **API** | [Application Program Interface](https://en.wikipedia.org/wiki/Application_programming_interface) |
-| **DOE** | [United States Department of Energy](https://en.wikipedia.org/wiki/United_States_Department_of_Energy) |
-| **DDS** | [Data Distribution Service](https://en.wikipedia.org/wiki/Data_Distribution_Service) |
-| **GEP** | [Gateway Exchange Protocol](http://gridprotectionalliance.org/docs/products/gsf/gep-overview.pdf) |
-| **GPA** | [Grid Protection Alliance, Inc.](https://www.gridprotectionalliance.org/) |
-| **GUID** | [Globally Unique Identifer](https://en.wikipedia.org/wiki/Universally_unique_identifier) |
-| **IP** | [Internet Protocol](https://en.wikipedia.org/wiki/Internet_Protocol) |
-| **MTU** | [Maximum Transmission Unit](https://en.wikipedia.org/wiki/Maximum_transmission_unit) |
-| **PDC** | [Phasor Data Concentrator](http://en.openei.org/wiki/Definition:Phasor_Data_Concentrator_%28PDC%29) |
-| **PMU** | [Phasor Measurement Unit](https://en.wikipedia.org/wiki/Phasor_measurement_unit) |
-| **STTP** | [Streaming Telemetry Transport Protocol](https://github.com/sttp/) |
-| **TCP** | [Transmission Control Protocol](https://en.wikipedia.org/wiki/Transmission_Control_Protocol) |
-| **UDP** | [User Datagram Protocol](https://en.wikipedia.org/wiki/User_Datagram_Protocol) |
-| **UTC** | [Coordinated Universal Time](https://en.wikipedia.org/wiki/Coordinated_Universal_Time) |
-| **ZeroMQ** | [Brokerless Messaging Queuing and Distribution Library](https://en.wikipedia.org/wiki/ZeroMQ) |
+| <a name="API"></a>**API** | [Application Program Interface](https://en.wikipedia.org/wiki/Application_programming_interface) |
+| <a name="DOE"></a>**DOE** | [United States Department of Energy](https://en.wikipedia.org/wiki/United_States_Department_of_Energy) |
+| <a name="DDS"></a>**DDS** | [Data Distribution Service](https://en.wikipedia.org/wiki/Data_Distribution_Service) |
+| <a name="GEP"></a>**GEP** | [Gateway Exchange Protocol](http://gridprotectionalliance.org/docs/products/gsf/gep-overview.pdf) |
+| <a name="GPA"></a>**GPA** | [Grid Protection Alliance, Inc.](https://www.gridprotectionalliance.org/) |
+| <a name="GUID"></a>**GUID** | [Globally Unique Identifer](https://en.wikipedia.org/wiki/Universally_unique_identifier) |
+| <a name="IP"></a>**IP** | [Internet Protocol](https://en.wikipedia.org/wiki/Internet_Protocol) |
+| <a name="MTU"></a>**MTU** | [Maximum Transmission Unit](https://en.wikipedia.org/wiki/Maximum_transmission_unit) |
+| <a name="PDC"></a>**PDC** | [Phasor Data Concentrator](http://en.openei.org/wiki/Definition:Phasor_Data_Concentrator_%28PDC%29) |
+| <a name="PMU"></a>**PMU** | [Phasor Measurement Unit](https://en.wikipedia.org/wiki/Phasor_measurement_unit) |
+| <a name="STTP"></a>**STTP** | [Streaming Telemetry Transport Protocol](https://github.com/sttp/) |
+| <a name="TCP"></a>**TCP** | [Transmission Control Protocol](https://en.wikipedia.org/wiki/Transmission_Control_Protocol) |
+| <a name="UDP"></a>**UDP** | [User Datagram Protocol](https://en.wikipedia.org/wiki/User_Datagram_Protocol) |
+| <a name="UTC"></a>**UTC** | [Coordinated Universal Time](https://en.wikipedia.org/wiki/Coordinated_Universal_Time) |
+| <a name="ZeroMQ"></a>**ZeroMQ** | [Brokerless Messaging Queuing and Distribution Library](https://en.wikipedia.org/wiki/ZeroMQ) |
 
 ### Document Conventions
 

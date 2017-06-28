@@ -80,9 +80,17 @@ The STTP organizational site [[4](Sections/References.md#user-content-ref4)] of 
   "Add New Specification Reference":
     "prefix": "newspecref"
     "body": "${1:1}. <a name=\"ref${1:1}\"></a>[${2:Reference Name}](${3:http://www.reference.url})"
+
+  "Insert Specification Acronym Link":
+    "prefix": "specacronym"
+    "body": "[[${1:Acronym}](Definitions.md#user-content-${1:Acronym})]"
+
+  "Add New Specification Acronym":
+    "prefix": "newspecacronym"
+    "body": "| <a name=\"${1:Acronym}\"></a>**${1:Acronym}** | [${2:Description}](${3:http://www.acronym.url}) |"
 ```
 
-> As soon you add the snippet and save the file, you can type `specref` from within any markdown document and press `Tab` to insert a new reference link. The reference index will be highlighted and can be set to the desired value. This script also defines a snippet for creating new references in the references section, just type `newspecref` from the `Sections\References.md` file and press tab to insert a new reference.
+> As soon you add the snippet and save the file, you can type `specref` from within any markdown document and press `Tab` to insert a new reference link. The reference index will be highlighted and can be set to the desired value. This script also defines a snippet for creating new references in the references section, just type `newspecref` from the `Sections\References.md` file and press tab to insert a new reference. Snippets are also included for creating new acronym and links, i.e., `specacronym` and `newspecacronym`.
 
 ### Highlighting Information
 
