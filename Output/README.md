@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.0.19 - June 27, 2017
+**Version:** 0.0.20 - June 28, 2017
 
 **Status:** Initial Development
 
@@ -51,7 +51,7 @@ Use of synchrophasors by U.S. utilities continues to grow following the jump sta
 
 To address these issues, the Advanced Synchrophasor Protocol (ASP) Project was proposed to DOE in response to FOA-1492. In this project proposal, the argument was made for a new protocol that overcomes the limitations of IEEE C37.118 for large-scale synchrophasor data system deployments.  The new protocol proposed leveraged the successful design elements of the secure Gateway Exchange Protocol (GEP) that was originally developed by the Grid Protection Alliance (GPA) as part of the SIEGate project (DE-OE-536).
 
- On May 1, 2017, a DOE grant (DE-OE-859) was awarded to GPA and the other 25 collaborators on ASP Project (see [Contributors](#contributors)) to develop: (1) a detailed definition of new publish-subscribe protocol, now called the Streaming Time-series Transport Protocol (STTP) and (2) software to support it including production-grade implementations of STTP API's in multiple development platforms along with a collection of tools to test and validate the new protocol.
+ On May 1, 2017, a DOE grant (DE-OE-859) was awarded to GPA and the other 25 collaborators on ASP Project (see [Contributors](#contributors) section) to develop: (1) a detailed definition of new publish-subscribe protocol, now called the Streaming Time-series Transport Protocol (STTP) and (2) software to support it including production-grade implementations of STTP API's in multiple development platforms along with a collection of tools to test and validate the new protocol.
 
 ### Scope of this Document
 
@@ -71,7 +71,7 @@ While the format and structure of this document, established to facilitate colla
 
 ### Definition of Key Terms
 
-The words "must", "must not", "required", "shall", "shall not", "should", "should not", "recommended", "may", and "optional" in this document are to be interpreted as described in [RFC 2119](https://tools.ietf.org/html/rfc2119)
+The words "must", "must not", "required", "shall", "shall not", "should", "should not", "recommended", "may", and "optional" in this document are to be interpreted as described in RFC 2119 [[3](#user-content-ref3)].
 
 >:information_source: All the terms below are hyperlinked to a key source for the definition or to a reference where more information is available.
 
@@ -118,7 +118,7 @@ Markdown notes in combination with the [Github Emogi](https://gist.github.com/rx
 
 > :construction: A informal note to document authors to facilitate specification development
 
-> :tomato::question: (author's initials): May be used by anyone to toss out questions and comments that are temporal.  These may be inserted at any point in any of the markdown documents.  These questions will preserved as they are migrated to "QuestionsSummmary.md" from time-to-time.
+> :tomato::question: (author's initials): May be used by anyone to toss out questions and comments that are temporal. These may be inserted at any point in any of the markdown documents.  These questions will preserved as they are migrated to the [QuestionsSummary.md](https://github.com/sttp/Specification/blob/master/QuestionsSummary.md) file from time-to-time.
 
 Code blocks are shown as:
 ```C#
@@ -458,7 +458,7 @@ How does publisher initiated connection, to cross security zones in desired dire
 ## References and Notes
 
 1. <a name="ref1"></a>[IEEE Standard C37.118, Standard for Synchrophasors for Power Systems](https://standards.ieee.org/findstds/standard/C37.118.2-2011.html)
-2. <a name="ref2"></a>[The MIT Open Source Software License](https://raw.githubusercontent.com/sttp/Specification/master/LICENSE)
+2. <a name="ref2"></a>[The MIT Open Source Software License](https://github.com/sttp/Specification/blob/master/LICENSE)
 3. <a name="ref3"></a>[RFC 2119, Current Best Practice](https://tools.ietf.org/html/rfc2119) Scott Bradner, Harvard University, 1997
 4. <a name="ref4"></a>[STTP Repositories on GitHub](https://github.com/sttp), Various specification documents and reference implementations.
 5. <a name="ref5"></a>[New Technology Value, Phasor Gateway](https://www.naspi.org/naspi/sites/default/files/2017-03/PRSP_Phasor_Gateway_Whitepaper_Final_with_disclaimer_Final.pdf), Peak Reliability, September 2016, Task 7 Data Delivery Efficiency Improvements, DE-OE-701.
