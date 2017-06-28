@@ -10,7 +10,11 @@ Data transport requires the use of a command channel using TCP/IP for reliable d
 
 _more_
 
+<<<<<<< HEAD
 > :information_source: Although not precluded from use over other data transports, the design of this protocol is targeted and optimized for use over Internet Protocol (IP), specifically TCP/IP and UDP/IP. Even so, since the command/response implementation and data packet distribution of the STTP protocol is fairly simple, it is expected that commonly available middleware data transport layers, such as ZeroMQ or DDS, could easily support and transmit data using the STTP protocol should any of the messaging distribution and management benefits of these transport layers be useful to a particular deployment environment. However, these types of deployments are outside the scope of this documentation. If needed, STTP integrations with middleware layers should be added as reference implementation repositories to the STTP organizational site <sup>[[4](References.md#user-content-ref4)]</sup>.
+=======
+> :information_source: Although not precluded from use over other data transports, the design of this protocol is targeted and optimized for use over [IP](Definitions.md#user-content-IP), specifically [TCP/IP](Definitions.md#user-content-TCP) and [UDP/IP](Definitions.md#user-content-UDP). Even so, since the command/response implementation and data packet distribution of the STTP protocol is fairly simple, it is expected that commonly available middleware data transport layers, such as [ZeroMQ](Definitions.md#user-content-ZeroMQ) or [DDS](Definitions.md#user-content-DDS), could easily support and transmit data using the STTP protocol should any of the messaging distribution and management benefits of these transport layers be useful to a particular deployment environment. However, these types of deployments are outside the scope of this documentation. If needed, STTP integrations with middleware layers should be added as reference implementation repositories to the STTP organizational site <sup>[[4](References.md#user-content-ref4)]</sup>.
+>>>>>>> origin/master
 
 ### Protocol Feature Summary
 
