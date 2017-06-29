@@ -35,7 +35,9 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 | **GPA** | [Grid Protection Alliance, Inc.](https://www.gridprotectionalliance.org/) |
 | **GPS** | [Global Positioning System](https://en.wikipedia.org/wiki/Global_Positioning_System) |
 | **GUID** | [Globally Unique Identifer](https://en.wikipedia.org/wiki/Universally_unique_identifier) |
+| **ICCP** | [Inter-Control Center Communications Protocol](https://en.wikipedia.org/wiki/IEC_60870-6) |
 | **IP** | [Internet Protocol](https://en.wikipedia.org/wiki/Internet_Protocol) |
+| **ISO** | [Independent System Operator](https://en.wikipedia.org/wiki/Regional_transmission_organization_(North_America)) |
 | **MTU** | [Maximum Transmission Unit](https://en.wikipedia.org/wiki/Maximum_transmission_unit) |
 | **PDC** | [Phasor Data Concentrator](http://en.openei.org/wiki/Definition:Phasor_Data_Concentrator_%28PDC%29) |
 | **PMU** | [Phasor Measurement Unit](https://en.wikipedia.org/wiki/Phasor_measurement_unit) |
