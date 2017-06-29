@@ -178,8 +178,8 @@ function incrementDocumentVersion() {
 
 function pushDocumentUpdates() {
   return through.obj(function(file, encoding, cb) {
-    const stdout = file.exec.stdout;
-    const stderr = file.exec.stderr;
+    const stdout = file.exec ? file.exec.stdout : null;
+    const stderr = file.exec ? file.exec.stderr : null;
     const pushUpdates =
       forcePush ||
       (stdout && stdout.length > 0) ||
