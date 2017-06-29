@@ -18,6 +18,7 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 | [**packet**](https://en.wikipedia.org/wiki/Network_packet) | A frame of data carried by a network whose size is dictated by the MTU |
 | [**phasor**](https://en.wikipedia.org/wiki/Phasor) | A complex equivalent of a simple cosine wave quantity such that the complex modulus is the cosine wave amplitude and the complex angle (in polar form) is the cosine wave phase angle. |
 | [**publish/subscribe**](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) | A messaging pattern where senders of messages, called publishers, do not program the messages to be sent directly to specific receivers, called subscribers, but instead characterize published messages into classes without knowledge of which subscribers, if any, there may be. |
+| [**null**](https://en.wikipedia.org/wiki/Null_pointer) | A value reserved for indicating that a reference, e.g., a pointer, is not initialized and does not refer to a valid object. |
 | **signal** | |
 | [**synchrophasor**](https://en.wikipedia.org/wiki/Phasor_measurement_unit) | A phasor calculated from data samples using a standard time signal as the reference for the measurement. Synchronized phasors from remote sites have a defined common phase relationship. |
 | [**time series**]((https://en.wikipedia.org/wiki/Time_series) | A series of data points indexed in time order, most commonly measured as a sequence taken at successive equally spaced points in time. |
@@ -39,6 +40,7 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 | **IP** | [Internet Protocol](https://en.wikipedia.org/wiki/Internet_Protocol) |
 | **ISO** | [Independent System Operator](https://en.wikipedia.org/wiki/Regional_transmission_organization_(North_America)) |
 | **MTU** | [Maximum Transmission Unit](https://en.wikipedia.org/wiki/Maximum_transmission_unit) |
+| **NaN** | [Not a Number](https://en.wikipedia.org/wiki/NaN) |
 | **PDC** | [Phasor Data Concentrator](http://en.openei.org/wiki/Definition:Phasor_Data_Concentrator_%28PDC%29) |
 | **PMU** | [Phasor Measurement Unit](https://en.wikipedia.org/wiki/Phasor_measurement_unit) |
 | **STTP** | [Streaming Telemetry Transport Protocol](https://github.com/sttp/) |
