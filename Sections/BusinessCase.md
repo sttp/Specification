@@ -1,6 +1,6 @@
 ## Business case
 
-At the conclusion of the STTP project in April 2019, the new STTP will be a well-tested, thoroughly vetted, production-grade protocol that will be supported by project team vendors.  An open source tool suite for STTP will be developed as part of the project (see [Appendix A](APIReference.md)) that will include a test harness that will allow utilities and vendors outside the project to test and validate STTP in their systems and API's.
+At the conclusion of the STTP project in April 2019, STTP will be a well-tested, thoroughly vetted, production-grade protocol that will be supported by project team vendors.  An open source tool suite for STTP will be developed as part of the project (see [Appendix A](APIReference.md)) that will include a test harness that will allow utilities and vendors outside the project to test and validate STTP in their systems and API's.
 
 STTP offers both short-term cost savings and strategic value in that it is:
 
@@ -22,9 +22,9 @@ GEP automatically exchanges and synchronizes measurement level meta-data using a
 
 #### An Enabling Technology
 
-It's possible that a protocol like STTP which allows secure, low-latency, high-volume data exchange among utilities at low cost can be a major factor in driving change in the industry.  New forms of inter-utility interaction will be possible, and new approaches for providing utility information services will be realizable.  In addition, STTP provides an alternative to the existing method for utility data exchange that will enable future generations of SCADA/EMS systems to both (1) utilize full-resolution synchrophasor data streams and (2) significantly reduce the cost of maintaining the configuration of components to exchange other real-time data.
+It's possible that a protocol like STTP which allows secure, low-latency, high-volume data exchange among utilities at low cost can be a major factor in driving change in the industry.  New higher-speed forms of inter-utility interaction will be possible, and new approaches for providing utility information services will be realizable.  In addition, STTP provides an alternative to the existing method for utility data exchange that will enable future generations of SCADA/EMS systems to both (1) utilize full-resolution synchrophasor data streams and (2) significantly reduce the cost of maintaining the configuration of components to exchange other real-time data.
 
-> :information_source: ICCP (IEC 60870-6/TASE.2) is the international standard used to exchange "real-time" SCADA data among utilities.  It's not uncommon for an ISO/RTO to consume hundreds of thousands of SCADA data points via ICCP from its member utilities and to exchange an equal number of points with its ISO/RTO neighbors. "Real-time" can be at a fast scan rate (every 2 seconds for regulation), or "real-time" data can be at a slower scan rate (every 4 seconds or every 10 seconds) for transmission system data.  Some data (generally analog measurement data) is exchanged continuously and some data (generally bi-modal data) like breaker status is only exchanged "on change".  ICCP came into coordinated use in North America in the mid-1990s.
+> :information_source: ICCP (IEC 60870-6/TASE.2) is the international standard used to exchange "real-time" SCADA data among electric utilities.  It's not uncommon for an ISO/RTO to consume hundreds of thousands of SCADA data points via ICCP from its member utilities and to exchange an equal number of points with its ISO/RTO neighbors. Real-time can be at a fast scan rate (every 2 seconds for regulation), or real-time data can be at a slower scan rate (every 4 seconds or every 10 seconds) for transmission system data.  Some data (generally analog measurement data) is exchanged continuously and some data (generally bi-modal data) like breaker status is only exchanged "on change".  ICCP came into coordinated use in North America in the mid-1990s.
 
 #### Built Upon A Proven Approach
 
