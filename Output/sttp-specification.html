@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.0.20 - June 28, 2017</p>
+<p><strong>Version:</strong> 0.0.21 - June 29, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -767,7 +767,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <h4 id="disclaimer">Disclaimer</h4>
 <p>This document was prepared as a part of work sponsored by an agency of the United States Government (DE-OE-0000859).  Neither the United States Government nor any agency thereof, nor any of their employees, makes any warranty, express or implied, or assumes any legal liability or responsibility for the accuracy, completeness, or usefulness of any information, apparatus, product, or process disclosed, or represents that its use would not infringe privately owned rights.  Reference herein to any specific commercial product, process, or service by trade name, trademark, manufacturer, or otherwise does not necessarily constitute or imply its endorsement, recommendation, or favoring by the United States Government or any agency thereof.  The views and opinions of authors expressed herein do not necessarily state or reflect those of the United States Government or any agency thereof.</p>
 <h4 id="license">License</h4>
-<p>This specification is free software and it can be redistributed and/or modified under the terms of the MIT License [<a href="#ref2">2</a>]. This specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.</p>
+<p>This specification is free software and it can be redistributed and/or modified under the terms of the MIT License <sup>[<a href="#ref2">2</a>]</sup>. This specification is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.</p>
 <h2 id="table-of-contents">Table of Contents</h2>
 <table>
 <thead>
@@ -860,7 +860,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </tbody>
 </table>
 <h2 id="introduction">Introduction</h2>
-<p>Use of synchrophasors by U.S. utilities continues to grow following the jump start provided by the Smart Grid Investment Grants. Even so, the dominant method to exchange synchrophasor data remains the IEEE C37.118-2005 [<a href="#ref1">1</a>] protocol that was designed for and continues to be the preferred solution for substation-to-control room communications.  It achieves its advantages through use of an ordered set (a frame) of information that is associated with a specific measurement time.  When IEEE C37.118 is used for PDC-to-PDC communication or for PDC-to-Application communication, large data frames are typically distributed to multiple systems.  To address the challenges presented by these large frame sizes, many utilities implement purpose-built networks for synchrophasor data only.  Even with these purpose-built networks, large frame sizes result in an increased probability of UDP frame loss, or in the case of TCP, increased communication latency.  In addition, IEEE C37.118 has only prescriptive methods for the management of measurement metadata which is well-suited for substation-to-control-center use but which becomes difficult to manage as this metadata spans analytic solutions and is used by multiple configuration owners in a wide-area context.</p>
+<p>Use of synchrophasors by U.S. utilities continues to grow following the jump start provided by the Smart Grid Investment Grants. Even so, the dominant method to exchange synchrophasor data remains the IEEE C37.118-2005 <sup>[<a href="#ref1">1</a>]</sup> protocol that was designed for and continues to be the preferred solution for substation-to-control room communications.  It achieves its advantages through use of an ordered set (a frame) of information that is associated with a specific measurement time.  When IEEE C37.118 is used for PDC-to-PDC communication or for PDC-to-Application communication, large data frames are typically distributed to multiple systems.  To address the challenges presented by these large frame sizes, many utilities implement purpose-built networks for synchrophasor data only.  Even with these purpose-built networks, large frame sizes result in an increased probability of UDP frame loss, or in the case of TCP, increased communication latency.  In addition, IEEE C37.118 has only prescriptive methods for the management of measurement metadata which is well-suited for substation-to-control-center use but which becomes difficult to manage as this metadata spans analytic solutions and is used by multiple configuration owners in a wide-area context.</p>
 <p>To address these issues, the Advanced Synchrophasor Protocol (ASP) Project was proposed to DOE in response to FOA-1492. In this project proposal, the argument was made for a new protocol that overcomes the limitations of IEEE C37.118 for large-scale synchrophasor data system deployments.  The new protocol proposed leveraged the successful design elements of the secure Gateway Exchange Protocol (GEP) that was originally developed by the Grid Protection Alliance (GPA) as part of the SIEGate project (DE-OE-536).</p>
 <p>On May 1, 2017, a DOE grant (DE-OE-859) was awarded to GPA and the other 25 collaborators on ASP Project (see <a href="#contributors">Contributors</a> section) to develop: (1) a detailed definition of new publish-subscribe protocol, now called the Streaming Time-series Transport Protocol (STTP) and (2) software to support it including production-grade implementations of STTP API's in multiple development platforms along with a collection of tools to test and validate the new protocol.</p>
 <h3 id="scope-of-this-document">Scope of this Document</h3>
@@ -874,7 +874,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Please add liberally to this section as terms are introduced in the spec</p>
 </blockquote>
 <h3 id="definition-of-key-terms">Definition of Key Terms</h3>
-<p>The words "must", "must not", "required", "shall", "shall not", "should", "should not", "recommended", "may", and "optional" in this document are to be interpreted as described in RFC 2119 [<a href="#ref3">3</a>].</p>
+<p>The words "must", "must not", "required", "shall", "shall not", "should", "should not", "recommended", "may", and "optional" in this document are to be interpreted as described in RFC 2119 <sup>[<a href="#ref3">3</a>]</sup>.</p>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> All the terms below are hyperlinked to a key source for the definition or to a reference where more information is available.</p>
 </blockquote>
@@ -892,11 +892,23 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>frame</strong></td>
-<td style="text-align:left;"></td>
+<td style="text-align:left;">A data-structure composed of primitive data types that has been serialized into a discrete binary package.</td>
+</tr>
+<tr>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Endianness"><strong>endianess</strong></a></td>
+<td style="text-align:left;">The hardware prescribed ordinal direction of the bits used to represent a numerical value in computer memory; usually noted as either <em>big</em> or <em>little</em>.</td>
+</tr>
+<tr>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Ethernet"><strong>Ethernet</strong></a></td>
+<td style="text-align:left;">Frame based data transmission technology used in local area networks.</td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>measurement</strong></td>
 <td style="text-align:left;"></td>
+</tr>
+<tr>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Network_packet"><strong>packet</strong></a></td>
+<td style="text-align:left;">A frame of data carried by a network whose size is dictated by the MTU</td>
 </tr>
 <tr>
 <td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Phasor"><strong>phasor</strong></a></td>
@@ -938,6 +950,10 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Application_programming_interface">Application Program Interface</a></td>
 </tr>
 <tr>
+<td style="text-align:right;"><strong>BES</strong></td>
+<td style="text-align:left;"><a href="http://www.nerc.com/pa/RAPA/Pages/BES.aspx">Bulk Electric System</a></td>
+</tr>
+<tr>
 <td style="text-align:right;"><strong>DOE</strong></td>
 <td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/United_States_Department_of_Energy">United States Department of Energy</a></td>
 </tr>
@@ -952,6 +968,10 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <tr>
 <td style="text-align:right;"><strong>GPA</strong></td>
 <td style="text-align:left;"><a href="https://www.gridprotectionalliance.org/">Grid Protection Alliance, Inc.</a></td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>GPS</strong></td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Global_Positioning_System">Global Positioning System</a></td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>GUID</strong></td>
@@ -1012,15 +1032,39 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <h2 id="protocol-overview">Protocol Overview</h2>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Purpose of protocol, fundamentals of how it works (command and data) - include sub-section titles ( 4# items) as needed</p>
-  <p>Describe what protocol is and is not - how it could operate with ZeroMQ, DDS, etc. as a transport layer - how it is different than thrift, protobuf, etc., i.e., atomized approach to native-type data vs serializing and deserializing data structures - why this has benefit at scale (i.e., very large structures)</p>
 </blockquote>
-<p>Data transport requires the use of a command channel using TCP/IP for reliable delivery of important commands. Optionally a secondary data channel can be established using UDP/IP for the transport of data that can tolerate loss. When no secondary UDP/IP is used, both commands and data will share use of the TCP/IP channel for communications.</p>
+<p>In typical messaging exchange paradigms, blocks of structured data need to be exchanged between one or more applications where the applications can be running on different physical hardware or on the same machine. The structured data to be exchanged is most often composed of simpler primitive data types <sup>[<a href="#ref6">6</a>]</sup>. Since the applications exchanging the data can be running on disparate operating systems, the details of the serialization of the data structures <sup>[<a href="#ref7">7</a>]</sup> can be complex and diverse. Such issues can include proper handling of the endianess of the primitive data types which may differ from the system that is deserializing the data and differences in the interpretation of how character data is encoded <sup>[<a href="#ref8">8</a>]</sup>.</p>
+<p>Existing solutions to the problem of serializing data structures in computer science field are very mature. There are various existing technologies that exist to help mitigate most issues with data structure serialization, such as Google Protocol Buffers <sup>[<a href="#ref9">9</a>]</sup> and Apache Thrift <sup>[<a href="#ref10">10</a>]</sup>. These commonly used frameworks create compact cross-platform serializations of the data structures to be exchanged. For the purposes of this specification these serialized data structures are referred to as <em>frames</em>.</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> In the electric power industry, the IEEE C37.118 <sup>[<a href="#ref1">1</a>]</sup> protocol exists as a standard serialization format for the exchange of synchrophasor data which is measured with an accurate time source, e.g., a GPS clock, and transmitted at fast data rates, up to 120 frames per second. Measured data sent by this protocol is still simply a frame of serialized primitive types which includes fields such as a timestamp, status flags, phasor angle / magnitude pairs, etc. The IEEE C37.118 protocol also prescribes the combination of data frames received from multiple source devices for the same timestamp into one large combined frame in a process known as concentration. The concentration process demands that a waiting period be established to make sure all the expected data frames for a given timestamp arrive. If any frames of data do not arrive before the waiting period expires, the overall combined frame is published anyway with <em>null</em> frames occupying space for any missing frames.</p>
+</blockquote>
+<p>For smaller, discrete frames of data, existing serialization and transport technologies are fast and highly effective. However, as the data structures become larger it becomes more costly, in terms of both memory allocation and computational processing, to serialize and deserialize the data structures. Because of this, large frames of data are not recommended for use by these serialization technologies <sup>[<a href="#ref11">11</a>]</sup> <sup>[<a href="#ref12">12</a>]</sup>. Additionally, and perhaps more importantly, there are also penalties that occur at the network transport layer.</p>
+<h3 id="large-frame-network-impact">Large Frame Network Impact</h3>
+<p>In terms of Internet Protocol (IP), all frames of data to be transmitted that exceed the negotiated maximum transmission unit (MTU) size (typically 1,500 bytes for Ethernet networks <sup>[<a href="#ref13">13</a>]</sup>) are divided into multiple fragments where each fragment is called a network packet. As such, larger frames of data produce more network packets.</p>
+<p>The impact of large frames on the network is further compounded by the fact that IP is inherently unreliable by design. Network packets can only be transmitted over a connection one packet at a time. When two or more network packets arrive for transmission at any physical network media point at the same time, the result is a collision where only one packet gets sent and the others get dropped <sup>[<a href="#ref14">14</a>]</sup>. IP defines a variety of different transport protocols for network packet transmission, each of which behave in different manners when dealing with packet loss.</p>
+<h4 id="large-frame-impacts-on-tcpip">Large Frame Impacts on TCP/IP</h4>
+<p>The most common Internet protocol, TCP/IP, creates an index for each of the network packets being sent for a frame of data and verifies that each are successfully delivered, retransmitting packets as many times as needed in the case of loss. This functionality is the basis for TCP being considered a <em>reliable</em> data transmission protocol.</p>
+<p>Since each packet of data for the transmitted frame is sequentially ordered, TCP is able to fully reconstruct and deliver the original frame once all the packets have arrived. However, for very large frames of data this causes TCP to suffer from the same kinds impacts on memory allocation and computational burden as the aforementioned serialization technologies, i.e., Protocol Buffers and Thrift. The unique distinction for IP based protocols is that the impact of the issues end up affecting every element of the interconnected network infrastructure between the source and sync of the data being exchanged.</p>
+<p>Another critical impact that is unique to TCP is that for data that needs to be delivered in a very timely fashion, retransmissions of lost frames can also cause cumulative time delays <sup>[<a href="#ref15">15</a>]</sup>, especially as large data frames are published at rapid data rates. Time delays are exacerbated during periods of heightened network activity which induces congestion causing increased collisions.</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> Synchrophasor data <sup>[<a href="#ref1">1</a>]</sup> is the source for real-time visualization and analysis tools which are used to operate the bulk electric system (BES) <sup>[<a href="#ref16">16</a>]</sup>. This real-time data is required to be accurate, dependable and timely in order to be useful for grid operators <sup>[<a href="#ref17">17</a>]</sup>. Any delays in the delivery of this data could have adverse affects on operational decisions impacting the BES.</p>
+</blockquote>
+<h4 id="large-frame-impacts-on-udpip">Large Frame Impacts on UDP/IP</h4>
+<p>Another very common Internet protocol is UDP/IP. Transmission of data over UDP differs from TCP in the fact that UDP does not attempt to retransmit data nor does make any attempts to verify the order of the transmitted packets. This functionality is the basis for UDP being considered a <em>lossy</em> data transmission protocol, but more lightweight as compared to TCP.</p>
+<p>Even with the unreliable delivery caveats, UDP will still attempt to reconstruct and deliver the originally transmitted frame of data. However, even if a single network packet is lost, the entire original frame will be lost with any packets that were already accumulated being discarded <sup>[<a href="#ref18">18</a>]</sup>, there are partial frame publications - frame delivery is an all or nothing operation.</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> As compared to TCP, because UDP does not retransmit dropped network packets it does not suffer from issues with induced time delays and its lightweight nature reduces overall network bandwidth requirements. As a result, UDP is often the protocol of choice when sending synchrophasor <sup>[<a href="#ref1">1</a>]</sup> data <sup>[<a href="#ref19">19</a>]</sup>.</p>
+</blockquote>
+<p>Since UDP attempts frame reconstruction with the received packets, the impact of very large frames of data with UDP are similar to those with TCP and serialization technologies in that there are increased impacts on memory allocation and computational processing throughout the network infrastructure between source and destination of the data.</p>
+<p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> .. speak to increased overall data loss with large UDP frames, citing Peak RC tests... Large frame issues at this point will be well established, now include details on how the STTP protocol is different/ better in these regards. A packet diagram comparing frames to measurements would be useful...  </p>
+<h3 id="protocol-transport-channels">Protocol Transport Channels</h3>
+<p>STTP data transport requires the use of a command channel using TCP/IP for reliable delivery of important commands. Optionally a secondary data channel can be established using UDP/IP for the transport of data that can tolerate loss. When no secondary UDP/IP is used, both commands and data will share use of the TCP/IP channel for communications.</p>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> JRC: <em>The question has been raised if a UDP only transport should be allowed? In this mode, any critical commands and responses would basically be sent over UDP. Thought would need to be given to commands and/or responses that never arrive and the consequences thereof.</em></p>
 </blockquote>
 <p><em>more</em></p>
 <blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> Although not precluded from use over other data transports, the design of this protocol is targeted and optimized for use over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a>, specifically TCP/IP and UDP/IP. Even so, since the command/response implementation and data packet distribution of the STTP protocol is fairly simple, it is expected that commonly available middleware data transport layers, such as <a href="http://zeromq.org/">ZeroMQ</a> or <a href="http://www.omg.org/spec/DDS/">Data Distribution Service</a> (DDS), could easily support and transmit data using the STTP protocol should any of the messaging distribution and management benefits of these transport layers be useful to a particular deployment environment. However, these types of deployments are outside the scope of this documentation. If needed, STTP integrations with middleware layers should be added as reference implementation repositories to the <a href="https://github.com/sttp/">STTP organizational site</a>.</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> Although not precluded from use over other data transports, the design of this protocol is targeted and optimized for use over Internet Protocol (IP), specifically TCP/IP and UDP/IP. Even so, since the command/response implementation and data packet distribution of the STTP protocol is fairly simple, it is expected that commonly available middleware data transport layers, such as ZeroMQ or DDS, could easily support and transmit data using the STTP protocol should any of the messaging distribution and management benefits of these transport layers be useful to a particular deployment environment. However, these types of deployments are outside the scope of this documentation. If needed, STTP integrations with middleware layers should be added as reference implementation repositories to the STTP organizational site <sup>[<a href="#ref4">4</a>]</sup>.</p>
 </blockquote>
 <h3 id="protocol-feature-summary">Protocol Feature Summary</h3>
 <blockquote>
@@ -1052,7 +1096,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </ul>
 <h3 id="reduces-first-cost">Reduces First Cost</h3>
 <ul>
-<li><p>GEP has been measured [<a href="#ref5">5</a>] to have less than half the band width requirements of IEEE C37.118 [<a href="#ref1">1</a>] when used with TCP and simple methods for lossless compression.  With the compression, a single signal or measurement point (i.e., an identifier, timestamp, value and quality code) requires only 2.5 bytes. By comparison, IEEE C37.118 requires 4.5 bytes per measurement on average.</p></li>
+<li><p>GEP has been measured <sup>[<a href="#ref5">5</a>]</sup> to have less than half the band width requirements of IEEE C37.118 <sup>[<a href="#ref1">1</a>]</sup> when used with TCP and simple methods for lossless compression.  With the compression, a single signal or measurement point (i.e., an identifier, timestamp, value and quality code) requires only 2.5 bytes. By comparison, IEEE C37.118 requires 4.5 bytes per measurement on average.</p></li>
 <li><p>The signal-based GEP protocol incorporates Pub/Sub data exchange methods so that unnecessary data points need not be exchanged – thereby further reducing overall bandwidth requirements as compared to IEEE C37.118.</p></li>
 </ul>
 <h3 id="reduces-operating-cost">Reduces Operating Cost</h3>
@@ -1397,11 +1441,25 @@ count may not match requested points due to rights or points may no longer exist
 </ul>
 <h2 id="references-and-notes">References and Notes</h2>
 <ol>
-<li><a name="ref1"></a><a href="https://standards.ieee.org/findstds/standard/C37.118.2-2011.html">IEEE Standard C37.118, Standard for Synchrophasors for Power Systems</a></li>
+<li><a name="ref1"></a><a href="https://standards.ieee.org/findstds/standard/C37.118.2-2011.html">IEEE Standard C37.118, Standard for Synchrophasors for Power Systems</a>, IEEE</li>
 <li><a name="ref2"></a><a href="https://github.com/sttp/Specification/blob/master/LICENSE">The MIT Open Source Software License</a></li>
 <li><a name="ref3"></a><a href="https://tools.ietf.org/html/rfc2119">RFC 2119, Current Best Practice</a> Scott Bradner, Harvard University, 1997</li>
 <li><a name="ref4"></a><a href="https://github.com/sttp">STTP Repositories on GitHub</a>, Various specification documents and reference implementations.</li>
 <li><a name="ref5"></a><a href="https://www.naspi.org/naspi/sites/default/files/2017-03/PRSP_Phasor_Gateway_Whitepaper_Final_with_disclaimer_Final.pdf">New Technology Value, Phasor Gateway</a>, Peak Reliability, September 2016, Task 7 Data Delivery Efficiency Improvements, DE-OE-701.</li>
+<li><a name="ref6"></a><a href="https://en.wikipedia.org/wiki/Primitive_data_type">Primitive Data Types</a>, Wikipedia</li>
+<li><a name="ref7"></a><a href="https://en.wikipedia.org/wiki/Serialization">Data Structure Serialization</a>, Wikipedia</li>
+<li><a name="ref8"></a><a href="https://en.wikipedia.org/wiki/Character_encoding">Character Encoding</a>, Wikipedia</li>
+<li><a name="ref9"></a><a href="https://developers.google.com/protocol-buffers/">Google Protocol Buffers</a></li>
+<li><a name="ref10"></a><a href="https://thrift.apache.org/">Apache Thrift</a></li>
+<li><a name="ref11"></a><a href="https://developers.google.com/protocol-buffers/docs/techniques#large-data">Protocol Buffers - Techniques - Large Data Sets</a></li>
+<li><a name="ref12"></a><a href="https://github.com/apache/thrift/blob/master/doc/specs/thrift-rpc.md#framed-vs-unframed-transport">Thrift Remote Procedure Call - Protocol considerations - Framed vs. unframed transport</a></li>
+<li><a name="ref13"></a><a href="https://support.microsoft.com/en-us/help/314496/the-default-mtu-sizes-for-different-network-topologies">The default MTU sizes for different network topologies</a>, Microsoft, Article ID: 314496, June 19, 2014</li>
+<li><a name="ref14"></a><a href="https://howdoesinternetwork.com/2011/collisions">Collisions and collision detection – What are collisions in Ethernet?</a>, Valter Popeskic, November 16, 2011</li>
+<li><a name="ref15"></a><a href="http://dna-pubs.cs.columbia.edu/citation/paperfile/164/votcp-cucs-023-07.pdf">The Delay-Friendliness of TCP</a>, Eli Brosh, Salman Abdul Base, Vishal Misra, Dan Rubenstein, Henning Schulzrinne, pages 7-8, October 2010</li>
+<li><a name="ref16"></a><a href="http://www.nerc.com/pa/RAPA/BES%20DL/bes_phase2_reference_document_20140325_final_clean.pdf">Bulk Electric System Definition Reference Document</a>, North American Electric Reliability Corporation, April, 2014</li>
+<li><a name="ref17"></a><a href="http://www.nerc.com/docs/oc/rapirtf/RAPIR%20final%20101710.pdf">Real-Time Application of Synchrophasors for Improving Reliability</a>, RAPIR Task Force, October 18, 2010</li>
+<li><a name="ref18"></a><a href="https://notes.shichao.io/tcpv1/ch10/#ip-fragmentation">User Datagram Protocol (UDP) and IP Fragmentation</a>, Shichao's Notes, Chapter 10</li>
+<li><a name="ref19"></a><a href="https://selinc.com/solutions/synchrophasors/report/115281/#different-communications-methods-using-sel-pmus-and-pdcs">Synchrophasors and Communications Bandwidth</a>, Schweitzer Engineering Laboratories, April 1, 2017-03</li>
 </ol>
 <h2 id="contributors">Contributors</h2>
 <p>The following individuals actively participated in the development of this standard.</p>
