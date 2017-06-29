@@ -28,4 +28,4 @@ It's possible that a protocol like STTP which allows secure, low-latency, high-v
 
 #### Built Upon A Proven Approach
 
- STTP will enhance the successful design elements of the Gateway Exchange Protocol (GEP) as a foundation and improve upon it. GEP currently in production use by Dominion, Entergy, MISO, PeakRC, TVA, FP&L, Southern Company, among others.
+ STTP will enhance the successful design elements of the Gateway Exchange Protocol (GEP) as a foundation and improve upon it. GEP is currently in production use by Dominion, Entergy, MISO, PeakRC, TVA, FP&L, Southern Company, among others.
