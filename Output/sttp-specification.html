@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.0.22 - June 29, 2017</p>
+<p><strong>Version:</strong> 0.0.23 - June 30, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -891,6 +891,10 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <td style="text-align:left;">A measurement on a single member of a statistical population.</td>
 </tr>
 <tr>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Data_structure"><strong>data structure</strong></a></td>
+<td style="text-align:left;">An organized set of primitive data types where each element has meaningful named.</td>
+</tr>
+<tr>
 <td style="text-align:right;"><strong>frame</strong></td>
 <td style="text-align:left;">A data-structure composed of primitive data types that has been serialized into a discrete binary package.</td>
 </tr>
@@ -908,15 +912,27 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </tr>
 <tr>
 <td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Network_packet"><strong>packet</strong></a></td>
-<td style="text-align:left;">A frame of data carried by a network whose size is dictated by the MTU</td>
+<td style="text-align:left;">Also called <em>network packet</em>. A block of data carried by a network whose size is dictated by the MTU.</td>
 </tr>
 <tr>
 <td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Phasor"><strong>phasor</strong></a></td>
 <td style="text-align:left;">A complex equivalent of a simple cosine wave quantity such that the complex modulus is the cosine wave amplitude and the complex angle (in polar form) is the cosine wave phase angle.</td>
 </tr>
 <tr>
+<td style="text-align:right;"><a href="(https://en.wikipedia.org/wiki/Primitive_data_type"><strong>primitive type</strong></a></td>
+<td style="text-align:left;">Also called <em>primitive data type</em>. A specific type of data provided by a programming language referenced by a keyword that represents the most basic unit of data storage - examples can include integer, float and boolean values.</td>
+</tr>
+<tr>
 <td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern"><strong>publish/subscribe</strong></a></td>
 <td style="text-align:left;">A messaging pattern where senders of messages, called publishers, do not program the messages to be sent directly to specific receivers, called subscribers, but instead characterize published messages into classes without knowledge of which subscribers, if any, there may be.</td>
+</tr>
+<tr>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Null_pointer"><strong>null</strong></a></td>
+<td style="text-align:left;">A value reserved for indicating that a reference, e.g., a pointer, is not initialized and does not refer to a valid object.</td>
+</tr>
+<tr>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Serialization"><strong>serialization</strong></a></td>
+<td style="text-align:left;">Process of transforming data structures into a format that is suitable for storage or transmission over a network.</td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>signal</strong></td>
@@ -978,12 +994,24 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">Globally Unique Identifer</a></td>
 </tr>
 <tr>
+<td style="text-align:right;"><strong>ICCP</strong></td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/IEC_60870-6">Inter-Control Center Communications Protocol</a></td>
+</tr>
+<tr>
 <td style="text-align:right;"><strong>IP</strong></td>
 <td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a></td>
 </tr>
 <tr>
+<td style="text-align:right;"><strong>ISO</strong></td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Regional_transmission_organization_(North_America)">Independent System Operator</a></td>
+</tr>
+<tr>
 <td style="text-align:right;"><strong>MTU</strong></td>
 <td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Maximum_transmission_unit">Maximum Transmission Unit</a></td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>NaN</strong></td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/NaN">Not a Number</a></td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>PDC</strong></td>
@@ -1033,12 +1061,12 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Purpose of protocol, fundamentals of how it works (command and data) - include sub-section titles ( 4# items) as needed</p>
 </blockquote>
-<p>In typical messaging exchange paradigms a source application hosts a block of structured data, composed in memory, with the intent to transmit the data to one or more receiving applications. The data has <em>structure</em> in the sense that it exists as a collection of simpler primitive data types <sup>[<a href="#ref6">6</a>]</sup> where each of the data elements is given a name to provide useful context and meaning; most programming languages represent data structures using a primary key word, e.g., <code>class</code> or <code>struct</code>. Before transmission, the data structure must be serialized <sup>[<a href="#ref7">7</a>]</sup>, this is necessary because the programming language of the source application which hosts the data structure defines the structure in memory using a format that is optimized for use in the application. The process of serializing the data structure causes each of the data elements to be translated into a format that is easily transmitted over a network and is suitable for deserialization by a receiving application.</p>
+<p>In typical messaging exchange paradigms a source application hosts a block of structured data, composed in memory, with the intent to transmit the data to one or more receiving applications. The data has <em>structure</em> in the sense that it exists as a collection of simpler primitive data types <sup>[<a href="#ref6">6</a>]</sup> where each of the data elements is given a name to provide useful context and meaning; most programming languages represent data structures using a primary key word, e.g., <code>class</code> or <code>struct</code>. Before transmission, the data structure must be serialized <sup>[<a href="#ref7">7</a>]</sup> - this is necessary because the programming language of the source application which hosts the data structure defines the structure in memory using a format that is optimized for use in the application. The process of serializing the data structure causes each of the data elements to be translated into a format that is easily transmitted over a network and is suitable for deserialization by a receiving application.</p>
 <p>The applications that are sending and receiving data structures can be running on the same machine or on different physical hardware with disparate operating systems. As a result, the details of the data structure serialization format can be complex and diverse. Such complexities can include issues with proper handling of the endianess of the primitive data types during serialization which may differ from the system that is deserializing the data, or differences in the interpretation of how character data is encoded <sup>[<a href="#ref8">8</a>]</sup>.</p>
-<p>The subject of serializing data structures in the computer science field has become very mature. Today most computer programming languages, or their associated frameworks, include various options for serializing data structures in multiple formats. However, these solutions tend to only work within their target ecosystems and are usually not very interoperable with other frameworks or languages.</p>
-<p>When interoperability is important, other technologies exist that focus on data structure serialization that works regardless of hardware, operating system or programming language. Two of these serialization technologies that are in wide use are Google Protocol Buffers <sup>[<a href="#ref9">9</a>]</sup> and Apache Thrift <sup>[<a href="#ref10">10</a>]</sup>. Both of these serialization frameworks create highly compact, cross-platform serializations of data structures with APIs that exist in commonly used programming languages.</p>
+<p>The subject of serializing data structures in the field of computer science has become very mature; many solutions exist to manage the complexities of serialization. Today most computer programming languages, or their associated frameworks, include various options for serializing data structures in multiple formats. However, these solutions tend to only work within their target ecosystems and are usually not very interoperable with other frameworks or languages.</p>
+<p>When interoperability is important, other technologies exist that focus on data structure serialization that works regardless of hardware, operating system or programming language. Two of these serialization technologies that are in wide use are Google Protocol Buffers <sup>[<a href="#ref9">9</a>]</sup> and the Facebook developed Apache Thrift <sup>[<a href="#ref10">10</a>]</sup>. Both of these serialization frameworks create highly compact, cross-platform serializations of data structures with APIs that exist in many commonly used programming languages.</p>
 <blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> In the electric power industry, the IEEE C37.118 <sup>[<a href="#ref1">1</a>]</sup> protocol exists as a standard serialization format for the exchange of synchrophasor data, Synchrophasor data is typically measured with an accurate time source, e.g., a GPS clock, and transmitted at high-speed data rates, up to 120 frames per second. Measured data sent by this protocol is still simply a frame of serialized primitive types which includes data elements such as a timestamp, status flags, phasor angle / magnitude pairs, etc. The IEEE C37.118 protocol also prescribes the combination of data frames received from multiple source devices for the same timestamp into one large combined frame in a process known as concentration. The concentration process demands that a waiting period be established to make sure all the expected data frames for a given timestamp arrive. If any frames of data do not arrive before the waiting period expires, the overall combined frame is published anyway. Since the frame format is fixed, empty data elements that have no defined value, e.g., not-a-number or null, still occupy space for the missing frames.</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> In the electric power industry, the IEEE C37.118 <sup>[<a href="#ref1">1</a>]</sup> protocol exists as a standard serialization format for the exchange of synchrophasor data. Synchrophasor data is typically measured with an accurate time source, e.g., a GPS clock, and transmitted at high-speed data rates, up to 120 frames per second. Measured data sent by this protocol is still simply a frame of serialized primitive types which includes data elements such as a timestamp, status flags, phasor angle / magnitude pairs, etc. The IEEE C37.118 protocol also prescribes the combination of data frames received from multiple source devices for the same timestamp into one large combined frame in a process known as concentration. The concentration process demands that a waiting period be established to make sure all the expected data frames for a given timestamp arrive. If any frames of data do not arrive before the waiting period expires, the overall combined frame is published anyway. Since the frame format is fixed, empty data elements that have no defined value, e.g., NaN or null, still occupy space for the missing frames.</p>
 </blockquote>
 <p>For smaller sized, discrete data structures, the existing available serialization technologies are very fast and highly effective. However, as the data structures become larger, the process of serialization and deserialization becomes more costly in terms of both memory allocation and computational processing. Because of this, large frames of data are not recommended for use by these serialization technologies <sup>[<a href="#ref11">11</a>]</sup> <sup>[<a href="#ref12">12</a>]</sup>. Additionally, and perhaps more importantly, there are also penalties that occur at the network transport layer.</p>
 <blockquote>
@@ -1072,7 +1100,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <li>The nature of IP is not going to change</li>
 <li>With STTP, delivery of the data is made more atomic to fit within MTU size, i.e., data is reduced to its primitive types and only the values that will fit into a single packet are transmitted to reduce (or eliminate) frame fragmentation - contrast previous large frame impacts where possible</li>
 <li>Sending primitives instead of data structure can increase bandwidth, but it will reduce data losses (cite GEP testing)</li>
-<li>External APIs exist (e.g., openECA) to manage serialization and deserialization of data structures from primitives - so the data structure, if useful, while managing data delivery of the primitive types - add note that technically IEEE C37.118 is just a data structure mapping to primitives</li>
+<li>External APIs exist (e.g., openECA) to manage serialization and deserialization of data structures from primitives - so the data structure, if useful, while managing data delivery of the primitive types can still be used - add note that technically IEEE C37.118 is just a data structure mapping to primitives</li>
 <li>Managing data at the primitive level adds granular control of access control rights as well as ability for data receivers to "subscribe" to only the data of interest</li>
 <li>Introduce individual primitive values as time series data points - time required(?), but may simply be an auto-incrementing integer value</li>
 <li>For each time series data point, rich metadata will be made available</li>
@@ -1109,37 +1137,23 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> Although not precluded from use over other data transports, the design of this protocol is targeted and optimized for use over Internet Protocol (IP), specifically TCP/IP and UDP/IP. Even so, since the command/response implementation and data packet distribution of the STTP protocol is fairly simple, it is expected that commonly available middleware data transport layers, such as ZeroMQ or DDS, could easily support and transmit data using the STTP protocol should any of the messaging distribution and management benefits of these transport layers be useful to a particular deployment environment. However, these types of deployments are outside the scope of this documentation. If needed, STTP integrations with middleware layers should be added as reference implementation repositories to the STTP organizational site <sup>[<a href="#ref4">4</a>]</sup>.</p>
 </blockquote>
 <h2 id="business-case">Business case</h2>
-<p>At the conclusion of the STTP project in April 2019, the new STTP will be a well-tested, thoroughly vetted, production-grade protocol that will be supported by project team vendors.  An open source tool suite for STTP will be developed as part of the project (see <a href="#appendix-a---sttp-api-reference">Appendix A</a>) that will include a test harness that will allow utilities and vendors outside the project to test and validate STTP in their systems and API's.</p>
+<p>At the conclusion of the STTP project in April 2019, STTP will be a well-tested, thoroughly vetted, production-grade protocol that will be supported by project team vendors.  An open source tool suite for STTP will be developed as part of the project (see <a href="#appendix-a---sttp-api-reference">Appendix A</a>) that will include a test harness that will allow utilities and vendors outside the project to test and validate STTP in their systems and API's.</p>
 <p>STTP offers both short-term cost savings and strategic value in that it is:</p>
-<h3 id="intrinsically-more-robust-with-less-data-loss">Intrinsically More Robust with Less Data Loss</h3>
-<ul>
-<li><p>By design, STTP packet sizes are small and are optimized for network MTU size reducing fragmentation which results in more efficient TCP performance and less overall data loss with UDP.</p></li>
-<li><p>STTP puts significantly less stress on network routing equipment and facilitates mixing of streaming data traffic and other general network communications.  With STTP, purpose built networks are not required to reliably support very large phasor data streams.</p></li>
-</ul>
-<h3 id="security-centric">Security Centric</h3>
-<ul>
-<li><p>STTP has been built using a "security first" design approach.  Authentication to establish a "connection" with other parties requires a "certificate".  While public certificate providers can be used, it is recommended that symmetric certificates be exchanged out-of-band to avoid the risk and cost of management of public keys.</p></li>
-<li><p>Best-practice encryption is natively available in STTP but not required given the common practice to manage encryption at the network layer.</p></li>
-</ul>
-<h3 id="reduces-first-cost">Reduces First Cost</h3>
-<ul>
-<li><p>GEP has been measured <sup>[<a href="#ref5">5</a>]</sup> to have less than half the band width requirements of IEEE C37.118 <sup>[<a href="#ref1">1</a>]</sup> when used with TCP and simple methods for lossless compression.  With the compression, a single signal or measurement point (i.e., an identifier, timestamp, value and quality code) requires only 2.5 bytes. By comparison, IEEE C37.118 requires 4.5 bytes per measurement on average.</p></li>
-<li><p>The signal-based GEP protocol incorporates Pub/Sub data exchange methods so that unnecessary data points need not be exchanged – thereby further reducing overall bandwidth requirements as compared to IEEE C37.118.</p></li>
-</ul>
-<h3 id="reduces-operating-cost">Reduces Operating Cost</h3>
-<ul>
-<li><p>GEP automatically exchanges and synchronizes measurement level meta-data using a GUID as the key value to allow the self-initialization and integration of rich meta-data with points from multiple connected synchrophasor networks.  This eliminates the need to map measurements to a pre-defined set identifiers and dispenses with the cost and hassles of synchronization of individual utility configuration with a centralized registry.</p></li>
-<li><p>Permissions for data subscriptions can be grouped and filtered using expressions to assure that only the signals that are authorized are shared (for example, all phasors from a specified substation) while the set of points available is dynamically adjusted as PMUs come and go without the need for point-by-point administrator approval.</p></li>
-</ul>
-<h3 id="an-enabling-technology">An Enabling Technology</h3>
-<ul>
-<li>It's possible that a protocol like STTP which allows secure, low-latency, high-volume data exchange among utilities at low cost can be a major factor in driving rapid change in the industry.  New forms of inter-utility interaction will be possible.  New approaches for providing utility information services will be possible.</li>
-</ul>
-<h3 id="built-upon-a-proven-approach">Built Upon A Proven Approach</h3>
-<ul>
-<li><p>STTP will enhance the successful design elements of the Gateway Exchange Protocol (GEP) as a foundation and improve upon it.</p></li>
-<li><p>GEP is in n production use by Dominion, Entergy, MISO, PeakRC, TVA, FP&amp;L, Southern Company and others.</p></li>
-</ul>
+<h4 id="intrinsically-robust">Intrinsically Robust</h4>
+<p>By design, STTP packet sizes are small and are optimized for network MTU size reducing fragmentation which results in more efficient TCP performance and less overall data loss with UDP.  STTP also puts significantly less stress on network routing equipment and facilitates mixing of streaming data traffic and other general network communications.  With STTP, purpose built networks are not required to reliably support very large phasor data streams.</p>
+<h4 id="security-centric">Security Centric</h4>
+<p>STTP has been built using a "security first" design approach.  Authentication to establish a connection with other parties requires a certificate.  While public certificate providers can be used, it is recommended that symmetric certificates be exchanged out-of-band to avoid the risk and cost of management of public keys. Best-practice encryption is natively available in STTP but not required given the common practice to manage encryption at the network layer.</p>
+<h4 id="reduces-first-cost">Reduces First Cost</h4>
+<p>GEP has been measured <sup>[<a href="#ref5">5</a>]</sup> to have less than half the band width requirements of IEEE C37.118 <sup>[<a href="#ref1">1</a>]</sup> when used with TCP and simple methods for lossless compression.  With the compression, a single signal or measurement point (i.e., an identifier, timestamp, value and quality code) requires only 2.5 bytes. By comparison, IEEE C37.118 requires 4.5 bytes per measurement on average. The signal-based GEP protocol incorporates Pub/Sub data exchange methods so that unnecessary data points need not be exchanged – thereby further reducing overall bandwidth requirements as compared to IEEE C37.118.</p>
+<h4 id="reduces-operating-cost">Reduces Operating Cost</h4>
+<p>GEP automatically exchanges and synchronizes measurement level meta-data using a GUID as the key value to allow the self-initialization and integration of rich meta-data with points from multiple connected synchrophasor networks.  This eliminates the need to map measurements to a pre-defined set identifiers and dispenses with the cost and hassles of synchronization of individual utility configuration with a centralized registry. Permissions for data subscriptions can be grouped and filtered using expressions to assure that only the signals that are authorized are shared (for example, all phasors from a specified substation) while the set of points available is dynamically adjusted as PMUs come and go without the need for point-by-point administrator approval.</p>
+<h4 id="an-enabling-technology">An Enabling Technology</h4>
+<p>It's possible that a protocol like STTP which allows secure, low-latency, high-volume data exchange among utilities at low cost can be a major factor in driving change in the industry.  New higher-speed forms of inter-utility interaction will be possible, and new approaches for providing utility information services will be realizable.  In addition, STTP provides an alternative to the existing method for utility data exchange that will enable future generations of SCADA/EMS systems to both (1) utilize full-resolution synchrophasor data streams and (2) significantly reduce the cost of maintaining the configuration of components to exchange other real-time data.</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> ICCP (IEC 60870-6/TASE.2) is the international standard used to exchange "real-time" SCADA data among electric utilities.  It's not uncommon for an ISO/RTO to consume hundreds of thousands of SCADA data points via ICCP from its member utilities and to exchange an equal number of points with its ISO/RTO neighbors. Real-time can be at a fast scan rate (every 2 seconds for regulation), or real-time data can be at a slower scan rate (every 4 seconds or every 10 seconds) for transmission system data.  Some data (generally analog measurement data) is exchanged continuously and some data (generally bi-modal data) like breaker status is only exchanged "on change".  ICCP came into coordinated use in North America in the mid-1990s.</p>
+</blockquote>
+<h4 id="built-upon-a-proven-approach">Built Upon A Proven Approach</h4>
+<p>STTP will enhance the successful design elements of the Gateway Exchange Protocol (GEP) as a foundation and improve upon it. GEP is currently in production use by Dominion, Entergy, MISO, PeakRC, TVA, FP&amp;L, Southern Company, among others.</p>
 <h2 id="design-philosophies">Design Philosophies</h2>
 <ul>
 <li>Minimize external libraries and dependencies for reference implementations</li>
@@ -1240,6 +1254,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <h4 id="set-operational-modes-command">Set Operational Modes Command</h4>
 <p>This must be the first command sent after a successful connection - the command must be sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. The rule for this operational mode negotiation is that once these modes have been established, they will not change for the lifetime of the connection.</p>
 <p>The subscriber must send the command and the publisher must await its reception. If the publisher does not receive the command in a timely fashion (time interval controlled by configuration), it will disconnect the subscriber.</p>
+<p>As part of this initial exchange, the subscriber will propose the desired protocol version to use.</p>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> In modes of operations where the publisher is initiating the connection, the publisher will still be waiting for subscriber to initiate communications with a <code>Set Operational Modes</code> command.</p>
 </blockquote>
@@ -1468,25 +1483,25 @@ count may not match requested points due to rights or points may no longer exist
 </ul>
 <h2 id="references-and-notes">References and Notes</h2>
 <ol>
-<li><a name="ref1"></a><a href="https://standards.ieee.org/findstds/standard/C37.118.2-2011.html">IEEE Standard C37.118, Standard for Synchrophasors for Power Systems</a>, IEEE</li>
+<li><a name="ref1"></a><a href="https://standards.ieee.org/findstds/standard/C37.118.2-2011.html">IEEE Standard C37.118, Standard for Synchrophasors for Power Systems</a>, IEEE, 2011</li>
 <li><a name="ref2"></a><a href="https://github.com/sttp/Specification/blob/master/LICENSE">The MIT Open Source Software License</a></li>
 <li><a name="ref3"></a><a href="https://tools.ietf.org/html/rfc2119">RFC 2119, Current Best Practice</a> Scott Bradner, Harvard University, 1997</li>
-<li><a name="ref4"></a><a href="https://github.com/sttp">STTP Repositories on GitHub</a>, Various specification documents and reference implementations.</li>
-<li><a name="ref5"></a><a href="https://www.naspi.org/naspi/sites/default/files/2017-03/PRSP_Phasor_Gateway_Whitepaper_Final_with_disclaimer_Final.pdf">New Technology Value, Phasor Gateway</a>, Peak Reliability, September 2016, Task 7 Data Delivery Efficiency Improvements, DE-OE-701.</li>
+<li><a name="ref4"></a><a href="https://github.com/sttp">STTP Repositories on GitHub</a>, Various specification documents and reference implementations, 2017</li>
+<li><a name="ref5"></a><a href="https://www.naspi.org/naspi/sites/default/files/2017-03/PRSP_Phasor_Gateway_Whitepaper_Final_with_disclaimer_Final.pdf">New Technology Value, Phasor Gateway</a>, Peak Reliability, Task 7 Data Delivery Efficiency Improvements, DE-OE-701., September 2016</li>
 <li><a name="ref6"></a><a href="https://en.wikipedia.org/wiki/Primitive_data_type">Primitive Data Types</a>, Wikipedia</li>
 <li><a name="ref7"></a><a href="https://en.wikipedia.org/wiki/Serialization">Data Structure Serialization</a>, Wikipedia</li>
-<li><a name="ref8"></a><a href="https://en.wikipedia.org/wiki/Character_encoding">Character Encoding</a>, Wikipedia</li>
-<li><a name="ref9"></a><a href="https://developers.google.com/protocol-buffers/">Google Protocol Buffers</a></li>
-<li><a name="ref10"></a><a href="https://thrift.apache.org/">Apache Thrift</a></li>
-<li><a name="ref11"></a><a href="https://developers.google.com/protocol-buffers/docs/techniques#large-data">Protocol Buffers - Techniques - Large Data Sets</a></li>
-<li><a name="ref12"></a><a href="https://github.com/apache/thrift/blob/master/doc/specs/thrift-rpc.md#framed-vs-unframed-transport">Thrift Remote Procedure Call - Protocol considerations - Framed vs. unframed transport</a></li>
+<li><a name="ref8"></a><a href="http://www.cs.tut.fi/~jkorpela/chars.html#encoding">Character Encoding</a>, Jukka Korpela, February 27, 2012</li>
+<li><a name="ref9"></a><a href="https://developers.google.com/protocol-buffers/docs/overview">Google Protocol Buffers Overview</a>, Google, May 31, 2017</li>
+<li><a name="ref10"></a><a href="https://thrift.apache.org/static/files/thrift-20070401.pdf">Thrift: Scalable Cross-Language Services Implementation</a>, Mark Slee, Aditya Agarwal and Marc Kwiatkowski, April 1, 2007</li>
+<li><a name="ref11"></a><a href="https://developers.google.com/protocol-buffers/docs/techniques#large-data">Protocol Buffers - Techniques - Large Data Sets</a>, Google, December 10, 2015</li>
+<li><a name="ref12"></a><a href="https://github.com/apache/thrift/blob/master/doc/specs/thrift-rpc.md#framed-vs-unframed-transport">Thrift Remote Procedure Call - Protocol considerations - Framed vs. unframed transport</a>, Apache Software Foundation, Apache Thrift Wiki, Sep 21, 2016</li>
 <li><a name="ref13"></a><a href="https://support.microsoft.com/en-us/help/314496/the-default-mtu-sizes-for-different-network-topologies">The default MTU sizes for different network topologies</a>, Microsoft, Article ID: 314496, June 19, 2014</li>
-<li><a name="ref14"></a><a href="https://howdoesinternetwork.com/2011/collisions">Collisions and collision detection – What are collisions in Ethernet?</a>, Valter Popeskic, November 16, 2011</li>
+<li><a name="ref14"></a><a href="https://howdoesinternetwork.com/2011/collisions">Collisions and collision detection - What are collisions in Ethernet?</a>, Valter Popeskic, November 16, 2011</li>
 <li><a name="ref15"></a><a href="http://dna-pubs.cs.columbia.edu/citation/paperfile/164/votcp-cucs-023-07.pdf">The Delay-Friendliness of TCP</a>, Eli Brosh, Salman Abdul Base, Vishal Misra, Dan Rubenstein, Henning Schulzrinne, pages 7-8, October 2010</li>
 <li><a name="ref16"></a><a href="http://www.nerc.com/pa/RAPA/BES%20DL/bes_phase2_reference_document_20140325_final_clean.pdf">Bulk Electric System Definition Reference Document</a>, North American Electric Reliability Corporation, April, 2014</li>
 <li><a name="ref17"></a><a href="http://www.nerc.com/docs/oc/rapirtf/RAPIR%20final%20101710.pdf">Real-Time Application of Synchrophasors for Improving Reliability</a>, RAPIR Task Force, October 18, 2010</li>
 <li><a name="ref18"></a><a href="https://notes.shichao.io/tcpv1/ch10/#ip-fragmentation">User Datagram Protocol (UDP) and IP Fragmentation</a>, Shichao's Notes, Chapter 10</li>
-<li><a name="ref19"></a><a href="https://selinc.com/solutions/synchrophasors/report/115281/#different-communications-methods-using-sel-pmus-and-pdcs">Synchrophasors and Communications Bandwidth</a>, Schweitzer Engineering Laboratories, April 1, 2017-03</li>
+<li><a name="ref19"></a><a href="https://selinc.com/solutions/synchrophasors/report/115281/#different-communications-methods-using-sel-pmus-and-pdcs">Synchrophasors and Communications Bandwidth</a>, Schweitzer Engineering Laboratories, April 1, 2010</li>
 <li><a name="ref20"></a><a href="https://www.naspi.org/sites/default/files/2017-03/01_bpa_donnelly_NASPI_presentation.pdf">Implementation and Operating Experience with Oscillation Detection at Bonneville Power Administration</a>, Matt Donnelly, March 2017</li>
 </ol>
 <h2 id="contributors">Contributors</h2>
