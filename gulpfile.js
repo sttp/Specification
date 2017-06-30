@@ -48,9 +48,8 @@ const sections = [
   "Sections/README.md" /* TOC */,
   "Sections/Introduction.md",
   "Sections/Definitions.md",
-  "Sections/Overview.md",
   "Sections/BusinessCase.md",
-  "Sections/DesignPhilosophies.md",
+  "Sections/Overview.md",
   "Sections/DataPointStructure.md",
   "Sections/CommandsAndResponses.md",
   "Sections/Commands.md",
@@ -64,8 +63,7 @@ const sections = [
   "Sections/Contributors.md",
   "Sections/History.md",
   "Sections/APIReference.md",
-  "Sections/IEEE_C37.118Mapping.md",
-  "Sections/ToDoList.md"
+  "Sections/IEEE_C37.118Mapping.md"
 ];
 
 // Define map of markdown file links to intra-page section headers, note
