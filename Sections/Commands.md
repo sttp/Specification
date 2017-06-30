@@ -17,6 +17,8 @@ This must be the first command sent after a successful connection - the command 
 
 The subscriber must send the command and the publisher must await its reception. If the publisher does not receive the command in a timely fashion (time interval controlled by configuration), it will disconnect the subscriber.
 
+As part of this initial exchange, the subscriber will propose the desired protocol version to use.
+
 > :information_source: In modes of operations where the publisher is initiating the connection, the publisher will still be waiting for subscriber to initiate communications with a `Set Operational Modes` command.
 
 * Wire Format: Binary
