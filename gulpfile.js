@@ -113,6 +113,7 @@ const execReportOptions = {
 var currentVersion = null;
 var updatedVersion = null;
 var forcePush = false;
+var referenceMappings = {};
 
 showdown.setFlavor("github");
 
@@ -240,6 +241,58 @@ function markdown2html() {
 
     file.contents = new Buffer(destinationHtml);
     file.path = gutil.replaceExtension(file.path, ".html");
+    this.push(file);
+    cb(null, file);
+  });
+}
+
+function loadReferenceMapping() {
+  return through.obj(function(file, encoding, cb) {
+    const mappings = file.contents.toString().split(/\r\n|\n/);
+
+    for (let i = 0; i < mappings.length; i++) {
+      if (mappings[i].startsWith("//"))
+        continue;
+
+      const mapping = mappings[i].split(",");
+
+      if (mapping.length == 2)
+        referenceMappings[mapping[0]] = mapping[1];
+    }
+
+    for (var key in referenceMappings) {
+      if (referenceMappings.hasOwnProperty(key)) {
+        console.log("Mapping \"" + key + "\" to \"" + referenceMappings[key] + "\"");
+      }
+    }
+
+    this.push(file);
+    cb(null, file);
+  });
+}
+
+function updateReferences() {
+  return through.obj(function(file, encoding, cb) {
+    if (file.contents) {
+      const referenceContent = "](References.md#user-content-ref"
+      var sourceMarkdown = file.contents.toString();
+
+      console.log("Processing \"" + file.path + "\"...");
+
+      for (let key in referenceMappings) {
+        if (referenceMappings.hasOwnProperty(key)) {
+          const value = referenceMappings[key];
+
+          sourceMarkdown = replaceAll(sourceMarkdown,
+            "[" + key + referenceContent + key + ")",
+            "[" + value + referenceContent + value + ")"
+          );
+        }
+      }
+
+      file.contents = new Buffer(sourceMarkdown);
+    }
+
     this.push(file);
     cb(null, file);
   });
@@ -386,4 +439,15 @@ gulp.task("update-repo", function() {
     .pipe(exec.reporter(execReportOptions))
     .pipe(exec(git + " clean -f -d -x"))
     .pipe(exec.reporter(execReportOptions));
+});
+
+gulp.task("renumber-references", function() {
+  console.log("Renumbering references...");
+
+  gulp.src("refmap.txt")
+    .pipe(loadReferenceMapping());
+
+  return gulp.src("Sections/*.md")
+    .pipe(updateReferences())
+    .pipe(gulp.dest("Sections/"));
 });
