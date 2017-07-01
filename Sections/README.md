@@ -5,8 +5,8 @@
 |   | [Title Page](TitlePage.md) |
 |   | [Preface](Preface.md) |
 | 1 | [Introduction](Introduction.md) |
-| 2 | [Definitions and Nomenclature](Definitions.md) |
-| 3 | [Business Case](BusinessCase.md) |
+| 2 | [Business Case](BusinessCase.md) |
+| 3 | [Definitions and Nomenclature](Definitions.md) |
 | 4 | [Protocol Overview](Overview.md) |
 | 5 | [Design Philosophies](DesignPhilosophies.md) |
 | 6 | [Data Point Structure](DataPointStructure.md) |
