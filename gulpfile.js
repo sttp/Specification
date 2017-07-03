@@ -327,7 +327,7 @@ gulp.task("increment-version", [ "clear-output" ], function() {
 gulp.task("copy-to-output", [ "increment-version" ], function() {
   console.log("Copying target files to output folder...");
 
-  gulp.src("Sections/Images/*")
+  gulp.src("Sections/Images/*.png")
     .pipe(gulp.dest("Output/Images/"));
 
   return gulp.src("Sections/Include/*")
@@ -389,10 +389,10 @@ gulp.task("clean-up", [ "convert-to-pdf" ], function() {
   console.log("Removing temporary files...");
 
   return gulp.src([
-    "Output/Include/",
-    "Output/README.html"
-  ], { read: false })
-  .pipe(clean());
+      "Output/Include/",
+      "Output/README.html"
+    ], { read: false })
+    .pipe(clean());
 });
 
 // This task will recompile output documents and increment the version
@@ -403,7 +403,7 @@ gulp.task("default", [ "clean-up" ]);
 gulp.task("push-changes", [ "clean-up" ], function() {
   forcePush = true;
 
-  gulp.src("README.md")
+  return gulp.src("README.md")
     .pipe(pushDocumentUpdates());
 });
 
@@ -421,7 +421,7 @@ gulp.task("push-changes-if-remote-updated", [ "clean-up" ], function() {
 
   const options = { continueOnError: true };
 
-  gulp.src("README.md")
+  return gulp.src("README.md")
     .pipe(exec(git + " log v" + currentVersion + "..", options))
     .pipe(pushDocumentUpdates());
 });
@@ -430,7 +430,7 @@ gulp.task("push-changes-if-remote-updated", [ "clean-up" ], function() {
 gulp.task("update-repo", function() {
   console.log("Updating local repo...");
 
-  gulp.src("README.md")
+  return gulp.src("README.md")
     .pipe(exec(git + " gc"))
     .pipe(exec.reporter(execReportOptions))
     .pipe(exec(git + " fetch"))
@@ -441,6 +441,7 @@ gulp.task("update-repo", function() {
     .pipe(exec.reporter(execReportOptions));
 });
 
+// This task will renumber the references in section markdown files
 gulp.task("renumber-references", function() {
   console.log("Renumbering references...");
 
