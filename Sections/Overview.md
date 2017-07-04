@@ -22,6 +22,7 @@ In terms of Internet Protocol (IP), all frames of data to be transmitted that ex
 
 ![Packet Fragmentation](Images/packet-fragmentation.png)
 
+<br/><sup>Diagram 1</sup>
 </p>
 
 The impacts of large frames on an IP network are determined by the number of network packets required to send the frame and the fact that IP is inherently unreliable by design. Network packets can only be transmitted over a connection one packet at a time; when two or more network packets arrive for transmission at the same time on any physical network media, the result is a collision. When a collision occurs, only one packet gets sent and the others get dropped <sup>[[12](References.md#user-content-ref12)]</sup>. IP defines a variety of different transport protocols for network packet transmission, each of which behave in different manners when dealing with packet loss. Consequently, many of the impacts a large frame has on an IP network is dependent upon the transport protocol used to send the frame.
@@ -56,7 +57,7 @@ For IEEE C37.118 <sup>[[1](References.md#user-content-ref1)]</sup> deployments, 
 
 Existing serialization technologies are not designed for messaging exchange use cases that demand sending large frames of data at high speeds, often falling short in terms of timely delivery or data loss depending on the IP transport protocol used. The obvious solution is to break large data structures into smaller ones, recombining them as needed in receiving applications <sup>[[9](References.md#user-content-ref9)]</sup>. Although this strategy can work fine for one-off solutions where data structures are manually partitioned into smaller units for transport, this does not lend itself to an abstract, versatile long term solution.
 
-Instead of serializing an entire data structure as a unit, STTP is designed to package each of the distinct elements of the data structure into small groups. Each data element, typically a primitive type, gets individually identified along with any associated state, e.g., time and/or quality information. Ultimately more information is being sent, but it is being packaged differently.
+Instead of serializing an entire data structure as a unit, STTP is designed to package each of the distinct elements of the data structure into small groups. Serialization is managed for each data element, typically a primitive type, that gets individually identified along with any associated state, e.g., time and/or quality information. Ultimately more information is being sent, but it is being packaged differently.
 
 > :information_source: For the purposes of this specification a data element, its identification and any associated state, e.g., time and quality, will be referred to as a _data point_.  
 
@@ -64,6 +65,7 @@ Instead of serializing an entire data structure as a unit, STTP is designed to p
 
 ![Mapping Data Structure Elements to Data Points](Images/data-element-to-points.png)
 
+<br/><sup>Diagram 2</sup>
 </p>
 
 To resolve issues with large frame impacts on IP based networks, a primary tenet of the STTP design strategy is to reduce fragmentation; as a result, STTP intentionally limits the number of data points that will be grouped together to form a frame to ensure its size is optimized for transmission over an IP network with minimal fragmentation.
@@ -74,6 +76,7 @@ Because each data point us uniquely identified, the elements that appear from on
 
 ![Mapping Data Structure Elements to Data Points](Images/sttp-data-frame.png)
 
+<br/><sup>Diagram 3</sup>
 </p>
 
 > :warning: While it is possible to always target zero fragmentation by making sure the frame size is below the current MTU size, the protocol should allow tuning for some fragmentation to accommodate different deployment scenarios and use cases, i.e., allowing target frame sizes that are larger than the current MTU size. For deployments in high-performance network environments, over all data collision based loss may be statistically the same for frame sizes that are a few multiples of the MTU.
