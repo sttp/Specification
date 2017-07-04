@@ -1,7 +1,5 @@
 ## Protocol Overview
 
-> :construction: Purpose of protocol, fundamentals of how it works (command and data) - include sub-section titles ( 4# items) as needed
-
 In typical messaging exchange paradigms a source application hosts a block of structured data, composed in memory, with the intent to transmit the data to one or more receiving applications. The data has _structure_ in the sense that it exists as a collection of simpler primitive data types where each of the data elements is given a name to provide useful context and meaning; most programming languages represent data structures using a primary key word, e.g., `class` or `struct`. Before transmission, the data structure must be serialized - this is necessary because the programming language of the source application which hosts the data structure defines the structure in memory using a format that is optimized for use in the application. The process of serializing the data structure causes each of the data elements to be translated into a format that is easily transmitted over a network and is suitable for deserialization by a receiving application.
 
 The applications that are sending and receiving data structures can be running on the same machine or on different physical hardware with disparate operating systems. As a result, the details of the data structure serialization format can be complex and diverse. Such complexities can include issues with proper handling of the endianess of the primitive data types during serialization which may differ from the system that is deserializing the data, or differences in the interpretation of how character data is encoded <sup>[[6](References.md#user-content-ref6)]</sup>.
@@ -20,7 +18,9 @@ For smaller sized, discrete data structures, the existing available serializatio
 
 In terms of Internet Protocol (IP), all frames of data to be transmitted that exceed the negotiated maximum transmission unit (MTU) size (typically 1,500 bytes for Ethernet networks <sup>[[11](References.md#user-content-ref11)]</sup>) are divided into multiple fragments where each fragment is called a network packet.
 
-![Packet Fragementation](https://sysmincomputing.files.wordpress.com/2010/12/frag.png)
+<p align="center">
+![Packet Fragmentation](Images/packet-fragmentation.png)
+</p>
 
 The impacts of large frames on an IP network are determined by the number of network packets required to send the frame and the fact that IP is inherently unreliable by design. Network packets can only be transmitted over a connection one packet at a time; when two or more network packets arrive for transmission at the same time on any physical network media, the result is a collision. When a collision occurs, only one packet gets sent and the others get dropped <sup>[[12](References.md#user-content-ref12)]</sup>. IP defines a variety of different transport protocols for network packet transmission, each of which behave in different manners when dealing with packet loss. Consequently, many of the impacts a large frame has on an IP network is dependent upon the transport protocol used to send the frame.
 
@@ -52,17 +52,59 @@ For IEEE C37.118 <sup>[[1](References.md#user-content-ref1)]</sup> deployments, 
 
 ### Changing the Paradigm
 
-> :construction: Turn bullets into prose... This section needs to contrast how STTP is different / better than data structure serialization when applied to large data volumes
+Existing serialization technologies are not designed for messaging exchange use cases that demand sending large frames of data at high speeds, often falling short in terms of timely delivery or data loss depending on the IP transport protocol used. The obvious solution is to break large data structures into smaller ones, recombining them as needed in receiving applications <sup>[[9](References.md#user-content-ref9)]</sup>. Although this strategy can work fine for one-off solutions where data structures are manually partitioned into smaller units for transport, this does not lend itself to an abstract, versatile long term solution.
 
-* When need exists to send large ~~frames~~ volumes data at high speeds, STTP is an excellent option. Otherwise, for smaller datasets, suggest sending data using protobuf or thrift.
-* The nature of IP is not going to change
-* With STTP, delivery of the data is made more atomic to fit within MTU size, i.e., data is reduced to its primitive types and only the values that will fit into a single packet are transmitted to reduce (or eliminate) frame fragmentation - contrast previous large frame impacts where possible
-* Sending primitives instead of data structure can increase bandwidth, but it will reduce data losses (cite GEP testing)
-* External APIs exist (e.g., openECA) to manage serialization and deserialization of data structures from primitives - so the data structure, if useful, while managing data delivery of the primitive types can still be used - add note that technically IEEE C37.118 is just a data structure mapping to primitives
-* Managing data at the primitive level adds granular control of access control rights as well as ability for data receivers to "subscribe" to only the data of interest
-* Introduce individual primitive values as time series data points - time required(?), but may simply be an auto-incrementing integer value
-* For each time series data point, rich metadata will be made available
-* Lead into next section for deeper detail
+Instead of serializing an entire data structure as a unit, STTP is designed to package each of the distinct elements of the data structure into small groups. Each data element, typically a primitive type, gets individually identified along with any associated state, e.g., time and/or quality information. Ultimately more information is being sent, but it is being packaged differently.
+
+> :information_source: For the purposes of this specification a data element, its identification and any associated state, e.g., time and quality, will be referred to as a _data point_.  
+
+<p align="center">
+![Mapping Data Structure Elements to Data Points](Images/data-element-to-points.png)
+</p>
+
+To resolve issues with large frame impacts on IP based networks, a primary tenet of the STTP design strategy is to reduce fragmentation; as a result, STTP intentionally limits the number of data points that will be grouped together to form a frame to ensure its size is optimized for transmission over an IP network with minimal fragmentation.
+
+Because each data point us uniquely identified, the elements that appear from one frame to another are not fixed allowing interleaving of data from multiple simultaneous data exchanges - this notion supports the delivery of any number of data structures where each can have a different publication interval.
+
+<p align="center">
+![Mapping Data Structure Elements to Data Points](Images/sttp-data-frame.png)
+</p>
+
+> :warning: While it is possible to always target zero fragmentation by making sure the frame size is below the current MTU size, the protocol should allow tuning for some fragmentation to accommodate different deployment scenarios and use cases, i.e., allowing target frame sizes that are larger than the current MTU size. For deployments in high-performance network environments, over all data collision based loss may be statistically the same for frame sizes that are a few multiples of the MTU.
+
+#### STTP Bandwidth Impact
+
+Since data points include identity and state along with the primitive type value, serializations of STTP data carry extra information; so by its very nature uncompressed STTP will often require more bandwidth as compared to traditional data structure serialization technologies.
+
+Even though in practice it is expected that use cases that demand a protocol like STTP, e.g., large sets of data with variable availability being transmitted as high speeds, will often be deployed in environments that are not bandwidth constrained, simple testing has shown that deviation based compression techniques that have negligible processing impact can yield overall bandwidth requirements for STTP that are equal to or less than other serialization technologies and protocols, even when carrying extra information. For synchrophasor data, tests have shown data point serializations to have less than half the bandwidth requirements of IEEE C37.118 <sup>[[1](References.md#user-content-ref1)]</sup> when used over TCP with simple stateful methods for lossless compression <sup>[[5](References.md#user-content-ref5)]</sup>.
+
+Bandwidth requirements for STTP can often be further lowered by reducing the amount of data being transmitted. For most data structure serialization technologies and protocols, the very process of packaging and sending data in form of data structures means that some data ends up being transmitted that is not used nor needed by the receiving application. Data reduction for these technologies means creating smaller data structures where it can be costly to maintain separate models for multiple data structures just to achieve bandwidth improvements. Since STTP exists as a publish / subscribe technology, a receiving application can choose to subscribe to only the individual data points it needs.
+
+#### Data Point Level Publish / Subscribe
+
+STTP is intrinsically designed to manage data at its most fundamental level, primitive types. Each uniquely identified primitive type value represents some form of physical measurement. When measured with periodicity and associated with a the timestamp at the moment of measurement, the resulting sequence of measured values and associated timestamps are known as _time series_ data. Since data points that are serialized by STTP can include time as part the state information for a value, STTP can be used as a time series data transmission protocol. However, the state information for values being transmitted is flexible - what is _time_ for one data point could simply be a _sequence_ for another. Additionally, the existence of some data points can be temporal, for example, to exchange a set of binary data a temporary data point ID may be created that only exists until the binary data transfer is complete.
+
+STTP uses a publish / subscribe based model for control of the data to be exchanged. This exchange is managed at the data point level where data sourced at a sending application, i.e., the _publisher_, will make a set of data points available for publication and a receiving application, i.e., the _subscriber_, will select a subset of the available points for subscription. As new data is made available at the publisher, the subset of the data as selected by the subscriber will be transmitted.
+
+##### Data Point Metadata
+
+A critical part of the publish / subscribe process is defining the data points that are available for subscription. An STTP publisher will define a tabular list of available data point identifiers and associated descriptive information as the _metadata_ that is available to a subscriber.   
+
+Each data point includes a unique identifier; regardless of the binary transmission format, this identifier will exist as a statistically unique GUID in the defined metadata for the available data points. This makes the metadata from multiple publishers easier to merge in local repositories used by a subscriber.
+
+At a minimum, each row in the STTP publisher metadata will include the GUID based data point identifier, a short human readable alpha-numeric _tag_, the primitive data type for the data point, a description, the date/time of addition, update and deletion and the data point enabled state.
+
+Metadata in STTP is designed to be extensible. Different industries may require different kinds of available metadata in order to properly map and integrate with other protocols and environments. To accommodate the extensibility, other tabular datasets can be made available by a publisher as needed.
+
+##### Data Point Access Control
+
+STTP puts publishers in full control of access to data. A publisher can choose not to allow connections and/or expose any data to a subscriber that is not strongly identified. Publishers can choose to restrict data access at an individual data point level, a group level or at an identified subscriber level.
+
+Selection of available points for an identified subscriber or a group can be controlled by an expression. Expression based access control means that the even as the data sources available to a publisher change, the expressions will still apply and need not be updated. For example, metadata will need to contain information about the primitive data type for a given data point - an expression based on this data type my look like the following:
+```
+ALLOW WHERE DataType='BOOL'
+```
+For this expression, all data points as defined in the metadata that have a data type of `BOOL` would be allowed for the group or identified subscriber. This expression would cause the allowed metadata to dynamically change as the available source data configured in the publisher changed.
 
 ### Protocol Feature Summary
 
@@ -77,9 +119,8 @@ For IEEE C37.118 <sup>[[1](References.md#user-content-ref1)]</sup> deployments, 
 * Security and availability features that enable use on critical systems to support critical operations
 * Publish/subscribe at data point level
 * API implemented in multiple languages on multiple platforms
-* Metadata will be versioned
-* Metadata will be tabular in nature (describe like a database table)
-* Sets of metadata from multiple parties will be easy to merge (introduce Guid for point ID)
+* Metadata will be versioned and tabular in nature
+* Sets of metadata from multiple parties will be easy to merge
 * Points defined in metadata will have a clear ownership path
 * A minimal set of metadata will exist to support any STTP deployments
 * Industry specific metadata extensions will exist to support specific industry deployments
@@ -88,8 +129,8 @@ For IEEE C37.118 <sup>[[1](References.md#user-content-ref1)]</sup> deployments, 
 
 STTP data transport requires the use of a command channel using TCP/IP for reliable delivery of important commands. Optionally a secondary data channel can be established using UDP/IP for the transport of data that can tolerate loss. When no secondary UDP/IP is used, both commands and data will share use of the TCP/IP channel for communications.
 
+> :information_source: Although not precluded from use over other data transports, the design of STTP is targeted and optimized for use over IP, specifically TCP/IP and UDP/IP. Even so, since the command/response implementation and data packet distribution of the STTP protocol is fairly simple, it is expected that commonly available middleware data transport layers, such as ZeroMQ or DDS, could easily support and transmit data using the STTP protocol should any of the messaging distribution and management benefits of these transport layers be useful to a particular deployment environment. However, these types of deployments are outside the scope of this documentation. If needed, STTP integrations with middleware layers should be added as reference implementation repositories to the STTP organizational site <sup>[[4](References.md#user-content-ref4)]</sup>.
+
+---
+
 > :tomato::question: JRC: _The question has been raised if a UDP only transport should be allowed? In this mode, any critical commands and responses would basically be sent over UDP. Thought would need to be given to commands and/or responses that never arrive and the consequences thereof._
-
-_more_
-
-> :information_source: Although not precluded from use over other data transports, the design of this protocol is targeted and optimized for use over Internet Protocol (IP), specifically TCP/IP and UDP/IP. Even so, since the command/response implementation and data packet distribution of the STTP protocol is fairly simple, it is expected that commonly available middleware data transport layers, such as ZeroMQ or DDS, could easily support and transmit data using the STTP protocol should any of the messaging distribution and management benefits of these transport layers be useful to a particular deployment environment. However, these types of deployments are outside the scope of this documentation. If needed, STTP integrations with middleware layers should be added as reference implementation repositories to the STTP organizational site <sup>[[4](References.md#user-content-ref4)]</sup>.
