@@ -14,6 +14,7 @@ For smaller sized, discrete data structures, the existing available serializatio
 
 > :information_source: For the purposes of this specification, serialized data structures will be referred to as a _frames_, regardless of the actual binary format.
 
+<p class="insert-page-break-after"></p>
 ### Large Frame Network Impact
 
 In terms of Internet Protocol (IP), all frames of data to be transmitted that exceed the negotiated maximum transmission unit (MTU) size (typically 1,500 bytes for Ethernet networks <sup>[[11](References.md#user-content-ref11)]</sup>) are divided into multiple fragments where each fragment is called a network packet.
@@ -37,6 +38,7 @@ Another critical impact that is unique to TCP is that for data that needs to be 
 
 > :information_source: Synchrophasor data is the source for real-time visualization and analysis tools which are used to operate the bulk electric system (BES). This real-time data is required to be accurate, dependable and timely in order to be useful for grid operators <sup>[[14](References.md#user-content-ref14)]</sup>. Any delays in the delivery of this data could have adverse affects on operational decisions impacting the BES.
 
+<p class="insert-page-break-after"></p>
 #### Large Frame Impacts on UDP/IP
 
 Another common Internet protocol is UDP/IP. Transmission of data over UDP differs from TCP in the fact that UDP does not attempt to retransmit data nor does it make any attempts to maintain the order of the transmitted packets. This functionality is the basis for UDP being considered a _lossy_ data transmission protocol, but more lightweight than TCP.
@@ -70,7 +72,7 @@ Instead of serializing an entire data structure as a unit, STTP is designed to p
 
 To resolve issues with large frame impacts on IP based networks, a primary tenet of the STTP design strategy is to reduce fragmentation; as a result, STTP intentionally limits the number of data points that will be grouped together to form a frame to ensure its size is optimized for transmission over an IP network with minimal fragmentation.
 
-Because each data point us uniquely identified, the elements that appear from one frame to another are not fixed allowing interleaving of data from multiple simultaneous data exchanges - this notion supports the delivery of any number of data structures where each can have a different publication interval.
+Because each data point is uniquely identified, the elements that appear from one frame to another are not fixed allowing interleaving of data from multiple simultaneous data exchanges - this notion supports the delivery of any number of data structures where each can have a different publication interval.
 
 <center>
 
