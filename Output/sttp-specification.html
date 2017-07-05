@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.0.26 - July 4, 2017</p>
+<p><strong>Version:</strong> 0.0.27 - July 5, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -1085,12 +1085,10 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </blockquote>
 <h3 id="large-frame-network-impact">Large Frame Network Impact</h3>
 <p>In terms of Internet Protocol (IP), all frames of data to be transmitted that exceed the negotiated maximum transmission unit (MTU) size (typically 1,500 bytes for Ethernet networks <sup>[<a href="#ref11">11</a>]</sup>) are divided into multiple fragments where each fragment is called a network packet.</p>
-<p align="center">
-
-![Packet Fragmentation](Images/packet-fragmentation.png)
-
-<br/><sup>Diagram 1</sup>
-</p>
+<p><center></p>
+<p><img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/packet-fragmentation.png" alt="Packet Fragmentation" /></p>
+<p><br /><sup>Diagram 1</sup><br />
+</center></p>
 <p>The impacts of large frames on an IP network are determined by the number of network packets required to send the frame and the fact that IP is inherently unreliable by design. Network packets can only be transmitted over a connection one packet at a time; when two or more network packets arrive for transmission at the same time on any physical network media, the result is a collision. When a collision occurs, only one packet gets sent and the others get dropped <sup>[<a href="#ref12">12</a>]</sup>. IP defines a variety of different transport protocols for network packet transmission, each of which behave in different manners when dealing with packet loss. Consequently, many of the impacts a large frame has on an IP network is dependent upon the transport protocol used to send the frame.</p>
 <h4 id="large-frame-impacts-on-tcpip">Large Frame Impacts on TCP/IP</h4>
 <p>The most common Internet protocol, TCP/IP, creates an index for each of the network packets being sent for a frame of data and verifies that each are successfully delivered, retransmitting packets as many times as needed in the case of loss. This functionality is the basis for TCP being considered a <em>reliable</em> data transmission protocol.</p>
@@ -1113,20 +1111,16 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> For the purposes of this specification a data element, its identification and any associated state, e.g., time and quality, will be referred to as a <em>data point</em>.  </p>
 </blockquote>
-<p align="center">
-
-![Mapping Data Structure Elements to Data Points](Images/data-element-to-points.png)
-
-<br/><sup>Diagram 2</sup>
-</p>
+<p><center></p>
+<p><img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/data-element-to-points.png" alt="Mapping Data Structure Elements to Data Points" /></p>
+<p><br /><sup>Diagram 2</sup><br />
+</center></p>
 <p>To resolve issues with large frame impacts on IP based networks, a primary tenet of the STTP design strategy is to reduce fragmentation; as a result, STTP intentionally limits the number of data points that will be grouped together to form a frame to ensure its size is optimized for transmission over an IP network with minimal fragmentation.</p>
 <p>Because each data point us uniquely identified, the elements that appear from one frame to another are not fixed allowing interleaving of data from multiple simultaneous data exchanges - this notion supports the delivery of any number of data structures where each can have a different publication interval.</p>
-<p align="center">
-
-![Mapping Data Structure Elements to Data Points](Images/sttp-data-frame.png)
-
-<br/><sup>Diagram 3</sup>
-</p>
+<p><center></p>
+<p><img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-data-frame.png" alt="Mapping Data Structure Elements to Data Points" /></p>
+<p><br /><sup>Diagram 3</sup><br />
+</center></p>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/warning.png?v5" alt=":warning:" title=":warning:" class="emoji-img emoji"> While it is possible to always target zero fragmentation by making sure the frame size is below the current MTU size, the protocol should allow tuning for some fragmentation to accommodate different deployment scenarios and use cases, i.e., allowing target frame sizes that are larger than the current MTU size. For deployments in high-performance network environments, over all data collision based loss may be statistically the same for frame sizes that are a few multiples of the MTU.</p>
 </blockquote>
