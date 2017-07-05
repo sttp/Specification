@@ -18,12 +18,12 @@ For smaller sized, discrete data structures, the existing available serializatio
 
 In terms of Internet Protocol (IP), all frames of data to be transmitted that exceed the negotiated maximum transmission unit (MTU) size (typically 1,500 bytes for Ethernet networks <sup>[[11](References.md#user-content-ref11)]</sup>) are divided into multiple fragments where each fragment is called a network packet.
 
-<p align="center">
+<center>
 
 ![Packet Fragmentation](Images/packet-fragmentation.png)
 
-<br/><sup>Diagram 1</sup>
-</p>
+<br /><sup>Diagram 1</sup>
+</center>
 
 The impacts of large frames on an IP network are determined by the number of network packets required to send the frame and the fact that IP is inherently unreliable by design. Network packets can only be transmitted over a connection one packet at a time; when two or more network packets arrive for transmission at the same time on any physical network media, the result is a collision. When a collision occurs, only one packet gets sent and the others get dropped <sup>[[12](References.md#user-content-ref12)]</sup>. IP defines a variety of different transport protocols for network packet transmission, each of which behave in different manners when dealing with packet loss. Consequently, many of the impacts a large frame has on an IP network is dependent upon the transport protocol used to send the frame.
 
@@ -61,23 +61,23 @@ Instead of serializing an entire data structure as a unit, STTP is designed to p
 
 > :information_source: For the purposes of this specification a data element, its identification and any associated state, e.g., time and quality, will be referred to as a _data point_.  
 
-<p align="center">
+<center>
 
 ![Mapping Data Structure Elements to Data Points](Images/data-element-to-points.png)
 
-<br/><sup>Diagram 2</sup>
-</p>
+<br /><sup>Diagram 2</sup>
+</center>
 
 To resolve issues with large frame impacts on IP based networks, a primary tenet of the STTP design strategy is to reduce fragmentation; as a result, STTP intentionally limits the number of data points that will be grouped together to form a frame to ensure its size is optimized for transmission over an IP network with minimal fragmentation.
 
 Because each data point us uniquely identified, the elements that appear from one frame to another are not fixed allowing interleaving of data from multiple simultaneous data exchanges - this notion supports the delivery of any number of data structures where each can have a different publication interval.
 
-<p align="center">
+<center>
 
 ![Mapping Data Structure Elements to Data Points](Images/sttp-data-frame.png)
 
-<br/><sup>Diagram 3</sup>
-</p>
+<br /><sup>Diagram 3</sup>
+</center>
 
 > :warning: While it is possible to always target zero fragmentation by making sure the frame size is below the current MTU size, the protocol should allow tuning for some fragmentation to accommodate different deployment scenarios and use cases, i.e., allowing target frame sizes that are larger than the current MTU size. For deployments in high-performance network environments, over all data collision based loss may be statistically the same for frame sizes that are a few multiples of the MTU.
 
