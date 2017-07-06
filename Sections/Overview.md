@@ -85,7 +85,7 @@ Because each data point is uniquely identified, the elements that appear from on
 <sup>Figure 3</sup>
 </center>
 
-> :warning: While it is possible to always target zero fragmentation by making sure the frame size is below the current MTU size, STTP implementations should allow tuning for some fragmentation to accommodate different deployment scenarios and use cases, i.e., allowing target frame sizes that are larger than the current MTU size. For deployments in high-performance network environments, over all loss due to data collisions may be statistically the same for frame sizes that are a few multiples of the MTU.
+> :warning: While it is possible to always target zero fragmentation by making sure the frame size is below the current MTU size, STTP implementations should allow tuning for some fragmentation to accommodate different deployment scenarios and use cases, i.e., allowing target frame sizes that are larger than the current MTU size. For deployments in high-performance network environments, overall loss due to data collisions may be statistically the same for frame sizes that are a few multiples of the MTU.
 
 #### STTP Bandwidth Impact
 
