@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.0.34 - July 7, 2017
+**Version:** 0.0.35 - July 7, 2017
 
 **Status:** Initial Development
 
@@ -39,7 +39,7 @@ This specification is free software and it can be redistributed and/or modified 
 | 11 | [References and Notes](#references-and-notes) |
 | 12 | [Contributors and Reviewers](#contributors) |
 | 13 | [Revision History](#major-version-history) |
-| A | [Appendix A - Functional Requirements]#appendix-a---functional-requirements |
+| A | [Appendix A - Functional Requirements](#appendix-a---functional-requirements) |
 | B | [Appendix B - STTP API Reference](#appendix-b---sttp-api-reference) |
 | C | [Appendix C - IEEE C37.118 Mapping](#appendix-c---ieee-c37118-mapping) |
 
@@ -57,7 +57,7 @@ The purpose of this document is to define STTP and to include, as appendices, de
 
 In the [Protocol Overview](#protocol-overview) section of this specification, high-level features and the business value of STTP are presented. The balance of the sections of the specification provide the details of protocol design.
 
-[Appendix A - Functional Requirements]#appendix-a---functional-requirements provides the set of functional requirements and use cases needed for successful STTP deployment.
+[Appendix A - Functional Requirements](#appendix-a---functional-requirements) provides the set of functional requirements and use cases needed for successful STTP deployment.
 
 [Appendix B - STTP API Reference](#appendix-b---sttp-api-reference) provides instructions to enable software developers to integrate and use of STTP within other software systems.
 
