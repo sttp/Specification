@@ -1,6 +1,6 @@
 ## Business case
 
-At the conclusion of the STTP project in April 2019, STTP will be a well-tested, thoroughly vetted, production-grade protocol that will be supported by project team vendors.  An open source tool suite for STTP will be developed as part of the project (see [Appendix A](APIReference.md)) that will include a test harness that will allow utilities and vendors outside the project to test and validate STTP in their systems and API's.
+At the conclusion of the STTP project in April 2019, STTP will be a well-tested, thoroughly vetted, production-grade protocol that will be supported by project team vendors.  An open source tool suite for STTP will be developed as part of the project (see [Appendix B](APIReference.md)) that will include a test harness that will allow utilities and vendors outside the project to test and validate STTP in their systems and API's.
 
 STTP offers both short-term cost savings and strategic value in that it is:
 

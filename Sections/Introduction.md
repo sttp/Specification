@@ -10,10 +10,12 @@ On May 1, 2017, a DOE grant (DE-OE-859) was awarded to GPA and the other 25 coll
 
 The purpose of this document is to define STTP and to include, as appendices, descriptions as to how to use its supporting software tools.  This STTP specification is focused on effective "streaming data" delivery of which synchrophasor data is a very important use case.
 
-In the [Overview](Overview.md) section of this specification, high-level features and the business value of STTP are presented. The balance of the sections of the specification provide the details of protocol design.
+In the [Protocol Overview](Overview.md) section of this specification, high-level features and the business value of STTP are presented. The balance of the sections of the specification provide the details of protocol design.
 
-[Appendix A - STTP API Reference](APIReference.md) provides instructions to enable software developers to integrate and use of STTP within other software systems.
+[Appendix A - Functional Requirements](FunctionalRequirements.md) provides the set of functional requirements and use cases needed for successful STTP deployment.
 
-[Appendix B - IEEE C37.118 Mapping](IEEE_C37.118Mapping.md) provides a detailed look at the process of transforming IEEE C37.118 into STTP as well as creating IEEE C37.118 streams from STTP.
+[Appendix B - STTP API Reference](APIReference.md) provides instructions to enable software developers to integrate and use of STTP within other software systems.
+
+[Appendix C - IEEE C37.118 Mapping](IEEE_C37.118Mapping.md) provides a detailed look at the process of transforming IEEE C37.118 into STTP as well as creating IEEE C37.118 streams from STTP.
 
 While the format and structure of this document, established to facilitate collaboration, is different than that used by standards bodies, it is hoped that the content within this document can meet all the information requirements needed to enable repackaging of this specification into draft standard formats.

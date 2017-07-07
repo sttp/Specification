@@ -17,5 +17,6 @@
 | 11 | [References and Notes](References.md) |
 | 12 | [Contributors and Reviewers](Contributors.md) |
 | 13 | [Revision History](History.md) |
-|  A | [Appendix A - STTP API Reference ](APIReference.md) |
-|  B | [Appendix B - IEEE C37.118 Mapping](IEEE_C37.118Mapping.md) |
+| A | [Appendix A - Functional Requirements](FunctionalRequirements.md) |
+| B | [Appendix B - STTP API Reference](APIReference.md) |
+| C | [Appendix C - IEEE C37.118 Mapping](IEEE_C37.118Mapping.md) |

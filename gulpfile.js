@@ -90,8 +90,9 @@ const sectionLinks = [
   [ "(References.md)", "(#references-and-notes)" ],
   [ "(Contributors.md)", "(#contributors)" ],
   [ "(History.md)", "(#major-version-history)" ],
-  [ "(APIReference.md)", "(#appendix-a---sttp-api-reference)" ],
-  [ "(IEEE_C37.118Mapping.md)", "(#appendix-b---ieee-c37118-mapping)" ],
+  [ "(FunctionalRequirements.md)", "#appendix-a---functional-requirements" ],
+  [ "(APIReference.md)", "(#appendix-b---sttp-api-reference)" ],
+  [ "(IEEE_C37.118Mapping.md)", "(#appendix-c---ieee-c37118-mapping)" ],
   [ "(ToDoList.md)", "(#specification-development-to-do-list)" ],
   /* Special replacements */
   [ "(References.md#", "(#" ],

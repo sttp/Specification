@@ -1,4 +1,4 @@
-## Appendix A - STTP API Reference
+## Appendix B - STTP API Reference
 
 appendix body
 
