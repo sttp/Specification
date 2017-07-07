@@ -147,3 +147,4 @@ Although not precluded from use over other data transports, the design of STTP i
 * Points defined in metadata will have a clear ownership path
 * A minimal set of metadata will exist to support any STTP deployments
 * Industry specific metadata extensions will exist to support specific industry deployments
+* Ability to support broadcast messaging and distribution of critical system alarms
