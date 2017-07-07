@@ -9,6 +9,16 @@
 * Value - multiple native types supports
 * Flags - standardize minimal set of simple flags, complex state can be new data point
 
+> :tomato::question: SEC: Rather than require all data to be mapped into a predefined Data Point, the lowest level of the protocol that defines how data is serialized should be a free-form data block that is defined at runtime. Instead, the Data Point Structure should be more like:
+> * C37.118 Data Point Structure
+> * DNP Data Point Structure
+> * ICCP Data Point Structure
+> * IEC 61850-90-5 Data Point Structure
+> * Generic Time-Series Data Point Structure (Origional Data Point Structure listed above)
+>
+> At some level, all measurements can be mapped to Generic Time-Series Data Point Structure, but they shouldn't be required to be from the get-go. This would allow the creation of a front-end data transport that could move any kind of time series data in its raw format and the consumer of the data can decide how to translate the data. This also means that these raw protocols could be encapsolated and transported over encrypted channels without requiring a stateful metadata repository to map all measurements to a GUID.
+
+
 ### Data Point Value Types
 
 * Null
