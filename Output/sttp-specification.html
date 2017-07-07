@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.0.33 - July 7, 2017</p>
+<p><strong>Version:</strong> 0.0.34 - July 7, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -803,51 +803,51 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </tr>
 <tr>
 <td style="text-align:center;">5</td>
-<td><a href="#design-philosophies">Design Philosophies</a></td>
-</tr>
-<tr>
-<td style="text-align:center;">6</td>
 <td><a href="#data-point-structure">Data Point Structure</a></td>
 </tr>
 <tr>
-<td style="text-align:center;">7</td>
+<td style="text-align:center;">6</td>
 <td><a href="#commands-and-responses">Commands and Responses</a></td>
 </tr>
 <tr>
-<td style="text-align:center;">8</td>
+<td style="text-align:center;">7</td>
 <td><a href="#data-point-characteristics">Data Point Characteristics</a></td>
 </tr>
 <tr>
-<td style="text-align:center;">9</td>
+<td style="text-align:center;">8</td>
 <td><a href="#metadata">Metadata</a></td>
 </tr>
 <tr>
-<td style="text-align:center;">10</td>
+<td style="text-align:center;">9</td>
 <td><a href="#compression">Compression</a></td>
 </tr>
 <tr>
-<td style="text-align:center;">11</td>
+<td style="text-align:center;">10</td>
 <td><a href="#security">Security</a></td>
 </tr>
 <tr>
-<td style="text-align:center;">12</td>
+<td style="text-align:center;">11</td>
 <td><a href="#references-and-notes">References and Notes</a></td>
 </tr>
 <tr>
-<td style="text-align:center;">13</td>
+<td style="text-align:center;">12</td>
 <td><a href="#contributors">Contributors and Reviewers</a></td>
 </tr>
 <tr>
-<td style="text-align:center;">14</td>
+<td style="text-align:center;">13</td>
 <td><a href="#major-version-history">Revision History</a></td>
 </tr>
 <tr>
 <td style="text-align:center;">A</td>
-<td><a href="#appendix-a---sttp-api-reference">Appendix A - STTP API Reference </a></td>
+<td>[Appendix A - Functional Requirements]#appendix-a---functional-requirements</td>
 </tr>
 <tr>
 <td style="text-align:center;">B</td>
-<td><a href="#appendix-b---ieee-c37118-mapping">Appendix B - IEEE C37.118 Mapping</a></td>
+<td><a href="#appendix-b---sttp-api-reference">Appendix B - STTP API Reference</a></td>
+</tr>
+<tr>
+<td style="text-align:center;">C</td>
+<td><a href="#appendix-c---ieee-c37118-mapping">Appendix C - IEEE C37.118 Mapping</a></td>
 </tr>
 </tbody>
 </table>
@@ -857,12 +857,13 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <p>On May 1, 2017, a DOE grant (DE-OE-859) was awarded to GPA and the other 25 collaborators on ASP Project (see <a href="#contributors">Contributors</a> section) to develop: (1) a detailed definition of new publish-subscribe protocol, now called the Streaming Time-series Transport Protocol (STTP) and (2) software to support it including production-grade implementations of STTP API's in multiple development platforms along with a collection of tools to test and validate the new protocol.</p>
 <h3 id="scope-of-this-document">Scope of this Document</h3>
 <p>The purpose of this document is to define STTP and to include, as appendices, descriptions as to how to use its supporting software tools.  This STTP specification is focused on effective "streaming data" delivery of which synchrophasor data is a very important use case.</p>
-<p>In the <a href="#protocol-overview">Overview</a> section of this specification, high-level features and the business value of STTP are presented. The balance of the sections of the specification provide the details of protocol design.</p>
-<p><a href="#appendix-a---sttp-api-reference">Appendix A - STTP API Reference</a> provides instructions to enable software developers to integrate and use of STTP within other software systems.</p>
-<p><a href="#appendix-b---ieee-c37118-mapping">Appendix B - IEEE C37.118 Mapping</a> provides a detailed look at the process of transforming IEEE C37.118 into STTP as well as creating IEEE C37.118 streams from STTP.</p>
+<p>In the <a href="#protocol-overview">Protocol Overview</a> section of this specification, high-level features and the business value of STTP are presented. The balance of the sections of the specification provide the details of protocol design.</p>
+<p>[Appendix A - Functional Requirements]#appendix-a---functional-requirements provides the set of functional requirements and use cases needed for successful STTP deployment.</p>
+<p><a href="#appendix-b---sttp-api-reference">Appendix B - STTP API Reference</a> provides instructions to enable software developers to integrate and use of STTP within other software systems.</p>
+<p><a href="#appendix-c---ieee-c37118-mapping">Appendix C - IEEE C37.118 Mapping</a> provides a detailed look at the process of transforming IEEE C37.118 into STTP as well as creating IEEE C37.118 streams from STTP.</p>
 <p>While the format and structure of this document, established to facilitate collaboration, is different than that used by standards bodies, it is hoped that the content within this document can meet all the information requirements needed to enable repackaging of this specification into draft standard formats.</p>
 <h2 id="business-case">Business case</h2>
-<p>At the conclusion of the STTP project in April 2019, STTP will be a well-tested, thoroughly vetted, production-grade protocol that will be supported by project team vendors.  An open source tool suite for STTP will be developed as part of the project (see <a href="#appendix-a---sttp-api-reference">Appendix A</a>) that will include a test harness that will allow utilities and vendors outside the project to test and validate STTP in their systems and API's.</p>
+<p>At the conclusion of the STTP project in April 2019, STTP will be a well-tested, thoroughly vetted, production-grade protocol that will be supported by project team vendors.  An open source tool suite for STTP will be developed as part of the project (see <a href="#appendix-b---sttp-api-reference">Appendix B</a>) that will include a test harness that will allow utilities and vendors outside the project to test and validate STTP in their systems and API's.</p>
 <p>STTP offers both short-term cost savings and strategic value in that it is:</p>
 <h4 id="intrinsically-robust">Intrinsically Robust</h4>
 <p>By design, STTP packet sizes are small and are optimized for network MTU size reducing fragmentation which results in more efficient TCP performance and less overall data loss with UDP.  STTP also puts significantly less stress on network routing equipment and facilitates mixing of streaming data traffic and other general network communications.  With STTP, purpose built networks are not required to reliably support very large phasor data streams.</p>
@@ -1150,6 +1151,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <p>Although not precluded from use over other data transports, the design of STTP is targeted and optimized for use over IP, specifically TCP/IP and UDP/IP. Even so, since the command/response implementation and data packet distribution of the STTP protocol is fairly simple, it is expected that commonly available middleware data transport layers, such as ZeroMQ or DDS, could easily support and transmit data using the STTP protocol should any of the messaging distribution and management benefits of these transport layers be useful to a particular deployment environment. However, these types of deployments are outside the scope of this documentation. If needed, STTP integrations with middleware layers should be added as reference implementation repositories to the STTP organizational site <sup>[<a href="#ref4">4</a>]</sup>.</p>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> JRC: <em>The question has been raised if a UDP only transport should be allowed? In this mode, any critical commands and responses would basically be sent over UDP. Thought would need to be given to commands and/or responses that never arrive and the consequences thereof.</em></p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> SEC: <em>We may also consider a UDP method that is not bi-directional. Much like how C37.118 currently supports such a data stream. This could be encrypted by storing the client's public key on the server and encrypting the cipher key periodically. It could be used when transporting from secure environment to an unsecure one. Anytime TCP is used, the potential of buffering and creating a DOS attack on the more secure system is possible. And UDP replies through a firewall are really easy to spoof.</em></p>
 </blockquote>
 <h3 id="sttp-feature-summary">STTP Feature Summary</h3>
 <ul>
@@ -1167,6 +1169,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <li>Points defined in metadata will have a clear ownership path</li>
 <li>A minimal set of metadata will exist to support any STTP deployments</li>
 <li>Industry specific metadata extensions will exist to support specific industry deployments</li>
+<li>Ability to support broadcast messaging and distribution of critical system alarms</li>
 </ul>
 <h2 id="data-point-structure">Data Point Structure</h2>
 <blockquote>
@@ -1179,6 +1182,18 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <li>Value - multiple native types supports</li>
 <li>Flags - standardize minimal set of simple flags, complex state can be new data point</li>
 </ul>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> SEC: Rather than require all data to be mapped into a predefined Data Point, the lowest level of the protocol that defines how data is serialized should be a free-form data block that is defined at runtime. Instead, the Data Point Structure should be more like:</p>
+  <ul>
+  <li>C37.118 Data Point Structure</li>
+  <li>DNP Data Point Structure</li>
+  <li>ICCP Data Point Structure</li>
+  <li>IEC 61850-90-5 Data Point Structure</li>
+  <li>Generic Time-Series Data Point Structure (Original Data Point Structure listed above)</li>
+  </ul>
+  <p>At some level, all measurements can be mapped to Generic Time-Series Data Point Structure, but they shouldn't be required to be from the get-go. This would allow the creation of a front-end data transport that could move any kind of time series data in its raw format and the consumer of the data can decide how to translate the data. This also means that these raw protocols could be encapsulated and transported over encrypted channels without requiring a stateful metadata repository to map all measurements to a GUID.</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/thumbsup.png?v5" alt=":thumbsup:" title=":thumbsup:" class="emoji-img emoji"> JRC: I think this could be supported in an automated process (and perhaps starting with code) found in serialization technologies like Google Protocol Buffers.</p>
+</blockquote>
 <h3 id="data-point-value-types">Data Point Value Types</h3>
 <ul>
 <li>Null</li>
@@ -1514,6 +1529,7 @@ count may not match requested points due to rights or points may no longer exist
 <li>J. Ritchie Carroll, GPA</li>
 <li>F. Russell Robertson, GPA</li>
 <li>Stephen C. Wills, GPA</li>
+<li>Steven E. Chisholm, OG&amp;E</li>
 </ul>
 <h3 id="asp-project-participants">ASP Project Participants</h3>
 <p><img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/participant-logos.png" alt="Project Participants" /></p>
@@ -1544,13 +1560,13 @@ count may not match requested points due to rights or points may no longer exist
 </tr>
 </tbody>
 </table>
-<h2 id="appendix-a---sttp-api-reference">Appendix A - STTP API Reference</h2>
+<h2 id="appendix-b---sttp-api-reference">Appendix B - STTP API Reference</h2>
 <p>appendix body</p>
 <p>appendix body</p>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> Links to language specific auto-generated XML code comment based API documentation would be useful.</p>
 </blockquote>
-<h2 id="appendix-b---ieee-c37118-mapping">Appendix B - IEEE C37.118 Mapping</h2>
+<h2 id="appendix-c---ieee-c37118-mapping">Appendix C - IEEE C37.118 Mapping</h2>
 <p>appendix body</p>
 <p>appendix body</p>
 </body>

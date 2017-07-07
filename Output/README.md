@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.0.33 - July 7, 2017
+**Version:** 0.0.34 - July 7, 2017
 
 **Status:** Initial Development
 
@@ -30,18 +30,18 @@ This specification is free software and it can be redistributed and/or modified 
 | 2 | [Business Case](#business-case) |
 | 3 | [Definitions and Nomenclature](#definitions-and-nomenclature) |
 | 4 | [Protocol Overview](#protocol-overview) |
-| 5 | [Design Philosophies](#design-philosophies) |
-| 6 | [Data Point Structure](#data-point-structure) |
-| 7 | [Commands and Responses](#commands-and-responses) |
-| 8 | [Data Point Characteristics](#data-point-characteristics) |
-| 9 | [Metadata](#metadata) |
-| 10 | [Compression](#compression) |
-| 11 | [Security](#security) |
-| 12 | [References and Notes](#references-and-notes) |
-| 13 | [Contributors and Reviewers](#contributors) |
-| 14 | [Revision History](#major-version-history) |
-|  A | [Appendix A - STTP API Reference ](#appendix-a---sttp-api-reference) |
-|  B | [Appendix B - IEEE C37.118 Mapping](#appendix-b---ieee-c37118-mapping) |
+| 5 | [Data Point Structure](#data-point-structure) |
+| 6 | [Commands and Responses](#commands-and-responses) |
+| 7 | [Data Point Characteristics](#data-point-characteristics) |
+| 8 | [Metadata](#metadata) |
+| 9 | [Compression](#compression) |
+| 10 | [Security](#security) |
+| 11 | [References and Notes](#references-and-notes) |
+| 12 | [Contributors and Reviewers](#contributors) |
+| 13 | [Revision History](#major-version-history) |
+| A | [Appendix A - Functional Requirements]#appendix-a---functional-requirements |
+| B | [Appendix B - STTP API Reference](#appendix-b---sttp-api-reference) |
+| C | [Appendix C - IEEE C37.118 Mapping](#appendix-c---ieee-c37118-mapping) |
 
 ## Introduction
 
@@ -55,17 +55,19 @@ On May 1, 2017, a DOE grant (DE-OE-859) was awarded to GPA and the other 25 coll
 
 The purpose of this document is to define STTP and to include, as appendices, descriptions as to how to use its supporting software tools.  This STTP specification is focused on effective "streaming data" delivery of which synchrophasor data is a very important use case.
 
-In the [Overview](#protocol-overview) section of this specification, high-level features and the business value of STTP are presented. The balance of the sections of the specification provide the details of protocol design.
+In the [Protocol Overview](#protocol-overview) section of this specification, high-level features and the business value of STTP are presented. The balance of the sections of the specification provide the details of protocol design.
 
-[Appendix A - STTP API Reference](#appendix-a---sttp-api-reference) provides instructions to enable software developers to integrate and use of STTP within other software systems.
+[Appendix A - Functional Requirements]#appendix-a---functional-requirements provides the set of functional requirements and use cases needed for successful STTP deployment.
 
-[Appendix B - IEEE C37.118 Mapping](#appendix-b---ieee-c37118-mapping) provides a detailed look at the process of transforming IEEE C37.118 into STTP as well as creating IEEE C37.118 streams from STTP.
+[Appendix B - STTP API Reference](#appendix-b---sttp-api-reference) provides instructions to enable software developers to integrate and use of STTP within other software systems.
+
+[Appendix C - IEEE C37.118 Mapping](#appendix-c---ieee-c37118-mapping) provides a detailed look at the process of transforming IEEE C37.118 into STTP as well as creating IEEE C37.118 streams from STTP.
 
 While the format and structure of this document, established to facilitate collaboration, is different than that used by standards bodies, it is hoped that the content within this document can meet all the information requirements needed to enable repackaging of this specification into draft standard formats.
 
 ## Business case
 
-At the conclusion of the STTP project in April 2019, STTP will be a well-tested, thoroughly vetted, production-grade protocol that will be supported by project team vendors.  An open source tool suite for STTP will be developed as part of the project (see [Appendix A](#appendix-a---sttp-api-reference)) that will include a test harness that will allow utilities and vendors outside the project to test and validate STTP in their systems and API's.
+At the conclusion of the STTP project in April 2019, STTP will be a well-tested, thoroughly vetted, production-grade protocol that will be supported by project team vendors.  An open source tool suite for STTP will be developed as part of the project (see [Appendix B](#appendix-b---sttp-api-reference)) that will include a test harness that will allow utilities and vendors outside the project to test and validate STTP in their systems and API's.
 
 STTP offers both short-term cost savings and strategic value in that it is:
 
@@ -311,6 +313,8 @@ Although not precluded from use over other data transports, the design of STTP i
 
 > :tomato::question: JRC: _The question has been raised if a UDP only transport should be allowed? In this mode, any critical commands and responses would basically be sent over UDP. Thought would need to be given to commands and/or responses that never arrive and the consequences thereof._
 
+> :tomato::question: SEC: _We may also consider a UDP method that is not bi-directional. Much like how C37.118 currently supports such a data stream. This could be encrypted by storing the client's public key on the server and encrypting the cipher key periodically. It could be used when transporting from secure environment to an unsecure one. Anytime TCP is used, the potential of buffering and creating a DOS attack on the more secure system is possible. And UDP replies through a firewall are really easy to spoof._
+
 ### STTP Feature Summary
 
 * Perform at high volume / large scale
@@ -327,6 +331,7 @@ Although not precluded from use over other data transports, the design of STTP i
 * Points defined in metadata will have a clear ownership path
 * A minimal set of metadata will exist to support any STTP deployments
 * Industry specific metadata extensions will exist to support specific industry deployments
+* Ability to support broadcast messaging and distribution of critical system alarms
 
 ## Data Point Structure
 
@@ -338,6 +343,17 @@ Although not precluded from use over other data transports, the design of STTP i
 * Timestamp (required? could simply be a auto-incrementing counter)
 * Value - multiple native types supports
 * Flags - standardize minimal set of simple flags, complex state can be new data point
+
+> :tomato::question: SEC: Rather than require all data to be mapped into a predefined Data Point, the lowest level of the protocol that defines how data is serialized should be a free-form data block that is defined at runtime. Instead, the Data Point Structure should be more like:
+> * C37.118 Data Point Structure
+> * DNP Data Point Structure
+> * ICCP Data Point Structure
+> * IEC 61850-90-5 Data Point Structure
+> * Generic Time-Series Data Point Structure (Original Data Point Structure listed above)
+>
+> At some level, all measurements can be mapped to Generic Time-Series Data Point Structure, but they shouldn't be required to be from the get-go. This would allow the creation of a front-end data transport that could move any kind of time series data in its raw format and the consumer of the data can decide how to translate the data. This also means that these raw protocols could be encapsulated and transported over encrypted channels without requiring a stateful metadata repository to map all measurements to a GUID.
+
+> :thumbsup: JRC: I think this could be supported in an automated process (and perhaps starting with code) found in serialization technologies like Google Protocol Buffers.
 
 ### Data Point Value Types
 
@@ -607,6 +623,7 @@ The following individuals actively participated in the development of this stand
 - J. Ritchie Carroll, GPA
 - F. Russell Robertson, GPA
 - Stephen C. Wills, GPA
+- Steven E. Chisholm, OG&E
 
 
 ### ASP Project Participants
@@ -625,7 +642,7 @@ The following individuals actively participated in the development of this stand
 | 0.1 | TBD, 2017 | Initial draft for validation of use of markdown |
 | 0.0 | June 15, 2017 | Specification template |
 
-## Appendix A - STTP API Reference
+## Appendix B - STTP API Reference
 
 appendix body
 
@@ -633,7 +650,8 @@ appendix body
 
 > :bulb: Links to language specific auto-generated XML code comment based API documentation would be useful.
 
-## Appendix B - IEEE C37.118 Mapping
+## Appendix C - IEEE C37.118 Mapping
+
 appendix body
 
 appendix body
