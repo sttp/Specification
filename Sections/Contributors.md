@@ -5,6 +5,7 @@ The following individuals actively participated in the development of this stand
 - J. Ritchie Carroll, GPA
 - F. Russell Robertson, GPA
 - Stephen C. Wills, GPA
+- Steven E. Chisholm, OG&E
 
 
 ### ASP Project Participants
