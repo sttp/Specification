@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.0.35 - July 7, 2017
+**Version:** 0.1.1 - July 7, 2017
 
 **Status:** Initial Development
 
@@ -639,8 +639,16 @@ The following individuals actively participated in the development of this stand
 
 | Version | Date | Notes |
 |--------:|------|:------|
-| 0.1 | TBD, 2017 | Initial draft for validation of use of markdown |
+| 0.1 | July 7, 2017 | Initial draft for validation of use of markdown |
 | 0.0 | June 15, 2017 | Specification template |
+
+## Appendix A - Functional Requirements
+
+* Functional requirement 1
+* Functional requirement 2
+* Functional requirement 3
+
+### Use Cases
 
 ## Appendix B - STTP API Reference
 
