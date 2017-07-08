@@ -14,7 +14,7 @@ STTP has been built using a "security first" design approach.  Authentication to
 
 #### Reduces First Cost
 
-GEP has been measured <sup>[[5](References.md#user-content-ref5)]</sup> to have less than half the band width requirements of IEEE C37.118 <sup>[[1](References.md#user-content-ref1)]</sup> when used with TCP and simple methods for lossless compression.  With the compression, a single signal or measurement point (i.e., an identifier, timestamp, value and quality code) requires only 2.5 bytes. By comparison, IEEE C37.118 requires 4.5 bytes per measurement on average. The signal-based GEP protocol incorporates Pub/Sub data exchange methods so that unnecessary data points need not be exchanged – thereby further reducing overall bandwidth requirements as compared to IEEE C37.118.
+GEP has been measured <sup>[[5](References.md#user-content-ref5)]</sup> to have less than half the band width requirements of IEEE C37.118 <sup>[[1](References.md#user-content-ref1)]</sup> when used with TCP and simple methods for lossless compression.  With the compression, a single signal or measurement point (i.e., an identifier, timestamp, value and quality code) requires only 2.5 bytes. By comparison, IEEE C37.118 requires 4.5 bytes per measurement on average. The signal-based GEP protocol incorporates Pub/Sub data exchange methods so that unnecessary data points need not be exchanged - thereby further reducing overall bandwidth requirements as compared to IEEE C37.118.
 
 #### Reduces Operating Cost
 
@@ -26,7 +26,7 @@ STTP provides an alternative to the existing method for utility data exchange th
 
 > :information_source: ICCP (IEC 60870-6/TASE.2) is the international standard used to exchange "real-time" SCADA data among electric utilities.  Analog measurement data is typically exchanged continuously every 2 to 10 seconds with bi-modal data such as breaker status information only being exchanged "on change".  ICCP came into coordinated use in North America in the mid-1990s.
 
-Promising technologies are being developed for cloud computing and these technologies are moving toward native implementations at individual utilities and ISOs -- and can be leveraged to support larger native implementations such as those to support an interconnect.  The common theme among these technologies is the ability to process significantly more data very quickly with improved reliability.
+Promising technologies are being developed for cloud computing and these technologies are moving toward native implementations at individual utilities and ISOs - and can be leveraged to support larger native implementations such as those to support an interconnect.  The common theme among these technologies is the ability to process significantly more data very quickly with improved reliability.
 
 It's possible that a protocol like STTP which allows secure, low-latency, high-volume data exchange among utilities at low cost can be a major factor in driving change toward these new technologies. New higher-speed forms of inter-utility interaction will be possible, and new approaches for providing utility information services will be realizable.  
 

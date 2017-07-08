@@ -97,7 +97,7 @@ const sectionLinks = [
   [ "(ToDoList.md)", "(#specification-development-to-do-list)" ],
   /* Special replacements */
   [ "(References.md#", "(#" ],
-  [ "(QuestionsSummary.md)", "(" + viewPath + "QuestionsSummary.md)" ],
+  [ "(QuestionsSummary.md)", "(" + viewPath + "Sections/QuestionsSummary.md)" ],
   [ "(../LICENSE)", "(" + viewPath + "LICENSE)" ]
 ];
 
