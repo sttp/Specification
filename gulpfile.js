@@ -62,6 +62,7 @@ const sections = [
   "Sections/References.md",
   "Sections/Contributors.md",
   "Sections/History.md",
+  "Sections/FunctionalRequirements.md",
   "Sections/APIReference.md",
   "Sections/IEEE_C37.118Mapping.md"
 ];
