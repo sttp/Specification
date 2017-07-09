@@ -16,7 +16,7 @@
   * SQL style expressions
   * Regex style expressions
 * Application of expressions
-  * Metadata reduction
+  * Metadata reduction (by subscriber)
   * Data point access security
 
 ### Dataset Versioning
