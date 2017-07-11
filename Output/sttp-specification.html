@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.1.3 - July 9, 2017</p>
+<p><strong>Version:</strong> 0.1.4 - July 11, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -1666,14 +1666,66 @@ count may not match requested points due to rights or points may no longer exist
 </tbody>
 </table>
 <h2 id="appendix-a---functional-requirements">Appendix A - Functional Requirements</h2>
-<ul>
-<li>Functional requirement 1</li>
-<li>Functional requirement 2</li>
-<li>Functional requirement 3</li>
-</ul>
 <blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> The following are <em>proposed</em> ideas that may need a home:</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Candidate topics (for now, these are a mix of functional and non-functional requirements)</p>
 </blockquote>
+<ul>
+<li>Performance and throughput(latency &amp; bandwidth)</li>
+<li>Scalability</li>
+<li>Pub/Sub configurability</li>
+<li>Metadata management</li>
+<li>Quality of Service</li>
+<li>Extensibility</li>
+<li>Confidentiality / Key management</li>
+<li>Access Control</li>
+<li>Integrity</li>
+<li>Alarming and notifications</li>
+<li>Enable best-practice security</li>
+<li>Reduced Risk of Non-Compliance</li>
+<li>Deployment for high-availability</li>
+<li>Disaster recovery considerations</li>
+<li>System Integration</li>
+<li>Installation and deployment</li>
+</ul>
+<h3 id="use-case-examples">Use Case Examples</h3>
+<p><strong>A.  High-volume, real-time phasor data exchange</strong> (e.g., ISO/RTO -to- ISO/RTO)</p>
+<p>Use case text</p>
+<p><strong>B. Medium volume, real-time data exchange with name translation</strong>  (e.g., Transmission Owner -to- ISO/RTO)</p>
+<p>Use case text</p>
+<p>**C.  Medium-volume historical phasor data exchange ** (e.g., ISO/RTO -to- Transmission Owner)</p>
+<p>Use case text</p>
+<p><strong>D. Within an Entity</strong></p>
+<p>Use case text</p>
+<p><strong>D. Low-volume real-time phasor data exchange with automated gap filling</strong> (e.g., Substation PDC -to- Control Center)</p>
+<p>Use case text</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> The following are <em>proposed</em> ideas that may need a home -- purposely written in future tense</p>
+</blockquote>
+<h3 id="operaitonal-requirements">Operaitonal Requirements</h3>
+<h4 id="data-classes">Data Classes</h4>
+<p>(1) commands  &amp; notifications &amp; transactional data - <strong>The Command Channel</strong></p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> some text from SIEGate doc as a starting point</p>
+</blockquote>
+<p>The command channel will be used to reliably negotiate session-specific communication, state, and protocol parameters.  It will:</p>
+<ul>
+<li>exchange metadata information between gateways in a trusted union, with each publishing gateway only exchanging information that the subscribing gateway is allowed to view.</li>
+<li>allow the connecting gateway to request points for a streaming data subscription from the publishing gateway. Requests for points that are not in the access control list for the subscribing gateway will be denied with a returned error.</li>
+<li>minimize the bandwidth required for communicating measurement IDs and time-stamps.</li>
+<li>allow the subscribing gateway to start and stop the data stream.</li>
+<li>exchange and optionally synchronize measurement point metadata information received from external trusted gateway unions to the local configuration source so that users can examine points that are available for subscription.</li>
+<li>enforce trusted gateway measurement point publication and subscription lists as defined in the configuration database. The system will drop data that it is not configured to receive.</li>
+<li>provide the necessary mechanisms to negotiate QoS configuration with the receiving entity.</li>
+</ul>
+<p>Provide the necessary communication to establish a trusted connection between a STTP publisher and subscriber by:</p>
+<ul>
+<li>establishment of a trusted STTP union will be handled through a manual configuration process out-of-band, that is, not over the gateway-to-gateway network over which the gateways communicate.</li>
+<li>information being used to establish a trusted union between an STTP publisher and subscriber  will be protected on the local system and will be considered information known only to the two gateways participating in the union.</li>
+<li>the gateways participating in the trusted union will exchange authentication information in an accepted and interoperable manner. For that reason, TLS and identity certificates should be used if possible.</li>
+</ul>
+<p>(2) streaming data - <strong>The Data Channel</strong></p>
+<p>The data channel will be used to send compact packets of identifiable measured values along with a timestamp with high-fidelity accuracy and flags that can be used to indicate both time and data quality.</p>
+<h4 id="data-exchange-with-other-sttp-systems">Data Exchange with Other STTP Systems</h4>
 <h4 id="subscription-delivery-options">Subscription Delivery Options</h4>
 <p>Per subscription delivery window – this subscription level setting would constrain data delivery to a provided timespan (in terms of UTC based start and stop time). This could either be a maximum (future) time constraint for real-time data or, where supported by publisher, a historical data request.<br />
 Publisher will likely want to validate size of historical requests, or least throttle responses, for very large historical requests.</p>
@@ -1681,7 +1733,6 @@ Publisher will likely want to validate size of historical requests, or least thr
 <p>Send a sequence of values – with respect to specified per value delivery settings (think buffer blocks)</p>
 <p>Send latest value – command allows for non-steaming request/reply, such as, translation to DNP3</p>
 <p>Send historical values – subject to availability of local archive / buffer with start and stop time- it has been requested many times that single value data recovery option will be available to accommodate for simple UDP loss, however this should be carefully considered since this basically makes UDP and TCP style protocol – if implemented, restored point should likely flow over TCP channel to reduce repeat recovery requests. Also, this should include detail in response message that recovery either succeeded or failed, where failure mode could include “data not available”. To reduce noise, at connection time publisher should always let know subscriber its capabilities which might include “I Support Historical Data Buffer” and perhaps depth of available data. That said there is true value in recovery of data gaps that occur due to loss of connectivity.</p>
-<h3 id="use-cases">Use Cases</h3>
 <h2 id="appendix-b---sttp-api-reference">Appendix B - STTP API Reference</h2>
 <p>appendix body</p>
 <p>appendix body</p>
