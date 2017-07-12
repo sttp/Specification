@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.1.4 - July 11, 2017</p>
+<p><strong>Version:</strong> 0.1.5 - July 12, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -1067,7 +1067,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/warning.png?v5" alt=":warning:" title=":warning:" class="emoji-img emoji"> This note use used to highlight important or critical information.</p>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> This note is used to call out information related to reference implementations or API development.</p>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> A informal note to document authors to facilitate specification development</p>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> (author's initials): May be used by anyone to toss out questions and comments that are temporal. These may be inserted at any point in any of the markdown documents.  These questions will preserved as they are migrated to the <a href="https://github.com/sttp/Specification/blob/master/Sections/QuestionsSummary.md">QuestionsSummary.md</a> file from time-to-time.</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> (author's initials): <em>May be used by anyone to toss out questions and comments that are temporal. These may be inserted at any point in any of the markdown documents.  These questions will preserved as they are migrated to the <a href="https://github.com/sttp/Specification/blob/master/Sections/QuestionsSummary.md">QuestionsSummary.md</a> file from time-to-time.</em></p>
 </blockquote>
 <p>Code blocks are shown as:</p>
 <pre><code class="C# language-C#">    public function void DisplayHelloWorld()
@@ -1094,6 +1094,10 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <p><sup>Figure 1</sup><br />
 </center></p>
 <p>The impacts of large frames on an IP network are determined by the number of network packets required to send the frame and the fact that IP is inherently unreliable by design. Network packets can only be transmitted over a connection one packet at a time; when two or more network packets arrive for transmission at the same time on any physical network media, the result is a collision. When a collision occurs, only one packet gets sent and the others get dropped <sup>[<a href="#ref12">12</a>]</sup>. IP defines a variety of different transport protocols for network packet transmission, each of which behave in different manners when dealing with packet loss. Consequently, many of the impacts a large frame has on an IP network is dependent upon the transport protocol used to send the frame.</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> KEM: <em>Can you have a collision on a full duplex system? If so, it sounds like buffering is improperly implemented.</em></p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> JRC: <em>A full duplex system prevents network media collisions between incoming and outgoing traffic. It does not prevent UDP data loss from buffer overruns in the OS network stack nor does it prevent collisions from simultaneous traffic.</em></p>
+</blockquote>
 <h4 id="large-frame-impacts-on-tcpip">Large Frame Impacts on TCP/IP</h4>
 <p>The most common Internet protocol, TCP/IP, creates an index for each of the network packets being sent for a frame of data and verifies that each are successfully delivered, retransmitting packets as many times as needed in the case of loss. This functionality is the basis for TCP being considered a <em>reliable</em> data transmission protocol.</p>
 <p>Since each packet of data for the transmitted frame is sequentially ordered, TCP is able to fully reconstruct and deliver the original frame once all the packets have arrived. However, for very large frames of data this causes TCP to suffer from the same kinds of impacts on memory allocation and computational burden as the aforementioned serialization technologies, i.e., Protocol Buffers and Thrift. The unique distinction for IP based protocols is that at some level, these issues also affect every element of the interconnected network infrastructure between the source and sync of the data being exchanged.</p>
@@ -1154,6 +1158,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> JRC: <em>The question has been raised if a UDP only transport should be allowed? In this mode, any critical commands and responses would basically be sent over UDP. Thought would need to be given to commands and/or responses that never arrive and the consequences thereof.</em></p>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> SEC: <em>We may also consider a UDP method that is not bi-directional. Much like how C37.118 currently supports such a data stream. This could be encrypted by storing the client's public key on the server and encrypting the cipher key periodically. It could be used when transporting from secure environment to an unsecure one. Anytime TCP is used, the potential of buffering and creating a DOS attack on the more secure system is possible. And UDP replies through a firewall are really easy to spoof.</em></p>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/confused.png?v5" alt=":confused:" title=":confused:" class="emoji-img emoji"> JRC: <em>Presume that this would require an out-of-band pre-defined configuration to be "known" or handle it the way C37.118 currently manages this, i.e., sending a "config frame" once per minute. In context of STTP, this might be a reduced set of metadata that represented "what" was being published. This would need some "rules" to operate properly.</em></p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> KEM: <em>The advantage in this case is that UDP will operate unidirectionally, TCP won't. However for commands you really need to close the loop. I suggest that STTP only be developed for TCP as suggested above, but do not state that it cannot be adapted to UDP.</em></p>
 </blockquote>
 <h3 id="sttp-feature-summary">STTP Feature Summary</h3>
 <ul>
@@ -1206,7 +1211,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <li>UInt16</li>
 <li>UInt32</li>
 <li>UInt64</li>
-<li>Decimal</li>
+<li>Decimal (IEEE Standard 754-2008)</li>
 <li>Double</li>
 <li>Single</li>
 <li>DateTime (need some thought on proper encoding, perhaps options)</li>
@@ -1218,8 +1223,10 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <li>Byte[]</li>
 </ul>
 <blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> KEM: <em>Is decimal the same as float?</em></p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> JRC: <em>Actually "decimal" is an IEEE standard data type, standard 754-2008 - I added that parenthetically above. It's a floating point number that doesn't suffer from typical floating point rounding issues - often used for currency operations. See here for more detail:</em> <a href="https://en.wikipedia.org/wiki/Decimal_data_type">https://en.wikipedia.org/wiki/Decimal_data_type</a></p>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Need to determine safe maximum upper limit of per-packet strings and byte[] data, especially since implementation could simply <em>span</em> multiple data points to collate a larger string or buffer back together.</p>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> <em>Should API automatically handle collation of larger data types, e.g., strings and buffers?</em></p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> JRC: <em>Should API automatically handle collation of larger data types, e.g., strings and buffers?</em></p>
 </blockquote>
 <h2 id="commands-and-responses">Commands and Responses</h2>
 <blockquote>
@@ -1437,13 +1444,15 @@ count may not match requested points due to rights or points may no longer exist
 <h4 id="rights-and-responsibilities">Rights and Responsibilities</h4>
 <p>Publisher will have the right to reject subscriber requested priority levels. If publisher rejects requested priority levels, then failure response to subscriber will include assigned levels for each data point so that subscriber can accept and update its run-time priority levels with those proposed by publisher or otherwise terminate the connection.</p>
 <p>Subscriber can request desired priority levels but is subject to publisher assigned levels. A common use case may be that data points with the verification characteristic enabled will also be requested to use higher priority levels. If the subscriber does not agree with assigned data point priority levels then, with appropriate response before termination, the subscriber will close the connection.</p>
-<h4 id="operational-statistics">Operational Statistics</h4>
-<ul>
-<li><p>Publisher will maintain overall and per-subscriber statistical count of how many data points are configured at each priority.</p></li>
-<li><p>Publisher will maintain overall and per-subscriber statistical count of how many data points have been published at each priority.</p></li>
-<li><p>Subscriber will maintain statistical count of how many data points are configured at each priority.</p></li>
-<li><p>Subscriber will maintain statistical count of how many data points have been received at each priority.</p></li>
-</ul>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> Operational Statistics</p>
+  <ul>
+  <li>Publisher will maintain overall and per-subscriber statistical count of how many data points are configured at each priority.</li>
+  <li>Publisher will maintain overall and per-subscriber statistical count of how many data points have been published at each priority.</li>
+  <li>Subscriber will maintain statistical count of how many data points are configured at each priority.</li>
+  <li>Subscriber will maintain statistical count of how many data points have been received at each priority.</li>
+  </ul>
+</blockquote>
 <h3 id="reliability-characteristic">Reliability Characteristic</h3>
 <p>Per data point subscriber request would have publisher send data point values over reliable command communications channel (e.g., TCP) or send without retransmission over lossy data communications channel (e.g., UDP). Reliability flag will be ignored when there is no defined alternate data communications channel.</p>
 <blockquote>
@@ -1455,13 +1464,15 @@ count may not match requested points due to rights or points may no longer exist
 <p>Publisher will have the right to reject subscriber requested reliability values. If publisher rejects requested reliability values, then failure response to subscriber will include assigned values for each data point so that subscriber can accept and update its run-time reliability values with those proposed by the publisher or otherwise terminate the connection.</p>
 <p>Subscriber can request desired reliability values but is subject to publisher assigned values. A common use case may be that typical streaming data that can tolerate loss be restricted by the publisher to a lossy data communications channel, e.g., UDP, to reduce possibility of command communications channel queuing over slow or noisy connections. If the subscriber does not agree with assigned data point reliability values then, with appropriate response before termination, the subscriber will close the connection.</p>
 <p>Note that if publisher requires that any of the subscribed data be published over a lossy data communications channel and the subscriber has not defined one, the publisher, with appropriate notification of issue to subscriber, will terminate the connection.</p>
-<h4 id="operational-statistics-1">Operational Statistics</h4>
-<ul>
-<li><p>Publisher will maintain overall and per-subscriber statistical count of how many data points are configured for both command communications channel and data communications channel.</p></li>
-<li><p>Publisher will maintain overall and per-subscriber statistical count of how many data points have been published for both command communications channel and data communications channel.</p></li>
-<li><p>Subscriber will maintain statistical count of how many data points are configured for both command communications channel and data communications channel.</p></li>
-<li><p>Subscriber will maintain statistical count of how many data points have been received for both command communications channel and data communications channel.</p></li>
-</ul>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> Operational Statistics</p>
+  <ul>
+  <li>Publisher will maintain overall and per-subscriber statistical count of how many data points are configured for both command communications channel and data communications channel.</li>
+  <li>Publisher will maintain overall and per-subscriber statistical count of how many data points have been published for both command communications channel and data communications channel.</li>
+  <li>Subscriber will maintain statistical count of how many data points are configured for both command communications channel and data communications channel.</li>
+  <li>Subscriber will maintain statistical count of how many data points have been received for both command communications channel and data communications channel.</li>
+  </ul>
+</blockquote>
 <h3 id="verification-characteristic">Verification Characteristic</h3>
 <p>Per data point publisher assigned characteristic will inform subscriber that a reply must be provided with receipt of data point delivery. Failure to receive receipt, within configured timeout of sender, will be exposed via API so that host application can manage any appropriate action, e.g., exception logging and/or queue for retry.  It is expected that verified data points only be used for sending critical data, either from subscriber to publisher or publisher to subscriber, e.g., a control value that will require verification of receipt.</p>
 <blockquote>
@@ -1477,15 +1488,17 @@ count may not match requested points due to rights or points may no longer exist
 <h4 id="rights-and-responsibilities-2">Rights and Responsibilities</h4>
 <p>Publisher has full authority over determination of which data points require verification. Any verification flags that may be specified by subscriber during data point delivery characteristic requests will be ignored. Subject to rights verification of subscriber to send data points back to publisher, any data points destined to publisher that are marked for verification must respond with a verification receipt back to subscriber upon successful delivery.</p>
 <p>Subscriber must reply to publisher upon receipt of data points that are marked for verification. If the subscriber does not agree with the volume of subscribed data points that require verification then, with appropriate response before termination, the subscriber can terminate the connection. For example, if publisher specifies verification for a large volume of the subscribed data points, this may exceed subscriber's configured upload bandwidth and connection will need to be terminated.</p>
-<h4 id="operational-statistics-2">Operational Statistics</h4>
-<ul>
-<li><p>Publisher will maintain overall and per-subscriber statistical count of how many data points are configured for delivery verification.</p></li>
-<li><p>Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with delivery notification.</p></li>
-<li><p>Publisher will maintain overall and per-subscriber statistical count of how many delivery receipts have been sent to subscribers.</p></li>
-<li><p>Subscriber will maintain statistical count of how many data points are configured for delivery verification.</p></li>
-<li><p>Subscriber will maintain statistical count of how many data points have been published with delivery notification.</p></li>
-<li><p>Subscriber will maintain statistical count of how many delivery receipts have been sent to publisher.</p></li>
-</ul>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> Operational Statistics</p>
+  <ul>
+  <li>Publisher will maintain overall and per-subscriber statistical count of how many data points are configured for delivery verification.</li>
+  <li>Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with delivery notification.</li>
+  <li>Publisher will maintain overall and per-subscriber statistical count of how many delivery receipts have been sent to subscribers.</li>
+  <li>Subscriber will maintain statistical count of how many data points are configured for delivery verification.</li>
+  <li>Subscriber will maintain statistical count of how many data points have been published with delivery notification.</li>
+  <li>Subscriber will maintain statistical count of how many delivery receipts have been sent to publisher.</li>
+  </ul>
+</blockquote>
 <h3 id="exception-characteristic">Exception Characteristic</h3>
 <p>Per data point subscriber request would have publisher either always send data points when they are made available or only send data points when they change as compared to last published value, i.e., on exception. Where applicable by data point value primitive type, i.e., numeric types, the exception can be restricted to a deviation of last published value. Exceptions with specified deviations for numeric types would be calculated as the absolute value of the last published data point value minus the current data point value being greater than or equal to the specified deviation, e.g.: <code>canPublish = abs(lastValue – currentValue) &gt;= deviation</code>. The default deviation for any numeric primitive type will always be zero such that any change in value will trigger a publication. For any data points with values that are non-numeric primitive types, publisher will always send value when it changes, i.e., no deviation logic will be applied when sending by exception for non-numeric primitive data types.</p>
 <blockquote>
@@ -1499,13 +1512,15 @@ count may not match requested points due to rights or points may no longer exist
 <h4 id="rights-and-responsibilities-3">Rights and Responsibilities</h4>
 <p>Publisher must respect subscriber requested exception characteristics. If publisher cannot fulfill subscriber subscription request for specified exception characteristics, e.g., based on volume, then, with appropriate notification of issue to subscriber, publisher will terminate the connection.</p>
 <p>Subscriber can request desired data point exception characteristics to reduce data reception volume with the expectation that if subscription to publisher succeeds, requested exception characteristics will be respected.</p>
-<h4 id="operational-statistics-3">Operational Statistics</h4>
-<ul>
-<li><p>Publisher will maintain overall and per-subscriber statistical count of how many data points are configured with exception based delivery.</p></li>
-<li><p>Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with exception based delivery.</p></li>
-<li><p>Subscriber will maintain statistical count of how many data points are configured with exception based delivery.</p></li>
-<li><p>Subscriber will maintain statistical count of how many data points values have been received with exception based delivery.</p></li>
-</ul>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> Operational Statistics</p>
+  <ul>
+  <li>Publisher will maintain overall and per-subscriber statistical count of how many data points are configured with exception based delivery.</li>
+  <li>Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with exception based delivery.</li>
+  <li>Subscriber will maintain statistical count of how many data points are configured with exception based delivery.</li>
+  <li>Subscriber will maintain statistical count of how many data points values have been received with exception based delivery.</li>
+  </ul>
+</blockquote>
 <h3 id="resolution-characteristic">Resolution Characteristic</h3>
 <p>Per data point subscriber request would have publisher either always send data points at full resolution or with down-sampling. Down-sampling options include latest, closest, best-quality and filtered.</p>
 <blockquote>
@@ -1520,13 +1535,15 @@ count may not match requested points due to rights or points may no longer exist
 <h4 id="rights-and-responsibilities-4">Rights and Responsibilities</h4>
 <p>Publisher must respect subscriber requested resolution characteristics when down-sampling resolution is requested, however, publisher has the right to reject subscriber requests for full resolution data or the type of resolution requested, for example, publisher may only allow non-filter based options for down-sampling to reduce loading. If publisher cannot fulfill subscriber subscription request for specified down-sampling characteristics or if publisher rejects requests for full resolution data or down-sampling options, then failure response to subscriber will include the proposed resolution characteristics for each data point so that subscriber can accept and update its run-time resolution values with those suggested by publisher or otherwise terminate the connection.</p>
 <p>Subscriber can request desired data point resolution characteristics to reduce data reception volume with the expectation that if subscription to publisher succeeds, requested down-sampling characteristics will be respected. If publisher rejects requested characteristics, subscriber can expect that proposed resolution characteristics by the publisher will still provide down-sampling. If the subscriber does not agree with the proposed publisher resolution characteristics then, with appropriate response before termination, the subscriber will close the connection.</p>
-<h4 id="operational-statistics-4">Operational Statistics</h4>
-<ul>
-<li><p>Publisher will maintain overall and per-subscriber statistical count of how many data points are configured with down-sampled delivery.</p></li>
-<li><p>Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with down-sampled delivery.</p></li>
-<li><p>Subscriber will maintain statistical count of how many data points are configured with down-sampled delivery.</p></li>
-<li><p>Subscriber will maintain statistical count of how many data points have been received with down-sampled delivery.</p></li>
-</ul>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> Operational Statistics:</p>
+  <ul>
+  <li>Publisher will maintain overall and per-subscriber statistical count of how many data points are configured with down-sampled delivery.</li>
+  <li>Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with down-sampled delivery.</li>
+  <li>Subscriber will maintain statistical count of how many data points are configured with down-sampled delivery.</li>
+  <li>Subscriber will maintain statistical count of how many data points have been received with down-sampled delivery.</li>
+  </ul>
+</blockquote>
 <h2 id="metadata">Metadata</h2>
 <ul>
 <li>Wire Format: Tabular XML format (XML) - highly compressible</li>
@@ -1635,6 +1652,7 @@ count may not match requested points due to rights or points may no longer exist
 <li>F. Russell Robertson, GPA</li>
 <li>Stephen C. Wills, GPA</li>
 <li>Steven E. Chisholm, OG&amp;E</li>
+<li>Kenneth E. Martin, EPG</li>
 </ul>
 <h3 id="asp-project-participants">ASP Project Participants</h3>
 <p><img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/participant-logos.png" alt="Project Participants" /></p>
@@ -1701,7 +1719,7 @@ count may not match requested points due to rights or points may no longer exist
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> The following are <em>proposed</em> ideas that may need a home -- purposely written in future tense</p>
 </blockquote>
-<h3 id="operaitonal-requirements">Operaitonal Requirements</h3>
+<h3 id="operational-requirements">Operational Requirements</h3>
 <h4 id="data-classes">Data Classes</h4>
 <p>(1) commands  &amp; notifications &amp; transactional data - <strong>The Command Channel</strong></p>
 <blockquote>

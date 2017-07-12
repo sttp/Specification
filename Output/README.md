@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.1.4 - July 11, 2017
+**Version:** 0.1.5 - July 12, 2017
 
 **Status:** Initial Development
 
@@ -170,7 +170,7 @@ Markdown notes in combination with the [Github Emogi](https://gist.github.com/rx
 
 > :construction: A informal note to document authors to facilitate specification development
 
-> :tomato::question: (author's initials): May be used by anyone to toss out questions and comments that are temporal. These may be inserted at any point in any of the markdown documents.  These questions will preserved as they are migrated to the [QuestionsSummary.md](https://github.com/sttp/Specification/blob/master/Sections/QuestionsSummary.md) file from time-to-time.
+> :tomato::question: (author's initials): _May be used by anyone to toss out questions and comments that are temporal. These may be inserted at any point in any of the markdown documents.  These questions will preserved as they are migrated to the [QuestionsSummary.md](https://github.com/sttp/Specification/blob/master/Sections/QuestionsSummary.md) file from time-to-time._
 
 Code blocks are shown as:
 ```C#
@@ -214,6 +214,10 @@ In terms of Internet Protocol (IP), all frames of data to be transmitted that ex
 </center>
 
 The impacts of large frames on an IP network are determined by the number of network packets required to send the frame and the fact that IP is inherently unreliable by design. Network packets can only be transmitted over a connection one packet at a time; when two or more network packets arrive for transmission at the same time on any physical network media, the result is a collision. When a collision occurs, only one packet gets sent and the others get dropped <sup>[[12](#user-content-ref12)]</sup>. IP defines a variety of different transport protocols for network packet transmission, each of which behave in different manners when dealing with packet loss. Consequently, many of the impacts a large frame has on an IP network is dependent upon the transport protocol used to send the frame.
+
+> :tomato::question: KEM: _Can you have a collision on a full duplex system? If so, it sounds like buffering is improperly implemented._
+
+> :bulb: JRC: _A full duplex system prevents network media collisions between incoming and outgoing traffic. It does not prevent UDP data loss from buffer overruns in the OS network stack nor does it prevent collisions from simultaneous traffic._
 
 #### Large Frame Impacts on TCP/IP
 
@@ -319,6 +323,8 @@ Although not precluded from use over other data transports, the design of STTP i
 
 > :confused: JRC: _Presume that this would require an out-of-band pre-defined configuration to be "known" or handle it the way C37.118 currently manages this, i.e., sending a "config frame" once per minute. In context of STTP, this might be a reduced set of metadata that represented "what" was being published. This would need some "rules" to operate properly._
 
+> :bulb: KEM: _The advantage in this case is that UDP will operate unidirectionally, TCP won't. However for commands you really need to close the loop. I suggest that STTP only be developed for TCP as suggested above, but do not state that it cannot be adapted to UDP._
+
 ### STTP Feature Summary
 
 * Perform at high volume / large scale
@@ -369,7 +375,7 @@ Although not precluded from use over other data transports, the design of STTP i
 * UInt16
 * UInt32
 * UInt64
-* Decimal
+* Decimal (IEEE Standard 754-2008)
 * Double
 * Single
 * DateTime (need some thought on proper encoding, perhaps options)
@@ -380,9 +386,13 @@ Although not precluded from use over other data transports, the design of STTP i
 * String (encoding support for UTF-16, UTF-8, ANSI and ASCII)
 * Byte[]
 
+> :tomato::question: KEM: _Is decimal the same as float?_
+
+> :bulb: JRC: _Actually "decimal" is an IEEE standard data type, standard 754-2008 - I added that parenthetically above. It's a floating point number that doesn't suffer from typical floating point rounding issues - often used for currency operations. See here for more detail:_ https://en.wikipedia.org/wiki/Decimal_data_type
+
 > :construction: Need to determine safe maximum upper limit of per-packet strings and byte[] data, especially since implementation could simply _span_ multiple data points to collate a larger string or buffer back together.
 
-> :tomato::question: _Should API automatically handle collation of larger data types, e.g., strings and buffers?_
+> :tomato::question: JRC: _Should API automatically handle collation of larger data types, e.g., strings and buffers?_
 
 ## Commands and Responses
 
@@ -543,14 +553,10 @@ Publisher will have the right to reject subscriber requested priority levels. If
 
 Subscriber can request desired priority levels but is subject to publisher assigned levels. A common use case may be that data points with the verification characteristic enabled will also be requested to use higher priority levels. If the subscriber does not agree with assigned data point priority levels then, with appropriate response before termination, the subscriber will close the connection.
 
-#### Operational Statistics
-
+> :wrench: Operational Statistics
 * Publisher will maintain overall and per-subscriber statistical count of how many data points are configured at each priority.
-
 * Publisher will maintain overall and per-subscriber statistical count of how many data points have been published at each priority.
-
 * Subscriber will maintain statistical count of how many data points are configured at each priority.
-
 * Subscriber will maintain statistical count of how many data points have been received at each priority.
 
 ### Reliability Characteristic
@@ -571,14 +577,10 @@ Subscriber can request desired reliability values but is subject to publisher as
 
 Note that if publisher requires that any of the subscribed data be published over a lossy data communications channel and the subscriber has not defined one, the publisher, with appropriate notification of issue to subscriber, will terminate the connection.
 
-#### Operational Statistics
-
+> :wrench: Operational Statistics
 * Publisher will maintain overall and per-subscriber statistical count of how many data points are configured for both command communications channel and data communications channel.
-
 * Publisher will maintain overall and per-subscriber statistical count of how many data points have been published for both command communications channel and data communications channel.
-
 * Subscriber will maintain statistical count of how many data points are configured for both command communications channel and data communications channel.
-
 * Subscriber will maintain statistical count of how many data points have been received for both command communications channel and data communications channel.
 
 ### Verification Characteristic
@@ -603,18 +605,12 @@ Publisher has full authority over determination of which data points require ver
 
 Subscriber must reply to publisher upon receipt of data points that are marked for verification. If the subscriber does not agree with the volume of subscribed data points that require verification then, with appropriate response before termination, the subscriber can terminate the connection. For example, if publisher specifies verification for a large volume of the subscribed data points, this may exceed subscriber's configured upload bandwidth and connection will need to be terminated.
 
-#### Operational Statistics
-
+> :wrench: Operational Statistics
 * Publisher will maintain overall and per-subscriber statistical count of how many data points are configured for delivery verification.
-
 * Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with delivery notification.
-
 * Publisher will maintain overall and per-subscriber statistical count of how many delivery receipts have been sent to subscribers.
-
 * Subscriber will maintain statistical count of how many data points are configured for delivery verification.
-
 * Subscriber will maintain statistical count of how many data points have been published with delivery notification.
-
 * Subscriber will maintain statistical count of how many delivery receipts have been sent to publisher.
 
 ### Exception Characteristic
@@ -639,14 +635,10 @@ Publisher must respect subscriber requested exception characteristics. If publis
 
 Subscriber can request desired data point exception characteristics to reduce data reception volume with the expectation that if subscription to publisher succeeds, requested exception characteristics will be respected.
 
-#### Operational Statistics
-
+> :wrench: Operational Statistics
 * Publisher will maintain overall and per-subscriber statistical count of how many data points are configured with exception based delivery.
-
 * Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with exception based delivery.
-
 * Subscriber will maintain statistical count of how many data points are configured with exception based delivery.
-
 * Subscriber will maintain statistical count of how many data points values have been received with exception based delivery.
 
 ### Resolution Characteristic
@@ -673,14 +665,10 @@ Publisher must respect subscriber requested resolution characteristics when down
 
 Subscriber can request desired data point resolution characteristics to reduce data reception volume with the expectation that if subscription to publisher succeeds, requested down-sampling characteristics will be respected. If publisher rejects requested characteristics, subscriber can expect that proposed resolution characteristics by the publisher will still provide down-sampling. If the subscriber does not agree with the proposed publisher resolution characteristics then, with appropriate response before termination, the subscriber will close the connection.
 
-#### Operational Statistics
-
+> :wrench: Operational Statistics:
 * Publisher will maintain overall and per-subscriber statistical count of how many data points are configured with down-sampled delivery.
-
 * Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with down-sampled delivery.
-
 * Subscriber will maintain statistical count of how many data points are configured with down-sampled delivery.
-
 * Subscriber will maintain statistical count of how many data points have been received with down-sampled delivery.
 
 ## Metadata
@@ -794,7 +782,7 @@ The following individuals actively participated in the development of this stand
 - F. Russell Robertson, GPA
 - Stephen C. Wills, GPA
 - Steven E. Chisholm, OG&E
-
+- Kenneth E. Martin, EPG
 
 ### ASP Project Participants
 ![Project Participants](Images/participant-logos.png)
@@ -857,7 +845,7 @@ Use case text
 
 > :construction: The following are _proposed_ ideas that may need a home -- purposely written in future tense
 
-### Operaitonal Requirements
+### Operational Requirements
 
 #### Data Classes
 
