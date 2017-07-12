@@ -12,7 +12,7 @@ STTP is implemented using a TCP/IP **command channel** and a TCP/IP **data chann
 
 STTP can be implemented with our without its security features.  STTP includes both strong access control and encryption.   STTP is configurable to allow use of private keys in a highly isolated environment or it can utilize key management services that offer X.509 identity certificates for authentication.
 
-In this section of the STTP specification, first data communication fundamentals are presented that set the boundary conditions for protocol design.  These are followed by an introduction to the major components of the protocol.
+In this section of the STTP specification, first data communication fundamentals are presented that set the boundary conditions for protocol design.  These are followed by an introduction to the major components STTP.
 
 > :construction:  Recommend a pattern of providing an introduction to what follows in the opening paragraphs of each major section.
 
