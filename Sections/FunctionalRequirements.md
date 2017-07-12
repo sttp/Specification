@@ -29,7 +29,7 @@ Use case text
 
 Use case text
 
-**C.  Medium-volume historical phasor data exchange ** (e.g., ISO/RTO -to- Transmission Owner)
+**C.  Medium-volume historical phasor data exchange** (e.g., ISO/RTO -to- Transmission Owner)
 
 Use case text
 
