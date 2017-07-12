@@ -1,7 +1,7 @@
 ## Section Map
 
-| Section (Heading Level) | Markdown Filename |
-|:-----------------------:|:-----------------:|
+| Section Title (Heading Level) | Markdown Filename |
+|:-----------------------------:|:-----------------:|
 | [Table of Contents (2)](README.md#table-of-contents) | [README.md](README.md) |
 | [Introduction (2)](Introduction.md#introduction) | [Introduction.md](Introduction.md) |
 | [Scope of this Document (3)](Introduction.md#scope-of-this-document) | [Introduction.md](Introduction.md) |
