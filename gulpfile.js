@@ -264,7 +264,8 @@ function loadReferenceMapping() {
 
     for (let key in referenceMappings) {
       if (referenceMappings.hasOwnProperty(key)) {
-        console.log("Mapping \"" + key + "\" to \"" + referenceMappings[key] + "\"");
+        console.log("Mapping \"" + key + "\" to \"" +
+          referenceMappings[key] + "\"");
       }
     }
 
