@@ -43,7 +43,7 @@ Use case text
 
 > :construction: The following are _proposed_ ideas that may need a home -- purposely written in future tense
 
-### Operaitonal Requirements
+### Operational Requirements
 
 #### Data Classes
 

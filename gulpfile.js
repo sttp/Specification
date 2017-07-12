@@ -115,6 +115,7 @@ var currentVersion = null;
 var updatedVersion = null;
 var forcePush = false;
 var referenceMappings = {};
+var sectionMap = null;
 
 showdown.setFlavor("github");
 
@@ -299,6 +300,64 @@ function updateReferences() {
   });
 }
 
+function truncateSectionMap() {
+  return through.obj(function(file, encoding, cb) {
+    const lines = file.contents.toString().split(/\r\n|\n/);
+
+    sectionMap = lines[0] + "\r\n";
+
+    for (let i = 1; i < lines.length; i++) {
+      sectionMap += lines[i] + "\r\n";
+
+      if (lines[i].startsWith("|:-"))
+        break;
+    }
+
+    this.push(file);
+    cb(null, file);
+  });
+}
+
+function appendToSectionMap() {
+  return through.obj(function(file, encoding, cb) {
+    const lines = file.contents.toString().split(/\r\n|\n/);
+    var headingLevel = 0;
+
+    // Map sections at heading levels 1 to 3
+    for (let i = 0; i < lines.length; i++) {
+      if (lines[i].startsWith("####"))
+        headingLevel = 0;
+      else if (lines[i].startsWith("###"))
+        headingLevel = 3;
+      else if (lines[i].startsWith("##"))
+        headingLevel = 2;
+      else if (lines[i].startsWith("#"))
+        headingLevel = 1;
+      else
+        headingLevel = 0;
+
+      if (headingLevel > 0) {
+        const filename = file.relative;
+        const sectionTitle = lines[i].substr(headingLevel + 1).trim();
+        const sectionAnchor = sectionTitle
+          .toLowerCase()
+          .replace(/[^\w\- ]+/g, " ")
+          .replace(/\s+/g, "-")
+          .replace(/\-+$/, "");
+
+        sectionMap += "| [" + sectionTitle  + " (" + headingLevel + ")](" +
+          filename + "#" + sectionAnchor + ") | [" + filename + "](" +
+          filename + ") |\r\n";
+      }
+    }
+
+    file.contents = new Buffer(sectionMap);
+    file.path = "Sections/SectionMap.md";
+    this.push(file);
+    cb(null, file);
+  });
+}
+
 gulp.task("check-version", [], function() {
   console.log("Checking document version...");
 
@@ -386,7 +445,18 @@ gulp.task("convert-to-pdf", [ "complete-html" ], function() {
     .pipe(gulp.dest("Output/"));
 });
 
-gulp.task("clean-up", [ "convert-to-pdf" ], function() {
+gulp.task("update-section-map", [ "convert-to-pdf" ], function() {
+  console.log("Updating section map...");
+
+  gulp.src("Sections/SectionMap.md")
+    .pipe(truncateSectionMap());
+
+  return gulp.src(sections)
+    .pipe(appendToSectionMap())
+    .pipe(gulp.dest("Sections/"));
+});
+
+gulp.task("clean-up", [ "update-section-map" ], function() {
   console.log("Removing temporary files...");
 
   return gulp.src([
