@@ -47,4 +47,4 @@
 
 > :construction: Need to determine safe maximum upper limit of per-packet strings and byte[] data, especially since implementation could simply _span_ multiple data points to collate a larger string or buffer back together.
 
-> :tomato::question: _Should API automatically handle collation of larger data types, e.g., strings and buffers?_
+> :tomato::question: JRC: _Should API automatically handle collation of larger data types, e.g., strings and buffers?_

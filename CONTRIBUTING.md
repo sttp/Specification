@@ -100,27 +100,38 @@ For very important notes or information that is deemed critical to understanding
 Which gets rendered as:
 > :warning: This is a very important note in the spec.
 
+For notes that are specific to reference implementations of the specification, use the following format:
+
+`> :wrench: This note is used to call out information related to reference implementations or API development.`
+
+Which gets rendered as:
+> :wrench: This note is used to call out information related to reference implementations or API development.
+
 ### Adding Questions and Responses
 
 While we are drafting the documentation, in order to make it easier to ask questions or make comments about a particular subject in-line to the text, we will support the following style for questions and associated responses:
 
 `> :tomato::question: author-initials: _question to be asked?_`
 
-`> :bulb: responder-initials: explanatory response...`
+`> :bulb: responder-initials: _explanatory response..._`
 
-`> :thumbsup: responder-initials: positive response...`
+`> :confused: responder-initials: _confused response..._`
 
-`> :thumbsdown: responder-initials: negative response...`
+`> :thumbsup: responder-initials: _positive response..._`
+
+`> :thumbsdown: responder-initials: _negative response..._`
 
 Which gets rendered as:
 
 > :tomato::question: author-initials: _question to be asked?_
 
-> :bulb: responder-initials: explanatory response...
+> :bulb: responder-initials: _explanatory response..._
 
-> :thumbsup: responder-initials: positive response...
+> :confused: responder-initials: _confused response..._
 
-> :thumbsdown: responder-initials: negative response...
+> :thumbsup: responder-initials: _positive response..._
+
+> :thumbsdown: responder-initials: _negative response..._
 
 Please keep the questions and responses close to topic area of concern. If the questions and responses get lengthy, we will move content to a new issue (see [STTP Issue Tracker](https://github.com/sttp/Specification/issues)) for further discussion and simply add a link the new issue from within the documentation text.
 

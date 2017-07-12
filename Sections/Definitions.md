@@ -66,7 +66,7 @@ Markdown notes in combination with the [Github Emogi](https://gist.github.com/rx
 
 > :construction: A informal note to document authors to facilitate specification development
 
-> :tomato::question: (author's initials): May be used by anyone to toss out questions and comments that are temporal. These may be inserted at any point in any of the markdown documents.  These questions will preserved as they are migrated to the [QuestionsSummary.md](QuestionsSummary.md) file from time-to-time.
+> :tomato::question: (author's initials): _May be used by anyone to toss out questions and comments that are temporal. These may be inserted at any point in any of the markdown documents.  These questions will preserved as they are migrated to the [QuestionsSummary.md](QuestionsSummary.md) file from time-to-time._
 
 Code blocks are shown as:
 ```C#
