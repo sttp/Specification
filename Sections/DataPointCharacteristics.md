@@ -32,11 +32,11 @@ Publisher will have the right to reject subscriber requested priority levels. If
 
 Subscriber can request desired priority levels but is subject to publisher assigned levels. A common use case may be that data points with the verification characteristic enabled will also be requested to use higher priority levels. If the subscriber does not agree with assigned data point priority levels then, with appropriate response before termination, the subscriber will close the connection.
 
-> :wrench: Operational Statistics
-* Publisher will maintain overall and per-subscriber statistical count of how many data points are configured at each priority.
-* Publisher will maintain overall and per-subscriber statistical count of how many data points have been published at each priority.
-* Subscriber will maintain statistical count of how many data points are configured at each priority.
-* Subscriber will maintain statistical count of how many data points have been received at each priority.
+> :wrench: Recommended Operational Statistics
+> * Publisher will maintain overall and per-subscriber statistical count of how many data points are configured at each priority.
+> * Publisher will maintain overall and per-subscriber statistical count of how many data points have been published at each priority.
+> * Subscriber will maintain statistical count of how many data points are configured at each priority.
+> * Subscriber will maintain statistical count of how many data points have been received at each priority.
 
 ### Reliability Characteristic
 
@@ -56,11 +56,11 @@ Subscriber can request desired reliability values but is subject to publisher as
 
 Note that if publisher requires that any of the subscribed data be published over a lossy data communications channel and the subscriber has not defined one, the publisher, with appropriate notification of issue to subscriber, will terminate the connection.
 
-> :wrench: Operational Statistics
-* Publisher will maintain overall and per-subscriber statistical count of how many data points are configured for both command communications channel and data communications channel.
-* Publisher will maintain overall and per-subscriber statistical count of how many data points have been published for both command communications channel and data communications channel.
-* Subscriber will maintain statistical count of how many data points are configured for both command communications channel and data communications channel.
-* Subscriber will maintain statistical count of how many data points have been received for both command communications channel and data communications channel.
+> :wrench: Recommended Operational Statistics
+> * Publisher will maintain overall and per-subscriber statistical count of how many data points are configured for both command communications channel and data communications channel.
+> * Publisher will maintain overall and per-subscriber statistical count of how many data points have been published for both command communications channel and data communications channel.
+> * Subscriber will maintain statistical count of how many data points are configured for both command communications channel and data communications channel.
+> * Subscriber will maintain statistical count of how many data points have been received for both command communications channel and data communications channel.
 
 ### Verification Characteristic
 
@@ -84,13 +84,13 @@ Publisher has full authority over determination of which data points require ver
 
 Subscriber must reply to publisher upon receipt of data points that are marked for verification. If the subscriber does not agree with the volume of subscribed data points that require verification then, with appropriate response before termination, the subscriber can terminate the connection. For example, if publisher specifies verification for a large volume of the subscribed data points, this may exceed subscriber's configured upload bandwidth and connection will need to be terminated.
 
-> :wrench: Operational Statistics
-* Publisher will maintain overall and per-subscriber statistical count of how many data points are configured for delivery verification.
-* Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with delivery notification.
-* Publisher will maintain overall and per-subscriber statistical count of how many delivery receipts have been sent to subscribers.
-* Subscriber will maintain statistical count of how many data points are configured for delivery verification.
-* Subscriber will maintain statistical count of how many data points have been published with delivery notification.
-* Subscriber will maintain statistical count of how many delivery receipts have been sent to publisher.
+> :wrench: Recommended Operational Statistics
+> * Publisher will maintain overall and per-subscriber statistical count of how many data points are configured for delivery verification.
+> * Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with delivery notification.
+> * Publisher will maintain overall and per-subscriber statistical count of how many delivery receipts have been sent to subscribers.
+> * Subscriber will maintain statistical count of how many data points are configured for delivery verification.
+> * Subscriber will maintain statistical count of how many data points have been published with delivery notification.
+> * Subscriber will maintain statistical count of how many delivery receipts have been sent to publisher.
 
 ### Exception Characteristic
 
@@ -114,11 +114,11 @@ Publisher must respect subscriber requested exception characteristics. If publis
 
 Subscriber can request desired data point exception characteristics to reduce data reception volume with the expectation that if subscription to publisher succeeds, requested exception characteristics will be respected.
 
-> :wrench: Operational Statistics
-* Publisher will maintain overall and per-subscriber statistical count of how many data points are configured with exception based delivery.
-* Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with exception based delivery.
-* Subscriber will maintain statistical count of how many data points are configured with exception based delivery.
-* Subscriber will maintain statistical count of how many data points values have been received with exception based delivery.
+> :wrench: Recommended Operational Statistics
+> * Publisher will maintain overall and per-subscriber statistical count of how many data points are configured with exception based delivery.
+> * Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with exception based delivery.
+> * Subscriber will maintain statistical count of how many data points are configured with exception based delivery.
+> * Subscriber will maintain statistical count of how many data points values have been received with exception based delivery.
 
 ### Resolution Characteristic
 
@@ -144,8 +144,8 @@ Publisher must respect subscriber requested resolution characteristics when down
 
 Subscriber can request desired data point resolution characteristics to reduce data reception volume with the expectation that if subscription to publisher succeeds, requested down-sampling characteristics will be respected. If publisher rejects requested characteristics, subscriber can expect that proposed resolution characteristics by the publisher will still provide down-sampling. If the subscriber does not agree with the proposed publisher resolution characteristics then, with appropriate response before termination, the subscriber will close the connection.
 
-> :wrench: Operational Statistics:
-* Publisher will maintain overall and per-subscriber statistical count of how many data points are configured with down-sampled delivery.
-* Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with down-sampled delivery.
-* Subscriber will maintain statistical count of how many data points are configured with down-sampled delivery.
-* Subscriber will maintain statistical count of how many data points have been received with down-sampled delivery.
+> :wrench: Recommended Operational Statistics:
+> * Publisher will maintain overall and per-subscriber statistical count of how many data points are configured with down-sampled delivery.
+> * Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with down-sampled delivery.
+> * Subscriber will maintain statistical count of how many data points are configured with down-sampled delivery.
+> * Subscriber will maintain statistical count of how many data points have been received with down-sampled delivery.
