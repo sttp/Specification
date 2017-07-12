@@ -6,7 +6,7 @@ The following individuals actively participated in the development of this stand
 - F. Russell Robertson, GPA
 - Stephen C. Wills, GPA
 - Steven E. Chisholm, OG&E
-
+- Kenneth E. Martin, EPG
 
 ### ASP Project Participants
 ![Project Participants](Images/participant-logos.png)

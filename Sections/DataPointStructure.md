@@ -30,7 +30,7 @@
 * UInt16
 * UInt32
 * UInt64
-* Decimal
+* Decimal (IEEE Standard 754-2008)
 * Double
 * Single
 * DateTime (need some thought on proper encoding, perhaps options)
@@ -40,6 +40,10 @@
 * Guid
 * String (encoding support for UTF-16, UTF-8, ANSI and ASCII)
 * Byte[]
+
+> :tomato::question: KEM: _Is decimal the same as float?_
+
+> :bulb: JRC: _Actually "decimal" is an IEEE standard data type, standard 754-2008 - I added that parenthetically above. It's a floating point number that doesn't suffer from typical floating point rounding issues - often used for currency operations. See here for more detail:_ https://en.wikipedia.org/wiki/Decimal_data_type
 
 > :construction: Need to determine safe maximum upper limit of per-packet strings and byte[] data, especially since implementation could simply _span_ multiple data points to collate a larger string or buffer back together.
 
