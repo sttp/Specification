@@ -26,7 +26,7 @@ STTP provides an alternative to the existing method for utility data exchange th
 
 > :information_source: ICCP (IEC 60870-6/TASE.2) is the international standard used to exchange "real-time" SCADA data among electric utilities.  Analog measurement data is typically exchanged continuously every 2 to 10 seconds with bi-modal data such as breaker status information only being exchanged "on change".  ICCP came into coordinated use in North America in the mid-1990s.
 
-Promising technologies are being developed for cloud computing and these technologies are moving toward native implementations at individual utilities and ISOs - and can be leveraged to support larger native implementations such as those to support an interconnect.  The common theme among these technologies is the ability to process significantly more data very quickly with improved reliability.
+Promising technologies are being developed for cloud computing and these technologies are moving toward native implementations at individual utilities and ISOs.  These cloud computing technologies can also be leveraged to support larger native implementations such as those for an interconnect.  The common theme among these technologies is the ability to process significantly more data quickly with improved reliability.
 
 It's possible that a protocol like STTP which allows secure, low-latency, high-volume data exchange among utilities at low cost can be a major factor in driving change toward these new technologies. New higher-speed forms of inter-utility interaction will be possible, and new approaches for providing utility information services will be realizable.  
 
