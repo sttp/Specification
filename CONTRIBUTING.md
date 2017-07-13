@@ -22,7 +22,7 @@ Information on this page:
 
 ## Site Design
 
-The design of this is site has been established to facilitate collaboration. The "source code" of the site exists as each of the primary specification document sections separated into multiple files. It is hoped that having multiple source files will reduce contention and merging conflicts while contributors are simultaneously adding content.
+The design of this is site has been established to facilitate collaboration. The "source code" of the site exists as each of the primary specification document sections separated into multiple files. It is hoped that having multiple source files will reduce contention and merging conflicts while contributors are simultaneously adding content. See the [section map](Sections/SectionMap.md) for all section titles and associated markdown files.
 
 The source code "language" for the site is GitHub flavored [markdown](https://en.wikipedia.org/wiki/Markdown). Since this technical documentation may become the basis for other technical specifications or standards bodies, markdown is an ideal choice for the text. Markdown is a very simple, readable, plain-text based document formatting language with minimal syntax to learn.
 
