@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.1.5 - July 12, 2017
+**Version:** 0.1.6 - July 13, 2017
 
 **Status:** Initial Development
 
@@ -45,11 +45,13 @@ This specification is free software and it can be redistributed and/or modified 
 
 ## Introduction
 
-Use of synchrophasors by U.S. utilities continues to grow following the jump start provided by the Smart Grid Investment Grants. Even so, the dominant method to exchange synchrophasor data remains the IEEE C37.118 <sup>[[1](#user-content-ref1)]</sup> protocol that was designed for and continues to be the preferred solution for substation-to-control room communications.  It achieves its advantages through use of an ordered set (a frame) of information that is associated with a specific measurement time.  When IEEE C37.118 is used for PDC-to-PDC communication or for PDC-to-Application communication, large data frames are typically distributed to multiple systems.  To address the challenges presented by these large frame sizes, many utilities implement purpose-built networks for synchrophasor data only.  Even with these purpose-built networks, large frame sizes result in an increased probability of UDP frame loss, or in the case of TCP, increased communication latency.  In addition, IEEE C37.118 has only prescriptive methods for the management of measurement metadata which is well-suited for substation-to-control-center use but which becomes difficult to manage as this metadata spans analytic solutions and is used by multiple configuration owners in a wide-area context.
+Use of synchrophasors by U.S. utilities continues to grow following the jump start provided by the Smart Grid Investment Grants (2010-2014). Several utilities now have PMU installation counts of 500 phasor measurement units (PMUs) or more and other utilities anticipate being at this level within the next few years. The dominant method to exchange synchrophasor data remains the IEEE C37.118 <sup>[[1](#user-content-ref1)]</sup> protocol that was designed for and continues to be the preferred solution for substation-to-control room communications.  It achieves its advantages through use of an ordered set (a frame) of information that is associated with a specific measurement time.  When IEEE C37.118 is used for PDC-to-PDC communication or for PDC-to-Application communication, large data frames are typically distributed to multiple systems.
 
-To address these issues, the Advanced Synchrophasor Protocol (ASP) Project was proposed to DOE in response to FOA-1492. In this project proposal, the argument was made for a new protocol that overcomes the limitations of IEEE C37.118 for large-scale synchrophasor data system deployments.  The new protocol proposed leveraged the successful design elements of the secure Gateway Exchange Protocol (GEP) that was originally developed by the Grid Protection Alliance (GPA) as part of the SIEGate project (DE-OE-536).
+To address the challenges presented by these large IEEE C37.118 frame sizes, many utilities have implemented purpose-built networks for synchrophasor data only.  Even with these purpose-built networks, large frame sizes result in an increased probability of UDP frame loss, or in the case of TCP, increased communication latency.  In addition, IEEE C37.118 has only prescriptive methods for the management of measurement metadata which is well-suited for substation-to-control-center use but which becomes difficult to manage as this metadata spans analytic solutions and is used by multiple configuration owners in a wide-area context.
 
-On May 1, 2017, a DOE grant (DE-OE-859) was awarded to GPA and the other 25 collaborators on ASP Project (see [Contributors](#contributors) section) to develop: (1) a detailed definition of new publish-subscribe protocol, now called the Streaming Time-series Transport Protocol (STTP) and (2) software to support it including production-grade implementations of STTP API's in multiple development platforms along with a collection of tools to test and validate the new protocol.
+The Advanced Synchrophasor Protocol (ASP) Project was proposed to DOE in response to FOA-1492. In this proposal, the argument was made for a new protocol that overcomes the limitations of IEEE C37.118 for large-scale synchrophasor data system deployments.  The new publish-subscribe protocol to be developed under the ASP Project is called the Streaming Telemetry Transport Protocol (STTP).  STTP leverages the successful design elements of the secure Gateway Exchange Protocol (GEP) that was originally developed by the Grid Protection Alliance (GPA) as part of the SIEGate project (DE-OE-536).
+
+On May 1, 2017, a DOE grant (DE-OE-859) was awarded to GPA and the other 25 collaborators on the ASP Project (see [Contributors](#contributors) section) to: (1) write a detailed definition of the STTP protocol _(i.e., this document)_; (2) develop software to support it including production-grade implementations of STTP API's for multiple development platforms along with a collection of tools to test and validate STTP; and (3) demonstrate and evaluate its efficacy with multiple vendors and utilities.
 
 ### Scope of this Document
 
@@ -67,7 +69,7 @@ While the format and structure of this document, established to facilitate colla
 
 ## Business case
 
-At the conclusion of the STTP project in April 2019, STTP will be a well-tested, thoroughly vetted, production-grade protocol that will be supported by project team vendors.  An open source tool suite for STTP will be developed as part of the project (see [Appendix B](#appendix-b---sttp-api-reference)) that will include a test harness that will allow utilities and vendors outside the project to test and validate STTP in their systems and API's.
+At the conclusion of the ASP project in April 2019, it is anticipated that STTP will be a well-tested, thoroughly vetted, production-grade protocol that will be supported by ASP project team vendors.  An open source tool suite for STTP will be developed as part of the project (see [Appendix B](#appendix-b---sttp-api-reference)) that will include a test harness that will allow utilities and vendors outside the project to test and validate STTP in their systems and API's.
 
 STTP offers both short-term cost savings and strategic value in that it is:
 
@@ -81,11 +83,11 @@ STTP has been built using a "security first" design approach.  Authentication to
 
 #### Reduces First Cost
 
-GEP has been measured <sup>[[5](#user-content-ref5)]</sup> to have less than half the band width requirements of IEEE C37.118 <sup>[[1](#user-content-ref1)]</sup> when used with TCP and simple methods for lossless compression.  With the compression, a single signal or measurement point (i.e., an identifier, timestamp, value and quality code) requires only 2.5 bytes. By comparison, IEEE C37.118 requires 4.5 bytes per measurement on average. The signal-based GEP protocol incorporates Pub/Sub data exchange methods so that unnecessary data points need not be exchanged - thereby further reducing overall bandwidth requirements as compared to IEEE C37.118.
+A protocol similar to STTP called GEP has been measured <sup>[[5](#user-content-ref5)]</sup> to have less than half the band width requirements of IEEE C37.118 <sup>[[1](#user-content-ref1)]</sup> when used with TCP and simple methods for lossless compression.  With the compression, a single signal or measurement point (i.e., an identifier, timestamp, value and quality code) requires only 2.5 bytes. By comparison, IEEE C37.118 requires 4.5 bytes per measurement on average. The signal-based GEP protocol incorporates Pub/Sub data exchange methods so that unnecessary data points need not be exchanged - thereby further reducing overall bandwidth requirements as compared to IEEE C37.118.
 
 #### Reduces Operating Cost
 
-GEP automatically exchanges and synchronizes measurement level meta-data using a GUID as the key value to allow the self-initialization and integration of rich meta-data with points from multiple connected synchrophasor networks.  This eliminates the need to map measurements to a pre-defined set identifiers and dispenses with the cost and hassles of synchronization of individual utility configuration with a centralized registry. Permissions for data subscriptions can be grouped and filtered using expressions to assure that only the signals that are authorized are shared (for example, all phasors from a specified substation) while the set of points available is dynamically adjusted as PMUs come and go without the need for point-by-point administrator approval.
+STTP will automatically exchange and synchronize measurement level meta-data using a GUID as the key value to allow the self-initialization and integration of rich meta-data with points from multiple connected synchrophasor networks.  This eliminates the need to map measurements to a pre-defined set identifiers and dispenses with the cost and hassles of synchronization of individual utility configuration with a centralized registry. Permissions for data subscriptions can be grouped and filtered using expressions to assure that only the signals that are authorized are shared (for example, all phasors from a specified substation) while the set of points available is dynamically adjusted as PMUs come and go without the need for point-by-point administrator approval.
 
 #### An Enabling Technology
 
@@ -93,7 +95,7 @@ STTP provides an alternative to the existing method for utility data exchange th
 
 > :information_source: ICCP (IEC 60870-6/TASE.2) is the international standard used to exchange "real-time" SCADA data among electric utilities.  Analog measurement data is typically exchanged continuously every 2 to 10 seconds with bi-modal data such as breaker status information only being exchanged "on change".  ICCP came into coordinated use in North America in the mid-1990s.
 
-Promising technologies are being developed for cloud computing and these technologies are moving toward native implementations at individual utilities and ISOs - and can be leveraged to support larger native implementations such as those to support an interconnect.  The common theme among these technologies is the ability to process significantly more data very quickly with improved reliability.
+Promising technologies are being developed for cloud computing and these technologies are moving toward native implementations at individual utilities and ISOs.  These cloud computing technologies can also be leveraged to support larger native implementations such as those for an interconnect.  The common theme among these technologies is the ability to process significantly more data quickly with improved reliability.
 
 It's possible that a protocol like STTP which allows secure, low-latency, high-volume data exchange among utilities at low cost can be a major factor in driving change toward these new technologies. New higher-speed forms of inter-utility interaction will be possible, and new approaches for providing utility information services will be realizable.  
 
@@ -184,19 +186,35 @@ Code is also shown `inline` as well.
 
 ## Protocol Overview
 
-In typical messaging exchange paradigms a source application hosts a block of structured data, composed in memory, with the intent to transmit the data to one or more receiving applications. The data has _structure_ in the sense that it exists as a collection of simpler primitive data types where each of the data elements is given a name to provide useful context and meaning; most programming languages represent data structures using a primary key word, e.g., `class` or `struct`. Before transmission, the data structure must be serialized - this is necessary because the programming language of the source application which hosts the data structure defines the structure in memory using a format that is optimized for use in the application. The process of serializing the data structure causes each of the data elements to be translated into a format that is easily transmitted over a network and is suitable for deserialization by a receiving application.
+STTP is an open, measurement-based publish/subscribe transport protocol that can be used to securely exchange time-series data and automatically synchronize meta-data between two applications. The protocol supports sending real-time and historical data at full or down-sampled resolutions. When sending historical data, the replay speed can be controlled dynamically for use in visualizations to enable users to see data faster or slower than recorded in real-time.
 
-The applications that are sending and receiving data structures can be running on the same machine or on different physical hardware with disparate operating systems. As a result, the details of the data structure serialization format can be complex and diverse. Such complexities can include issues with proper handling of the endianess of the primitive data types during serialization which may differ from the system that is deserializing the data, or differences in the interpretation of how character data is encoded <sup>[[6](#user-content-ref6)]</sup>.
+The wire protocol employed by STTP implements a publish/subscribe data exchange model using a simple command driven operation with a compressed binary serialization of time-series values. The protocol does not require a predefined or fixed configuration – that is, the time-series values arriving in one data packet can be different than those arriving in another. Each packet of data consists of a collection of time-series values; each time-series value is a structure containing an ID, a time-stamp, a value and associated flags.
+
+STTP is implemented using a _command channel_ and a _data channel_. The actual IP transport protocols for these channels varies based on need, but is often either a single TCP/IP transport for both the command and data channel -or- a TCP/IP based command channel with a UDP/IP based data channel.
+
+The command channel is used to reliably negotiate session specific required communication, state and protocol parameters. The command channel is also used to authenticate with other STTP communications appliances, exchange metadata on available data points, and request specific data points for subscription. The data channel is used to send compact, binary encoded packets of identifiable measured values along with a timestamp accurate to one ten-millionth of a second (e.g., a tick) and flags that can be used to indicate time and data quality.
+
+STTP can be implemented with our without its security features. STTP includes both strong access control and encryption and is configurable to allow use of private keys in a highly isolated environment. When security is enabled, STTP utilizes standard key management services with X.509 identity certificates for authentication.
+
+In this section of the STTP specification, first data communication fundamentals are presented that set the boundary conditions for protocol design. These are followed by an introduction to the major components STTP.
+
+> :construction:  Recommend a pattern of providing an introduction to what follows in the opening paragraphs of each major section.
+
+### Background
+
+In typical messaging exchange paradigms, a source application hosts a block of structured data, composed in memory, with the intent to transmit the data to one or more receiving applications. The data has _structure_ in the sense that it exists as a collection of simpler primitive data types where each of the data elements is given a name to provide useful context and meaning; most programming languages represent data structures using a primary key word, e.g., `class` or `struct`. Before transmission, the data structure must be serialized - this is necessary because the programming language of the source application which hosts the data structure defines the structure in memory using a format that is optimized for use in the application. The process of serializing the data structure causes each of the data elements to be translated into a format that is easily transmitted over a network and is suitable for deserialization by a receiving application.
+
+The applications that are sending and receiving data structures can be running on the same machine or on different physical hardware with disparate operating systems. As a result, the details of the data structure serialization format can be complex and diverse. Such complexities can include issues with proper handling of the endianness of the primitive data types during serialization which may differ from the system that is deserializing the data, or differences in the interpretation of how character data is encoded <sup>[[6](#user-content-ref6)]</sup>.
 
 The subject of serializing data structures in the field of computer science has become very mature; many solutions exist to manage the complexities of serialization. Today most computer programming languages, or their associated frameworks, include various options for serializing data structures in multiple formats. However, these solutions tend to only work within their target ecosystems and are usually not very interoperable with other frameworks or languages.
 
 When interoperability is important, other technologies exist that focus on data structure serialization that works regardless of hardware, operating system or programming language. Two of these serialization technologies that are in wide use are Google Protocol Buffers <sup>[[7](#user-content-ref7)]</sup> and the Facebook developed Apache Thrift <sup>[[8](#user-content-ref8)]</sup>. Both of these serialization frameworks create highly compact, cross-platform serializations of data structures with APIs that exist in many commonly used programming languages.
 
-For smaller sized, discrete data structures, the existing available serialization technologies are very fast and highly effective. However, as the data structures become larger, the process of serialization and deserialization becomes more costly in terms of both memory allocation and computational processing. Because of this, large frames of data are not recommended for use by these serialization technologies <sup>[[9](#user-content-ref9)]</sup> <sup>[[10](#user-content-ref10)]</sup>. Additionally, and perhaps more importantly, there are also penalties that occur at the network transport layer.
-
 > :information_source: For the purposes of this specification, serialized data structures will be referred to as a _frames_, regardless of the actual binary format.
 
-##### Data Structure Serialization in the Power Industry
+For smaller sized, discrete data structures, the existing available serialization technologies are very fast and highly effective. However, as the data structures become larger, the process of serialization and deserialization becomes more costly in terms of both memory allocation and computational processing. Because of this, large frames of data are not recommended for use by these serialization technologies <sup>[[9](#user-content-ref9)]</sup> <sup>[[10](#user-content-ref10)]</sup>. Additionally, and perhaps more importantly, there are also penalties that occur at the network transport layer.
+
+#### Data Structure Serialization in the Power Industry
 
 In the electric power industry, the IEEE C37.118 <sup>[[1](#user-content-ref1)]</sup> protocol exists as a standard serialization format for the exchange of synchrophasor data. Synchrophasor data is typically measured with an accurate time source, e.g., a GPS clock, and transmitted at high-speed data rates, up to 120 frames per second. Measured data sent by this protocol is still simply a frame of serialized primitive types which includes data elements such as a timestamp, status flags, phasor angle / magnitude pairs, etc. The IEEE C37.118 protocol also prescribes the combination of data frames received from multiple source devices for the same timestamp into one large combined frame in a process known as concentration. The concentration process demands that a waiting period be established to make sure all the expected data frames for a given timestamp arrive. If any frames of data do not arrive before the waiting period expires, the overall combined frame is published anyway. Since the frame format is fixed, empty data elements that have no defined value, e.g., NaN or null, still occupy space for the missing frames.
 
@@ -204,7 +222,7 @@ In the electric power industry, the IEEE C37.118 <sup>[[1](#user-content-ref1)]<
 
 ### Large Frame Network Impact
 
-In terms of Internet Protocol (IP), all frames of data to be transmitted that exceed the negotiated maximum transmission unit (MTU) size (typically 1,500 bytes for Ethernet networks <sup>[[11](#user-content-ref11)]</sup>) are divided into multiple fragments where each fragment is called a network packet, see [Figure 1](#user-content-figure1).
+Under the Internet Protocol (IP), all frames of data to be transmitted that exceed the negotiated maximum transmission unit (MTU) size (typically 1,500 bytes for Ethernet networks <sup>[[11](#user-content-ref11)]</sup>) are divided into multiple fragments where each fragment is called a network packet, see [Figure 1](#user-content-figure1).
 
 <a name="figure1"></a> <center>
 
@@ -213,7 +231,7 @@ In terms of Internet Protocol (IP), all frames of data to be transmitted that ex
 <sup>Figure 1</sup>
 </center>
 
-The impacts of large frames on an IP network are determined by the number of network packets required to send the frame and the fact that IP is inherently unreliable by design. Network packets can only be transmitted over a connection one packet at a time; when two or more network packets arrive for transmission at the same time on any physical network media, the result is a collision. When a collision occurs, only one packet gets sent and the others get dropped <sup>[[12](#user-content-ref12)]</sup>. IP defines a variety of different transport protocols for network packet transmission, each of which behave in different manners when dealing with packet loss. Consequently, many of the impacts a large frame has on an IP network is dependent upon the transport protocol used to send the frame.
+Since IP is inherently unreliable, the impact of large frames on an IP network can be determined by the number of network packets required to send the frame.  Network packets can only be transmitted over a connection one packet at a time; when two or more network packets arrive for transmission at the same time on any physical network media, the result is a collision. When a collision occurs, only one packet gets sent and the others get dropped <sup>[[12](#user-content-ref12)]</sup>. IP defines a variety of different transport protocols for network packet transmission, each of which behave in different manners when dealing with packet loss. Consequently, many of the impacts a large frame has on an IP network is dependent upon the transport protocol used to send the frame.
 
 > :tomato::question: KEM: _Can you have a collision on a full duplex system? If so, it sounds like buffering is improperly implemented._
 
@@ -313,7 +331,7 @@ For this expression, all data points as defined in the metadata that have a data
 
 #### Data Transport Channels
 
-STTP data transport requires the use of a command channel using TCP/IP for reliable delivery of important commands. Optionally a secondary data channel can be established using UDP/IP for the transport of data that can tolerate loss. When no secondary UDP/IP is used, both commands and data will share use of the TCP/IP channel for communications.
+STTP data transport requires the use of a _command channel_ using TCP/IP for reliable delivery of important commands. Optionally a secondary _data channel_ can be established using UDP/IP for the transport of data that can tolerate loss. When no secondary UDP/IP is used, both commands and data will share use of the TCP/IP channel for communications.
 
 Although not precluded from use over other data transports, the design of STTP is targeted and optimized for use over IP, specifically TCP/IP and UDP/IP. Even so, since the command/response implementation and data packet distribution of the STTP protocol is fairly simple, it is expected that commonly available middleware data transport layers, such as ZeroMQ or DDS, could easily support and transmit data using the STTP protocol should any of the messaging distribution and management benefits of these transport layers be useful to a particular deployment environment. However, these types of deployments are outside the scope of this documentation. If needed, STTP integrations with middleware layers should be added as reference implementation repositories to the STTP organizational site <sup>[[4](#user-content-ref4)]</sup>.
 
@@ -324,6 +342,7 @@ Although not precluded from use over other data transports, the design of STTP i
 > :confused: JRC: _Presume that this would require an out-of-band pre-defined configuration to be "known" or handle it the way C37.118 currently manages this, i.e., sending a "config frame" once per minute. In context of STTP, this might be a reduced set of metadata that represented "what" was being published. This would need some "rules" to operate properly._
 
 > :bulb: KEM: _The advantage in this case is that UDP will operate unidirectionally, TCP won't. However for commands you really need to close the loop. I suggest that STTP only be developed for TCP as suggested above, but do not state that it cannot be adapted to UDP._
+
 
 ### STTP Feature Summary
 
@@ -553,11 +572,11 @@ Publisher will have the right to reject subscriber requested priority levels. If
 
 Subscriber can request desired priority levels but is subject to publisher assigned levels. A common use case may be that data points with the verification characteristic enabled will also be requested to use higher priority levels. If the subscriber does not agree with assigned data point priority levels then, with appropriate response before termination, the subscriber will close the connection.
 
-> :wrench: Operational Statistics
-* Publisher will maintain overall and per-subscriber statistical count of how many data points are configured at each priority.
-* Publisher will maintain overall and per-subscriber statistical count of how many data points have been published at each priority.
-* Subscriber will maintain statistical count of how many data points are configured at each priority.
-* Subscriber will maintain statistical count of how many data points have been received at each priority.
+> :wrench: Recommended Operational Statistics
+> * Publisher will maintain overall and per-subscriber statistical count of how many data points are configured at each priority.
+> * Publisher will maintain overall and per-subscriber statistical count of how many data points have been published at each priority.
+> * Subscriber will maintain statistical count of how many data points are configured at each priority.
+> * Subscriber will maintain statistical count of how many data points have been received at each priority.
 
 ### Reliability Characteristic
 
@@ -577,11 +596,11 @@ Subscriber can request desired reliability values but is subject to publisher as
 
 Note that if publisher requires that any of the subscribed data be published over a lossy data communications channel and the subscriber has not defined one, the publisher, with appropriate notification of issue to subscriber, will terminate the connection.
 
-> :wrench: Operational Statistics
-* Publisher will maintain overall and per-subscriber statistical count of how many data points are configured for both command communications channel and data communications channel.
-* Publisher will maintain overall and per-subscriber statistical count of how many data points have been published for both command communications channel and data communications channel.
-* Subscriber will maintain statistical count of how many data points are configured for both command communications channel and data communications channel.
-* Subscriber will maintain statistical count of how many data points have been received for both command communications channel and data communications channel.
+> :wrench: Recommended Operational Statistics
+> * Publisher will maintain overall and per-subscriber statistical count of how many data points are configured for both command communications channel and data communications channel.
+> * Publisher will maintain overall and per-subscriber statistical count of how many data points have been published for both command communications channel and data communications channel.
+> * Subscriber will maintain statistical count of how many data points are configured for both command communications channel and data communications channel.
+> * Subscriber will maintain statistical count of how many data points have been received for both command communications channel and data communications channel.
 
 ### Verification Characteristic
 
@@ -605,13 +624,13 @@ Publisher has full authority over determination of which data points require ver
 
 Subscriber must reply to publisher upon receipt of data points that are marked for verification. If the subscriber does not agree with the volume of subscribed data points that require verification then, with appropriate response before termination, the subscriber can terminate the connection. For example, if publisher specifies verification for a large volume of the subscribed data points, this may exceed subscriber's configured upload bandwidth and connection will need to be terminated.
 
-> :wrench: Operational Statistics
-* Publisher will maintain overall and per-subscriber statistical count of how many data points are configured for delivery verification.
-* Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with delivery notification.
-* Publisher will maintain overall and per-subscriber statistical count of how many delivery receipts have been sent to subscribers.
-* Subscriber will maintain statistical count of how many data points are configured for delivery verification.
-* Subscriber will maintain statistical count of how many data points have been published with delivery notification.
-* Subscriber will maintain statistical count of how many delivery receipts have been sent to publisher.
+> :wrench: Recommended Operational Statistics
+> * Publisher will maintain overall and per-subscriber statistical count of how many data points are configured for delivery verification.
+> * Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with delivery notification.
+> * Publisher will maintain overall and per-subscriber statistical count of how many delivery receipts have been sent to subscribers.
+> * Subscriber will maintain statistical count of how many data points are configured for delivery verification.
+> * Subscriber will maintain statistical count of how many data points have been published with delivery notification.
+> * Subscriber will maintain statistical count of how many delivery receipts have been sent to publisher.
 
 ### Exception Characteristic
 
@@ -635,11 +654,11 @@ Publisher must respect subscriber requested exception characteristics. If publis
 
 Subscriber can request desired data point exception characteristics to reduce data reception volume with the expectation that if subscription to publisher succeeds, requested exception characteristics will be respected.
 
-> :wrench: Operational Statistics
-* Publisher will maintain overall and per-subscriber statistical count of how many data points are configured with exception based delivery.
-* Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with exception based delivery.
-* Subscriber will maintain statistical count of how many data points are configured with exception based delivery.
-* Subscriber will maintain statistical count of how many data points values have been received with exception based delivery.
+> :wrench: Recommended Operational Statistics
+> * Publisher will maintain overall and per-subscriber statistical count of how many data points are configured with exception based delivery.
+> * Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with exception based delivery.
+> * Subscriber will maintain statistical count of how many data points are configured with exception based delivery.
+> * Subscriber will maintain statistical count of how many data points values have been received with exception based delivery.
 
 ### Resolution Characteristic
 
@@ -665,11 +684,11 @@ Publisher must respect subscriber requested resolution characteristics when down
 
 Subscriber can request desired data point resolution characteristics to reduce data reception volume with the expectation that if subscription to publisher succeeds, requested down-sampling characteristics will be respected. If publisher rejects requested characteristics, subscriber can expect that proposed resolution characteristics by the publisher will still provide down-sampling. If the subscriber does not agree with the proposed publisher resolution characteristics then, with appropriate response before termination, the subscriber will close the connection.
 
-> :wrench: Operational Statistics:
-* Publisher will maintain overall and per-subscriber statistical count of how many data points are configured with down-sampled delivery.
-* Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with down-sampled delivery.
-* Subscriber will maintain statistical count of how many data points are configured with down-sampled delivery.
-* Subscriber will maintain statistical count of how many data points have been received with down-sampled delivery.
+> :wrench: Recommended Operational Statistics:
+> * Publisher will maintain overall and per-subscriber statistical count of how many data points are configured with down-sampled delivery.
+> * Publisher will maintain overall and per-subscriber statistical count of how many data points have been published with down-sampled delivery.
+> * Subscriber will maintain statistical count of how many data points are configured with down-sampled delivery.
+> * Subscriber will maintain statistical count of how many data points have been received with down-sampled delivery.
 
 ## Metadata
 
@@ -831,7 +850,7 @@ Use case text
 
 Use case text
 
-**C.  Medium-volume historical phasor data exchange ** (e.g., ISO/RTO -to- Transmission Owner)
+**C.  Medium-volume historical phasor data exchange** (e.g., ISO/RTO -to- Transmission Owner)
 
 Use case text
 
