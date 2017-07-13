@@ -2,7 +2,7 @@
 
 STTP will allow the ability to define delivery and quality of service characteristics for each data point made available for publication. These characteristics include priority, reliability, verification, exception and resolution.
 
-The publisher is in full control of what per data point delivery characteristics are allowed. The transport layers in use for the connection will also dictate that availability of some characteristics, e.g., reliability. Regardless, the subscriber can always request a specific set of per data point delivery characteristics, but these may be denied by the publisher.
+The publisher is in full control of what per data point delivery characteristics are allowed. The transport layers in use for the connection will also dictate the availability of some characteristics, e.g., reliability. Regardless, the subscriber can always request a specific set of per data point delivery characteristics, but these may be denied by the publisher.
 
 > :construction: Once defined, reference associated command / response details that define the negotiations for data point delivery characteristics.
 
