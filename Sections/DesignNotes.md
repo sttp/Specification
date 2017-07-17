@@ -33,6 +33,21 @@ Format:
 * (int16) (Optional) User Data Length (if previous block equals 127)
 * (byte[]) User Data
 
+## Protocol Negotiation
+Upon connection, session details must be negotiated. The initial negotiation will be done in the clear,
+but renegotiation can be done at anytime. It is recommended if encryption is to be used that 
+the first negotiation step will only negotiate the encryption, after the secured channel has been
+established, then more of the session can be configured. 
+
+Items to be negotiated:
+* Encryption: TLS-1.0, TLS-1.2, ZeroMQ, Kerberos, None
+* Authentication: Password, LDAP, Windows, Certificate, None
+* Message Format: Standard/Compact
+* Connection Type: Who is Client/Server/Peer. (This allows server initiated connections if they are desired)
+* List of all supported features needed for this connection
+* Data Point Stream Format: Raw/Standard/Ultra Compact
+
+
 ## Feature: Data Point Streaming
 The data stream feature will detail how raw Data Points will be serialized on the wire. 
 
