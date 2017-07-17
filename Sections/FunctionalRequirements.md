@@ -19,7 +19,61 @@
 * System Integration
 * Installation and deployment
 
+### Feature List
+ * Full Data Stream - Capable of sending all of the data points to any connecting stream.
+ * Basic Metadata - Defines each data point with only a short descriptor.
+ * Subscribed Data Stream - Allows the incoming connection to define the measurements that will be selectively streamed.
+ * Access Control - Permissions controls on a point by point basis.
+ * Data Backfilling - Allows backfilling missing data in the event of a communcations outage.
+ * Encryption - Data channels are encryption and the connection is authenticated.
+ * Data Stream Compression - The data stream will support advance compression methods.
+ * Advance Queries - Must be able to handle more advance request/reply queries.
+
 ### Use Case Examples
+
+This is a list of all use cases along with the predefined set of features that must be supported by this use case.
+
+\*optional features
+
+**A. PMU**
+
+Features:
+ * Full Data Stream
+ * Basic Metadata
+ * Subscribed Data Stream*
+ * Data Backfilling*
+ * Encryption*
+
+**B. PDC**
+
+Features:
+ * Full Data Stream
+ * Basic Metadata
+ * Subscribed Data Stream
+ * Data Backfilling*
+ * Encryption
+ * Data Compression*
+
+**C. Gateway**
+
+Features:
+* Full Data Stream
+* Basic Metadata
+* Subscribed Data Stream
+* Data Backfilling*
+* Encryption
+* Data Compression
+
+**D. Historian**
+
+Features:
+* Basic Metadata
+* Encryption
+* Data Compression
+* Advance Queries
+
+-------------------------
+(Old use case examples)
 
 **A.  High-volume, real-time phasor data exchange** (e.g., ISO/RTO -to- ISO/RTO)
 
