@@ -24,10 +24,11 @@
  * Basic Metadata - Defines each data point with only a short descriptor.
  * Subscribed Data Stream - Allows the incoming connection to define the measurements that will be selectively streamed.
  * Access Control - Permissions controls on a point by point basis.
- * Data Backfilling - Allows backfilling missing data in the event of a communcations outage.
+ * Data Backfilling - Allows backfilling missing data in the event of a communications outage.
  * Encryption - Data channels are encryption and the connection is authenticated.
  * Data Stream Compression - The data stream will support advance compression methods.
  * Advance Queries - Must be able to handle more advance request/reply queries.
+ * Data Pushing - Capable of initializing a connection and writing data out.
 
 ### Use Case Examples
 
@@ -71,6 +72,14 @@ Features:
 * Encryption
 * Data Compression
 * Advance Queries
+
+**E. Data Diode** - Handles moving data from a higher security level to a lower level
+
+Features:
+* Data Pushing
+* Basic Metadata
+* Encryption
+* Data Compression
 
 -------------------------
 (Old use case examples)
