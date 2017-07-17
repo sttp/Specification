@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.1.7 - July 14, 2017</p>
+<p><strong>Version:</strong> 0.1.8 - July 17, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -1716,7 +1716,59 @@ count may not match requested points due to rights or points may no longer exist
 <li>System Integration</li>
 <li>Installation and deployment</li>
 </ul>
+<h3 id="feature-list">Feature List</h3>
+<ul>
+<li>Full Data Stream - Capable of sending all of the data points to any connecting stream.</li>
+<li>Basic Metadata - Defines each data point with only a short descriptor.</li>
+<li>Subscribed Data Stream - Allows the incoming connection to define the measurements that will be selectively streamed.</li>
+<li>Access Control - Permissions controls on a point by point basis.</li>
+<li>Data Backfilling - Allows backfilling missing data in the event of a communcations outage.</li>
+<li>Encryption - Data channels are encryption and the connection is authenticated.</li>
+<li>Data Stream Compression - The data stream will support advance compression methods.</li>
+<li>Advance Queries - Must be able to handle more advance request/reply queries.</li>
+</ul>
 <h3 id="use-case-examples">Use Case Examples</h3>
+<p>This is a list of all use cases along with the predefined set of features that must be supported by this use case.</p>
+<p>*optional features</p>
+<p><strong>A. PMU</strong></p>
+<p>Features:</p>
+<ul>
+<li>Full Data Stream</li>
+<li>Basic Metadata</li>
+<li>Subscribed Data Stream*</li>
+<li>Data Backfilling*</li>
+<li>Encryption*</li>
+</ul>
+<p><strong>B. PDC</strong></p>
+<p>Features:</p>
+<ul>
+<li>Full Data Stream</li>
+<li>Basic Metadata</li>
+<li>Subscribed Data Stream</li>
+<li>Data Backfilling*</li>
+<li>Encryption</li>
+<li>Data Compression*</li>
+</ul>
+<p><strong>C. Gateway</strong></p>
+<p>Features:</p>
+<ul>
+<li>Full Data Stream</li>
+<li>Basic Metadata</li>
+<li>Subscribed Data Stream</li>
+<li>Data Backfilling*</li>
+<li>Encryption</li>
+<li>Data Compression</li>
+</ul>
+<p><strong>D. Historian</strong></p>
+<p>Features:</p>
+<ul>
+<li>Basic Metadata</li>
+<li>Encryption</li>
+<li>Data Compression</li>
+<li>Advance Queries</li>
+</ul>
+<hr />
+<p>(Old use case examples)</p>
 <p><strong>A.  High-volume, real-time phasor data exchange</strong> (e.g., ISO/RTO -to- ISO/RTO)</p>
 <p>Use case text</p>
 <p><strong>B. Medium volume, real-time data exchange with name translation</strong>  (e.g., Transmission Owner -to- ISO/RTO)</p>
