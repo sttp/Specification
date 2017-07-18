@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.1.8 - July 17, 2017
+**Version:** 0.1.9 - July 18, 2017
 
 **Status:** Initial Development
 
@@ -188,7 +188,7 @@ Code is also shown `inline` as well.
 
 STTP is an open, data point centric publish/subscribe transport protocol that can be used to securely exchange time-series style data and automatically synchronize metadata between two applications. The protocol supports sending real-time and historical data at full or down-sampled resolutions. When sending historical data, the replay speed can be controlled dynamically for use in visualizations to enable users to see data faster or slower than recorded in real-time.
 
-The wire protocol employed by STTP implements a publish/subscribe data exchange model using simple commands with a compressed binary serialization of data points. The protocol does not require a predefined or fixed configuration – that is, the data points values arriving in one data packet can be different than those arriving in another. Each packet of data consists of a collection of data points where each instance is a compact structure containing an ID, a timestamp or sequence, a value and any associated flags.
+The wire protocol employed by STTP implements a publish/subscribe data exchange model using simple commands with a compressed binary serialization of data points. The protocol does not require a predefined or fixed configuration - that is, the data points values arriving in one data packet can be different than those arriving in another. Each packet of data consists of a collection of data points where each instance is a compact structure containing an ID, a timestamp or sequence, a value and any associated flags.
 
 STTP is implemented using a _command channel_ and a _data channel_. The actual IP transport protocols for these channels varies based on need, but is often either a single TCP/IP transport for both the command and data channel -or- a TCP/IP based command channel with a UDP/IP based data channel.
 
@@ -218,8 +218,6 @@ For smaller sized, discrete data structures, the existing available serializatio
 
 In the electric power industry, the IEEE C37.118 <sup>[[1](#user-content-ref1)]</sup> protocol exists as a standard serialization format for the exchange of synchrophasor data. Synchrophasor data is typically measured with an accurate time source, e.g., a GPS clock, and transmitted at high-speed data rates, up to 120 frames per second. Measured data sent by this protocol is still simply a frame of serialized primitive types which includes data elements such as a timestamp, status flags, phasor angle / magnitude pairs, etc. The IEEE C37.118 protocol also prescribes the combination of data frames received from multiple source devices for the same timestamp into one large combined frame in a process known as concentration. The concentration process demands that a waiting period be established to make sure all the expected data frames for a given timestamp arrive. If any frames of data do not arrive before the waiting period expires, the overall combined frame is published anyway. Since the frame format is fixed, empty data elements that have no defined value, e.g., NaN or null, still occupy space for the missing frames.
 
-<p class="insert-page-break-after"></p>
-
 ### Large Frame Network Impact
 
 Under the Internet Protocol (IP), all frames of data to be transmitted that exceed the negotiated maximum transmission unit (MTU) size (typically 1,500 bytes for Ethernet networks <sup>[[11](#user-content-ref11)]</sup>) are divided into multiple fragments where each fragment is called a network packet, see [Figure 1](#user-content-figure1).
@@ -246,8 +244,6 @@ Since each packet of data for the transmitted frame is sequentially ordered, TCP
 Another critical impact that is unique to TCP is that for data that needs to be delivered in a timely fashion, retransmissions of dropped packets can also cause cumulative time delays <sup>[[13](#user-content-ref13)]</sup>, especially as large data frames are published at rapid rates. Time delays are also exacerbated during periods of increased network activity which induces congestion and a higher rate of collisions.
 
 > :information_source: Synchrophasor data is the source for real-time visualization and analysis tools which are used to operate the bulk electric system (BES). This real-time data is required to be accurate, dependable and timely in order to be useful for grid operators <sup>[[14](#user-content-ref14)]</sup>. Any delays in the delivery of this data could have adverse affects on operational decisions impacting the BES.
-
-<p class="insert-page-break-after"></p>
 
 #### Large Frame Impacts on UDP/IP
 
@@ -692,10 +688,33 @@ Subscriber can request desired data point resolution characteristics to reduce d
 
 ## Metadata
 
-*  Wire Format: Tabular XML format (XML) - highly compressible
-* Primary data point identifier is Guid (describe)
-* Extensibility
-* Rights based content restriction
+JRC: Following needs some extra thought
+~~Metadata information will be described in one of two formats. **Basic Metadata** or **Advance Metadata**. 
+Basic Metadata has fewer restrictions and intended for use where a persistent metadata repository 
+is not desired and limited programming support exists where XML encoding would be cumbersome. 
+(Ex. PMU or intermediate PDCs)~~
+
+~~Advance Metadata contains more formally defined metadata structures necessary to version 
+the metadata and provide synchronizing and filtering and permission based access. This
+would require access to a repository that would maintain this data. 
+(Ex. Large Scale PDCs, Gateways, Historians)~~
+
+~~## Basic Metadata~~
+
+~~* Attributes are Key/Value pairs~~
+~~* Supports Nodal Relationships (Site Information -> Device Information -> Point Information)~~
+~~* Data requests are full dumps~~
+~~* Data can be sent on demand when streaming measurements~~
+~~* Contains a Runtime Version Number~~
+~~* This number is incremented on any metadata change~~
+~~* This number also changes every process restart~~
+
+~~## Advance Metadata~~
+
+~~* Wire Format: Tabular XML format (XML) - highly compressible~~
+~~* Primary data point identifier is Guid (describe)~~
+~~* Extensibility~~
+~~* Rights based content restriction~~
 
 ### Dataset Contents
 
@@ -726,6 +745,7 @@ Subscriber can request desired data point resolution characteristics to reduce d
   * Merging considerations
   * Conflict resolution
   * Ownership control
+
 
 ## Compression
 
@@ -845,10 +865,11 @@ The following individuals actively participated in the development of this stand
  * Basic Metadata - Defines each data point with only a short descriptor.
  * Subscribed Data Stream - Allows the incoming connection to define the measurements that will be selectively streamed.
  * Access Control - Permissions controls on a point by point basis.
- * Data Backfilling - Allows backfilling missing data in the event of a communcations outage.
+ * Data Backfilling - Allows backfilling missing data in the event of a communications outage.
  * Encryption - Data channels are encryption and the connection is authenticated.
  * Data Stream Compression - The data stream will support advance compression methods.
  * Advance Queries - Must be able to handle more advance request/reply queries.
+ * Data Pushing - Capable of initializing a connection and writing data out.
 
 ### Use Case Examples
 
@@ -892,6 +913,14 @@ Features:
 * Encryption
 * Data Compression
 * Advance Queries
+
+**E. Data Diode** - Handles moving data from a higher security level to a lower level
+
+Features:
+* Data Pushing
+* Basic Metadata
+* Encryption
+* Data Compression
 
 -------------------------
 (Old use case examples)
@@ -972,6 +1001,42 @@ appendix body
 
 ## Appendix C - IEEE C37.118 Mapping
 
-appendix body
+A C37.118 stream can be encapsulated in it's raw format inside sttp using the following
+mapping and data point definition. The intent of this mapping is to make sttp transparent.
 
-appendix body
+C37.118 -> sttp -> C37.118
+
+JRC: I was thinking the following kind of mapping would be available in a extended metadata table, e.g., `IEEEC37.118` table with an ID or name for the mapping, the field types and measurement mappings.
+
+Metadata for each Data Point:
+ * (int16) Data Concentrator ID Code
+ * (int16) ID Code of data source
+ * (int32) Time Base
+ * (char) Value Type (S=Stat, P=Phasor, F=Freq, Q=DFreq, A=Analog, D=Digital)
+ * (int8) Size (2/4)
+ * (char) Phasor Type (R=Rect, P=Polar)
+ * (int16) Position Index (eg. whether this is the first or second phasor or analog)
+ * (int16) PMU Number (eg. whether this is the first of second PMU in a concentrated stream)
+ * (char16) Station Name
+ * (char16[16]) Channel Name (Array of 16 if channel type is Digital)
+ * (int16) Nominal Line Frequency
+ * (int16) Rate of data transmission
+ * (int16) Config Change Count
+
+> :confused: JRC: Note sure I understand the following - this seems to break the tenant of mapping primitives? Even if broken into chunks, this would require identification and sequencing of chunks? Perhaps I am missing your idea here...
+
+Data Point
+ * (uint32) SOC
+ * (uint24) FrameSec
+ * (uint8) Time Quality
+ * One of the following:
+   * Status, Digital, Int16 Freq, Int16 DFreq, Int16 Analog
+     * (int16) Value
+   * Float Freq, Float DFreq, Float Analog
+     * (float) Value
+   * Int16 Phasor (Rect or Polar)
+     * (int16) Value1 (Mag/Real)
+     * (int16) Value2 (Ang/Im)
+   * Float Phasor (Rect or Polar)
+     * (float) Value1 (Mag/Real)
+     * (float) Value2 (Ang/Im)

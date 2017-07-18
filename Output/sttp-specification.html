@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.1.8 - July 17, 2017</p>
+<p><strong>Version:</strong> 0.1.9 - July 18, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -1078,7 +1078,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <p>Code is also shown <code>inline</code> as well.</p>
 <h2 id="protocol-overview">Protocol Overview</h2>
 <p>STTP is an open, data point centric publish/subscribe transport protocol that can be used to securely exchange time-series style data and automatically synchronize metadata between two applications. The protocol supports sending real-time and historical data at full or down-sampled resolutions. When sending historical data, the replay speed can be controlled dynamically for use in visualizations to enable users to see data faster or slower than recorded in real-time.</p>
-<p>The wire protocol employed by STTP implements a publish/subscribe data exchange model using simple commands with a compressed binary serialization of data points. The protocol does not require a predefined or fixed configuration – that is, the data points values arriving in one data packet can be different than those arriving in another. Each packet of data consists of a collection of data points where each instance is a compact structure containing an ID, a timestamp or sequence, a value and any associated flags.</p>
+<p>The wire protocol employed by STTP implements a publish/subscribe data exchange model using simple commands with a compressed binary serialization of data points. The protocol does not require a predefined or fixed configuration - that is, the data points values arriving in one data packet can be different than those arriving in another. Each packet of data consists of a collection of data points where each instance is a compact structure containing an ID, a timestamp or sequence, a value and any associated flags.</p>
 <p>STTP is implemented using a <em>command channel</em> and a <em>data channel</em>. The actual IP transport protocols for these channels varies based on need, but is often either a single TCP/IP transport for both the command and data channel -or- a TCP/IP based command channel with a UDP/IP based data channel.</p>
 <p>The command channel is used to reliably negotiate session specific required communication, state and protocol parameters. The command channel is also used to authenticate with other STTP instances, exchange metadata on available data points, and request specific data points for subscription. The data channel is used to send compact, binary encoded packets of data points.</p>
 <p>STTP includes strong access control and encryption and is configurable to allow use of private keys in a highly isolated environment. When encryption and strong identity verification is enabled, STTP utilizes standard key management services with X.509 identity certificates for authentication.</p>
@@ -1097,7 +1097,6 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <p>For smaller sized, discrete data structures, the existing available serialization technologies are very fast and highly effective. However, as the data structures become larger, the process of serialization and deserialization becomes more costly in terms of both memory allocation and computational processing. Because of this, large frames of data are not recommended for use by these serialization technologies <sup>[<a href="#ref9">9</a>]</sup> <sup>[<a href="#ref10">10</a>]</sup>. Additionally, and perhaps more importantly, there are also penalties that occur at the network transport layer.</p>
 <h4 id="data-structure-serialization-in-the-power-industry">Data Structure Serialization in the Power Industry</h4>
 <p>In the electric power industry, the IEEE C37.118 <sup>[<a href="#ref1">1</a>]</sup> protocol exists as a standard serialization format for the exchange of synchrophasor data. Synchrophasor data is typically measured with an accurate time source, e.g., a GPS clock, and transmitted at high-speed data rates, up to 120 frames per second. Measured data sent by this protocol is still simply a frame of serialized primitive types which includes data elements such as a timestamp, status flags, phasor angle / magnitude pairs, etc. The IEEE C37.118 protocol also prescribes the combination of data frames received from multiple source devices for the same timestamp into one large combined frame in a process known as concentration. The concentration process demands that a waiting period be established to make sure all the expected data frames for a given timestamp arrive. If any frames of data do not arrive before the waiting period expires, the overall combined frame is published anyway. Since the frame format is fixed, empty data elements that have no defined value, e.g., NaN or null, still occupy space for the missing frames.</p>
-<p class="insert-page-break-after"></p>
 <h3 id="large-frame-network-impact">Large Frame Network Impact</h3>
 <p>Under the Internet Protocol (IP), all frames of data to be transmitted that exceed the negotiated maximum transmission unit (MTU) size (typically 1,500 bytes for Ethernet networks <sup>[<a href="#ref11">11</a>]</sup>) are divided into multiple fragments where each fragment is called a network packet, see <a href="#figure1">Figure 1</a>.</p>
 <p><a name="figure1"></a> <center></p>
@@ -1116,7 +1115,6 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> Synchrophasor data is the source for real-time visualization and analysis tools which are used to operate the bulk electric system (BES). This real-time data is required to be accurate, dependable and timely in order to be useful for grid operators <sup>[<a href="#ref14">14</a>]</sup>. Any delays in the delivery of this data could have adverse affects on operational decisions impacting the BES.</p>
 </blockquote>
-<p class="insert-page-break-after"></p>
 <h4 id="large-frame-impacts-on-udpip">Large Frame Impacts on UDP/IP</h4>
 <p>Another common Internet protocol is UDP/IP. Transmission of data over UDP differs from TCP in the fact that UDP does not attempt to retransmit data nor does it make any attempts to maintain the order of the transmitted packets. This functionality is the basis for UDP being considered a <em>lossy</em> data transmission protocol, but more lightweight than TCP.</p>
 <p>Even with the unreliable delivery caveats, UDP will still attempt to reconstruct and deliver the originally transmitted frame of data. However, even if a single network packet is dropped, the entire original frame will be lost and any packets that were already accumulated get discarded <sup>[<a href="#ref15">15</a>]</sup>. In other words, there are no partial frame deliveries - frame reception with UDP is an all or nothing operation.</p>
@@ -1556,12 +1554,28 @@ count may not match requested points due to rights or points may no longer exist
   </ul>
 </blockquote>
 <h2 id="metadata">Metadata</h2>
-<ul>
-<li>Wire Format: Tabular XML format (XML) - highly compressible</li>
-<li>Primary data point identifier is Guid (describe)</li>
-<li>Extensibility</li>
-<li>Rights based content restriction</li>
-</ul>
+<p>JRC: Following needs some extra thought<br />
+<del>Metadata information will be described in one of two formats. <strong>Basic Metadata</strong> or <strong>Advance Metadata</strong>. 
+Basic Metadata has fewer restrictions and intended for use where a persistent metadata repository 
+is not desired and limited programming support exists where XML encoding would be cumbersome. 
+(Ex. PMU or intermediate PDCs)</del></p>
+<p><del>Advance Metadata contains more formally defined metadata structures necessary to version 
+the metadata and provide synchronizing and filtering and permission based access. This
+would require access to a repository that would maintain this data. 
+(Ex. Large Scale PDCs, Gateways, Historians)</del></p>
+<p><del>## Basic Metadata</del></p>
+<p><del>* Attributes are Key/Value pairs</del><br />
+<del>* Supports Nodal Relationships (Site Information -> Device Information -> Point Information)</del><br />
+<del>* Data requests are full dumps</del><br />
+<del>* Data can be sent on demand when streaming measurements</del><br />
+<del>* Contains a Runtime Version Number</del><br />
+<del>* This number is incremented on any metadata change</del><br />
+<del>* This number also changes every process restart</del></p>
+<p><del>## Advance Metadata</del></p>
+<p><del>* Wire Format: Tabular XML format (XML) - highly compressible</del><br />
+<del>* Primary data point identifier is Guid (describe)</del><br />
+<del>* Extensibility</del><br />
+<del>* Rights based content restriction</del></p>
 <h3 id="dataset-contents">Dataset Contents</h3>
 <ul>
 <li>Minimum required dataset for STTP operation</li>
@@ -1722,10 +1736,11 @@ count may not match requested points due to rights or points may no longer exist
 <li>Basic Metadata - Defines each data point with only a short descriptor.</li>
 <li>Subscribed Data Stream - Allows the incoming connection to define the measurements that will be selectively streamed.</li>
 <li>Access Control - Permissions controls on a point by point basis.</li>
-<li>Data Backfilling - Allows backfilling missing data in the event of a communcations outage.</li>
+<li>Data Backfilling - Allows backfilling missing data in the event of a communications outage.</li>
 <li>Encryption - Data channels are encryption and the connection is authenticated.</li>
 <li>Data Stream Compression - The data stream will support advance compression methods.</li>
 <li>Advance Queries - Must be able to handle more advance request/reply queries.</li>
+<li>Data Pushing - Capable of initializing a connection and writing data out.</li>
 </ul>
 <h3 id="use-case-examples">Use Case Examples</h3>
 <p>This is a list of all use cases along with the predefined set of features that must be supported by this use case.</p>
@@ -1766,6 +1781,14 @@ count may not match requested points due to rights or points may no longer exist
 <li>Encryption</li>
 <li>Data Compression</li>
 <li>Advance Queries</li>
+</ul>
+<p><strong>E. Data Diode</strong> - Handles moving data from a higher security level to a lower level</p>
+<p>Features:</p>
+<ul>
+<li>Data Pushing</li>
+<li>Basic Metadata</li>
+<li>Encryption</li>
+<li>Data Compression</li>
 </ul>
 <hr />
 <p>(Old use case examples)</p>
@@ -1821,7 +1844,45 @@ Publisher will likely want to validate size of historical requests, or least thr
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> Links to language specific auto-generated XML code comment based API documentation would be useful.</p>
 </blockquote>
 <h2 id="appendix-c---ieee-c37118-mapping">Appendix C - IEEE C37.118 Mapping</h2>
-<p>appendix body</p>
-<p>appendix body</p>
+<p>A C37.118 stream can be encapsulated in it's raw format inside sttp using the following<br />
+mapping and data point definition. The intent of this mapping is to make sttp transparent.</p>
+<p>C37.118 -&gt; sttp -&gt; C37.118</p>
+<p>JRC: I was thinking the following kind of mapping would be available in a extended metadata table, e.g., <code>IEEEC37.118</code> table with an ID or name for the mapping, the field types and measurement mappings.</p>
+<p>Metadata for each Data Point:</p>
+<ul>
+<li>(int16) Data Concentrator ID Code</li>
+<li>(int16) ID Code of data source</li>
+<li>(int32) Time Base</li>
+<li>(char) Value Type (S=Stat, P=Phasor, F=Freq, Q=DFreq, A=Analog, D=Digital)</li>
+<li>(int8) Size (2/4)</li>
+<li>(char) Phasor Type (R=Rect, P=Polar)</li>
+<li>(int16) Position Index (eg. whether this is the first or second phasor or analog)</li>
+<li>(int16) PMU Number (eg. whether this is the first of second PMU in a concentrated stream)</li>
+<li>(char16) Station Name</li>
+<li>(char16[16]) Channel Name (Array of 16 if channel type is Digital)</li>
+<li>(int16) Nominal Line Frequency</li>
+<li>(int16) Rate of data transmission</li>
+<li>(int16) Config Change Count</li>
+</ul>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/confused.png?v5" alt=":confused:" title=":confused:" class="emoji-img emoji"> JRC: Note sure I understand the following - this seems to break the tenant of mapping primitives? Even if broken into chunks, this would require identification and sequencing of chunks? Perhaps I am missing your idea here...</p>
+</blockquote>
+<p>Data Point</p>
+<ul>
+<li>(uint32) SOC</li>
+<li>(uint24) FrameSec</li>
+<li>(uint8) Time Quality</li>
+<li>One of the following:<ul>
+<li>Status, Digital, Int16 Freq, Int16 DFreq, Int16 Analog<ul>
+<li>(int16) Value</li></ul></li>
+<li>Float Freq, Float DFreq, Float Analog<ul>
+<li>(float) Value</li></ul></li>
+<li>Int16 Phasor (Rect or Polar)<ul>
+<li>(int16) Value1 (Mag/Real)</li>
+<li>(int16) Value2 (Ang/Im)</li></ul></li>
+<li>Float Phasor (Rect or Polar)<ul>
+<li>(float) Value1 (Mag/Real)</li>
+<li>(float) Value2 (Ang/Im)</li></ul></li></ul></li>
+</ul>
 </body>
 </html>
