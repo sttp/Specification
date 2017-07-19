@@ -1,4 +1,6 @@
-## Appendix C - IEEE C37.118
+## Appendix C - IEEE C37.118 Mapping
+
+> :bulb: JRC: We've already been considering options - especially for reference implementations - that are prescripted outside the STTP specification for mapping structures into and out of the protocol - this seems like one of those use cases. Need to discuss the following suggestions in light of the implications they have when considering the of primary tenants of the protocol...
 
 ### Encapsulation
 
