@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.1.9 - July 18, 2017</p>
+<p><strong>Version:</strong> 0.1.10 - July 19, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -1844,10 +1844,28 @@ Publisher will likely want to validate size of historical requests, or least thr
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> Links to language specific auto-generated XML code comment based API documentation would be useful.</p>
 </blockquote>
 <h2 id="appendix-c---ieee-c37118-mapping">Appendix C - IEEE C37.118 Mapping</h2>
-<p>A C37.118 stream can be encapsulated in it's raw format inside sttp using the following<br />
-mapping and data point definition. The intent of this mapping is to make sttp transparent.</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> JRC: We've already been considering options - especially for reference implementations - that are prescripted outside the STTP specification for mapping structures into and out of the protocol - this seems like one of those use cases. Need to discuss the following suggestions in light of the implications they have when considering the of primary tenants of the protocol...</p>
+</blockquote>
+<h3 id="encapsulation">Encapsulation</h3>
+<p>A C37.118 stream can be encapsulated in its raw format inside sttp using the following<br />
+definitions. The intent of this definition is to make sttp transparent so a sttp service can <br />
+transport insecure C37.118 over an untrusted medium.</p>
 <p>C37.118 -&gt; sttp -&gt; C37.118</p>
-<p>JRC: I was thinking the following kind of mapping would be available in a extended metadata table, e.g., <code>IEEEC37.118</code> table with an ID or name for the mapping, the field types and measurement mappings.</p>
+<p><strong>Use Case:</strong> A light weight front-end processor manages connectivity to all or a subset of PMU/PDCs <br />
+communicating via C37.118. Existing server applications can through a single connection, connect to this<br />
+front-end processor to receive all of the raw data. This application then uses its own mapping to interpret the<br />
+raw data. Since each vendor has their own proprietary mapping, it's naive to think we can create one mapping<br />
+that everyone will adopt. In addition, a neighboring utility can also run a lightweight service <br />
+that can connect to this front-end processor and translate it back into a C37.118 stream without<br />
+having to maintain another local database of how to map it back into a C37.118 stream.</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> JRC: I was thinking the following kind of mapping would be available in a extended<br />
+  metadata table, e.g., <code>IEEEC37.118</code> table with an ID or name for the mapping,<br />
+  the field types and measurement mappings.</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> SEC: I would think it would not be adventageous to make a dedicated hard coded table that <br />
+  will maintain this mapping information. It would make extensibility more difficult. </p>
+</blockquote>
 <p>Metadata for each Data Point:</p>
 <ul>
 <li>(int16) Data Concentrator ID Code</li>
@@ -1865,10 +1883,20 @@ mapping and data point definition. The intent of this mapping is to make sttp tr
 <li>(int16) Config Change Count</li>
 </ul>
 <blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/confused.png?v5" alt=":confused:" title=":confused:" class="emoji-img emoji"> JRC: Note sure I understand the following - this seems to break the tenant of mapping primitives? Even if broken into chunks, this would require identification and sequencing of chunks? Perhaps I am missing your idea here...</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/confused.png?v5" alt=":confused:" title=":confused:" class="emoji-img emoji"> JRC: Note sure I understand the following - this seems to break the tenant of<br />
+  mapping primitives? Even if broken into chunks, this would require identification and<br />
+  sequencing of chunks? Perhaps I am missing your idea here...</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> SEC: I see. I'm not trying to "map" premitives. I've created a new section in the<br />
+  document for mapping into the generic Data Point type. This is simply what I understand is necessary<br />
+  to transport the data in it's raw format. </p>
+  <p>I'm focusing on what the transport layer looks like. How the higher level API decides <br />
+  to use this data has yet to be defined and can vary from application to application. <br />
+  We may not decide support encapsulation, but either way, the wireline protocol should not care<br />
+  how the API decides to use it.</p>
 </blockquote>
 <p>Data Point</p>
 <ul>
+<li>(MetaData) All of the metadata that was exchanged with this point, mapped to a Runtime ID.</li>
 <li>(uint32) SOC</li>
 <li>(uint24) FrameSec</li>
 <li>(uint8) Time Quality</li>
@@ -1884,5 +1912,7 @@ mapping and data point definition. The intent of this mapping is to make sttp tr
 <li>(float) Value1 (Mag/Real)</li>
 <li>(float) Value2 (Ang/Im)</li></ul></li></ul></li>
 </ul>
+<h3 id="mapping">Mapping</h3>
+<p>To be described later once a generic Data Point has been described. </p>
 </body>
 </html>

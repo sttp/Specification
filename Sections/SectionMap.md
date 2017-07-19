@@ -48,3 +48,5 @@
 | [Operational Requirements (3)](FunctionalRequirements.md#operational-requirements) | [FunctionalRequirements.md](FunctionalRequirements.md) |
 | [Appendix B - STTP API Reference (2)](APIReference.md#appendix-b---sttp-api-reference) | [APIReference.md](APIReference.md) |
 | [Appendix C - IEEE C37.118 Mapping (2)](IEEE_C37.118Mapping.md#appendix-c---ieee-c37-118-mapping) | [IEEE_C37.118Mapping.md](IEEE_C37.118Mapping.md) |
+| [Encapsulation (3)](IEEE_C37.118Mapping.md#encapsulation) | [IEEE_C37.118Mapping.md](IEEE_C37.118Mapping.md) |
+| [Mapping (3)](IEEE_C37.118Mapping.md#mapping) | [IEEE_C37.118Mapping.md](IEEE_C37.118Mapping.md) |
