@@ -73,7 +73,18 @@ Features:
 * Data Compression
 * Advance Queries
 
-**E. Data Diode** - Handles moving data from a higher security level to a lower level
+**E. Data Diode**
+
+To facilitate moving data from a more secure environment to a less secure one (eg. Prod to Dev) a
+separate service will be created that can connect to (or accept connections from) a publisher. This
+communication can be a fully implemented sttp connection and thus can manage subscriptions that will be 
+exported to lower level clients. 
+
+This data diode will then establish a connection with a lower security level and forward data to this 
+client. The client will only be able to turn on/off the data stream, request metadata, and request a user 
+configurable amount of historical data that may be missing during a communications outage. These requests 
+must be handled by the data diode with no modifications made to the established connection to the publisher.
+Each connection must operate independently of each other.
 
 Features:
 * Data Pushing
