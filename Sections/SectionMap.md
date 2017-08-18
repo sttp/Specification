@@ -50,3 +50,5 @@
 | [Appendix C - IEEE C37.118 Mapping (2)](IEEE_C37.118Mapping.md#appendix-c---ieee-c37-118-mapping) | [IEEE_C37.118Mapping.md](IEEE_C37.118Mapping.md) |
 | [Encapsulation (3)](IEEE_C37.118Mapping.md#encapsulation) | [IEEE_C37.118Mapping.md](IEEE_C37.118Mapping.md) |
 | [Mapping (3)](IEEE_C37.118Mapping.md#mapping) | [IEEE_C37.118Mapping.md](IEEE_C37.118Mapping.md) |
+| [Appendix D - Other Protocol Evaluations (2)](OtherProtocols.md#appendix-d---other-protocol-evaluations) | [OtherProtocols.md](OtherProtocols.md) |
+| [RFC 3350 - RTP: Transport Protocol for Real-Time Applications (3)](OtherProtocols.md#rfc-3350---rtp-transport-protocol-for-real-time-applications) | [OtherProtocols.md](OtherProtocols.md) |

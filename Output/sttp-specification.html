@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.1.13 - August 16, 2017</p>
+<p><strong>Version:</strong> 0.1.14 - August 18, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -849,6 +849,10 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <td style="text-align:center;">C</td>
 <td><a href="#appendix-c---ieee-c37118-mapping">Appendix C - IEEE C37.118 Mapping</a></td>
 </tr>
+<tr>
+<td style="text-align:center;">D</td>
+<td><a href="#appendix-d---other-protocol-evaluations">Appendix D - Other Protocol Evaluations</a></td>
+</tr>
 </tbody>
 </table>
 <h2 id="introduction">Introduction</h2>
@@ -862,6 +866,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <p><a href="#appendix-a---functional-requirements">Appendix A - Functional Requirements</a> provides the set of functional requirements and use cases needed for successful STTP deployment.</p>
 <p><a href="#appendix-b---sttp-api-reference">Appendix B - STTP API Reference</a> provides instructions to enable software developers to integrate and use of STTP within other software systems.</p>
 <p><a href="#appendix-c---ieee-c37118-mapping">Appendix C - IEEE C37.118 Mapping</a> provides a detailed look at the process of transforming IEEE C37.118 into STTP as well as creating IEEE C37.118 streams from STTP.</p>
+<p><a href="#appendix-d---other-protocol-evaluations">Appendix D - Other Protocol Evaluations</a> provides insight into other protocols that were considered for suitability when developing the STTP use cases and functional requirements.</p>
 <p>While the format and structure of this document, established to facilitate collaboration, is different than that used by standards bodies, it is hoped that the content within this document can meet all the information requirements needed to enable repackaging of this specification into draft standard formats.</p>
 <h2 id="business-case">Business case</h2>
 <p>At the conclusion of the ASP project in April 2019, it is anticipated that STTP will be a well-tested, thoroughly vetted, production-grade protocol that will be supported by ASP project team vendors.  An open source tool suite for STTP will be developed as part of the project (see <a href="#appendix-b---sttp-api-reference">Appendix B</a>) that will include a test harness that will allow utilities and vendors outside the project to test and validate STTP in their systems and API's.</p>
@@ -1923,5 +1928,42 @@ having to maintain another local database of how to map it back into a C37.118 s
 </ul>
 <h3 id="mapping">Mapping</h3>
 <p>To be described later once a generic Data Point has been described. </p>
+<h2 id="appendix-d---other-protocol-evaluations">Appendix D - Other Protocol Evaluations</h2>
+<p>Various other standard protocols were evaluated for suitability as a starting point for STTP, most were quickly eliminated for one of the following reasons:</p>
+<ul>
+<li>Request / Reply (i.e., non-streaming) nature</li>
+<li>Insufficient specified limits on data throughput</li>
+<li>Restrictive payload formatting, e.g., inability to send binary data</li>
+<li>Forced transport specifications, e.g., HTTP</li>
+</ul>
+<p>Other protocols that dealt with streaming data were found to not meet all the use case requirements that were desired for STTP. Suitability determinations for these protocols follows.</p>
+<h3 id="rfc-3350---rtp-transport-protocol-for-real-time-applications">RFC 3350 - RTP: Transport Protocol for Real-Time Applications</h3>
+<p>At first blush, there seems to be much overlap in the requirements defined for the STTP protocol and those defined for RTP. In particular, its ability to reliably deliver real-time streaming data with several channels (e.g., audio and video) to a participant.</p>
+<p>At a high-level, here are some the features of RTP:</p>
+<ul>
+<li>Used for applications transmitting real-time data, such as audio and video</li>
+<li>Designed to be independent of the underlying transport</li>
+<li>Services include payload type identification, sequence numbering, time-stamping and delivery monitoring</li>
+<li>Primarily designed to satisfy the needs of multi-participant multimedia conferences</li>
+</ul>
+<p>RTP defines how to send, at a wire level, several related streams of data (i.e., content) for delivery to multiple participants simultaneously, i.e., all consumers receive the same data. However, since the desired use case for the STTP protocol can describe a different stream per consumer, i.e., where each consumer decides specifically what data they want, this multicast ability of RTP is not a feature that would be particularly useful. RTP also defines a fixed frame header timestamp that is used to synchronize several streams back together at the consumer level - such as lining up audio and video together for playback. The STTP use case, however, has a requirement to deliver a varying number of points each with its own timestamp, so the single header timestamp would not be useful – existing synchrophasor protocols also operate this way, i.e., with a single timestamp followed by payload measured at that time.</p>
+<p>The RTP protocol also has stated caveats against multiplexing too many points:</p>
+<pre><code>5.2 Multiplexing RTP Sessions
+
+   For efficient protocol processing, the number of multiplexing points
+   should be minimized, as described in the integrated layer processing
+   design principle [10].  In RTP, multiplexing is provided by the
+   destination transport address (network address and port number) which
+   is different for each RTP session.  For example, in a teleconference
+   composed of audio and video media encoded separately, each medium
+   SHOULD be carried in a separate RTP session with its own destination
+   transport address.
+
+   Separate audio and video streams SHOULD NOT be carried in a single
+   RTP session and demultiplexed based on the payload type or SSRC
+   fields.</code></pre>
+<p>This indicates that the most appropriate use of this protocol would be to define each data point stream onto its own network address/port number - this would not be ideal as the total number of port numbers on a system is a fixed resource and the number of data points two STTP connections will want to exchange could range in the hundreds of thousands.</p>
+<p>Perhaps the largest technical issue with RTP for the STTP use case is the fixed number of possible multiplexed points. The RTP protocol defines a SSRC per packet header field as well as multiple CCRC per packet header fields that allow you to identify up to 16 points (SSRC + 15 CCRC) in the same packet for a given timestamp. If you ignored the header timestamp and other stated issues, it might be possible to make RTP work for the streaming data portion of the STTP use case requirements if you took the 16 packet points, each with a fairly large header, and applied per-point identification in the data payload for each packet – in this case the represented data could change packet-to-packet. However, doing this attempts to twist an existing protocol beyond its original design intentions to simply meet one portion of the needs of the current STTP use case simply for the sake of using an existing standard. This also does not solve the other STTP use case requirements, e.g., providing meta-data for the points being subscribed.</p>
+<p>Regardless of the appropriateness of this standard to the desired use case, there is much that can be gleaned from this real-world production use protocol. In particular the dynamic ability to change encoding and frame-rates in response to changing network conditions should be noted as possible desired features of the STTP protocol.</p>
 </body>
 </html>
