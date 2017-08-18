@@ -20,4 +20,6 @@ In the [Protocol Overview](Overview.md) section of this specification, high-leve
 
 [Appendix C - IEEE C37.118 Mapping](IEEE_C37.118Mapping.md) provides a detailed look at the process of transforming IEEE C37.118 into STTP as well as creating IEEE C37.118 streams from STTP.
 
+[Appendix D - Other Protocol Evaluations](OtherProtocols.md) provides insight into other protocols that were considered for suitability when developing the STTP use cases and functional requirements.
+
 While the format and structure of this document, established to facilitate collaboration, is different than that used by standards bodies, it is hoped that the content within this document can meet all the information requirements needed to enable repackaging of this specification into draft standard formats.
