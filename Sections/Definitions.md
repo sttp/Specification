@@ -10,13 +10,15 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 
 | Term | Definition |
 |-----:|:-----------|
+| [**certificate**](https://en.wikipedia.org/wiki/X.509#Certificates) | A file that contains a public key and identity information, e.g., an organization name, hostnames, IP addresses, etc. The X.509 standard defines a standard format for certificate files that can either be self-signed or signed by a certificate authority. Certificates are used in conjunction with public-key infrastructure to provide identity validation and encryption keys used to secure IP transport protocol communications, such as with the TLS protocol. <br/> Also called _X.509 Certificate_. |
 | [**data point**](https://en.wikipedia.org/wiki/Data_point) | A measurement of identified data along with any associated state, e.g., time of measurement and quality of measured data. |
 | [**data structure**](https://en.wikipedia.org/wiki/Data_structure) | An organized set of primitive data types where each element has a meaningful name. |
 | **frame** | A data-structure composed of primitive data types that has been serialized into a discrete binary package. |
 | [**endianess**](https://en.wikipedia.org/wiki/Endianness) | The hardware prescribed ordinal direction of the bits used to represent a numerical value in computer memory; usually noted as either _big_ or _little_. |
-| [**endpoint**](https://en.wikipedia.org/wiki/Communication_endpoint) | A combination of an IP address and port number that represents a unique identification for establishing communications on an IP network. Endpoints, along with an IP transport protocol, are used by a socket to establish inter-device network communications. <br/> Also called _communications endpoint_. |
+| [**endpoint**](https://en.wikipedia.org/wiki/Communication_endpoint) | A combination of an IP address (or hostname) and port number that represents a unique identification for establishing communications on an IP network. Endpoints, along with an IP transport protocol, are used by a socket to establish inter-device network communications. <br/> Also called _communications endpoint_. |
 | [**Ethernet**](https://en.wikipedia.org/wiki/Ethernet) | Frame based data transmission technology used in local area networks. |
 | [**fragmentation**](https://en.wikipedia.org/wiki/IP_fragmentation) | Network fragmentation is the process that breaks frames into smaller fragments, called packets, that can pass over a network according to an MTU size limit. Fragments are reassembled by the receiver. |
+| [**hostname**](https://en.wikipedia.org/wiki/Hostname) | A human readable label used in a computer network that maps to an IP address. A hostname can be used instead of an IP address to establish a socket connection for inter-device network communications. Resolution of a hostname to its IP address is handled by a DNS service which is defined as part of a system's IP configuration. |
 | [** IP address**](https://en.wikipedia.org/wiki/IP_address) | An unsigned integer, either 32-bits for version 4 addresses or 128-bits for version 6 address, used to uniquely identify all devices connected to a computer network using Internet Protocol. The address combined with a port number creates a unique endpoint that is used by a socket to establish a communications channel on a host system. |
 | [**IP transport protocol**](https://en.wikipedia.org/wiki/Transport_layer) | An established set of governing principals that define the rules and behaviors for the transmission of data between two entities when using Internet Protocol. The most commonly used IP transport protocols are TCP and UDP. |
 | **measurement** |  |
@@ -38,8 +40,10 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 |-----:|:-----------|
 | **API** | [Application Program Interface](https://en.wikipedia.org/wiki/Application_programming_interface) |
 | **BES** | [Bulk Electric System](http://www.nerc.com/pa/RAPA/Pages/BES.aspx) |
+| **CA** | [Certificate Authority](https://en.wikipedia.org/wiki/Certificate_authority) |
 | **DOE** | [United States Department of Energy](https://en.wikipedia.org/wiki/United_States_Department_of_Energy) |
 | **DDS** | [Data Distribution Service](https://en.wikipedia.org/wiki/Data_Distribution_Service) |
+| **DNS** | [Domain Name System](https://en.wikipedia.org/wiki/Domain_Name_System) |
 | **GEP** | [Gateway Exchange Protocol](http://gridprotectionalliance.org/docs/products/gsf/gep-overview.pdf) |
 | **GPA** | [Grid Protection Alliance, Inc.](https://www.gridprotectionalliance.org/) |
 | **GPS** | [Global Positioning System](https://en.wikipedia.org/wiki/Global_Positioning_System) |
@@ -51,11 +55,13 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 | **NaN** | [Not a Number](https://en.wikipedia.org/wiki/NaN) |
 | **PDC** | [Phasor Data Concentrator](http://en.openei.org/wiki/Definition:Phasor_Data_Concentrator_%28PDC%29) |
 | **PMU** | [Phasor Measurement Unit](https://en.wikipedia.org/wiki/Phasor_measurement_unit) |
+| **PKI** | [Public Key Infrastructure](https://en.wikipedia.org/wiki/Public_key_infrastructure)
 | **STTP** | [Streaming Telemetry Transport Protocol](https://github.com/sttp/) |
 | **TCP** | [Transmission Control Protocol](https://en.wikipedia.org/wiki/Transmission_Control_Protocol) - _also as_ &nbsp;**TCP/IP** |
 | **TLS** | [Transport Layer Security](https://en.wikipedia.org/wiki/Transport_Layer_Security) |
 | **UDP** | [User Datagram Protocol](https://en.wikipedia.org/wiki/User_Datagram_Protocol) - _also as_ &nbsp;**UDP/IP** |
 | **UTC** | [Coordinated Universal Time](https://en.wikipedia.org/wiki/Coordinated_Universal_Time) |
+| **X.509** | [PKI Standard for Certificates](https://en.wikipedia.org/wiki/X.509) |
 | **ZeroMQ** | [Brokerless Messaging Queuing and Distribution Library](https://en.wikipedia.org/wiki/ZeroMQ) |
 
 ### Document Conventions
