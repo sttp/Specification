@@ -57,9 +57,9 @@ All document references are enumerated in the [Sections/References.md](Sections/
 
 `4. <a name="ref4"></a>[STTP Repositories on GitHub](https://github.com/sttp), Various specification documents and reference implementations.`
 
-Bookmark names should be prefixed with `ref` and be numbered sequentially.
+> :information_source: If you are using a URL reference that contains parentheses, it will be necessary to replace the embedded parentheses with their URL encoded equivalents. Specifically, the open parenthesis `(` and close parenthesis `)`  will need to be replaced with `%28` and `%29`, respectively, so the URL can be properly parsed in the markdown.
 
-> :warning: Since multiple documents may be linked to the reference by number, any renumbering of the references will impact many documents.
+Bookmark names should be prefixed with `ref` and be numbered sequentially. Keep in mind that since multiple documents may be linked to the reference by number, any renumbering of the references can impact many documents.
 
 When GitHub encounters user added bookmarks, it automatically prefixes the bookmark name with `user-content-` to ensure uniqueness of the bookmark on the page when rendered. As a result, any time you need to link to the numbered reference, the markdown should look like the following:
 
