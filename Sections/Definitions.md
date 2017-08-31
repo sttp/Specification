@@ -53,6 +53,7 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 | **ISO** | [Independent System Operator](https://en.wikipedia.org/wiki/Regional_transmission_organization_(North_America) |
 | **MTU** | [Maximum Transmission Unit](https://en.wikipedia.org/wiki/Maximum_transmission_unit) |
 | **NaN** | [Not a Number](https://en.wikipedia.org/wiki/NaN) |
+| **NAT** | [Network Address Translation](https://en.wikipedia.org/wiki/Network_address_translation) |
 | **PDC** | [Phasor Data Concentrator](http://en.openei.org/wiki/Definition:Phasor_Data_Concentrator_%28PDC%29) |
 | **PMU** | [Phasor Measurement Unit](https://en.wikipedia.org/wiki/Phasor_measurement_unit) |
 | **PKI** | [Public Key Infrastructure](https://en.wikipedia.org/wiki/Public_key_infrastructure)
