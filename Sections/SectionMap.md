@@ -15,6 +15,11 @@
 | [Large Frame Network Impact (3)](Overview.md#large-frame-network-impact) | [Overview.md](Overview.md) |
 | [Changing the Paradigm with STTP (3)](Overview.md#changing-the-paradigm-with-sttp) | [Overview.md](Overview.md) |
 | [STTP Feature Summary (3)](Overview.md#sttp-feature-summary) | [Overview.md](Overview.md) |
+| [Establishing Connections (2)](EstablishingConnections.md#establishing-connections) | [EstablishingConnections.md](EstablishingConnections.md) |
+| [Forward Connections (3)](EstablishingConnections.md#forward-connections) | [EstablishingConnections.md](EstablishingConnections.md) |
+| [Reverse Connections (3)](EstablishingConnections.md#reverse-connections) | [EstablishingConnections.md](EstablishingConnections.md) |
+| [Secure Connections (3)](EstablishingConnections.md#secure-connections) | [EstablishingConnections.md](EstablishingConnections.md) |
+| [Connection Negotiations (3)](EstablishingConnections.md#connection-negotiations) | [EstablishingConnections.md](EstablishingConnections.md) |
 | [Data Point Structure (2)](DataPointStructure.md#data-point-structure) | [DataPointStructure.md](DataPointStructure.md) |
 | [Data Point Value Types (3)](DataPointStructure.md#data-point-value-types) | [DataPointStructure.md](DataPointStructure.md) |
 | [Commands and Responses (2)](CommandsAndResponses.md#commands-and-responses) | [CommandsAndResponses.md](CommandsAndResponses.md) |

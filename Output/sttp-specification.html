@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.1.16 - August 22, 2017</p>
+<p><strong>Version:</strong> 0.1.18 - September 1, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -906,6 +906,10 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </thead>
 <tbody>
 <tr>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/X.509#Certificates"><strong>certificate</strong></a></td>
+<td style="text-align:left;">A file that contains a public key and identity information, e.g., an organization name, hostnames, IP addresses, etc. The X.509 standard defines a standard format for certificate files that can either be self-signed or signed by a certificate authority. Certificates are used in conjunction with public-key infrastructure to provide identity validation and encryption keys used to secure IP transport protocol communications, such as with the TLS protocol. <br/> Also called <em>X.509 Certificate</em>.</td>
+</tr>
+<tr>
 <td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Data_point"><strong>data point</strong></a></td>
 <td style="text-align:left;">A measurement of identified data along with any associated state, e.g., time of measurement and quality of measured data.</td>
 </tr>
@@ -922,12 +926,32 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <td style="text-align:left;">The hardware prescribed ordinal direction of the bits used to represent a numerical value in computer memory; usually noted as either <em>big</em> or <em>little</em>.</td>
 </tr>
 <tr>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Communication_endpoint"><strong>endpoint</strong></a></td>
+<td style="text-align:left;">A combination of an IP address (or hostname) and port number that represents a unique identification for establishing communications on an IP network. Endpoints, along with an IP transport protocol, are used by a socket to establish inter-device network communications. <br/> Also called <em>communications endpoint</em>.</td>
+</tr>
+<tr>
 <td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Ethernet"><strong>Ethernet</strong></a></td>
 <td style="text-align:left;">Frame based data transmission technology used in local area networks.</td>
 </tr>
 <tr>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Firewall_%28computing%29"><strong>firewall</strong></a></td>
+<td style="text-align:left;">A security system used on a computer network, existing as software on an operating system or a standalone hardware appliance, used to control the ingress and egress of network communication paths , i.e., access to endpoints, based on a configured set of rules. Security zones between networks are established using firewalls to limit accessible resources between <em>secure</em> internal networks and <em>untrusted</em> external networks, like the Internet.</td>
+</tr>
+<tr>
 <td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/IP_fragmentation"><strong>fragmentation</strong></a></td>
 <td style="text-align:left;">Network fragmentation is the process that breaks frames into smaller fragments, called packets, that can pass over a network according to an MTU size limit. Fragments are reassembled by the receiver.</td>
+</tr>
+<tr>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Hostname"><strong>hostname</strong></a></td>
+<td style="text-align:left;">A human readable label used in a computer network that maps to an IP address. A hostname can be used instead of an IP address to establish a socket connection for inter-device network communications. Resolution of a hostname to its IP address is handled by a DNS service which is defined as part of a system's IP configuration.</td>
+</tr>
+<tr>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/IP_address"><strong>IP address</strong></a></td>
+<td style="text-align:left;">An unsigned integer, either 32-bits for version 4 addresses or 128-bits for version 6 address, used to uniquely identify all devices connected to a computer network using Internet Protocol. The address combined with a port number creates a unique endpoint that is used by a socket to establish a communications channel on a host system.</td>
+</tr>
+<tr>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Transport_layer"><strong>IP transport protocol</strong></a></td>
+<td style="text-align:left;">An established set of governing principals that define the rules and behaviors for the transmission of data between two entities when using Internet Protocol. The most commonly used IP transport protocols are TCP and UDP.</td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>measurement</strong></td>
@@ -940,6 +964,10 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <tr>
 <td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Phasor"><strong>phasor</strong></a></td>
 <td style="text-align:left;">A complex equivalent of a simple cosine wave quantity such that the complex modulus is the cosine wave amplitude and the complex angle (in polar form) is the cosine wave phase angle.</td>
+</tr>
+<tr>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Port_%28computer_networking%29"><strong>port</strong></a></td>
+<td style="text-align:left;">A 16-bit unsigned integer that, along with an IP address, represents a unique endpoint for establishing communications on an IP network. A port and associated IP address, i.e., an endpoint, and a IP transport protocol is used by a socket to establish a unique communications channel. <br/> Also called <em>network port</em>.</td>
 </tr>
 <tr>
 <td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Primitive_data_type"><strong>primitive type</strong></a></td>
@@ -962,16 +990,16 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <td style="text-align:left;"></td>
 </tr>
 <tr>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Network_socket"><strong>socket</strong></a></td>
+<td style="text-align:left;">A network communications mechanism, created as a programming language construct, used for sending and/or receiving data at a single destination within an IP network that is established with an endpoint and selected IP transport protocol. <br/> Also called <em>network socket</em>.</td>
+</tr>
+<tr>
 <td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit"><strong>synchrophasor</strong></a></td>
 <td style="text-align:left;">A phasor calculated from data samples using a standard time signal as the reference for the measurement. Synchronized phasors from remote sites have a defined common phase relationship.</td>
 </tr>
 <tr>
 <td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Time_series"><strong>time series</strong></a></td>
 <td style="text-align:left;">A series of data points indexed in time order, most commonly measured as a sequence taken at successive equally spaced points in time.</td>
-</tr>
-<tr>
-<td style="text-align:right;"><strong>term</strong></td>
-<td style="text-align:left;">definition</td>
 </tr>
 </tbody>
 </table>
@@ -993,12 +1021,20 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <td style="text-align:left;"><a href="http://www.nerc.com/pa/RAPA/Pages/BES.aspx">Bulk Electric System</a></td>
 </tr>
 <tr>
+<td style="text-align:right;"><strong>CA</strong></td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Certificate_authority">Certificate Authority</a></td>
+</tr>
+<tr>
 <td style="text-align:right;"><strong>DOE</strong></td>
 <td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/United_States_Department_of_Energy">United States Department of Energy</a></td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>DDS</strong></td>
 <td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Data_Distribution_Service">Data Distribution Service</a></td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>DNS</strong></td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Domain_Name_System">Domain Name System</a></td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>GEP</strong></td>
@@ -1026,7 +1062,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>ISO</strong></td>
-<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Regional_transmission_organization_(North_America)">Independent System Operator</a></td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Regional_transmission_organization_(North_America">Independent System Operator</a></td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>MTU</strong></td>
@@ -1037,6 +1073,10 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/NaN">Not a Number</a></td>
 </tr>
 <tr>
+<td style="text-align:right;"><strong>NAT</strong></td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Network_address_translation">Network Address Translation</a></td>
+</tr>
+<tr>
 <td style="text-align:right;"><strong>PDC</strong></td>
 <td style="text-align:left;"><a href="http://en.openei.org/wiki/Definition:Phasor_Data_Concentrator_%28PDC%29">Phasor Data Concentrator</a></td>
 </tr>
@@ -1045,20 +1085,32 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">Phasor Measurement Unit</a></td>
 </tr>
 <tr>
+<td style="text-align:right;"><strong>PKI</strong></td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Public_key_infrastructure">Public Key Infrastructure</a></td>
+</tr>
+<tr>
 <td style="text-align:right;"><strong>STTP</strong></td>
 <td style="text-align:left;"><a href="https://github.com/sttp/">Streaming Telemetry Transport Protocol</a></td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>TCP</strong></td>
-<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Transmission_Control_Protocol">Transmission Control Protocol</a></td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Transmission_Control_Protocol">Transmission Control Protocol</a> - <em>also as</em> &nbsp;<strong>TCP/IP</strong></td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>TLS</strong></td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Transport_Layer_Security">Transport Layer Security</a></td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>UDP</strong></td>
-<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/User_Datagram_Protocol">User Datagram Protocol</a></td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/User_Datagram_Protocol">User Datagram Protocol</a> - <em>also as</em> &nbsp;<strong>UDP/IP</strong></td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>UTC</strong></td>
 <td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/Coordinated_Universal_Time">Coordinated Universal Time</a></td>
+</tr>
+<tr>
+<td style="text-align:right;"><strong>X.509</strong></td>
+<td style="text-align:left;"><a href="https://en.wikipedia.org/wiki/X.509">PKI Standard for Certificates</a></td>
 </tr>
 <tr>
 <td style="text-align:right;"><strong>ZeroMQ</strong></td>
@@ -1192,6 +1244,35 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <li>Industry specific metadata extensions will exist to support specific industry deployments</li>
 <li>Ability to support broadcast messaging and distribution of critical system alarms</li>
 </ul>
+<h2 id="establishing-connections">Establishing Connections</h2>
+<p>It is expected that STTP will normally be used over Internet Protocol. In order to meet the entire set of capabilities as enumerated in this specification, a TCP/IP based connection will be required. In its most simple mode of operation, a single established TCP connection can be used to meet the requirements for both the <em>command channel</em> and <em>data channel</em> functions. Connections using UDP/IP can also be established for data channel functions when used in conjunction with a TCP based command channel, however, use of UDP connections for STTP data transmission reduces the set of capabilities that can be supported. As an example, since UDP is a lossy transmission protocol, its use means that transmitted data can be dropped, so any capabilities that implement stateful compression which requires delivery guarantees cannot be supported.</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> UDP only style deliveries, either unicast or multicast, of data using STTP can only be accommodated with substantial capability restrictions. That is, with no reliable command channel, consumers of STTP data provided over a UDP only connection would be subject to publisher established formats, content and resolution of the data being delivered. Alternately, establishment of a UDP based command channel would require adjustments in protocol behavior to accommodate failures to send command requests and/or receive responses due to lack of delivery guarantees.  While it is expected that with the right set of initial assumptions and capability restrictions that STTP could effectively operate with a UDP only connection, the main text of this specification will intentionally remain silent on such details for the sake of simplicity, clarity and brevity.</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Add an appendix to discuss how a UDP only STTP transmission should work so that needed caveats and capability restrictions can be established for this behavior. Describing this operation is important given that UDP only data transmissions for synchrophasors is widely used in production environments today. UDP only deployments, e.g., multicast, can also be very useful in lab environments for simplicity in data distribution. Regardless of the veracity and logic for the technical arguments that can be made to not use UDP, either by itself or in combination with TCP, by not defining the protocol behavior in these modes of operation there is increased risk of the protocol not being initially adopted or accepted. Having these behaviors documented will help alleviate any non-standard implementations that may crop up otherwise. Reference implementations will be adjusted to accommodate these use-cases as time allows, however UDP options will be implemented at lower priority. During code development, UDP use cases will be kept in-mind such that future iterations of the reference implementations can accommodate UDP based behaviors and functionality more readily.</p>
+</blockquote>
+<p>All STTP connections will be established using standard IP sockets. The actual details of establishing a socket connection are specific to an operating system and ultimately the programming language being used. However, the minimum information needed to create a socket is (1) an endpoint, i.e., the IP address and port number, (2) the desired IP transport protocol, e.g., TCP or UDP, and (3) the type connection to be established, i.e., a <em>server-style</em> socket or a <em>client-style</em> socket. A server-style socket is one that will listen for connections from clients. A client-style socket is one that will connect to a listening server socket. Client-style sockets are always the <em>initiators</em> of any given connection, i.e., client sockets always "make the call" to server sockets to begin communications.</p>
+<h3 id="forward-connections">Forward Connections</h3>
+<p>Under typical conditions, STTP publishers, as data providers, will use server-style sockets and STTP subscribers, as data consumers, will use client-style sockets to initiate connections to a publisher's listening socket. Establishing a server-style socket for a publisher and client-style sockets for any subscribers describes a connectivity model for STTP that is called a <em>forward connection</em>. Forward connections are expected to be the normal use case for STTP publisher/subscriber connections. However, for an STTP connection is does not matter which party, publisher or subscriber, is the server or the client from a socket perspective.</p>
+<h3 id="reverse-connections">Reverse Connections</h3>
+<p>In STTP it is perfectly valid for a publisher to initiate a client-style socket connection to a subscriber that is listening with an established server-style socket. This type of connectivity model is called a <em>reverse connection</em>. Since a client-style connection is the only type of socket that can initiate a connection, a reverse connection requires the publisher to be the initiator of a connection. This would be stablished such that the target subscriber would be able to receive data.</p>
+<p>Reverse connections flip the normal responsibilities of a publish/subscribe messaging pattern by having parties that provision the data also the be the initiators of a connection. Data subscribers, which might otherwise come and go as needed, now become a persistent network resource that needs to be readily available for a connection from its publisher. Reverse connections can require more data flow planning and network engineering to ensure that connections are initiated from the proper locations while having data flowing to the desired locations.</p>
+<p>Regardless of how a connection is established, forward or reverse, the functions, roles and responsibilities of the participants will not change, i.e., a publisher will still be the provider of data and the subscriber will still be the consumer of data. Additionally, any required protocol negotiations by the parties will continue as normal once the connection has been established.</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> Increased flexibility in the connectivity models for STTP is necessary so that security boundaries that have been enforced with firewall rules can be maintained. A common use case is that the publisher, and the data it is has access to, will exist in a secure network environment and the subscribers, which need access to the data, will exist in less secure network environments. In these scenarios, firewall rules will prohibit any connections to be initiated from an environment that is considered to be less secure. However, such environments normally allow connections to be initiated from inside the secure environment out to listening connections in less secure environments. Described more simply, nothing can reach in to systems in the secure environment, but systems in the secure environment can reach out - this much like how a computer in a home network can access the public Internet through a router, but the router's built-in firewall prevents systems on the Internet from accessing the home computer. Although reverse connections may initially seem counter-intuitive, they exist as a firm STTP requirement to allow for successful data exchange from within secure environments.</p>
+</blockquote>
+<h4 id="bidirectional-data-exchange">Bidirectional Data Exchange</h4>
+<h4 id="udp-restrictions-with-simple-connections">UDP Restrictions with Simple Connections</h4>
+<h3 id="secure-connections">Secure Connections</h3>
+<p>For data transmissions over the Internet or those that need to transmit sensitive data, a secured socket connection will need to be established for STTP communications. To secure a connection, a socket will be established with standard Transport Layer Security (TLS) using a signed X.509 certificate. TLS will be used to encrypt, authenticate and attest to the integrity of the data being transmitted over STTP.</p>
+<p>TLS is a protocol layer that sits above TCP, as a result, secure connections will be established in exactly the same manner as simple connections, however TLS will handle the needed negotiations to enable security. Once the base TCP connection is established, TLS security will added to the socket not directly interfere with   Since it is expected that implementations of</p>
+<h4 id="certificates">Certificates</h4>
+<p>STTP implementations should have the capability to use either self-signed certificates or those signed by a certificate authority (CA).</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> Through configuration, STTP implementations should be able to gracefully accommodate use cases where the validation of signed certificates encounters errors, e.g., the common name mismatch error <sup>[<a href="#ref18">18</a>]</sup>. This is important since STTP can be deployed be in environments where there is no public Internet access or where a client connection may appear to have a mismatched IP addresses due to a difference caused by NAT configuration. Certificate error conditions such as the inability to verify hostnames, IP addresses or contact an issuing CA should mitigatable through configuration. For user interfaces, appropriate warnings and feedback should be provided as to possible impact on security. Any new configurations should always default to the highest level of security and error warnings but be easily adjustable for any given environment as deemed appropriate by a user.</p>
+</blockquote>
+<h4 id="udp-security-with-secure-connections">UDP Security with Secure Connections</h4>
+<h3 id="connection-negotiations">Connection Negotiations</h3>
+<p>After a successful connection has been established, the publisher and subscriber will participate in a set of initial set of negotiations that will determine the operational...</p>
 <h2 id="data-point-structure">Data Point Structure</h2>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Lead with paragraph on purpose / value of the section - (1) what is a data point structure and (2) why have a data point structure / value? Next paragraph would be contents of section...</p>
@@ -1675,6 +1756,7 @@ would require access to a repository that would maintain this data.
 <li><a name="ref15"></a><a href="https://notes.shichao.io/tcpv1/ch10/#ip-fragmentation">User Datagram Protocol (UDP) and IP Fragmentation</a>, Shichao's Notes, Chapter 10</li>
 <li><a name="ref16"></a><a href="https://selinc.com/solutions/synchrophasors/report/115281/#different-communications-methods-using-sel-pmus-and-pdcs">Synchrophasors and Communications Bandwidth</a>, Schweitzer Engineering Laboratories, April 1, 2010</li>
 <li><a name="ref17"></a><a href="https://www.naspi.org/sites/default/files/2017-03/01_bpa_donnelly_NASPI_presentation.pdf">Implementation and Operating Experience with Oscillation Detection at Bonneville Power Administration</a>, Matt Donnelly, March 2017</li>
+<li><a name="ref18"></a><a href="https://blogs.msdn.microsoft.com/ieinternals/2009/12/07/understanding-certificate-name-mismatches/">Understanding Certificate Name Mismatches</a>, Eric Lawrence, December 7, 2009</li>
 </ol>
 <h2 id="contributors">Contributors</h2>
 <p>The following individuals actively participated in the development of this standard.</p>
