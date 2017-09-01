@@ -356,6 +356,9 @@ function appendToSectionMap() {
       }
     }
 
+    if (sectionMap == null)
+      sectionMap = "";
+
     file.contents = new Buffer(sectionMap);
     file.path = "Sections/SectionMap.md";
     this.push(file);
