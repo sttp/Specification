@@ -2,11 +2,13 @@
 
 The following individuals actively participated in the development of this standard.
 
-- J. Ritchie Carroll, GPA
-- F. Russell Robertson, GPA
-- Stephen C. Wills, GPA
-- Steven E. Chisholm, OG&E
-- Kenneth E. Martin, EPG
+- J. Ritchie Carroll, Grid Protection Alliance
+- F. Russell Robertson, Grid Protection Alliance
+- Stephen C. Wills, Grid Protection Alliance
+- Steven E. Chisholm, Oklahoma Gas & Electric
+- Kenneth E. Martin, Electric Power Group
+- Matt Donnelly, T&D Consulting Engineers
+- Jeff Otto, Schweitzer Engineering Laboratories
 
 ### ASP Project Participants
 ![Project Participants](Images/participant-logos.png)
