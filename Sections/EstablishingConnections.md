@@ -32,11 +32,11 @@ More traditional configuration models can be established for bidirectional data 
 
 ### Using UDP for Data Transmission
 
-By reducing the STTP capability set to functions that support lossy data transmission, data channel functionality in STTP can be stablished over a UDP connection. When using a UDP based data channel, the command channel functionality should still be established over a TCP connection. A reliable command channel is needed in order to properly manage initial protocol negotiations, which will include establishing the operational modes of the publisher/subscriber connection, as well as providing the ability for subscribers to choose the data to be received.
+By reducing the STTP capability set to functions that support lossy data transmission, data channel functionality in STTP can be established over a UDP connection. When using a UDP based data channel, the command channel functionality should still be established over a TCP connection. A reliable command channel is needed in order to properly manage initial protocol negotiations, which will include establishing the operational modes of the publisher/subscriber connection, as well as providing the ability for subscribers to choose the data to be received.
 
 STTP data channel functionality is designed to be unidirectional, i.e., data is sent without the expectation of a response, in order to accommodate connections with unidirectional data flows, such as UDP. Any functionality related to data that requires a response, e.g., a delivery receipt, will be managed by the command channel.
 
-> :wrench: The initial subscriber command request sent to a publisher should include the UDP port that the subscriber wishes the publisher to use. The destination UDP port is local resource for the subscriber host machine and therefore under its control. However, UDP endpoints often need specific firewall rules to allow data transmission, thus requiring a preselected port to be established during the initial configuration process.
+> :wrench: The initial subscriber command request sent to a publisher should include the UDP port that the subscriber wishes the publisher to use. The destination UDP port is a local resource for the subscriber host machine and therefore under its control. However, UDP endpoints often need specific firewall rules to allow data transmission, thus requiring a preselected port to be established during the initial configuration process.
 
 > :construction: Update reference implementation note above with link to the proper subscriber command request that defines UDP port
 
