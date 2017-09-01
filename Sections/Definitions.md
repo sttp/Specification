@@ -44,12 +44,14 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 
 | Term | Definition |
 |-----:|:-----------|
+| **AES** | [Advanced Encryption Standard](https://en.wikipedia.org/wiki/Advanced_Encryption_Standard) |
 | **API** | [Application Program Interface](https://en.wikipedia.org/wiki/Application_programming_interface) |
 | **BES** | [Bulk Electric System](http://www.nerc.com/pa/RAPA/Pages/BES.aspx) |
 | **CA** | [Certificate Authority](https://en.wikipedia.org/wiki/Certificate_authority) |
 | **DOE** | [United States Department of Energy](https://en.wikipedia.org/wiki/United_States_Department_of_Energy) |
 | **DDS** | [Data Distribution Service](https://en.wikipedia.org/wiki/Data_Distribution_Service) |
 | **DNS** | [Domain Name System](https://en.wikipedia.org/wiki/Domain_Name_System) |
+| **DTLS** | [Datagram Transport Layer Security](https://en.wikipedia.org/wiki/Datagram_Transport_Layer_Security) |
 | **GEP** | [Gateway Exchange Protocol](http://gridprotectionalliance.org/docs/products/gsf/gep-overview.pdf) |
 | **GPA** | [Grid Protection Alliance, Inc.](https://www.gridprotectionalliance.org/) |
 | **GPS** | [Global Positioning System](https://en.wikipedia.org/wiki/Global_Positioning_System) |
