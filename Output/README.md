@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.1.18 - September 1, 2017
+**Version:** 0.1.19 - September 1, 2017
 
 **Status:** Initial Development
 
@@ -30,15 +30,16 @@ This specification is free software and it can be redistributed and/or modified 
 | 2 | [Business Case](#business-case) |
 | 3 | [Definitions and Nomenclature](#definitions-and-nomenclature) |
 | 4 | [Protocol Overview](#protocol-overview) |
-| 5 | [Data Point Structure](#data-point-structure) |
-| 6 | [Commands and Responses](#commands-and-responses) |
-| 7 | [Data Point Characteristics](#data-point-characteristics) |
-| 8 | [Metadata](#metadata) |
-| 9 | [Compression](#compression) |
-| 10 | [Security](#security) |
-| 11 | [References and Notes](#references-and-notes) |
-| 12 | [Contributors and Reviewers](#contributors) |
-| 13 | [Revision History](#major-version-history) |
+| 5 | [Establishing Connections](#establishing-connections) |
+| 6 | [Data Point Structure](#data-point-structure) |
+| 7 | [Commands and Responses](#commands-and-responses) |
+| 8 | [Data Point Characteristics](#data-point-characteristics) |
+| 9 | [Metadata](#metadata) |
+| 10 | [Compression](#compression) |
+| 11 | [Security](#security) |
+| 12 | [References and Notes](#references-and-notes) |
+| 13 | [Contributors and Reviewers](#contributors) |
+| 14 | [Revision History](#major-version-history) |
 | A | [Appendix A - Functional Requirements](#appendix-a---functional-requirements) |
 | B | [Appendix B - STTP API Reference](#appendix-b---sttp-api-reference) |
 | C | [Appendix C - IEEE C37.118 Mapping](#appendix-c---ieee-c37118-mapping) |
