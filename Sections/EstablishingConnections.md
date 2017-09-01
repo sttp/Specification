@@ -1,6 +1,6 @@
 ## Establishing Connections
 
-It is expected that STTP will normally be used over Internet Protocol. In order to meet the entire set of capabilities as enumerated in this specification, a TCP/IP based connection will be required. In its most simple mode of operation, a single established TCP connection can be used to meet the requirements for both the _command channel_ and _data channel_ functions. Connections using UDP/IP can also be established for data channel functions when used in conjunction with a TCP based command channel, however, use of UDP connections for STTP data transmission reduces the set of capabilities that can be supported. As an example, since UDP is a lossy transmission protocol, its use means that transmitted data can be dropped, so any capabilities that implement stateful compression which requires delivery guarantees cannot be supported.
+It is expected that STTP will normally be used over Internet Protocol. In order to meet the entire set of capabilities as enumerated in this specification, a TCP/IP based connection will be required. For simple STTP configurations, a single established TCP connection can be used to meet the requirements for both the _command channel_ and _data channel_ functions. Connections using UDP/IP can also be configured for data channel functions when used in conjunction with a TCP based command channel, however, use of UDP connections for STTP data transmission reduces the set of capabilities that can be supported. As an example, since UDP is a lossy transmission protocol, its use means that transmitted data can be dropped, so any capabilities that implement stateful compression and require delivery guarantees cannot be supported.
 
 > :information_source: UDP only style deliveries, either unicast or multicast, of data using STTP can only be accommodated with substantial capability restrictions. That is, with no reliable command channel, consumers of STTP data provided over a UDP only connection would be subject to publisher established formats, content and resolution of the data being delivered. Alternately, establishment of a UDP based command channel would require adjustments in protocol behavior to accommodate failures to send command requests and/or receive responses due to lack of delivery guarantees.  While it is expected that with the right set of initial assumptions and capability restrictions that STTP could effectively operate with a UDP only connection, the main text of this specification will intentionally remain silent on such details for the sake of simplicity, clarity and brevity.
 
@@ -10,7 +10,7 @@ All STTP connections will be established using standard IP sockets. The actual d
 
 ### Forward Connections
 
-Under typical conditions, STTP publishers, as data providers, will use server-style sockets and STTP subscribers, as data consumers, will use client-style sockets to initiate connections to a publisher's listening socket. Establishing a server-style socket for a publisher and client-style sockets for any subscribers describes a connectivity model for STTP that is called a _forward connection_. Forward connections are expected to be the normal use case for STTP publisher/subscriber connections. However, for an STTP connection is does not matter which party, publisher or subscriber, is the server or the client from a socket perspective.
+Under typical conditions, STTP publishers, as data providers, will use server-style sockets and STTP subscribers, as data consumers, will use client-style sockets to initiate connections to a publisher's listening socket. Establishing a server-style socket for a publisher and client-style sockets for any subscribers describes a connectivity model for STTP that is called a _forward connection_. Forward connections are expected to be the normal use case for STTP publisher/subscriber connections. However, for an STTP connection, is does not matter which party, publisher or subscriber, is the server or the client from a socket perspective.
 
 ### Reverse Connections
 
@@ -22,9 +22,23 @@ Regardless of how a connection is established, forward or reverse, the functions
 
 > :information_source: Increased flexibility in the connectivity models for STTP is necessary so that security boundaries that have been enforced with firewall rules can be maintained. A common use case is that the publisher, and the data it is has access to, will exist in a secure network environment and the subscribers, which need access to the data, will exist in less secure network environments. In these scenarios, firewall rules will prohibit any connections to be initiated from an environment that is considered to be less secure. However, such environments normally allow connections to be initiated from inside the secure environment out to listening connections in less secure environments. Described more simply, nothing can reach in to systems in the secure environment, but systems in the secure environment can reach out - this much like how a computer in a home network can access the public Internet through a router, but the router's built-in firewall prevents systems on the Internet from accessing the home computer. Although reverse connections may initially seem counter-intuitive, they exist as a firm STTP requirement to allow for successful data exchange from within secure environments.
 
-#### Bidirectional Data Exchange
+### Bidirectional Data Exchange
 
-#### UDP Restrictions with Simple Connections
+For simple TCP only based connectivity configurations, once a connection has been established between two systems a communications pathway exists such that data can flow bidirectionally. This is true regardless of which party uses a client or server socket - or the connectivity model in use, i.e., a forward or reverse connection.
+
+Since data in a TCP based connection can easily move in both directions, both parties can simultaneously enable both publisher and subscriber functions. This allows STTP to be used in a data exchange _gateway_ capacity allowing for bidirectional data exchange with simplified connectivity requirements. The only decision two parties would need to make in this mode of operation is which STTP instance will act as a server and which instance will act as a client.
+
+More traditional configuration models can be established for bidirectional data exchange as well, such as, restricting server-style sockets to a publisher functions with connecting client-style sockets restricted to subscriber functions. In this configuration, both parties would have listening server-style sockets for publisher functions and both would need to establish client-style sockets for subscriber functions. This can be the preferred mode of operation when both parties want to have more control over subscriber connectivity and security, or the parties want to use UDP for data transmission.
+
+### Using UDP for Data Transmission
+
+By reducing the STTP capability set to functions that support lossy data transmission, data channel functionality in STTP can be stablished over a UDP connection. When using a UDP based data channel, the command channel functionality should still be established over a TCP connection. A reliable command channel is needed in order to properly manage initial protocol negotiations, which will include establishing the operational modes of the publisher/subscriber connection, as well as providing the ability for subscribers to choose the data to be received.
+
+STTP data channel functionality is designed to be unidirectional, i.e., data is sent without the expectation of a response, in order to accommodate connections with unidirectional data flows, such as UDP. Any functionality related to data that requires a response, e.g., a delivery receipt, is managed by the command channel.
+
+> :wrench: The initial subscriber command request sent to a publisher should include the UDP port that the subscriber wishes the publisher to use. The destination UDP port is local resource for the subscriber host machine and therefore under its control. However, UDP endpoints often need specific firewall rules to allow data transmission, thus requiring a preselected port to be established during the initial configuration process.
+
+> :construction: Update reference implementation note above with link to proper subscriber command request that defines UDP port
 
 ### Secure Connections
 
