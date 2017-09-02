@@ -22,3 +22,4 @@
 | B | [Appendix B - STTP API Reference](APIReference.md) |
 | C | [Appendix C - IEEE C37.118 Mapping](IEEE_C37.118Mapping.md) |
 | D | [Appendix D - Other Protocol Evaluations](OtherProtocols.md) |
+| E | [Appendix E - TSSC Algorithm](TSSCAlgorithm.md) |
