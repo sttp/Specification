@@ -16,7 +16,7 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 | [**data point**](https://en.wikipedia.org/wiki/Data_point) | A measurement of identified data along with any associated state, e.g., time of measurement and quality of measured data. |
 | [**data structure**](https://en.wikipedia.org/wiki/Data_structure) | An organized set of primitive data types where each element has a meaningful name. |
 | **frame** | A data-structure composed of primitive data types that has been serialized into a discrete binary package. |
-| [**endianess**](https://en.wikipedia.org/wiki/Endianness) | The hardware prescribed ordinal direction of the bits used to represent a numerical value in computer memory; usually noted as either _big_ or _little_. |
+| [**endianess**](https://en.wikipedia.org/wiki/Endianness) | The hardware prescribed ordinal direction of the bits used to represent a numerical value in computer memory; usually noted as either _big-endian_ or _little-endian_. |
 | [**endpoint**](https://en.wikipedia.org/wiki/Communication_endpoint) | A combination of an IP address (or hostname) and port number that represents a unique identification for establishing communications on an IP network. Endpoints, along with an IP transport protocol, are used by a socket to establish inter-device network communications. <br/> Also called _network endpoint_. |
 | [**Ethernet**](https://en.wikipedia.org/wiki/Ethernet) | Frame based data transmission technology used in local area networks. |
 | [**firewall**](https://en.wikipedia.org/wiki/Firewall_%28computing%29) | A security system used on a computer network, existing as software on an operating system or a standalone hardware appliance, used to control the ingress and egress of network communication paths , i.e., access to endpoints, based on a configured set of rules. Security zones between networks are established using firewalls to limit accessible resources between _secure_ internal networks and _untrusted_ external networks, like the Internet. |
@@ -89,11 +89,29 @@ Markdown notes in combination with the [Github Emogi](https://gist.github.com/rx
 > :tomato::question: (author's initials): _May be used by anyone to toss out questions and comments that are temporal. These may be inserted at any point in any of the markdown documents.  These questions will preserved as they are migrated to the [QuestionsSummary.md](QuestionsSummary.md) file from time-to-time._
 
 Code blocks are shown as:
-```C#
-    public function void DisplayHelloWorld()
+```C
+    void DisplayHelloWorld()
     {
-        Console.WriteLine("Hello world!");
+        printf("Hello World!");
     }
 ```
 
 Code is also shown `inline` as well.
+
+### Presentation Language
+
+This specification deals with the serialization and representation of data in external contexts. To help describe the format of the data the following high-level syntax will be used. The syntax resembles the "C" programming language, however its purpose is to be illustrative and not language accurate.
+
+#### Standard Endianness
+
+Representation of all data types is explicitly specified. The most fundamental unit of data is one byte, i.e., 8-bits. Multi-byte data items are encoded as a sequence of contiguous bytes, from left to right when shown horizontally or from top to bottom when shown vertically. Unless otherwise specified, byte-ordering for encoded multi-byte values, e.g., a binary representation of integer values, will always be in big-endian order.
+
+When extracted from a stream of bytes stream on a system whose native byte-ordering is little-endian, a multi-byte item, e.g., a 32-bit integer value, could be decoded as follows:
+
+```C
+    value = buffer[0] << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
+```
+
+#### Comments
+
+Code comments in this specification begin with `//` and continue to the end of the line. Optionally comments can be represented as beginning with `/*` and ending with `*/`.

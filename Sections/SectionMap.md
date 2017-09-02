@@ -10,6 +10,7 @@
 | [Definition of Key Terms (3)](Definitions.md#definition-of-key-terms) | [Definitions.md](Definitions.md) |
 | [Acronyms (3)](Definitions.md#acronyms) | [Definitions.md](Definitions.md) |
 | [Document Conventions (3)](Definitions.md#document-conventions) | [Definitions.md](Definitions.md) |
+| [Presentation Language (3)](Definitions.md#presentation-language) | [Definitions.md](Definitions.md) |
 | [Protocol Overview (2)](Overview.md#protocol-overview) | [Overview.md](Overview.md) |
 | [Background (3)](Overview.md#background) | [Overview.md](Overview.md) |
 | [Large Frame Network Impact (3)](Overview.md#large-frame-network-impact) | [Overview.md](Overview.md) |
@@ -39,6 +40,7 @@
 | [Dataset Versioning (3)](Metadata.md#dataset-versioning) | [Metadata.md](Metadata.md) |
 | [Dataset Serialization (3)](Metadata.md#dataset-serialization) | [Metadata.md](Metadata.md) |
 | [Compression (2)](Compression.md#compression) | [Compression.md](Compression.md) |
+| [Compression Algorithms (3)](Compression.md#compression-algorithms) | [Compression.md](Compression.md) |
 | [Security (2)](Security.md#security) | [Security.md](Security.md) |
 | [Encrypted Communications (3)](Security.md#encrypted-communications) | [Security.md](Security.md) |
 | [Strong Identity Validation (3)](Security.md#strong-identity-validation) | [Security.md](Security.md) |
@@ -63,3 +65,8 @@
 | [Mapping (3)](IEEE_C37.118Mapping.md#mapping) | [IEEE_C37.118Mapping.md](IEEE_C37.118Mapping.md) |
 | [Appendix D - Other Protocol Evaluations (2)](OtherProtocols.md#appendix-d---other-protocol-evaluations) | [OtherProtocols.md](OtherProtocols.md) |
 | [RFC 3350 - RTP: Transport Protocol for Real-Time Applications (3)](OtherProtocols.md#rfc-3350---rtp-transport-protocol-for-real-time-applications) | [OtherProtocols.md](OtherProtocols.md) |
+| [Appendix E - TSSC Algorithm (2)](TSSCAlgorithm.md#appendix-e---tssc-algorithm) | [TSSCAlgorithm.md](TSSCAlgorithm.md) |
+| [Code Words (3)](TSSCAlgorithm.md#code-words) | [TSSCAlgorithm.md](TSSCAlgorithm.md) |
+| [Encoding (3)](TSSCAlgorithm.md#encoding) | [TSSCAlgorithm.md](TSSCAlgorithm.md) |
+| [Decoding (3)](TSSCAlgorithm.md#decoding) | [TSSCAlgorithm.md](TSSCAlgorithm.md) |
+| [Data Point Metadata (3)](TSSCAlgorithm.md#data-point-metadata) | [TSSCAlgorithm.md](TSSCAlgorithm.md) |

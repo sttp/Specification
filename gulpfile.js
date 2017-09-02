@@ -66,7 +66,8 @@ const sections = [
   "Sections/FunctionalRequirements.md",
   "Sections/APIReference.md",
   "Sections/IEEE_C37.118Mapping.md",
-  "Sections/OtherProtocols.md"
+  "Sections/OtherProtocols.md",
+  "Sections/TSSCAlgorithm.md"
 ];
 
 // Define map of markdown file links to intra-page section headers, note
@@ -98,6 +99,7 @@ const sectionLinks = [
   [ "(APIReference.md)", "(#appendix-b---sttp-api-reference)" ],
   [ "(IEEE_C37.118Mapping.md)", "(#appendix-c---ieee-c37118-mapping)" ],
   [ "(OtherProtocols.md)", "(#appendix-d---other-protocol-evaluations)" ],
+  [ "(TSSCAlgorithm.md)", "(#appendix-e---tssc-algorithm)" ],
   [ "(ToDoList.md)", "(#specification-development-to-do-list)" ],
   /* Special replacements */
   [ "(References.md#", "(#" ],

@@ -22,4 +22,6 @@ In the [Protocol Overview](Overview.md) section of this specification, high-leve
 
 [Appendix D - Other Protocol Evaluations](OtherProtocols.md) provides insight into other protocols that were considered for suitability when developing the STTP use cases and functional requirements.
 
+[Appendix E - TSSC Algorithm](TSSCAlgorithm.md) provides specification details for the Time-series Special Compression Algorithm (TSSC) which is used by STTP to archive very high compression ratios for streaming data.
+
 While the format and structure of this document, established to facilitate collaboration, is different than that used by standards bodies, it is hoped that the content within this document can meet all the information requirements needed to enable repackaging of this specification into draft standard formats.
