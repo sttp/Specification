@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.1.22 - September 1, 2017
+**Version:** 0.1.23 - September 2, 2017
 
 **Status:** Initial Development
 
@@ -1130,6 +1130,8 @@ The Core class contains the basic elements of the API.
     > [Required] returns the connection string of the current connection, or an empty string if no connection is established.
 * `Connect(connectionString:string) : void`
     > [Required] establishes a connection to the STTP server. The method will throw an exception if the connection cannot be established.
+> :tomato::question: mkd: Should this return an object, an interface or a handle like, for example, the Perl DBI API (ref: https://metacpan.org/pod/DBI#Architecture-of-a-DBI-Application)?  With this architecture the handle could be used for all other methods, and multiple handles could be kept which represent connections to various STTP servers.
+
 * `Disconnect() : void`
     > [Required] terminates a connection.
 * `ValidateConnection() : string`
