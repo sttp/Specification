@@ -9,8 +9,8 @@
 | 3 | [Definitions and Nomenclature](Definitions.md) |
 | 4 | [Protocol Overview](Overview.md) |
 | 5 | [Establishing Connections](EstablishingConnections.md) |
-| 6 | [Data Point Structure](DataPointStructure.md) |
-| 7 | [Commands and Responses](CommandsAndResponses.md) |
+| 6 | [Commands and Responses](CommandsAndResponses.md) |
+| 7 | [Data Point Structure](DataPointStructure.md) |
 | 8 | [Data Point Characteristics](DataPointCharacteristics.md) |
 | 9 | [Metadata](Metadata.md) |
 | 10 | [Compression](Compression.md) |
