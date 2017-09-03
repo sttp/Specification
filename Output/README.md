@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.1.23 - September 2, 2017
+**Version:** 0.1.24 - September 3, 2017
 
 **Status:** Initial Development
 
@@ -44,6 +44,7 @@ This specification is free software and it can be redistributed and/or modified 
 | B | [Appendix B - STTP API Reference](#appendix-b---sttp-api-reference) |
 | C | [Appendix C - IEEE C37.118 Mapping](#appendix-c---ieee-c37118-mapping) |
 | D | [Appendix D - Other Protocol Evaluations](#appendix-d---other-protocol-evaluations) |
+| E | [Appendix E - TSSC Algorithm](#appendix-e---tssc-algorithm) |
 
 ## Introduction
 
@@ -68,6 +69,8 @@ In the [Protocol Overview](#protocol-overview) section of this specification, hi
 [Appendix C - IEEE C37.118 Mapping](#appendix-c---ieee-c37118-mapping) provides a detailed look at the process of transforming IEEE C37.118 into STTP as well as creating IEEE C37.118 streams from STTP.
 
 [Appendix D - Other Protocol Evaluations](#appendix-d---other-protocol-evaluations) provides insight into other protocols that were considered for suitability when developing the STTP use cases and functional requirements.
+
+[Appendix E - TSSC Algorithm](#appendix-e---tssc-algorithm) provides specification details for the Time-series Special Compression Algorithm (TSSC) which is used by STTP to archive very high compression ratios for streaming data.
 
 While the format and structure of this document, established to facilitate collaboration, is different than that used by standards bodies, it is hoped that the content within this document can meet all the information requirements needed to enable repackaging of this specification into draft standard formats.
 
@@ -126,7 +129,7 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 | [**data point**](https://en.wikipedia.org/wiki/Data_point) | A measurement of identified data along with any associated state, e.g., time of measurement and quality of measured data. |
 | [**data structure**](https://en.wikipedia.org/wiki/Data_structure) | An organized set of primitive data types where each element has a meaningful name. |
 | **frame** | A data-structure composed of primitive data types that has been serialized into a discrete binary package. |
-| [**endianess**](https://en.wikipedia.org/wiki/Endianness) | The hardware prescribed ordinal direction of the bits used to represent a numerical value in computer memory; usually noted as either _big_ or _little_. |
+| [**endianess**](https://en.wikipedia.org/wiki/Endianness) | The hardware prescribed ordinal direction of the bits used to represent a numerical value in computer memory; usually noted as either _big-endian_ or _little-endian_. |
 | [**endpoint**](https://en.wikipedia.org/wiki/Communication_endpoint) | A combination of an IP address (or hostname) and port number that represents a unique identification for establishing communications on an IP network. Endpoints, along with an IP transport protocol, are used by a socket to establish inter-device network communications. <br/> Also called _network endpoint_. |
 | [**Ethernet**](https://en.wikipedia.org/wiki/Ethernet) | Frame based data transmission technology used in local area networks. |
 | [**firewall**](https://en.wikipedia.org/wiki/Firewall_%28computing%29) | A security system used on a computer network, existing as software on an operating system or a standalone hardware appliance, used to control the ingress and egress of network communication paths , i.e., access to endpoints, based on a configured set of rules. Security zones between networks are established using firewalls to limit accessible resources between _secure_ internal networks and _untrusted_ external networks, like the Internet. |
@@ -199,14 +202,32 @@ Markdown notes in combination with the [Github Emogi](https://gist.github.com/rx
 > :tomato::question: (author's initials): _May be used by anyone to toss out questions and comments that are temporal. These may be inserted at any point in any of the markdown documents.  These questions will preserved as they are migrated to the [QuestionsSummary.md](https://github.com/sttp/Specification/blob/master/Sections/QuestionsSummary.md) file from time-to-time._
 
 Code blocks are shown as:
-```C#
-    public function void DisplayHelloWorld()
+```C
+    void DisplayHelloWorld()
     {
-        Console.WriteLine("Hello world!");
+        printf("Hello World!");
     }
 ```
 
 Code is also shown `inline` as well.
+
+### Presentation Language
+
+This specification deals with the serialization and representation of data in external contexts. To help describe the format of the data the following high-level syntax will be used. The syntax resembles the "C" programming language, however its purpose is to be illustrative and not language accurate.
+
+#### Standard Endianness
+
+Representation of all data types is explicitly specified. The most fundamental unit of data is one byte, i.e., 8-bits. Multi-byte data items are encoded as a sequence of contiguous bytes, from left to right when shown horizontally or from top to bottom when shown vertically. Unless otherwise specified, byte-ordering for encoded multi-byte values, e.g., a binary representation of integer values, will always be in big-endian order.
+
+When extracted from a stream of bytes on a system whose native byte-ordering is little-endian, a multi-byte item, e.g., a 32-bit integer value, could be decoded as follows:
+
+```C
+    uint32 value = buffer[0] << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
+```
+
+#### Comments
+
+Code comments in this specification begin with `//` and continue to the end of the line. Optionally comments can be represented as beginning with `/*` and ending with `*/`.
 
 ## Protocol Overview
 
@@ -865,12 +886,39 @@ would require access to a repository that would maintain this data.
 
 ## Compression
 
-* Types of compression
-  * Stateful data compression (TCP)
-  * Per-packet data compression (UDP)
-  * Metadata compression (GZip)
-* Compression algorithm extensibility
-  * Negotiating desired compression algorithm
+Compression algorithms used with STTP can be either stateful, i.e., the compressor maintains its state through all compressed records, or stateless, i.e., the compressor compresses each data packet independently.
+
+Stateful compression algorithms will provide the best possible compression for STTP data transmission but will require use of a reliable transport protocol, e.g., TCP. Stateless compression methods will be required when an unreliable transport protocol is being used for data transmission, e.g., UDP.
+
+### Compression Algorithms
+
+STTP is designed so that new compression algorithms can be implemented and used without requiring revisions to the specification. To accommodate this, compression algorithms are negotiated, by text name and numeric version, after a connection is established along with other operational modes for the session. [TBD: See Session Negotiation]
+
+The negotiation process specifies both the stateful compression algorithm to use as well as the stateless compression algorithm, when applicable.  
+
+The following compression algorithms are expected to always be available for STTP implementations such that a minimal set of compression algorithms will always be available for a publisher/subscription connection session negotiation.
+
+#### No Compression
+
+It will always be possible for STTP to send data packets in their native binary format without any specified compression.
+
+For the purposes of session negotiation the text name for selecting no compression algorithm is `NONE` and its version number will always be `0.0`.
+
+#### Deflate Compression
+
+Deflate is an industry-standard algorithm that is used for lossless compression and decompression. The Deflate compression algorithm is defined in RFC 1951 <sup>[[19](#user-content-ref19)]</sup>. This algorithm was chosen as a safe default option for an always available compression option in STTP since implementations of the protocol are widely available on various operating systems and programming languages.
+
+The Deflate algorithm is technically a stateful algorithm, however, it is defined for use within STTP in either stateful or stateless modes. In a stateless mode, the Deflate algorithm will simply be applied to each data packet with its default initial state. The Deflate algorithm is the only default compression option that is specified for STTP stateless compression.
+
+For the purposes of session negotiation the text name for the Deflate algorithm is `DEFLATE` and its version number is `1.0`.
+
+#### Time-series Special Compression
+
+The Time-series Special Compression algorithm (TSSC) is an algorithm specifically designed for STTP that is used to quickly compress streaming time-series data with very good compression ratios. The TSSC algorithm is defined in [Appendix E - TSSC Algorithm](#appendix-e---tssc-algorithm).
+
+TSSC is a stateful compression algorithm that is specifically designed to work with STTP streaming data packets. As such it is only designed for use in STTP when the data channel functions are established with a reliable transport protocol, e.g., TCP.
+
+For the purposes of session negotiation the text name for the Time-series Special Compression algorithm is `TSSC` and its version number is `1.0`.
 
 ## Security
 
@@ -929,6 +977,7 @@ How does publisher initiated connection, to cross security zones in desired dire
 16. <a name="ref16"></a>[Synchrophasors and Communications Bandwidth](https://selinc.com/solutions/synchrophasors/report/115281/#different-communications-methods-using-sel-pmus-and-pdcs), Schweitzer Engineering Laboratories, April 1, 2010
 17. <a name="ref17"></a>[Implementation and Operating Experience with Oscillation Detection at Bonneville Power Administration](https://www.naspi.org/sites/default/files/2017-03/01_bpa_donnelly_NASPI_presentation.pdf), Matt Donnelly, March 2017
 18. <a name="ref18"></a>[Understanding Certificate Name Mismatches](https://blogs.msdn.microsoft.com/ieinternals/2009/12/07/understanding-certificate-name-mismatches/), Eric Lawrence, December 7, 2009
+19. <a name="ref19"></a>[DEFLATE Compressed Data Format Specification version 1.3](https://tools.ietf.org/html/rfc1951), L. Peter Deutsch, May, 1996
 
 ## Contributors
 
@@ -1283,3 +1332,187 @@ This indicates that the most appropriate use of this protocol would be to define
 Perhaps the largest technical issue with RTP for the STTP use case is the fixed number of possible multiplexed points. The RTP protocol defines a SSRC per packet header field as well as multiple CCRC per packet header fields that allow you to identify up to 16 points (SSRC + 15 CCRC) in the same packet for a given timestamp. If you ignored the header timestamp and other stated issues, it might be possible to make RTP work for the streaming data portion of the STTP use case requirements if you took the 16 packet points, each with a fairly large header, and applied per-point identification in the data payload for each packet – in this case the represented data could change packet-to-packet. However, doing this attempts to twist an existing protocol beyond its original design intentions to simply meet one portion of the needs of the current STTP use case simply for the sake of using an existing standard. This also does not solve the other STTP use case requirements, e.g., providing meta-data for the points being subscribed.
 
 Regardless of the appropriateness of this standard to the desired use case, there is much that can be gleaned from this real-world production use protocol. In particular the dynamic ability to change encoding and frame-rates in response to changing network conditions should be noted as possible desired features of the STTP protocol.
+
+## Appendix E - TSSC Algorithm
+
+The Time-series Special Compression algorithm (TSSC) is an algorithm that was specifically designed for STTP that is used to quickly compress streaming time-series data packets with very good compression ratios.
+
+TSSC is a stateful compression algorithm and must only be used when the STTP data channel functions are established with a reliable transport protocol, e.g., TCP.
+
+Fundamentally TSSC works by applying simple XOR based compression techniques and only sending bits of data that have changed since the last saved state. Many compression algorithms use this technique for compression, the reason TSSC is able to archive such high compression ratios is by taking advantage of the common structure in use by STTP, i.e., that data points are based on a fixed set of elements, specifically an identifier, a timestamp, a set of quality flags and a value block. From a stateful compression perspective, each of these structural elements can be treated as four separate compression streams and handled differently based on the nature and repeating patterns in the continuous data.
+
+Another factor that contributes to the compression algorithm's success is that streaming data has a tendency to have some level of sequencing. For example one measured value will often follow another, in this case a new measured value will have a timestamp that is likely to only have slightly changed since the last measurement. Also, if the measurements are taken very rapidly, the difference in the actual measured value may also be small. By taking advantage of these non-entropic states for individual structure elements, compression is improved.
+
+> :construction: Must be able to describe TSSC major functions verbally, at least by describing major code chunks. FYI, the following snippets were copied from GEP's TSSC implementation and will need to change based on architectural changes in STTP, e.g., multiple data types. Final code references should be in C language for a more universal example.
+
+### Code Words
+
+Compression in TSSC happens per STTP data point element. Encoding compressed elements into a stream happens based a set of commands that describe the element targeted for compression and its compression state. The available code words are defined below.
+
+```C
+  const byte EndOfStream = 0;
+
+  const byte PointIDXOR4 = 1;
+  const byte PointIDXOR8 = 2;
+  const byte PointIDXOR12 = 3;
+  const byte PointIDXOR16 = 4;
+
+  const byte TimeDelta1Forward = 5;
+  const byte TimeDelta2Forward = 6;
+  const byte TimeDelta3Forward = 7;
+  const byte TimeDelta4Forward = 8;
+  const byte TimeDelta1Reverse = 9;
+  const byte TimeDelta2Reverse = 10;
+  const byte TimeDelta3Reverse = 11;
+  const byte TimeDelta4Reverse = 12;
+  const byte Timestamp2 = 13;
+  const byte TimeXOR7Bit = 14;
+
+  const byte Quality2 = 15;
+  const byte Quality7Bit32 = 16;
+
+  const byte Value1 = 17;
+  const byte Value2 = 18;
+  const byte Value3 = 19;
+  const byte ValueZero = 20;
+  const byte ValueXOR4 = 21;
+  const byte ValueXOR8 = 22;
+  const byte ValueXOR12 = 23;
+  const byte ValueXOR16 = 24;
+  const byte ValueXOR20 = 25;
+  const byte ValueXOR24 = 26;
+  const byte ValueXOR28 = 27;
+  const byte ValueXOR32 = 28;
+```
+
+### Encoding
+
+The following defines a class that represents the encoder for each STTP data point.
+
+> :construction: Break down functions into details and describe
+
+```C
+class TsscEncoder
+{
+    const uint Bits28 = 0xFFFFFFFu;
+    const uint Bits24 = 0xFFFFFFu;
+    const uint Bits20 = 0xFFFFFu;
+    const uint Bits16 = 0xFFFFu;
+    const uint Bits12 = 0xFFFu;
+    const uint Bits8 = 0xFFu;
+    const uint Bits4 = 0xFu;
+    const uint Bits0 = 0x0u;
+
+    private byte[] m_data;
+    private int m_position;
+    private int m_lastPosition;
+
+    private long m_prevTimestamp1;
+    private long m_prevTimestamp2;
+
+    private long m_prevTimeDelta1;
+    private long m_prevTimeDelta2;
+    private long m_prevTimeDelta3;
+    private long m_prevTimeDelta4;
+
+    private TsscPointMetadata m_lastPoint;
+    private IndexedArray<TsscPointMetadata> m_points;
+
+    public void Reset() {}
+
+    public void SetBuffer(byte[] data, int startingPosition, int length) {}
+
+    public int FinishBlock() {}
+
+    public unsafe bool TryAddMeasurement(ushort id, long timestamp, uint quality, float value) {}
+}
+
+/* CODE TRUNCATED */
+```
+
+### Decoding
+
+The following defines a class that represents the encoder for each STTP data point.
+
+> :construction: Break down functions into details and describe
+
+```C
+class TsscDecoder
+{
+    private byte[] m_data;
+    private int m_position;
+    private int m_lastPosition;
+
+    private long m_prevTimestamp1;
+    private long m_prevTimestamp2;
+
+    private long m_prevTimeDelta1;
+    private long m_prevTimeDelta2;
+    private long m_prevTimeDelta3;
+    private long m_prevTimeDelta4;
+
+    private TsscPointMetadata m_lastPoint;
+    private IndexedArray<TsscPointMetadata> m_points;
+
+    public void Reset() {}
+
+    public void SetBuffer(byte[] data, int startingPosition, int length) {}
+
+    public unsafe bool TryGetMeasurement(out ushort id, out long timestamp, out uint quality, out float value) {}
+
+    private void DecodePointID(int code, TsscPointMetadata lastPoint) {}
+
+    private long DecodeTimestamp(int code) {}
+
+    private uint DecodeQuality(int code, TsscPointMetadata nextPoint) {}
+}
+
+/* CODE TRUNCATED */
+```
+
+### Data Point Metadata
+
+The following defines a class that represents the metadata stored for each STTP data point.
+
+> :construction: Break down functions into details and describe
+
+```C
+class TsscPointMetadata
+{
+    public ushort PrevNextPointId1;
+
+    public uint PrevQuality1;
+    public uint PrevQuality2;
+    public uint PrevValue1;
+    public uint PrevValue2;
+    public uint PrevValue3;
+
+    private readonly byte[] m_commandStats;
+    private int m_commandsSentSinceLastChange = 0;
+
+    private byte m_mode;
+    private byte m_mode21;
+    private byte m_mode31;
+    private byte m_mode301;
+    private byte m_mode41;
+    private byte m_mode401;
+    private byte m_mode4001;
+
+    private int m_startupMode = 0;
+    private readonly Action<int, int> m_writeBits;
+    private readonly Func<int> m_readBit;
+    private readonly Func<int> m_readBits5;
+
+    public TsscPointMetadata(Action<int, int> writeBits, Func<int> readBit, Func<int> readBits5) {}
+
+    public void WriteCode(int code) {}
+
+    public int ReadCode() {}
+
+    private void UpdatedCodeStatistics(int code) {}
+
+    private void AdaptCommands() {}
+}
+
+/* CODE TRUNCATED */
+```
