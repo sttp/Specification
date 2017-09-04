@@ -23,11 +23,11 @@
 | [Using UDP for Data Transmission (3)](EstablishingConnections.md#using-udp-for-data-transmission) | [EstablishingConnections.md](EstablishingConnections.md) |
 | [Secure Connections (3)](EstablishingConnections.md#secure-connections) | [EstablishingConnections.md](EstablishingConnections.md) |
 | [Connection Negotiations (3)](EstablishingConnections.md#connection-negotiations) | [EstablishingConnections.md](EstablishingConnections.md) |
-| [Data Point Structure (2)](DataPointStructure.md#data-point-structure) | [DataPointStructure.md](DataPointStructure.md) |
-| [Data Point Value Types (3)](DataPointStructure.md#data-point-value-types) | [DataPointStructure.md](DataPointStructure.md) |
 | [Commands and Responses (2)](CommandsAndResponses.md#commands-and-responses) | [CommandsAndResponses.md](CommandsAndResponses.md) |
 | [Commands (3)](Commands.md#commands) | [Commands.md](Commands.md) |
 | [Responses (3)](Responses.md#responses) | [Responses.md](Responses.md) |
+| [Data Point Structure (2)](DataPointStructure.md#data-point-structure) | [DataPointStructure.md](DataPointStructure.md) |
+| [Data Point Value Types (3)](DataPointStructure.md#data-point-value-types) | [DataPointStructure.md](DataPointStructure.md) |
 | [Data Point Characteristics (2)](DataPointCharacteristics.md#data-point-characteristics) | [DataPointCharacteristics.md](DataPointCharacteristics.md) |
 | [Priority Characteristic (3)](DataPointCharacteristics.md#priority-characteristic) | [DataPointCharacteristics.md](DataPointCharacteristics.md) |
 | [Reliability Characteristic (3)](DataPointCharacteristics.md#reliability-characteristic) | [DataPointCharacteristics.md](DataPointCharacteristics.md) |

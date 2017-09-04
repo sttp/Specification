@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.1.24 - September 3, 2017
+**Version:** 0.1.25 - September 4, 2017
 
 **Status:** Initial Development
 
@@ -31,8 +31,8 @@ This specification is free software and it can be redistributed and/or modified 
 | 3 | [Definitions and Nomenclature](#definitions-and-nomenclature) |
 | 4 | [Protocol Overview](#protocol-overview) |
 | 5 | [Establishing Connections](#establishing-connections) |
-| 6 | [Data Point Structure](#data-point-structure) |
-| 7 | [Commands and Responses](#commands-and-responses) |
+| 6 | [Commands and Responses](#commands-and-responses) |
+| 7 | [Data Point Structure](#data-point-structure) |
 | 8 | [Data Point Characteristics](#data-point-characteristics) |
 | 9 | [Metadata](#metadata) |
 | 10 | [Compression](#compression) |
@@ -493,57 +493,6 @@ STTP will secure UDP traffic using the AES encryption algorithm and a 256-bit pu
 
 After a successful connection has been established, the publisher and subscriber will participate in a set of initial set of negotiations that will determine the operational modes of the session. more...
 
-## Data Point Structure
-
-> :construction: Lead with paragraph on purpose / value of the section - (1) what is a data point structure and (2) why have a data point structure / value? Next paragraph would be contents of section...
-
-... this section includes:
-
-* Identification - maps to 128-bit Guid, transport mapping should be small
-* Timestamp (required? could simply be a auto-incrementing counter)
-* Value - multiple native types supports
-* Flags - standardize minimal set of simple flags, complex state can be new data point
-
-> :tomato::question: SEC: Rather than require all data to be mapped into a predefined Data Point, the lowest level of the protocol that defines how data is serialized should be a free-form data block that is defined at runtime. Instead, the Data Point Structure should be more like:
-> * C37.118 Data Point Structure
-> * DNP Data Point Structure
-> * ICCP Data Point Structure
-> * IEC 61850-90-5 Data Point Structure
-> * Generic Time-Series Data Point Structure (Original Data Point Structure listed above)
->
-> At some level, all measurements can be mapped to Generic Time-Series Data Point Structure, but they shouldn't be required to be from the get-go. This would allow the creation of a front-end data transport that could move any kind of time series data in its raw format and the consumer of the data can decide how to translate the data. This also means that these raw protocols could be encapsulated and transported over encrypted channels without requiring a stateful metadata repository to map all measurements to a GUID.
-
-> :thumbsup: JRC: I think this could be supported in an automated process (and perhaps starting with code) found in serialization technologies like Google Protocol Buffers. The openECA style data structure handling has been on my mind as a way to handle "mappings" of other protocols, basically as data structures like you mention. Cannot get away from some sort of Identification of the "instance" of a mapping though - even if the mapping ID defaulted to something simple. At a wire protocol level though, sticking to primitive types helps keep protocol parsing very simple - and- there are just too many other technologies that already exist to serialize data structures- STTP should not be trying to re-solve that problem. A consumer of STTP should be able to parse any packet of data even when what the data represented was unknown.
-
-### Data Point Value Types
-
-* Null
-* Byte
-* Int16
-* Int32
-* Int64
-* UInt16
-* UInt32
-* UInt64
-* Decimal (IEEE Standard 754-2008)
-* Double
-* Single
-* DateTime (need some thought on proper encoding, perhaps options)
-* TimeSpan (Tick level resolution, or better, would be ideal)
-* Char (2-byte Unicode)
-* Bool
-* Guid
-* String (encoding support for UTF-16, UTF-8, ANSI and ASCII)
-* Byte[]
-
-> :tomato::question: KEM: _Is decimal the same as float?_
-
-> :bulb: JRC: _Actually "decimal" is an IEEE standard data type, standard 754-2008 - I added that parenthetically above. It's a floating point number that doesn't suffer from typical floating point rounding issues - often used for currency operations. See here for more detail:_ https://en.wikipedia.org/wiki/Decimal_data_type
-
-> :construction: Need to determine safe maximum upper limit of per-packet strings and byte[] data, especially since implementation could simply _span_ multiple data points to collate a larger string or buffer back together.
-
-> :tomato::question: JRC: _Should API automatically handle collation of larger data types, e.g., strings and buffers?_
-
 ## Commands and Responses
 
 > :construction: Purpose of command/response structure, fundamentals of how it works, why it is needed
@@ -668,6 +617,57 @@ Failed responses to operational modes usually indicate lack of support by publis
 * Wire Format: Binary
   * Includes a mapping of data point Guids to run-time signal IDs
   * Includes per data point ownership state, rights and delivery characteristic details
+
+## Data Point Structure
+
+> :construction: Lead with paragraph on purpose / value of the section - (1) what is a data point structure and (2) why have a data point structure / value? Next paragraph would be contents of section...
+
+... this section includes:
+
+* Identification - maps to 128-bit Guid, transport mapping should be small
+* Timestamp (required? could simply be a auto-incrementing counter)
+* Value - multiple native types supports
+* Flags - standardize minimal set of simple flags, complex state can be new data point
+
+> :tomato::question: SEC: Rather than require all data to be mapped into a predefined Data Point, the lowest level of the protocol that defines how data is serialized should be a free-form data block that is defined at runtime. Instead, the Data Point Structure should be more like:
+> * C37.118 Data Point Structure
+> * DNP Data Point Structure
+> * ICCP Data Point Structure
+> * IEC 61850-90-5 Data Point Structure
+> * Generic Time-Series Data Point Structure (Original Data Point Structure listed above)
+>
+> At some level, all measurements can be mapped to Generic Time-Series Data Point Structure, but they shouldn't be required to be from the get-go. This would allow the creation of a front-end data transport that could move any kind of time series data in its raw format and the consumer of the data can decide how to translate the data. This also means that these raw protocols could be encapsulated and transported over encrypted channels without requiring a stateful metadata repository to map all measurements to a GUID.
+
+> :thumbsup: JRC: I think this could be supported in an automated process (and perhaps starting with code) found in serialization technologies like Google Protocol Buffers. The openECA style data structure handling has been on my mind as a way to handle "mappings" of other protocols, basically as data structures like you mention. Cannot get away from some sort of Identification of the "instance" of a mapping though - even if the mapping ID defaulted to something simple. At a wire protocol level though, sticking to primitive types helps keep protocol parsing very simple - and- there are just too many other technologies that already exist to serialize data structures- STTP should not be trying to re-solve that problem. A consumer of STTP should be able to parse any packet of data even when what the data represented was unknown.
+
+### Data Point Value Types
+
+* Null
+* Byte
+* Int16
+* Int32
+* Int64
+* UInt16
+* UInt32
+* UInt64
+* Decimal (IEEE Standard 754-2008)
+* Double
+* Single
+* DateTime (need some thought on proper encoding, perhaps options)
+* TimeSpan (Tick level resolution, or better, would be ideal)
+* Char (2-byte Unicode)
+* Bool
+* Guid
+* String (encoding support for UTF-16, UTF-8, ANSI and ASCII)
+* Byte[]
+
+> :tomato::question: KEM: _Is decimal the same as float?_
+
+> :bulb: JRC: _Actually "decimal" is an IEEE standard data type, standard 754-2008 - I added that parenthetically above. It's a floating point number that doesn't suffer from typical floating point rounding issues - often used for currency operations. See here for more detail:_ https://en.wikipedia.org/wiki/Decimal_data_type
+
+> :construction: Need to determine safe maximum upper limit of per-packet strings and byte[] data, especially since implementation could simply _span_ multiple data points to collate a larger string or buffer back together.
+
+> :tomato::question: JRC: _Should API automatically handle collation of larger data types, e.g., strings and buffers?_
 
 ## Data Point Characteristics
 
@@ -1335,13 +1335,13 @@ Regardless of the appropriateness of this standard to the desired use case, ther
 
 ## Appendix E - TSSC Algorithm
 
-The Time-series Special Compression algorithm (TSSC) is an algorithm that was specifically designed for STTP that is used to quickly compress streaming time-series data packets with very good compression ratios.
+The Time-series Special Compression algorithm (TSSC) was specifically designed for STTP and is used to quickly compress streaming time-series data packets with very good compression ratios.
 
-TSSC is a stateful compression algorithm and must only be used when the STTP data channel functions are established with a reliable transport protocol, e.g., TCP.
+TSSC is a stateful compression algorithm is intended to be used when the STTP data channel functions are established with a reliable transport protocol, e.g., TCP.
 
-Fundamentally TSSC works by applying simple XOR based compression techniques and only sending bits of data that have changed since the last saved state. Many compression algorithms use this technique for compression, the reason TSSC is able to archive such high compression ratios is by taking advantage of the common structure in use by STTP, i.e., that data points are based on a fixed set of elements, specifically an identifier, a timestamp, a set of quality flags and a value block. From a stateful compression perspective, each of these structural elements can be treated as four separate compression streams and handled differently based on the nature and repeating patterns in the continuous data.
+Fundamentally TSSC works by applying simple XOR based compression techniques and only sending bits of data that have changed since the last saved state. Although many compression algorithms use this technique for compression, TSSC achieves high compression ratios with the same techniques by taking advantage of the data point structure in use by STTP, i.e., that data points are based on a fixed set of elements, specifically an identifier, a timestamp, a set of quality flags and a value block. From a stateful compression perspective, each of these structural elements can be treated as four separate compression streams and handled differently based on their nature and repeating patterns in the continuous data.
 
-Another factor that contributes to the compression algorithm's success is that streaming data has a tendency to have some level of sequencing. For example one measured value will often follow another, in this case a new measured value will have a timestamp that is likely to only have slightly changed since the last measurement. Also, if the measurements are taken very rapidly, the difference in the actual measured value may also be small. By taking advantage of these non-entropic states for individual structure elements, compression is improved.
+Contributing to the compression algorithm's success is that streaming data has a tendency to have some level of sequencing. For example one measured value will often follow another where a new measured value will have a timestamp that will have only slightly changed since the last measurement. Also, if the measurements are taken very rapidly, the difference in the actual measured value may also be small. By taking advantage of these non-entropic states for individual structure elements, compression is improved.
 
 > :construction: Must be able to describe TSSC major functions verbally, at least by describing major code chunks. FYI, the following snippets were copied from GEP's TSSC implementation and will need to change based on architectural changes in STTP, e.g., multiple data types. Final code references should be in C language for a more universal example.
 

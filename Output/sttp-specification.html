@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.1.24 - September 3, 2017</p>
+<p><strong>Version:</strong> 0.1.25 - September 4, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -807,11 +807,11 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </tr>
 <tr>
 <td style="text-align:center;">6</td>
-<td><a href="#data-point-structure">Data Point Structure</a></td>
+<td><a href="#commands-and-responses">Commands and Responses</a></td>
 </tr>
 <tr>
 <td style="text-align:center;">7</td>
-<td><a href="#commands-and-responses">Commands and Responses</a></td>
+<td><a href="#data-point-structure">Data Point Structure</a></td>
 </tr>
 <tr>
 <td style="text-align:center;">8</td>
@@ -1348,56 +1348,6 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </blockquote>
 <h3 id="connection-negotiations">Connection Negotiations</h3>
 <p>After a successful connection has been established, the publisher and subscriber will participate in a set of initial set of negotiations that will determine the operational modes of the session. more...</p>
-<h2 id="data-point-structure">Data Point Structure</h2>
-<blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Lead with paragraph on purpose / value of the section - (1) what is a data point structure and (2) why have a data point structure / value? Next paragraph would be contents of section...</p>
-</blockquote>
-<p>... this section includes:</p>
-<ul>
-<li>Identification - maps to 128-bit Guid, transport mapping should be small</li>
-<li>Timestamp (required? could simply be a auto-incrementing counter)</li>
-<li>Value - multiple native types supports</li>
-<li>Flags - standardize minimal set of simple flags, complex state can be new data point</li>
-</ul>
-<blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> SEC: Rather than require all data to be mapped into a predefined Data Point, the lowest level of the protocol that defines how data is serialized should be a free-form data block that is defined at runtime. Instead, the Data Point Structure should be more like:</p>
-  <ul>
-  <li>C37.118 Data Point Structure</li>
-  <li>DNP Data Point Structure</li>
-  <li>ICCP Data Point Structure</li>
-  <li>IEC 61850-90-5 Data Point Structure</li>
-  <li>Generic Time-Series Data Point Structure (Original Data Point Structure listed above)</li>
-  </ul>
-  <p>At some level, all measurements can be mapped to Generic Time-Series Data Point Structure, but they shouldn't be required to be from the get-go. This would allow the creation of a front-end data transport that could move any kind of time series data in its raw format and the consumer of the data can decide how to translate the data. This also means that these raw protocols could be encapsulated and transported over encrypted channels without requiring a stateful metadata repository to map all measurements to a GUID.</p>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/thumbsup.png?v5" alt=":thumbsup:" title=":thumbsup:" class="emoji-img emoji"> JRC: I think this could be supported in an automated process (and perhaps starting with code) found in serialization technologies like Google Protocol Buffers. The openECA style data structure handling has been on my mind as a way to handle "mappings" of other protocols, basically as data structures like you mention. Cannot get away from some sort of Identification of the "instance" of a mapping though - even if the mapping ID defaulted to something simple. At a wire protocol level though, sticking to primitive types helps keep protocol parsing very simple - and- there are just too many other technologies that already exist to serialize data structures- STTP should not be trying to re-solve that problem. A consumer of STTP should be able to parse any packet of data even when what the data represented was unknown.</p>
-</blockquote>
-<h3 id="data-point-value-types">Data Point Value Types</h3>
-<ul>
-<li>Null</li>
-<li>Byte</li>
-<li>Int16</li>
-<li>Int32</li>
-<li>Int64</li>
-<li>UInt16</li>
-<li>UInt32</li>
-<li>UInt64</li>
-<li>Decimal (IEEE Standard 754-2008)</li>
-<li>Double</li>
-<li>Single</li>
-<li>DateTime (need some thought on proper encoding, perhaps options)</li>
-<li>TimeSpan (Tick level resolution, or better, would be ideal)</li>
-<li>Char (2-byte Unicode)</li>
-<li>Bool</li>
-<li>Guid</li>
-<li>String (encoding support for UTF-16, UTF-8, ANSI and ASCII)</li>
-<li>Byte[]</li>
-</ul>
-<blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> KEM: <em>Is decimal the same as float?</em></p>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> JRC: <em>Actually "decimal" is an IEEE standard data type, standard 754-2008 - I added that parenthetically above. It's a floating point number that doesn't suffer from typical floating point rounding issues - often used for currency operations. See here for more detail:</em> <a href="https://en.wikipedia.org/wiki/Decimal_data_type">https://en.wikipedia.org/wiki/Decimal_data_type</a></p>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Need to determine safe maximum upper limit of per-packet strings and byte[] data, especially since implementation could simply <em>span</em> multiple data points to collate a larger string or buffer back together.</p>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> JRC: <em>Should API automatically handle collation of larger data types, e.g., strings and buffers?</em></p>
-</blockquote>
 <h2 id="commands-and-responses">Commands and Responses</h2>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Purpose of command/response structure, fundamentals of how it works, why it is needed</p>
@@ -1593,6 +1543,56 @@ count may not match requested points due to rights or points may no longer exist
 <li>Includes a mapping of data point Guids to run-time signal IDs</li>
 <li>Includes per data point ownership state, rights and delivery characteristic details</li></ul></li>
 </ul>
+<h2 id="data-point-structure">Data Point Structure</h2>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Lead with paragraph on purpose / value of the section - (1) what is a data point structure and (2) why have a data point structure / value? Next paragraph would be contents of section...</p>
+</blockquote>
+<p>... this section includes:</p>
+<ul>
+<li>Identification - maps to 128-bit Guid, transport mapping should be small</li>
+<li>Timestamp (required? could simply be a auto-incrementing counter)</li>
+<li>Value - multiple native types supports</li>
+<li>Flags - standardize minimal set of simple flags, complex state can be new data point</li>
+</ul>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> SEC: Rather than require all data to be mapped into a predefined Data Point, the lowest level of the protocol that defines how data is serialized should be a free-form data block that is defined at runtime. Instead, the Data Point Structure should be more like:</p>
+  <ul>
+  <li>C37.118 Data Point Structure</li>
+  <li>DNP Data Point Structure</li>
+  <li>ICCP Data Point Structure</li>
+  <li>IEC 61850-90-5 Data Point Structure</li>
+  <li>Generic Time-Series Data Point Structure (Original Data Point Structure listed above)</li>
+  </ul>
+  <p>At some level, all measurements can be mapped to Generic Time-Series Data Point Structure, but they shouldn't be required to be from the get-go. This would allow the creation of a front-end data transport that could move any kind of time series data in its raw format and the consumer of the data can decide how to translate the data. This also means that these raw protocols could be encapsulated and transported over encrypted channels without requiring a stateful metadata repository to map all measurements to a GUID.</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/thumbsup.png?v5" alt=":thumbsup:" title=":thumbsup:" class="emoji-img emoji"> JRC: I think this could be supported in an automated process (and perhaps starting with code) found in serialization technologies like Google Protocol Buffers. The openECA style data structure handling has been on my mind as a way to handle "mappings" of other protocols, basically as data structures like you mention. Cannot get away from some sort of Identification of the "instance" of a mapping though - even if the mapping ID defaulted to something simple. At a wire protocol level though, sticking to primitive types helps keep protocol parsing very simple - and- there are just too many other technologies that already exist to serialize data structures- STTP should not be trying to re-solve that problem. A consumer of STTP should be able to parse any packet of data even when what the data represented was unknown.</p>
+</blockquote>
+<h3 id="data-point-value-types">Data Point Value Types</h3>
+<ul>
+<li>Null</li>
+<li>Byte</li>
+<li>Int16</li>
+<li>Int32</li>
+<li>Int64</li>
+<li>UInt16</li>
+<li>UInt32</li>
+<li>UInt64</li>
+<li>Decimal (IEEE Standard 754-2008)</li>
+<li>Double</li>
+<li>Single</li>
+<li>DateTime (need some thought on proper encoding, perhaps options)</li>
+<li>TimeSpan (Tick level resolution, or better, would be ideal)</li>
+<li>Char (2-byte Unicode)</li>
+<li>Bool</li>
+<li>Guid</li>
+<li>String (encoding support for UTF-16, UTF-8, ANSI and ASCII)</li>
+<li>Byte[]</li>
+</ul>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> KEM: <em>Is decimal the same as float?</em></p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> JRC: <em>Actually "decimal" is an IEEE standard data type, standard 754-2008 - I added that parenthetically above. It's a floating point number that doesn't suffer from typical floating point rounding issues - often used for currency operations. See here for more detail:</em> <a href="https://en.wikipedia.org/wiki/Decimal_data_type">https://en.wikipedia.org/wiki/Decimal_data_type</a></p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Need to determine safe maximum upper limit of per-packet strings and byte[] data, especially since implementation could simply <em>span</em> multiple data points to collate a larger string or buffer back together.</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> JRC: <em>Should API automatically handle collation of larger data types, e.g., strings and buffers?</em></p>
+</blockquote>
 <h2 id="data-point-characteristics">Data Point Characteristics</h2>
 <p>STTP will allow the ability to define delivery and quality of service characteristics for each data point made available for publication. These characteristics include priority, reliability, verification, exception and resolution.</p>
 <p>The publisher is in full control of what per data point delivery characteristics are allowed. The transport layers in use for the connection will also dictate the availability of some characteristics, e.g., reliability. Regardless, the subscriber can always request a specific set of per data point delivery characteristics, but these may be denied by the publisher.</p>
@@ -2169,10 +2169,10 @@ having to maintain another local database of how to map it back into a C37.118 s
 <p>Perhaps the largest technical issue with RTP for the STTP use case is the fixed number of possible multiplexed points. The RTP protocol defines a SSRC per packet header field as well as multiple CCRC per packet header fields that allow you to identify up to 16 points (SSRC + 15 CCRC) in the same packet for a given timestamp. If you ignored the header timestamp and other stated issues, it might be possible to make RTP work for the streaming data portion of the STTP use case requirements if you took the 16 packet points, each with a fairly large header, and applied per-point identification in the data payload for each packet – in this case the represented data could change packet-to-packet. However, doing this attempts to twist an existing protocol beyond its original design intentions to simply meet one portion of the needs of the current STTP use case simply for the sake of using an existing standard. This also does not solve the other STTP use case requirements, e.g., providing meta-data for the points being subscribed.</p>
 <p>Regardless of the appropriateness of this standard to the desired use case, there is much that can be gleaned from this real-world production use protocol. In particular the dynamic ability to change encoding and frame-rates in response to changing network conditions should be noted as possible desired features of the STTP protocol.</p>
 <h2 id="appendix-e---tssc-algorithm">Appendix E - TSSC Algorithm</h2>
-<p>The Time-series Special Compression algorithm (TSSC) is an algorithm that was specifically designed for STTP that is used to quickly compress streaming time-series data packets with very good compression ratios.</p>
-<p>TSSC is a stateful compression algorithm and must only be used when the STTP data channel functions are established with a reliable transport protocol, e.g., TCP.</p>
-<p>Fundamentally TSSC works by applying simple XOR based compression techniques and only sending bits of data that have changed since the last saved state. Many compression algorithms use this technique for compression, the reason TSSC is able to archive such high compression ratios is by taking advantage of the common structure in use by STTP, i.e., that data points are based on a fixed set of elements, specifically an identifier, a timestamp, a set of quality flags and a value block. From a stateful compression perspective, each of these structural elements can be treated as four separate compression streams and handled differently based on the nature and repeating patterns in the continuous data.</p>
-<p>Another factor that contributes to the compression algorithm's success is that streaming data has a tendency to have some level of sequencing. For example one measured value will often follow another, in this case a new measured value will have a timestamp that is likely to only have slightly changed since the last measurement. Also, if the measurements are taken very rapidly, the difference in the actual measured value may also be small. By taking advantage of these non-entropic states for individual structure elements, compression is improved.</p>
+<p>The Time-series Special Compression algorithm (TSSC) was specifically designed for STTP and is used to quickly compress streaming time-series data packets with very good compression ratios.</p>
+<p>TSSC is a stateful compression algorithm is intended to be used when the STTP data channel functions are established with a reliable transport protocol, e.g., TCP.</p>
+<p>Fundamentally TSSC works by applying simple XOR based compression techniques and only sending bits of data that have changed since the last saved state. Although many compression algorithms use this technique for compression, TSSC achieves high compression ratios with the same techniques by taking advantage of the data point structure in use by STTP, i.e., that data points are based on a fixed set of elements, specifically an identifier, a timestamp, a set of quality flags and a value block. From a stateful compression perspective, each of these structural elements can be treated as four separate compression streams and handled differently based on their nature and repeating patterns in the continuous data.</p>
+<p>Contributing to the compression algorithm's success is that streaming data has a tendency to have some level of sequencing. For example one measured value will often follow another where a new measured value will have a timestamp that will have only slightly changed since the last measurement. Also, if the measurements are taken very rapidly, the difference in the actual measured value may also be small. By taking advantage of these non-entropic states for individual structure elements, compression is improved.</p>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Must be able to describe TSSC major functions verbally, at least by describing major code chunks. FYI, the following snippets were copied from GEP's TSSC implementation and will need to change based on architectural changes in STTP, e.g., multiple data types. Final code references should be in C language for a more universal example.</p>
 </blockquote>
