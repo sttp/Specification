@@ -1,6 +1,6 @@
 ### Commands
 
-This section defines the STTP command channel functions. These functions always expect a response.
+This section defines the STTP command channel functions.
 
 | Code | Command | Source | Response | Description |
 |:----:|---------|:------:|:--------:|-------------|
