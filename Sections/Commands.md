@@ -8,7 +8,7 @@ All commands must be sent over the command channel.
 | 0x01 | [Metadata Refresh](#metadata-refresh-command) | Subscriber | Requests publisher send updated metadata. |
 | 0x02 | [Subscribe](#subscribe-command) | Subscriber | Defines desired set of data points to begin receiving. |
 | 0x03 | [Unsubscribe](#unsubscribe-command) | Subscriber | Requests publisher terminate current subscription. |
-| 0x0n | etc. | | | |
+| 0x0n | etc. | | |
 | 0xFF | [NoOp](#noop-command) | Any | Periodic message to allow validation of connectivity. |
 
 #### Set Operational Modes Command
