@@ -22,7 +22,6 @@
 | [Bidirectional Data Exchange (3)](EstablishingConnections.md#bidirectional-data-exchange) | [EstablishingConnections.md](EstablishingConnections.md) |
 | [Using UDP for Data Transmission (3)](EstablishingConnections.md#using-udp-for-data-transmission) | [EstablishingConnections.md](EstablishingConnections.md) |
 | [Secure Connections (3)](EstablishingConnections.md#secure-connections) | [EstablishingConnections.md](EstablishingConnections.md) |
-| [Connection Negotiations (3)](EstablishingConnections.md#connection-negotiations) | [EstablishingConnections.md](EstablishingConnections.md) |
 | [Commands and Responses (2)](CommandsAndResponses.md#commands-and-responses) | [CommandsAndResponses.md](CommandsAndResponses.md) |
 | [Commands (3)](Commands.md#commands) | [Commands.md](Commands.md) |
 | [Responses (3)](Responses.md#responses) | [Responses.md](Responses.md) |

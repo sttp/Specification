@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.1.25 - September 4, 2017
+**Version:** 0.1.26 - September 5, 2017
 
 **Status:** Initial Development
 
@@ -489,13 +489,13 @@ STTP will secure UDP traffic using the AES encryption algorithm and a 256-bit pu
 
 > :information_source: Although TLS is normally used with reliable IP transport protocols such as TCP, TLS has also been implemented for UDP using the Datagram Transport Layer Security (DTLS) protocol. This protocol could allow a UDP channel to be secured without having a preexisting TLS secured command channel and even provide security for UDP only style data deliveries. However, as of the writing of this specification, DTLS implementations were not widely available on the platforms and programming languages that were being targeted for initial STTP reference implementations.
 
-### Connection Negotiations
-
-After a successful connection has been established, the publisher and subscriber will participate in a set of initial set of negotiations that will determine the operational modes of the session. more...
-
 ## Commands and Responses
 
-> :construction: Purpose of command/response structure, fundamentals of how it works, why it is needed
+STTP is implemented using functionality called the _command channel_ that is used to reliably negotiate session specific required communication, state and protocol parameters. Command channel functionality is used to establish communications with other STTP implementations, exchange metadata on available data points and request data points for subscription. Any messages, such as commands, transmitted with the expectation of receiving a response will only be sent over the command channel, as such this functionality requires a reliable transmission protocol, e.g., TCP.
+
+STTP also defines functionality which is used to send messages without an expectation of receiving a response called the _data channel_. This functionality allows for transmission of messages over a lossy protocol, e.g., UDP. Data channel functionality is used to send compact, binary encoded data points of identifiable measured values along with timestamps accurate to one ten-millionth of a second and flags that can be used to indicate time and data quality.
+
+This section describes the available commands and responses that define the functionality of STTP.
 
 ### Commands
 
@@ -507,12 +507,12 @@ All commands must be sent over the command channel.
 | 0x01 | [Metadata Refresh](#metadata-refresh-command) | Subscriber | Requests publisher send updated metadata. |
 | 0x02 | [Subscribe](#subscribe-command) | Subscriber | Defines desired set of data points to begin receiving. |
 | 0x03 | [Unsubscribe](#unsubscribe-command) | Subscriber | Requests publisher terminate current subscription. |
-| 0x0n | etc. | | | |
+| 0x0n | etc. | | |
 | 0xFF | [NoOp](#noop-command) | Any | Periodic message to allow validation of connectivity. |
 
 #### Set Operational Modes Command
 
-This must be the first command sent after a successful connection - the command must be sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. The rule for this operational mode negotiation is that once these modes have been established, they will not change for the lifetime of the connection.
+After a successful connection has been established, the publisher and subscriber will participate in a set of initial set of negotiations that will determine the operational modes of the session. The negotiation happens with this `Set Operational Modes` code and must be the first command sent after a successful connection - this command must be sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. The rule for this operational mode negotiation is that once these modes have been established, they will not change for the lifetime of the connection.
 
 The subscriber must send the command and the publisher must await its reception. If the publisher does not receive the command in a timely fashion (time interval controlled by configuration), it will disconnect the subscriber.
 
