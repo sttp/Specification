@@ -115,3 +115,43 @@ When extracted from a stream of bytes on a system whose native byte-ordering is 
 #### Comments
 
 Code comments in this specification begin with `//` and continue to the end of the line. Optionally comments can be represented as beginning with `/*` and ending with `*/`.
+
+#### Common Structures
+
+The following common code structures are predefined for use within other STTP protocol structures.
+
+##### Version Structure
+
+Represents a versioned entity, e.g., a protocol version, consisting of a byte for the major and minor components of the version:
+
+```C
+struct {
+  uint8 major;
+  uint8 minor;
+}
+Version;
+```
+
+##### NamedVersion Structure
+
+Represents a named entity and associated version, e.g., a compression algorithm, consisting of a `Version` and an ASCII encoded string name.
+
+```C
+struct {
+  Version version;
+  uint8[255] name;
+}
+NamedVersion;
+```
+
+##### NamedVersions Structure
+
+Represents a collection of `NamedVersion` entities which includes a count of the total elements.
+
+```C
+struct {
+  uint16 count;
+  NamedVersion[] items;
+}
+NamedVersions;
+```

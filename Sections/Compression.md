@@ -6,11 +6,13 @@ Stateful compression algorithms will provide the best possible compression for S
 
 ### Compression Algorithms
 
-STTP is designed so that new compression algorithms can be implemented and used without requiring revisions to the specification. To accommodate this, compression algorithms are negotiated, by text name and numeric version, after a connection is established along with other operational modes for the session. [TBD: See Session Negotiation]
+STTP is designed so that new compression algorithms can be implemented and used without requiring revisions to the specification. To accommodate this, compression algorithms are negotiated, by text name and numeric version, after a connection is established along with other operational modes for the session. See [session negotiation](Commands.md#negotiate-session-command) for more details.
 
 The negotiation process specifies both the stateful compression algorithm to use as well as the stateless compression algorithm, when applicable.  
 
 The following compression algorithms are expected to always be available for STTP implementations such that a minimal set of compression algorithms will always be available for a publisher/subscription connection session negotiation.
+
+> :warning: TLS actually includes options to allow for payload level encryption algorithms. When using TLS security and a STTP defined compression option, compression options for TLS should not also be enabled.
 
 #### No Compression
 
