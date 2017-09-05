@@ -35,7 +35,7 @@ ProtocolVersions;
 
 ```
 - The `count` field defines the total number of elements in the `versions` field array.
-- The `versions` field is an array of `Version` structures.
+- The `versions` field is an array of [`Version`](Definitions.md#version-structure) structures.
 
 Since the current version of this specification only defines details for version 1.0 of STTP, the initial `NegotiateSession` command payload from the publisher will be an instance of the `ProtocolVersions` structure with a `count` value of `1` and a single element `versions` array where `versions[0].major` is `1` and `versions[0].minor` is `0`.
 
@@ -74,8 +74,8 @@ OperationalModes;
 - The `udpPort` field meaning depends on the usage context:
   - When sent with the publisher command payload, field is used to indicate publisher support of UDP. A value of zero indicates that UDP broadcasts are not supported and any non-zero value indicates that UDP broadcasts are supported.
   - When sent with the subscriber response payload, field is used to indicate the desired subscriber UDP port for data channel functionality. A value of zero will indicate that a UDP connection should not be established for subscriber data channel functionality.
-- The `statefulCompressionAlgorithms` field defines the named and versioned algorithms to use for stateful compression operations.
-- The `statelessCompressionAlgorithms` field defines the named and versioned algorithms to use for stateless compression operations.
+- The `statefulCompressionAlgorithms` field defines the [`NamedVersions`](Definitions.md#namedversions-structure) representing the algorithms to use for stateful compression operations.
+- The `statelessCompressionAlgorithms` field defines the [`NamedVersions`](Definitions.md#namedversions-structure) representing the algorithms to use for stateless compression operations.
 
 When the second `NegotiateSession` command is received from the publisher, the subscriber will send either a `Succeeded` or `Failed` response indicating its ability to support a subset of the specified operational modes.
 
