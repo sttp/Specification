@@ -15,7 +15,6 @@
 | [Background (3)](Overview.md#background) | [Overview.md](Overview.md) |
 | [Large Frame Network Impact (3)](Overview.md#large-frame-network-impact) | [Overview.md](Overview.md) |
 | [Changing the Paradigm with STTP (3)](Overview.md#changing-the-paradigm-with-sttp) | [Overview.md](Overview.md) |
-| [STTP Feature Summary (3)](Overview.md#sttp-feature-summary) | [Overview.md](Overview.md) |
 | [Establishing Connections (2)](EstablishingConnections.md#establishing-connections) | [EstablishingConnections.md](EstablishingConnections.md) |
 | [Forward Connections (3)](EstablishingConnections.md#forward-connections) | [EstablishingConnections.md](EstablishingConnections.md) |
 | [Reverse Connections (3)](EstablishingConnections.md#reverse-connections) | [EstablishingConnections.md](EstablishingConnections.md) |
@@ -23,6 +22,7 @@
 | [Using UDP for Data Transmission (3)](EstablishingConnections.md#using-udp-for-data-transmission) | [EstablishingConnections.md](EstablishingConnections.md) |
 | [Secure Connections (3)](EstablishingConnections.md#secure-connections) | [EstablishingConnections.md](EstablishingConnections.md) |
 | [Commands and Responses (2)](CommandsAndResponses.md#commands-and-responses) | [CommandsAndResponses.md](CommandsAndResponses.md) |
+| [Message Structures (3)](CommandsAndResponses.md#message-structures) | [CommandsAndResponses.md](CommandsAndResponses.md) |
 | [Commands (3)](Commands.md#commands) | [Commands.md](Commands.md) |
 | [Responses (3)](Responses.md#responses) | [Responses.md](Responses.md) |
 | [Data Point Structure (2)](DataPointStructure.md#data-point-structure) | [DataPointStructure.md](DataPointStructure.md) |
@@ -60,8 +60,6 @@
 | [Security (3)](APIReference.md#security) | [APIReference.md](APIReference.md) |
 | [Utility (3)](APIReference.md#utility) | [APIReference.md](APIReference.md) |
 | [Appendix C - IEEE C37.118 Mapping (2)](IEEE_C37.118Mapping.md#appendix-c---ieee-c37-118-mapping) | [IEEE_C37.118Mapping.md](IEEE_C37.118Mapping.md) |
-| [Encapsulation (3)](IEEE_C37.118Mapping.md#encapsulation) | [IEEE_C37.118Mapping.md](IEEE_C37.118Mapping.md) |
-| [Mapping (3)](IEEE_C37.118Mapping.md#mapping) | [IEEE_C37.118Mapping.md](IEEE_C37.118Mapping.md) |
 | [Appendix D - Other Protocol Evaluations (2)](OtherProtocols.md#appendix-d---other-protocol-evaluations) | [OtherProtocols.md](OtherProtocols.md) |
 | [RFC 3350 - RTP: Transport Protocol for Real-Time Applications (3)](OtherProtocols.md#rfc-3350---rtp-transport-protocol-for-real-time-applications) | [OtherProtocols.md](OtherProtocols.md) |
 | [Appendix E - TSSC Algorithm (2)](TSSCAlgorithm.md#appendix-e---tssc-algorithm) | [TSSCAlgorithm.md](TSSCAlgorithm.md) |

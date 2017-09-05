@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.1.26 - September 5, 2017
+**Version:** 0.1.29 - September 5, 2017
 
 **Status:** Initial Development
 
@@ -229,6 +229,46 @@ When extracted from a stream of bytes on a system whose native byte-ordering is 
 
 Code comments in this specification begin with `//` and continue to the end of the line. Optionally comments can be represented as beginning with `/*` and ending with `*/`.
 
+#### Common Structures
+
+The following common code structures are predefined for use within other STTP protocol structures.
+
+##### Version Structure
+
+Represents a versioned entity, e.g., a protocol version, consisting of a byte for the major and minor components of the version:
+
+```C
+struct {
+  uint8 major;
+  uint8 minor;
+}
+Version;
+```
+
+##### NamedVersion Structure
+
+Represents a named entity and associated version, e.g., a compression algorithm, consisting of a `Version` and an ASCII encoded string name.
+
+```C
+struct {
+  Version version;
+  uint8[255] name;
+}
+NamedVersion;
+```
+
+##### NamedVersions Structure
+
+Represents a collection of `NamedVersion` entities which includes a count of the total elements.
+
+```C
+struct {
+  uint16 count;
+  NamedVersion[] items;
+}
+NamedVersions;
+```
+
 ## Protocol Overview
 
 STTP is an open, data point centric publish/subscribe transport protocol that can be used to securely exchange time-series style data and automatically synchronize metadata between two applications. The protocol supports sending real-time and historical data at full or down-sampled resolutions. When sending historical data, the replay speed can be controlled dynamically for use in visualizations to enable users to see data faster or slower than recorded in real-time.
@@ -242,8 +282,6 @@ The command channel is used to reliably negotiate session specific required comm
 STTP includes strong access control and encryption and is configurable to allow use of private keys in a highly isolated environment. When encryption and strong identity verification is enabled, STTP utilizes standard key management services with X.509 identity certificates for authentication.
 
 In this section of the STTP specification, first data communication fundamentals are presented that set the boundary conditions for protocol design. These are followed by an introduction to the major components STTP.
-
-> :construction:  Recommend a pattern of providing an introduction to what follows in the opening paragraphs of each major section.
 
 ### Background
 
@@ -275,10 +313,6 @@ Under the Internet Protocol (IP), all frames of data to be transmitted that exce
 </center>
 
 Since IP is inherently unreliable, the impact of large frames on an IP network can be determined by the number of network packets required to send the frame.  Network packets can only be transmitted over a connection one packet at a time; when two or more network packets arrive for transmission at the same time on any physical network media, the result is a collision. When a collision occurs, only one packet gets sent and the others get dropped <sup>[[12](#user-content-ref12)]</sup>. IP defines a variety of different transport protocols for network packet transmission, each of which behave in different manners when dealing with packet loss. Consequently, many of the impacts a large frame has on an IP network is dependent upon the transport protocol used to send the frame.
-
-> :tomato::question: KEM: _Can you have a collision on a full duplex system? If so, it sounds like buffering is improperly implemented._
-
-> :bulb: JRC: _A full duplex system prevents network media collisions between incoming and outgoing traffic. It does not prevent UDP data loss from buffer overruns in the OS network stack nor does it prevent collisions from simultaneous traffic._
 
 #### Large Frame Impacts on TCP/IP
 
@@ -365,43 +399,16 @@ Metadata in STTP is designed to be extensible. Different industries may require 
 STTP puts publishers in full control of access to data. A publisher can choose not to allow connections and/or expose any data to a subscriber that is not strongly identified. Publishers can choose to restrict data access at an individual data point level, a group level or at an identified subscriber level.
 
 Selection of available points for an identified subscriber or a group can be controlled by an expression. Expression based access control means that the even as the data sources available to a publisher change, the expressions will still apply and need not be updated. For example, metadata will need to contain information about the primitive data type for a given data point - an expression based on this data type may look like the following:
+
 ```
 ALLOW WHERE DataType='BOOL'
 ```
+
 For this expression, all data points as defined in the metadata that have a data type of `BOOL` would be allowed for the group or identified subscriber. This expression would cause the allowed metadata to dynamically change as the available source data configured in the publisher changed.
 
 #### Data Transport Channels
 
-STTP data transport requires the use of a _command channel_ using TCP/IP for reliable delivery of important commands. Optionally a secondary _data channel_ can be established using UDP/IP for the transport of data that can tolerate loss. When no secondary UDP/IP is used, both commands and data will share use of the TCP/IP channel for communications.
-
 Although not precluded from use over other data transports, the design of STTP is targeted and optimized for use over IP, specifically TCP/IP and UDP/IP. Even so, since the command/response implementation and data packet distribution of the STTP protocol is fairly simple, it is expected that commonly available middleware data transport layers, such as ZeroMQ or DDS, could easily support and transmit data using the STTP protocol should any of the messaging distribution and management benefits of these transport layers be useful to a particular deployment environment. However, these types of deployments are outside the scope of this documentation. If needed, STTP integrations with middleware layers should be added as reference implementation repositories to the STTP organizational site <sup>[[4](#user-content-ref4)]</sup>.
-
-> :tomato::question: JRC: _The question has been raised if a UDP only transport should be allowed? In this mode, any critical commands and responses would basically be sent over UDP. Thought would need to be given to commands and/or responses that never arrive and the consequences thereof._
-
-> :tomato::question: SEC: _We may also consider a UDP method that is not bi-directional. Much like how C37.118 currently supports such a data stream. This could be encrypted by storing the client's public key on the server and encrypting the cipher key periodically. It could be used when transporting from secure environment to an unsecure one. Anytime TCP is used, the potential of buffering and creating a DOS attack on the more secure system is possible. And UDP replies through a firewall are really easy to spoof._
-
-> :confused: JRC: _Presume that this would require an out-of-band pre-defined configuration to be "known" or handle it the way C37.118 currently manages this, i.e., sending a "config frame" once per minute. In context of STTP, this might be a reduced set of metadata that represented "what" was being published. This would need some "rules" to operate properly._
-
-> :bulb: KEM: _The advantage in this case is that UDP will operate unidirectionally, TCP won't. However for commands you really need to close the loop. I suggest that STTP only be developed for TCP as suggested above, but do not state that it cannot be adapted to UDP._
-
-
-### STTP Feature Summary
-
-* Perform at high volume / large scale
-* Minimize data losses (e.g., over UDP)
-* Lower bandwidth requirements (e.g., over TCP)
-* Optimized for the performant delivery of individual data points
-* Automated exchange of metadata (no centralized registry required)
-* Detect and expose communication issues
-* Security and availability features that enable use on critical systems to support critical operations
-* Publish/subscribe at data point level
-* API implemented in multiple languages on multiple platforms
-* Metadata will be versioned and tabular in nature
-* Sets of metadata from multiple parties will be easy to merge
-* Points defined in metadata will have a clear ownership path
-* A minimal set of metadata will exist to support any STTP deployments
-* Industry specific metadata extensions will exist to support specific industry deployments
-* Ability to support broadcast messaging and distribution of critical system alarms
 
 ## Establishing Connections
 
@@ -491,40 +498,105 @@ STTP will secure UDP traffic using the AES encryption algorithm and a 256-bit pu
 
 ## Commands and Responses
 
-STTP is implemented using functionality called the _command channel_ that is used to reliably negotiate session specific required communication, state and protocol parameters. Command channel functionality is used to establish communications with other STTP implementations, exchange metadata on available data points and request data points for subscription. Any messages, such as commands, transmitted with the expectation of receiving a response will only be sent over the command channel, as such this functionality requires a reliable transmission protocol, e.g., TCP.
+STTP is implemented using functionality called the _command channel_ that is used to reliably negotiate session specific required communication, state and protocol parameters. Command channel functionality includes establishing communications with other STTP implementations, exchanging metadata on available data points and the ability to request data points for subscription. Any messages, such as commands, transmitted with the expectation of receiving a response will only be sent over the command channel, as such this functionality requires a reliable transmission protocol, e.g., TCP.
 
 STTP also defines functionality which is used to send messages without an expectation of receiving a response called the _data channel_. This functionality allows for transmission of messages over a lossy protocol, e.g., UDP. Data channel functionality is used to send compact, binary encoded data points of identifiable measured values along with timestamps accurate to one ten-millionth of a second and flags that can be used to indicate time and data quality.
 
 This section describes the available commands and responses that define the functionality of STTP.
 
+### Message Structures
+
+Commands and responses are defined as simple binary message structures as follows:
+
+```C
+struct {
+  uint8 code;
+  uint16 length;
+  uint8[] payload;
+}
+Command
+
+struct {
+  uint8 code;
+  uint8 responseToCode;
+  uint16 length;
+  uint8[] payload;
+}
+Response
+```
+
+The payload of the message will depend on command or response code which are detailed in the following sections.
+
 ### Commands
 
-All commands must be sent over the command channel.
+This section defines the STTP command channel functions.
 
-| Code | Command | Source | Description |
-|:----:|---------|:------:|-------------|
-| 0x00 | [Set Operational Modes](#set-operational-modes-command) | Subscriber | Defines desired set of operational modes. |
-| 0x01 | [Metadata Refresh](#metadata-refresh-command) | Subscriber | Requests publisher send updated metadata. |
-| 0x02 | [Subscribe](#subscribe-command) | Subscriber | Defines desired set of data points to begin receiving. |
-| 0x03 | [Unsubscribe](#unsubscribe-command) | Subscriber | Requests publisher terminate current subscription. |
-| 0x0n | etc. | | |
-| 0xFF | [NoOp](#noop-command) | Any | Periodic message to allow validation of connectivity. |
+| Code | Command | Source | Response | Description |
+|:----:|---------|:------:|:--------:|-------------|
+| 0x00 | [Negotiate Session](#negotiate-session-command) | Publisher | Yes | Starts session negotiation of operational modes. |
+| 0x01 | [Metadata Refresh](#metadata-refresh-command) | Subscriber | Yes  | Requests publisher send updated metadata. |
+| 0x02 | [Subscribe](#subscribe-command) | Subscriber | Yes | Defines desired set of data points to begin receiving. |
+| 0x03 | [Unsubscribe](#unsubscribe-command) | Subscriber | Yes | Requests publisher terminate current subscription. |
+| 0x04 | [Secure Data Channel](#)  | Subscriber | Yes | Requests publisher secure the data channel.  |
+| 0x05 | [Signal Mapping](#signal-mapping-response) | Publisher | No | Response contains data point Guid to run-time ID mappings. |
+| 0x06 | [Data Point Packet](#data-point-packet-response) | Publisher | No | Response contains data points. |
+| 0x0n | etc. | | | |
+| 0xFF | [NoOp](#noop-command) | Both | Yes | Periodic message to allow validation of connectivity. |
 
-#### Set Operational Modes Command
+#### Negotiate Session Command
 
-After a successful connection has been established, the publisher and subscriber will participate in a set of initial set of negotiations that will determine the operational modes of the session. The negotiation happens with this `Set Operational Modes` code and must be the first command sent after a successful connection - this command must be sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. The rule for this operational mode negotiation is that once these modes have been established, they will not change for the lifetime of the connection.
+After a successful connection has been established, the publisher and subscriber will participate in a set of initial set of negotiations that will determine the operational modes of the session. The negotiation happens with the `Negotiate Session` command code which will be the first command sent after a successful connection.  The command is sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. The rule for this operational mode negotiation is that once these modes have been established, they will not change for the lifetime of the connection.
 
-The subscriber must send the command and the publisher must await its reception. If the publisher does not receive the command in a timely fashion (time interval controlled by configuration), it will disconnect the subscriber.
+Immediately after connecting the publisher will start the negotiation process by sending the `Negotiate Session` command to the subscriber that will contain information on the available operational modes that the publisher supports. The subscriber will be waiting for this initial publisher command, if the subscriber does not receive the command in a timely fashion (time interval controlled by configuration), the subscriber will disconnect.
 
-As part of this initial exchange, the subscriber will propose the desired protocol version to use.
+Session negotiation is a multi-step process with commands being sent by the publisher and responses being sent by the subscriber until negotiation terms are either established or the connection is terminated because terms could not be agreed upon.
 
-> :information_source: In modes of operations where the publisher is initiating the connection, the publisher will still be waiting for subscriber to initiate communications with a `Set Operational Modes` command.
+##### Protocol Version Negotiation
 
-* Wire Format: Binary
-* Requested operational mode negotiations
-  * String encoding
-  * Compression modes
-  * UDP data channel usage / port
+Since future STTP protocol versions could include different session negotiation options, the first negotiation will always be for the supported protocol versions. The payload of the first `Negotiate Session` command sent by the publisher will be an instance of the `ProtocolVersions` structure, defined as follows, that defines the versions of the STTP protocol that are supported:
+
+```C
+struct {
+  int count;
+  Version[] versions;
+}
+ProtocolVersions
+
+```
+
+This specification only defines details for version 1.0 of STTP, so the initial `Negotiate Session` command payload from the publisher will be an instance of the `ProtocolVersions` structure with a `count` value of `1` with a single element `versions` array instance where `versions[0].major` is `1` and `versions[0].minor` is `0`.
+
+The subscriber will return with either a `Succeed` or `Failed` response indicating its ability to support the specified protocol versions.
+
+If the subscriber can support one of the protocols specified by the publisher, the `Succeed` response payload will be an instance of the `ProtocolVersions` structure with a `count` of `1` and a single element `versions` array instance that indicates the protocol version to be used.
+
+If the subscriber cannot support one of the protocols specified by the publisher, the `Failed` response payload will be an instance of the `ProtocolVersions` structure filled out with the supported protocols. In case of failure, both the publisher and subscriber should start connection termination sequences since no protocol version could be agreed upon.
+
+##### Operational Modes Negotiation
+
+If the protocol version negotiation succeeds for version `1.0` of STTP, the next negotiation will be for desired operational modes. The payload of the second `Negotiate Session` command sent by the publisher will be an instance of the `OperationalModes` structure, defined as follows, that will define the supported string encodings, supported stateful and stateless compression algorithms and if UDP broadcasts will be allowed:
+
+```C
+enum {
+  ASCII = 1 << 0,
+  ANSI = 1 << 1,
+  UTF8 = 1 << 2,
+  Unicode  = 1 << 3
+}
+Encodings
+
+struct {
+  Encodings encodings;
+  uint16 udpPort;
+  NamedVersions statefulCompressionAlgorithms;
+  NamedVersions statelessCompressionAlgorithms;
+}
+OperationalModes
+```
+
+The `encodings` property of the `OperationalModes` defines a set of string encodings supported by the publisher, this is a bit flag that indicates the supported string encodings.
+
+The publisher uses the `udpPort` property to indicate its willingness to support UDP based publications to the subscriber. A value of zero indicates that no UDP broadcasts will be supported and any non-zero value indicates that UDP broadcasts will be supported.
 
 #### Metadata Refresh Command
 
@@ -540,6 +612,26 @@ As part of this initial exchange, the subscriber will propose the desired protoc
 
   * Wire Format: Binary
 
+#### Secure Data Channel
+
+  * Wire Format: Binary
+
+#### Data Point Packet Response
+
+* Wire Format: Binary
+  * Includes a byte flag indicating content, e.g.:
+    * Data compression mode, if any
+    * Total data points in packet
+  * Includes serialized data points
+
+:information_source: The data point packet is technically classified as a response to a `subscribe` command. However, unlike most responses that operate as a sole response to a parent command, data-packet responses will continue to flow for available measurements until an `unsubscribe` command is issued.
+
+#### Signal Mapping Response
+
+* Wire Format: Binary
+  * Includes a mapping of data point Guids to run-time signal IDs
+  * Includes per data point ownership state, rights and delivery characteristic details
+
 #### NoOp Command
 
 No operation keep-alive ping. It is possible for the command channel to remain quiet for some time if most data is being transmitted over the data channel, this command allows a periodic test of client connectivity.
@@ -550,12 +642,10 @@ No operation keep-alive ping. It is possible for the command channel to remain q
 
 Responses are sent over a designated channel based on the nature of the response.
 
-| Code | Response | Source | Channel | Description |
-|:----:|----------|:------:|:-------:|-------------|
-| 0x80 | [Succeeded](#succeeded-response) | Publisher | Command | Command request succeeded. Response details follow. |
-| 0x81 | [Failed](#failed-response) | Publisher | Command | Command request failed. Response error details follow. |
-| 0x82 | [Data Point Packet](#data-point-packet-response) | Any | Data | Response contains data points. |
-| 0x83 | [Signal Mapping](#signal-mapping-response) | Any | Command | Response contains data point Guid to run-time ID mappings. |
+| Code | Response | Source | Description |
+|:----:|----------|:------:|-------------|
+| 0x80 | [Succeeded](#succeeded-response) | Any | Command request succeeded. Response success details follow. |
+| 0x81 | [Failed](#failed-response) | Any | Command request failed. Response error details follow. |
 | 0x8n | etc. | | | | |
 
 > :information_source: For the response table above, when a response is destined for the data channel, it should be understood that a connection can be established where both the command and data channel use the same TCP connection.
@@ -601,22 +691,6 @@ Failed responses to operational modes usually indicate lack of support by publis
 
   * Wire Format: Binary
     * Includes operational mode that failed followed by available operational mode options
-
-#### Data Point Packet Response
-
-* Wire Format: Binary
-  * Includes a byte flag indicating content, e.g.:
-    * Data compression mode, if any
-    * Total data points in packet
-  * Includes serialized data points
-
-:information_source: The data point packet is technically classified as a response to a `subscribe` command. However, unlike most responses that operate as a sole response to a parent command, data-packet responses will continue to flow for available measurements until an `unsubscribe` command is issued.
-
-#### Signal Mapping Response
-
-* Wire Format: Binary
-  * Includes a mapping of data point Guids to run-time signal IDs
-  * Includes per data point ownership state, rights and delivery characteristic details
 
 ## Data Point Structure
 
@@ -892,11 +966,13 @@ Stateful compression algorithms will provide the best possible compression for S
 
 ### Compression Algorithms
 
-STTP is designed so that new compression algorithms can be implemented and used without requiring revisions to the specification. To accommodate this, compression algorithms are negotiated, by text name and numeric version, after a connection is established along with other operational modes for the session. [TBD: See Session Negotiation]
+STTP is designed so that new compression algorithms can be implemented and used without requiring revisions to the specification. To accommodate this, compression algorithms are negotiated, by text name and numeric version, after a connection is established along with other operational modes for the session. See [session negotiation](Commands.md#negotiate-session-command) for more details.
 
 The negotiation process specifies both the stateful compression algorithm to use as well as the stateless compression algorithm, when applicable.  
 
 The following compression algorithms are expected to always be available for STTP implementations such that a minimal set of compression algorithms will always be available for a publisher/subscription connection session negotiation.
+
+> :warning: TLS actually includes options to allow for payload level encryption algorithms. When using TLS security and a STTP defined compression option, compression options for TLS should not also be enabled.
 
 #### No Compression
 
@@ -1039,6 +1115,26 @@ The following individuals actively participated in the development of this stand
  * Advance Queries - Must be able to handle more advance request/reply queries.
  * Data Pushing - Capable of initializing a connection and writing data out.
 
+
+ > :construction: This list was moved from Overview - needs to merged with list above...
+
+ * Perform at high volume / large scale
+ * Minimize data losses (e.g., over UDP)
+ * Lower bandwidth requirements (e.g., over TCP)
+ * Optimized for the performant delivery of individual data points
+ * Automated exchange of metadata (no centralized registry required)
+ * Detect and expose communication issues
+ * Security and availability features that enable use on critical systems to support critical operations
+ * Publish/subscribe at data point level
+ * API implemented in multiple languages on multiple platforms
+ * Metadata will be versioned and tabular in nature
+ * Sets of metadata from multiple parties will be easy to merge
+ * Points defined in metadata will have a clear ownership path
+ * A minimal set of metadata will exist to support any STTP deployments
+ * Industry specific metadata extensions will exist to support specific industry deployments
+ * Ability to support broadcast messaging and distribution of critical system alarms
+
+
 ### Use Case Examples
 
 This is a list of all use cases along with the predefined set of features that must be supported by this use case.
@@ -1086,12 +1182,12 @@ Features:
 
 To facilitate moving data from a more secure environment to a less secure one (eg. Prod to Dev) a
 separate service will be created that can connect to (or accept connections from) a publisher. This
-communication can be a fully implemented sttp connection and thus can manage subscriptions that will be 
-exported to lower level clients. 
+communication can be a fully implemented sttp connection and thus can manage subscriptions that will be
+exported to lower level clients.
 
-This data diode will then establish a connection with a lower security level and forward data to this 
-client. The client will only be able to turn on/off the data stream, request metadata, and request a user 
-configurable amount of historical data that may be missing during a communications outage. These requests 
+This data diode will then establish a connection with a lower security level and forward data to this
+client. The client will only be able to turn on/off the data stream, request metadata, and request a user
+configurable amount of historical data that may be missing during a communications outage. These requests
 must be handled by the data diode with no modifications made to the established connection to the publisher.
 Each connection must operate independently of each other.
 
@@ -1209,80 +1305,7 @@ The Utility class contains utility methods.
 > :bulb: Links to language specific auto-generated XML code comment based API documentation would be useful.
 ## Appendix C - IEEE C37.118 Mapping
 
-> :bulb: JRC: We've already been considering options - especially for reference implementations - that are prescripted outside the STTP specification for mapping structures into and out of the protocol - this seems like one of those use cases. Need to discuss the following suggestions in light of the implications they have when considering the of primary tenants of the protocol...
-
-### Encapsulation
-
-A C37.118 stream can be encapsulated in its raw format inside sttp using the following
-definitions. The intent of this definition is to make sttp transparent so a sttp service can 
-transport insecure C37.118 over an untrusted medium.
-
-C37.118 -> sttp -> C37.118
-
-**Use Case:** A light weight front-end processor manages connectivity to all or a subset of PMU/PDCs 
-communicating via C37.118. Existing server applications can through a single connection, connect to this
-front-end processor to receive all of the raw data. This application then uses its own mapping to interpret the
-raw data. Since each vendor has their own proprietary mapping, it's naive to think we can create one mapping
-that everyone will adopt. In addition, a neighboring utility can also run a lightweight service 
-that can connect to this front-end processor and translate it back into a C37.118 stream without
-having to maintain another local database of how to map it back into a C37.118 stream.
-
-> :tomato::question: JRC: I was thinking the following kind of mapping would be available in a extended
-> metadata table, e.g., `IEEEC37.118` table with an ID or name for the mapping,
-> the field types and measurement mappings.
-
-> :bulb: SEC: I would think it would not be adventageous to make a dedicated hard coded table that 
-> will maintain this mapping information. It would make extensibility more difficult. 
-
-Metadata for each Data Point:
- * (int16) Data Concentrator ID Code
- * (int16) ID Code of data source
- * (int32) Time Base
- * (char) Value Type (S=Stat, P=Phasor, F=Freq, Q=DFreq, A=Analog, D=Digital)
- * (int8) Size (2/4)
- * (char) Phasor Type (R=Rect, P=Polar)
- * (int16) Position Index (eg. whether this is the first or second phasor or analog)
- * (int16) PMU Number (eg. whether this is the first of second PMU in a concentrated stream)
- * (char16) Station Name
- * (char16[16]) Channel Name (Array of 16 if channel type is Digital)
- * (int16) Nominal Line Frequency
- * (int16) Rate of data transmission
- * (int16) Config Change Count
-
-> :confused: JRC: Note sure I understand the following - this seems to break the tenant of
-> mapping primitives? Even if broken into chunks, this would require identification and
-> sequencing of chunks? Perhaps I am missing your idea here...
-
-> :bulb: SEC: I see. I'm not trying to "map" premitives. I've created a new section in the
-> document for mapping into the generic Data Point type. This is simply what I understand is necessary
-> to transport the data in it's raw format. 
-> 
-> I'm focusing on what the transport layer looks like. How the higher level API decides 
-> to use this data has yet to be defined and can vary from application to application. 
-> We may not decide support encapsulation, but either way, the wireline protocol should not care
-> how the API decides to use it.
-
-Data Point
- * (MetaData) All of the metadata that was exchanged with this point, mapped to a Runtime ID.
- * (uint32) SOC
- * (uint24) FrameSec
- * (uint8) Time Quality
- * One of the following:
-   * Status, Digital, Int16 Freq, Int16 DFreq, Int16 Analog
-     * (int16) Value
-   * Float Freq, Float DFreq, Float Analog
-     * (float) Value
-   * Int16 Phasor (Rect or Polar)
-     * (int16) Value1 (Mag/Real)
-     * (int16) Value2 (Ang/Im)
-   * Float Phasor (Rect or Polar)
-     * (float) Value1 (Mag/Real)
-     * (float) Value2 (Ang/Im)
-
-
-### Mapping
-
-To be described later once a generic Data Point has been described. 
+Today most all synchrophasor deployments include IEEE C37.118 in various parts of the infrastructure, this section describes how STTP will be mapped to and from IEEE C37.118 streams so that interoperability can be established with the existing protocol implementations and STTP.
 
 ## Appendix D - Other Protocol Evaluations
 
