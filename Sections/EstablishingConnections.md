@@ -83,7 +83,3 @@ STTP will secure UDP traffic using the AES encryption algorithm and a 256-bit pu
 > :construction: Update text above with link to the proper subscriber command request that establishes data channel security for UDP connections.
 
 > :information_source: Although TLS is normally used with reliable IP transport protocols such as TCP, TLS has also been implemented for UDP using the Datagram Transport Layer Security (DTLS) protocol. This protocol could allow a UDP channel to be secured without having a preexisting TLS secured command channel and even provide security for UDP only style data deliveries. However, as of the writing of this specification, DTLS implementations were not widely available on the platforms and programming languages that were being targeted for initial STTP reference implementations.
-
-### Connection Negotiations
-
-After a successful connection has been established, the publisher and subscriber will participate in a set of initial set of negotiations that will determine the operational modes of the session. more...

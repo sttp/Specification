@@ -13,7 +13,7 @@ All commands must be sent over the command channel.
 
 #### Set Operational Modes Command
 
-This must be the first command sent after a successful connection - the command must be sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. The rule for this operational mode negotiation is that once these modes have been established, they will not change for the lifetime of the connection.
+After a successful connection has been established, the publisher and subscriber will participate in a set of initial set of negotiations that will determine the operational modes of the session. The negotiation happens with this `Set Operational Modes` code and must be the first command sent after a successful connection - this command must be sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. The rule for this operational mode negotiation is that once these modes have been established, they will not change for the lifetime of the connection.
 
 The subscriber must send the command and the publisher must await its reception. If the publisher does not receive the command in a timely fashion (time interval controlled by configuration), it will disconnect the subscriber.
 
