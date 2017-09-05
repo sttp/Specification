@@ -136,7 +136,7 @@ Version;
 
 ##### NamedVersion Structure
 
-Represents a named entity and associated version, e.g., a compression algorithm, consisting of a `Version` and an ASCII encoded string name.
+Represents a named entity and associated version, e.g., a compression algorithm, consisting of a [`Version`](Definitions.md#version-structure) and an ASCII encoded string name.
 
 ```C
 struct {
@@ -146,13 +146,13 @@ struct {
 NamedVersion;
 ```
 - The `name` field defines an ASCII encoded string name for this structure. Field name should be padded with spaces to the right and any serializations should not include a null terminator, i.e., a zero value character.
-- The `version` field defines a `Version` number for this structure.
+- The `version` field defines a [`Version`](Definitions.md#version-structure) number for this structure.
 
 > :information_source: Small fixed string size for `name` field expected to be sufficient for foreseeable use cases, e.g., specification of compression algorithm.
 
 ##### NamedVersions Structure
 
-Represents a collection of `NamedVersion` entities which includes a count of the total elements.
+Represents a collection of [`NamedVersion`](Definitions.md#namedversion-structure) entities which includes a count of the total elements.
 
 ```C
 struct {
@@ -162,4 +162,4 @@ struct {
 NamedVersions;
 ```
 - The `count` field defines the total number of elements in the `items` array.
-- The `items` field is an array of `NamedVersion` structures.
+- The `items` field is an array of [`NamedVersion`](Definitions.md#namedversion-structure) structures.
