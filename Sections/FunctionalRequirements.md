@@ -30,6 +30,26 @@
  * Advance Queries - Must be able to handle more advance request/reply queries.
  * Data Pushing - Capable of initializing a connection and writing data out.
 
+
+ > :construction: This list was moved from Overview - needs to merged with list above...
+
+ * Perform at high volume / large scale
+ * Minimize data losses (e.g., over UDP)
+ * Lower bandwidth requirements (e.g., over TCP)
+ * Optimized for the performant delivery of individual data points
+ * Automated exchange of metadata (no centralized registry required)
+ * Detect and expose communication issues
+ * Security and availability features that enable use on critical systems to support critical operations
+ * Publish/subscribe at data point level
+ * API implemented in multiple languages on multiple platforms
+ * Metadata will be versioned and tabular in nature
+ * Sets of metadata from multiple parties will be easy to merge
+ * Points defined in metadata will have a clear ownership path
+ * A minimal set of metadata will exist to support any STTP deployments
+ * Industry specific metadata extensions will exist to support specific industry deployments
+ * Ability to support broadcast messaging and distribution of critical system alarms
+
+
 ### Use Case Examples
 
 This is a list of all use cases along with the predefined set of features that must be supported by this use case.
@@ -77,12 +97,12 @@ Features:
 
 To facilitate moving data from a more secure environment to a less secure one (eg. Prod to Dev) a
 separate service will be created that can connect to (or accept connections from) a publisher. This
-communication can be a fully implemented sttp connection and thus can manage subscriptions that will be 
-exported to lower level clients. 
+communication can be a fully implemented sttp connection and thus can manage subscriptions that will be
+exported to lower level clients.
 
-This data diode will then establish a connection with a lower security level and forward data to this 
-client. The client will only be able to turn on/off the data stream, request metadata, and request a user 
-configurable amount of historical data that may be missing during a communications outage. These requests 
+This data diode will then establish a connection with a lower security level and forward data to this
+client. The client will only be able to turn on/off the data stream, request metadata, and request a user
+configurable amount of historical data that may be missing during a communications outage. These requests
 must be handled by the data diode with no modifications made to the established connection to the publisher.
 Each connection must operate independently of each other.
 

@@ -12,8 +12,6 @@ STTP includes strong access control and encryption and is configurable to allow 
 
 In this section of the STTP specification, first data communication fundamentals are presented that set the boundary conditions for protocol design. These are followed by an introduction to the major components STTP.
 
-> :construction:  Recommend a pattern of providing an introduction to what follows in the opening paragraphs of each major section.
-
 ### Background
 
 In typical messaging exchange paradigms, a source application hosts a block of structured data, composed in memory, with the intent to transmit the data to one or more receiving applications. The data has _structure_ in the sense that it exists as a collection of simpler primitive data types where each of the data elements is given a name to provide useful context and meaning; most programming languages represent data structures using a primary key word, e.g., `class` or `struct`. Before transmission, the data structure must be serialized - this is necessary because the programming language of the source application which hosts the data structure defines the structure in memory using a format that is optimized for use in the application. The process of serializing the data structure causes each of the data elements to be translated into a format that is easily transmitted over a network and is suitable for deserialization by a receiving application.
@@ -44,10 +42,6 @@ Under the Internet Protocol (IP), all frames of data to be transmitted that exce
 </center>
 
 Since IP is inherently unreliable, the impact of large frames on an IP network can be determined by the number of network packets required to send the frame.  Network packets can only be transmitted over a connection one packet at a time; when two or more network packets arrive for transmission at the same time on any physical network media, the result is a collision. When a collision occurs, only one packet gets sent and the others get dropped <sup>[[12](References.md#user-content-ref12)]</sup>. IP defines a variety of different transport protocols for network packet transmission, each of which behave in different manners when dealing with packet loss. Consequently, many of the impacts a large frame has on an IP network is dependent upon the transport protocol used to send the frame.
-
-> :tomato::question: KEM: _Can you have a collision on a full duplex system? If so, it sounds like buffering is improperly implemented._
-
-> :bulb: JRC: _A full duplex system prevents network media collisions between incoming and outgoing traffic. It does not prevent UDP data loss from buffer overruns in the OS network stack nor does it prevent collisions from simultaneous traffic._
 
 #### Large Frame Impacts on TCP/IP
 
@@ -141,33 +135,4 @@ For this expression, all data points as defined in the metadata that have a data
 
 #### Data Transport Channels
 
-STTP data transport requires the use of a _command channel_ using TCP/IP for reliable delivery of important commands. Optionally a secondary _data channel_ can be established using UDP/IP for the transport of data that can tolerate loss. When no secondary UDP/IP is used, both commands and data will share use of the TCP/IP channel for communications.
-
 Although not precluded from use over other data transports, the design of STTP is targeted and optimized for use over IP, specifically TCP/IP and UDP/IP. Even so, since the command/response implementation and data packet distribution of the STTP protocol is fairly simple, it is expected that commonly available middleware data transport layers, such as ZeroMQ or DDS, could easily support and transmit data using the STTP protocol should any of the messaging distribution and management benefits of these transport layers be useful to a particular deployment environment. However, these types of deployments are outside the scope of this documentation. If needed, STTP integrations with middleware layers should be added as reference implementation repositories to the STTP organizational site <sup>[[4](References.md#user-content-ref4)]</sup>.
-
-> :tomato::question: JRC: _The question has been raised if a UDP only transport should be allowed? In this mode, any critical commands and responses would basically be sent over UDP. Thought would need to be given to commands and/or responses that never arrive and the consequences thereof._
-
-> :tomato::question: SEC: _We may also consider a UDP method that is not bi-directional. Much like how C37.118 currently supports such a data stream. This could be encrypted by storing the client's public key on the server and encrypting the cipher key periodically. It could be used when transporting from secure environment to an unsecure one. Anytime TCP is used, the potential of buffering and creating a DOS attack on the more secure system is possible. And UDP replies through a firewall are really easy to spoof._
-
-> :confused: JRC: _Presume that this would require an out-of-band pre-defined configuration to be "known" or handle it the way C37.118 currently manages this, i.e., sending a "config frame" once per minute. In context of STTP, this might be a reduced set of metadata that represented "what" was being published. This would need some "rules" to operate properly._
-
-> :bulb: KEM: _The advantage in this case is that UDP will operate unidirectionally, TCP won't. However for commands you really need to close the loop. I suggest that STTP only be developed for TCP as suggested above, but do not state that it cannot be adapted to UDP._
-
-
-### STTP Feature Summary
-
-* Perform at high volume / large scale
-* Minimize data losses (e.g., over UDP)
-* Lower bandwidth requirements (e.g., over TCP)
-* Optimized for the performant delivery of individual data points
-* Automated exchange of metadata (no centralized registry required)
-* Detect and expose communication issues
-* Security and availability features that enable use on critical systems to support critical operations
-* Publish/subscribe at data point level
-* API implemented in multiple languages on multiple platforms
-* Metadata will be versioned and tabular in nature
-* Sets of metadata from multiple parties will be easy to merge
-* Points defined in metadata will have a clear ownership path
-* A minimal set of metadata will exist to support any STTP deployments
-* Industry specific metadata extensions will exist to support specific industry deployments
-* Ability to support broadcast messaging and distribution of critical system alarms
