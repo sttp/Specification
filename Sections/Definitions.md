@@ -131,6 +131,8 @@ struct {
 }
 Version;
 ```
+- The `major` field defines the major component of the represented version.
+- The `minor` field defines the minor component of the represented version.
 
 ##### NamedVersion Structure
 
@@ -138,11 +140,15 @@ Represents a named entity and associated version, e.g., a compression algorithm,
 
 ```C
 struct {
+  uint8[20] name;
   Version version;
-  uint8[255] name;
 }
 NamedVersion;
 ```
+- The `name` field defines an ASCII encoded string name for this structure. Field name should be padded with spaces to the right and any serializations should not include a null terminator, i.e., a zero value character.
+- The `version` field defines a `Version` number for this structure.
+
+> :information_source: Small fixed string size for `name` field expected to be sufficient for foreseeable use cases, e.g., specification of compression algorithm.
 
 ##### NamedVersions Structure
 
@@ -155,3 +161,5 @@ struct {
 }
 NamedVersions;
 ```
+- The `count` field defines the total number of elements in the `items` array.
+- The `items` field is an array of `NamedVersion` structures.

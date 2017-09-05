@@ -6,25 +6,45 @@ STTP also defines functionality which is used to send messages without an expect
 
 This section describes the available commands and responses that define the functionality of STTP.
 
-### Message Structures
+### Message Formats
 
-Commands and responses are defined as simple binary message structures as follows:
+Commands and responses are defined as simple binary message structures. The details for the payload of the message will depend on command or response code which is detailed in the following sections.
+
+#### Command Structure
+
+Commands are used to manage primary STTP functionality. The following defines the binary format of a `Command`:
 
 ```C
 struct {
-  uint8 code;
+  uint8 commandCode;
   uint16 length;
   uint8[] payload;
 }
-Command
-
-struct {
-  uint8 code;
-  uint8 responseToCode;
-  uint16 length;
-  uint8[] payload;
-}
-Response
+Command;
 ```
 
-The payload of the message will depend on command or response code which are detailed in the following sections.
+- The `commandCode` field defines the command code value for the command message, see defined [command codes](Commands.md#commands).
+- The `length` field defines the length of the `payload` in bytes.
+- The `payload` field is a byte array representing the serialized payload associated with the `commandCode`.
+
+Empty payloads have a `length` field value of `0` and a `payload` field value of `null`.
+
+#### Response Structure
+
+Responses for most commands will be either `Succeeded` to `Failed`. The following structure defines the binary format of a `Response`:
+
+```C
+struct {
+  uint8 responsecode;
+  uint8 commandCode;
+  uint16 length;
+  uint8[] payload;
+}
+Response;
+```
+- The `responseCode` field defines the response code value for the response message, see defined [response codes](Responses.md#responses).
+- The `commandCode` field defines the command code value that this message is in response to, see defined [command codes](Commands.md#commands).
+- The `length` field defines the length of the `payload` in bytes.
+- The `payload` field is a byte array representing the serialized payload associated with the response `responseCode`.
+
+Empty payloads have a `length` field value of `0` and a `payload` field value of `null`.
