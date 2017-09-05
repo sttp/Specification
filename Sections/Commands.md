@@ -9,7 +9,7 @@ This section defines the command functions available to STTP. Commands that expe
 | 0x02 | [Subscribe](#subscribe-command) | Subscriber | Yes | Defines desired set of data points to begin receiving. |
 | 0x03 | [Unsubscribe](#unsubscribe-command) | Subscriber | Yes | Requests publisher terminate current subscription. |
 | 0x04 | [SecureDataChannel](#)  | Subscriber | Yes | Requests publisher secure the data channel.  |
-| 0x05 | [SignalMapping](#signal-mapping-response) | Publisher | No | Response contains data point Guid to run-time ID mappings. |
+| 0x05 | [SignalMapping](#signal-mapping-response) | Publisher | Yes | Response contains data point Guid to run-time ID mappings. |
 | 0x06 | [DataPointPacket](#data-point-packet-response) | Publisher | No | Response contains data points. |
 | 0x0n | etc. | | | |
 | 0xFF | [NoOp](#noop-command) | Both | Yes | Periodic message to allow validation of connectivity. |
@@ -34,8 +34,8 @@ struct {
 ProtocolVersions;
 
 ```
-- The `count` field defines the total number of elements in the `versions` array.
-- The `versions` field is an array of 'Version' structures.
+- The `count` field defines the total number of elements in the `versions` field array.
+- The `versions` field is an array of `Version` structures.
 
 Since the current version of this specification only defines details for version 1.0 of STTP, the initial `NegotiateSession` command payload from the publisher will be an instance of the `ProtocolVersions` structure with a `count` value of `1` and a single element `versions` array where `versions[0].major` is `1` and `versions[0].minor` is `0`.
 
@@ -45,13 +45,13 @@ If the subscriber can support one of the protocols specified by the publisher, t
 
 If the subscriber cannot support one of the protocols specified by the publisher, the `Failed` response payload will be an instance of the `ProtocolVersions` structure filled out with the supported protocols. In case of failure, both the publisher and subscriber should terminate the connection since no protocol version could be agreed upon.
 
-When a `Succeeded` response for the first `NegotiateSession` command is received from the subscriber, the publisher will validate the subscriber selected protocol version. If the publisher does not agree with the protocol version selected by the subscriber, the publisher will send a `Failed` response with an empty payload and terminate the connection since no protocol version could be agreed upon.
+When a `Succeeded` response for the first `NegotiateSession` command is received from the subscriber, the publisher will validate the subscriber selected protocol version. If the publisher does not agree with the protocol version selected by the subscriber, the publisher will send a `Failed` response with an empty payload and terminate the connection since no protocol version could be agreed upon. If the publisher accepts the subscriber selected protocol version, the negotiation will continue with the selection of operational modes.
 
-If the publisher accepts the subscriber selected protocol version, the negotiation will continue with the selection of operational modes. After sending a `Succeeded` response to the first `NegotiateSession` command, the subscriber will be waiting for either a `Failed` response from the publisher or the second `NegotiateSession` command; if the subscriber does not receive a command or response in a timely fashion (time interval controlled by configuration), the subscriber will disconnect.
+After sending a `Succeeded` response to the first `NegotiateSession` command, the subscriber will be waiting for either a `Failed` response from the publisher or the second `NegotiateSession` command; if the subscriber does not receive a command or response in a timely fashion (time interval controlled by configuration), the subscriber will disconnect.
 
 ##### Operational Modes Negotiation
 
-For version `1.0` of STTP, if the protocol version negotiation step succeeds the next negotiation will be for the desired operational modes. The payload of the second `NegotiateSession` command sent by the publisher will be an instance of the `OperationalModes` structure, defined as follows, that iterates the supported string encodings, if UDP broadcasts are allowed and available stateful and stateless compression algorithms:
+For version `1.0` of STTP, if the protocol version negotiation step succeeds the next negotiation will be for the desired operational modes. The payload of the second `NegotiateSession` command sent by the publisher will be an instance of the `OperationalModes` structure, defined as follows, that iterates the supported string encodings, if UDP broadcasts are allowed and available stateful and stateless [compression algorithms](Compression.md#compression):
 
 ```C
 enum {
@@ -70,22 +70,20 @@ struct {
 }
 OperationalModes;
 ```
-- The `encodings` field defines a set of string encodings supported by the publisher, this is a bit flag that indicates the supported string encodings.
+- The `encodings` field defines a set of string encodings supported by the publisher, this is a bit flag that indicates each of the supported string encodings.
 - The `udpPort` field meaning depends on the usage context:
-  - When sent with the publisher command payload, field is used to indicate publisher support of UDP. A value of zero indicates that UDP broadcast are not supported and any non-zero value indicates that UDP broadcasts are supported.
+  - When sent with the publisher command payload, field is used to indicate publisher support of UDP. A value of zero indicates that UDP broadcasts are not supported and any non-zero value indicates that UDP broadcasts are supported.
   - When sent with the subscriber response payload, field is used to indicate the desired subscriber UDP port for data channel functionality. A value of zero will indicate that a UDP connection should not be established for subscriber data channel functionality.
 - The `statefulCompressionAlgorithms` field defines the named and versioned algorithms to use for stateful compression operations.
 - The `statelessCompressionAlgorithms` field defines the named and versioned algorithms to use for stateless compression operations.
 
 When the second `NegotiateSession` command is received from the publisher, the subscriber will send either a `Succeeded` or `Failed` response indicating its ability to support a subset of the specified operational modes.
 
-If the subscriber can support a subset of the operational modes allowed by the publisher, the `Succeeded` response payload will be an instance of the `OperationalModes` structure with the specific values for the `encodings`, `udpPort`, `statefulCompressionAlgorithms` and `statelessCompressionAlgorithms` fields. The `encodings` field should specify a single flag designating the string encoding to use and both the `statefulCompressionAlgorithms` and `statelessCompressionAlgorithms` fields should define a `count` of `1` and a single element array that indicates the compression algorithm to be used, see [compression algorithms](Compression.md#compression).
+If the subscriber can support a subset of the operational modes allowed by the publisher, the `Succeeded` response payload will be an instance of the `OperationalModes` structure with the specific values for the `encodings`, `udpPort`, `statefulCompressionAlgorithms` and `statelessCompressionAlgorithms` fields. The `encodings` field should specify a single flag designating the string encoding to use and both the `statefulCompressionAlgorithms` and `statelessCompressionAlgorithms` fields should define a `count` of `1` and a single element array that indicates the [compression algorithm](Compression.md#compression) to be used where a named value of `NONE` with a version of `0.0` indicates that no compression should be used.
 
 If the subscriber cannot support a subset of the operational modes allowed by the publisher, the `Failed` response payload will be an instance of the `OperationalModes` structure filled out with the supported operational modes. In case of failure, both the publisher and subscriber should terminate the connection since no protocol version could be agreed upon.
 
-When a `Succeeded` response for the second `NegotiateSession` command is received from the subscriber, the publisher will validate the subscriber selected operational modes. If the publisher does not agree with the operational modes selected by the subscriber, the publisher will send a `Failed` response with an empty payload and terminate the connection since no operational modes could be agreed upon.
-
-If the publisher accepts the subscriber selected operational modes, then the publisher will send a `Succeeded` response with an empty payload and the publisher will consider the sessions negotiations to be completed successfully.
+When a `Succeeded` response for the second `NegotiateSession` command is received from the subscriber, the publisher will validate the subscriber selected operational modes. If the publisher does not agree with the operational modes selected by the subscriber, the publisher will send a `Failed` response with an empty payload and terminate the connection since no operational modes could be agreed upon. If the publisher accepts the subscriber selected operational modes, then the publisher will send a `Succeeded` response with an empty payload and the publisher will consider the session negotiations to be completed successfully.
 
 After sending a `Succeeded` response to the second `NegotiateSession` command, the subscriber will be waiting for either a `Succeeded` or `Failed` response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber will disconnect.
 
