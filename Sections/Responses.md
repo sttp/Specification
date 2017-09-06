@@ -3,9 +3,9 @@
 The following table defines the responses to commands that can be sent by STTP. Currently the only defined responses will be `Succeeded` or `Failed`. The payload of response message depends on the command code the message is in response to.
 
 | Code | Type | Source | Description |
-|:----:|----------|:------:|-------------|
-| 0x80 | [Succeeded](#succeeded-response) | Any | Command request succeeded. Response success details follow. |
-| 0x81 | [Failed](#failed-response) | Any | Command request failed. Response error details follow. |
+|:----:|------|:------:|-------------|
+| 0x80 | [Succeeded](#succeeded-response) | Any | Command request succeeded. Response success payload, if any, included. |
+| 0x81 | [Failed](#failed-response) | Any | Command request failed. Response error payload, if any, included. |
 
 #### Succeeded Response
 

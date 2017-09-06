@@ -1,6 +1,6 @@
 ### Commands
 
-The following table defines the commands available to STTP. Commands that expect a response define the _command channel_ functions, those that do not define the _data channel_ functions.
+The following table defines the commands available to STTP. Commands that expect a response define the command channel functions, those that do not define the data channel functions.
 
 | Code | Command | Source | Response | Description |
 |:----:|---------|:------:|:--------:|-------------|
@@ -17,11 +17,11 @@ The following table defines the commands available to STTP. Commands that expect
 
 After a successful connection has been established, the publisher and subscriber will participate in an initial set of negotiations that will determine the STTP protocol version and operational modes of the session. The negotiation happens with the `NegotiateSession` command code which will be the first command sent after a successful publisher/subscriber connection. The command is sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. Once the sessions negotiations for the protocol version and operational modes have been established they will not change for the lifetime of the session.
 
-Session negotiation is a multi-step process with commands being sent by the publisher and responses being sent by the subscriber until negotiation terms are either established or the connection is terminated because terms could not be agreed upon.
+Session negotiation is a multi-step process with commands and responses being sent by the publisher and subscriber until negotiation terms are either established or the connection is terminated because terms could not be agreed upon.
 
 ##### Protocol Version Negotiation
 
-It is possible that future STTP protocol versions will include different session negotiation options, so the first session negotiation step is always to establish the protocol version to use. Immediately after connecting, the publisher will start the protocol version negotiation process by sending the `NegotiateSession` command to the subscriber that will contain information on the available protocol versions that the publisher supports. The subscriber will be waiting for this initial publisher command; if the subscriber does not receive the command in a timely fashion (time interval controlled by configuration), the subscriber will disconnect.
+Future STTP protocol versions can include different session negotiation options, so the first session negotiation step is always to establish the protocol version to use. Immediately after connecting, the publisher will start the protocol version negotiation process by sending the `NegotiateSession` command to the subscriber that will contain information on the available protocol versions that the publisher supports. The subscriber will be waiting for this initial publisher command; if the subscriber does not receive the command in a timely fashion (time interval controlled by configuration), the subscriber will disconnect.
 
 The payload of the first `NegotiateSession` command sent by the publisher will be an instance of the `ProtocolVersions` structure, defined as follows, that iterates the versions of the STTP protocol that are supported:
 
@@ -50,7 +50,7 @@ After sending a `Succeeded` response to the first `NegotiateSession` command, th
 
 ##### Operational Modes Negotiation
 
-For version `1.0` of STTP, if the protocol version negotiation step succeeds the next negotiation will be for the desired operational modes. The payload of the second `NegotiateSession` command sent by the publisher will be an instance of the `OperationalModes` structure, defined as follows, that iterates the supported string encodings, if UDP broadcasts are allowed and available stateful and stateless compression algorithms (see [Compression Algorithms](Compression.md#compression)):
+For version `1.0` of STTP, if the protocol version negotiation step succeeds, the next negotiation will be for the desired operational modes. The payload of the second `NegotiateSession` command sent by the publisher will be an instance of the `OperationalModes` structure, defined as follows, that iterates the supported string encodings, if UDP broadcasts are allowed and available stateful and stateless compression algorithms (see [Compression Algorithms](Compression.md#compression)):
 
 ```C
 enum {
@@ -86,7 +86,7 @@ When a `Succeeded` response for the second `NegotiateSession` command is receive
 
 After sending a `Succeeded` response to the second `NegotiateSession` command, the subscriber will be waiting for either a `Succeeded` or `Failed` response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber will disconnect.
 
-If the subscriber receives a `Succeeded` response from the publisher, the subscriber will consider the session negotiations to be completed successfully.
+If the subscriber receives a `Succeeded` response for the `NegotiateSession` command from the publisher, the subscriber will consider the session negotiations to be completed successfully.
 
 #### Metadata Refresh Command
 
@@ -100,7 +100,17 @@ If the subscriber receives a `Succeeded` response from the publisher, the subscr
 
 #### Unsubscribe Command
 
-  * Wire Format: Binary
+The subscriber will issue an `Unsubscribe` with an empty payload to stop any existing data subscription.
+
+Upon reception of the `Unsubscribe` command from a subscriber, the publisher will immediately cease publication of `DataPointPacket` commands to the specific subscriber that issued the command; also, the publisher will send a `Succeeded` response for the `Unsubscribe` command with an empty payload. If for any reason the publisher cannot terminate the subscription, the publisher will send a `Failed` response for the `Unsubscribe` command with a string based payload, encoded according to the pre-negotiated subscriber string encoding, that describes the reason the subscription cannot be terminated.
+
+After sending an `Unsubscribe` command to the publisher, the subscriber will be waiting for either a `Succeeded` or `Failed` response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect and not attempt to send further commands to stop the data subscription.
+
+If the subscriber receives a `Failed` response for the `Unsubscribe` command from the publisher, the subscriber should disconnect and not attempt to send further commands to stop the data subscription.
+
+Upon reception of a `Succeeded` response for the `Unsubscribe` command from the publisher, the subscriber should consider any cached signal mapping previously received from the publisher to now be invalid - accordingly any allocated memory for the cache should now be released.
+
+> :wrench: With reception of the `Succeeded` response for the `Unsubscribe` command the subscriber can be assured that the publisher has stopped sending further `DataPointPacket` commands, however, STTP implementations should anticipate that some data packets could still arrive depending on how much data was already queued for transmission. This may be more evident when a lossy communications protocol, e.g., UDP, is being used for data channel functionality and the `Succeeded` response for the `Unsubscribe` command is received on a reliable communications protocol, e.g., TCP.
 
 #### Secure Data Channel Command
 
@@ -126,4 +136,4 @@ If the subscriber receives a `Succeeded` response from the publisher, the subscr
 
 When data channel functions are operating over a lossy communications protocol, e.g., UDP, and command channel functions are operating over a reliable communications protocol, e.g., TCP, then command channel activity may remain quiet for some time. To make sure the connection for the command channel is still established the `NoOp` command allows a periodic test of connectivity.
 
-The `NoOp` function is always sent with an empty payload. The command is designed to be sent over the command channel on a configurable schedule. For implementations of STTP, when the command is sent any exceptions are monitored such that if there are any then the command channel connection can be reestablished.
+The `NoOp` command is always sent with an empty payload. The command is designed to be sent over the command channel on a configurable schedule. For implementations of STTP, when the command is sent any exceptions are monitored such that if there are any then the command channel connection can be reestablished.
