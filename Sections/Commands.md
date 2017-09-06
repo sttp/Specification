@@ -4,7 +4,7 @@ The following table defines the commands available to STTP. Commands that expect
 
 | Code | Command | Source | Response | Description |
 |:----:|---------|:------:|:--------:|-------------|
-| 0x00 | [NegotiateSession](#negotiate-session-command) | Publisher | Yes | Starts session negotiation of operational modes. |
+| 0x00 | [NegotiateSession](#negotiate-session-command) | Publisher | Yes | Starts session negotiation for a new connection. |
 | 0x01 | [MetadataRefresh](#metadata-refresh-command) | Subscriber | Yes  | Requests publisher send updated metadata. |
 | 0x02 | [Subscribe](#subscribe-command) | Subscriber | Yes | Defines desired set of data points to begin receiving. |
 | 0x03 | [Unsubscribe](#unsubscribe-command) | Subscriber | Yes | Requests publisher terminate current subscription. |
