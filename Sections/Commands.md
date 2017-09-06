@@ -1,20 +1,19 @@
 ### Commands
 
-This section defines the command functions available to STTP. Commands that expect a response define _command channel_ functions and commands that do not expect a response define _data channel_ functions.
+The following table defines the commands available to STTP. Commands that expect a response define the _command channel_ functions, those that do not define the _data channel_ functions.
 
-| Code | Function | Source | Response | Description |
+| Code | Command | Source | Response | Description |
 |:----:|---------|:------:|:--------:|-------------|
-| 0x00 | [NegotiateSession](#negotiate-session-function) | Publisher | Yes | Starts session negotiation of operational modes. |
-| 0x01 | [MetadataRefresh](#metadata-refresh-function) | Subscriber | Yes  | Requests publisher send updated metadata. |
-| 0x02 | [Subscribe](#subscribe-function) | Subscriber | Yes | Defines desired set of data points to begin receiving. |
-| 0x03 | [Unsubscribe](#unsubscribe-function) | Subscriber | Yes | Requests publisher terminate current subscription. |
-| 0x04 | [SecureDataChannel](#secure-data-channel-function)  | Subscriber | Yes | Requests publisher secure the data channel.  |
-| 0x05 | [SignalMapping](#signal-mapping-function) | Publisher | Yes | Response contains data point Guid to run-time ID mappings. |
-| 0x06 | [DataPointPacket](#data-point-packet-function) | Publisher | No | Response contains data points. |
-| 0x0n | etc. | | | |
-| 0xFF | [NoOp](#noop-function) | Both | Yes | Periodic message to allow validation of connectivity. |
+| 0x00 | [NegotiateSession](#negotiate-session-command) | Publisher | Yes | Starts session negotiation of operational modes. |
+| 0x01 | [MetadataRefresh](#metadata-refresh-command) | Subscriber | Yes  | Requests publisher send updated metadata. |
+| 0x02 | [Subscribe](#subscribe-command) | Subscriber | Yes | Defines desired set of data points to begin receiving. |
+| 0x03 | [Unsubscribe](#unsubscribe-command) | Subscriber | Yes | Requests publisher terminate current subscription. |
+| 0x04 | [SecureDataChannel](#secure-data-channel-command)  | Subscriber | Yes | Requests publisher secure the data channel.  |
+| 0x05 | [SignalMapping](#signal-mapping-command) | Publisher | Yes | Defines data point Guid to run-time ID mappings. |
+| 0x06 | [DataPointPacket](#data-point-packet-command) | Publisher | No | Payload contains data points. |
+| 0xFF | [NoOp](#noop-command) | Both | Yes | Periodic message to allow validation of connectivity. |
 
-#### Negotiate Session Function
+#### Negotiate Session Command
 
 After a successful connection has been established, the publisher and subscriber will participate in an initial set of negotiations that will determine the STTP protocol version and operational modes of the session. The negotiation happens with the `NegotiateSession` command code which will be the first command sent after a successful publisher/subscriber connection. The command is sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. Once the sessions negotiations for the protocol version and operational modes have been established they will not change for the lifetime of the session.
 
@@ -39,13 +38,13 @@ ProtocolVersions;
 
 Since the current version of this specification only defines details for version 1.0 of STTP, the initial `NegotiateSession` command payload from the publisher will be an instance of the `ProtocolVersions` structure with a `count` value of `1` and a single element `versions` array where `versions[0].major` is `1` and `versions[0].minor` is `0`.
 
-When the first `NegotiateSession` command is received from the publisher, the subscriber will send either a `Succeeded` or `Failed` response indicating its ability to support one of the specified protocol versions.
+When the first `NegotiateSession` command is received from the publisher, the subscriber will send either a `Succeeded` or `Failed` response for the `NegotiateSession` command indicating its ability to support one of the specified protocol versions.
 
 If the subscriber can support one of the protocols specified by the publisher, the `Succeeded` response payload will be an instance of the `ProtocolVersions` structure with a `count` of `1` and a single element `versions` array that indicates the protocol version to be used.
 
 If the subscriber cannot support one of the protocols specified by the publisher, the `Failed` response payload will be an instance of the `ProtocolVersions` structure filled out with the supported protocols. In case of failure, both the publisher and subscriber should terminate the connection since no protocol version could be agreed upon.
 
-When a `Succeeded` response for the first `NegotiateSession` command is received from the subscriber, the publisher will validate the subscriber selected protocol version. If the publisher does not agree with the protocol version selected by the subscriber, the publisher will send a `Failed` response with an empty payload and terminate the connection since no protocol version could be agreed upon. If the publisher accepts the subscriber selected protocol version, the negotiation will continue with the selection of operational modes.
+When a `Succeeded` response for the first `NegotiateSession` command is received from the subscriber, the publisher will validate the subscriber selected protocol version. If the publisher does not agree with the protocol version selected by the subscriber, the publisher will send a `Failed` response for the `NegotiateSession` command with an empty payload and terminate the connection since no protocol version could be agreed upon. If the publisher accepts the subscriber selected protocol version, the negotiation will continue with the selection of operational modes.
 
 After sending a `Succeeded` response to the first `NegotiateSession` command, the subscriber will be waiting for either a `Failed` response from the publisher or the second `NegotiateSession` command; if the subscriber does not receive a command or response in a timely fashion (time interval controlled by configuration), the subscriber will disconnect.
 
@@ -77,37 +76,37 @@ OperationalModes;
 - The `statefulCompressionAlgorithms` field defines the [`NamedVersions`](Definitions.md#namedversions-structure) representing the algorithms to use for stateful compression operations.
 - The `statelessCompressionAlgorithms` field defines the [`NamedVersions`](Definitions.md#namedversions-structure) representing the algorithms to use for stateless compression operations.
 
-When the second `NegotiateSession` command is received from the publisher, the subscriber will send either a `Succeeded` or `Failed` response indicating its ability to support a subset of the specified operational modes.
+When the second `NegotiateSession` command is received from the publisher, the subscriber will send either a `Succeeded` or `Failed` response for the `NegotiateSession` command indicating its ability to support a subset of the specified operational modes.
 
 If the subscriber can support a subset of the operational modes allowed by the publisher, the `Succeeded` response payload will be an instance of the `OperationalModes` structure with the specific values for the `encodings`, `udpPort`, `statefulCompressionAlgorithms` and `statelessCompressionAlgorithms` fields. The `encodings` field should specify a single flag designating the string encoding to use and both the `statefulCompressionAlgorithms` and `statelessCompressionAlgorithms` fields should define a `count` of `1` and a single element array that indicates the [compression algorithm](Compression.md#compression) to be used where a named value of `NONE` with a version of `0.0` indicates that no compression should be used.
 
 If the subscriber cannot support a subset of the operational modes allowed by the publisher, the `Failed` response payload will be an instance of the `OperationalModes` structure filled out with the supported operational modes. In case of failure, both the publisher and subscriber should terminate the connection since no protocol version could be agreed upon.
 
-When a `Succeeded` response for the second `NegotiateSession` command is received from the subscriber, the publisher will validate the subscriber selected operational modes. If the publisher does not agree with the operational modes selected by the subscriber, the publisher will send a `Failed` response with an empty payload and terminate the connection since no operational modes could be agreed upon. If the publisher accepts the subscriber selected operational modes, then the publisher will send a `Succeeded` response with an empty payload and the publisher will consider the session negotiations to be completed successfully.
+When a `Succeeded` response for the second `NegotiateSession` command is received from the subscriber, the publisher will validate the subscriber selected operational modes. If the publisher does not agree with the operational modes selected by the subscriber, the publisher will send a `Failed` response for the `NegotiateSession` command with an empty payload and terminate the connection since no operational modes could be agreed upon. If the publisher accepts the subscriber selected operational modes, then the publisher will send a `Succeeded` response for the `NegotiateSession` command with an empty payload and the publisher will consider the session negotiations to be completed successfully.
 
 After sending a `Succeeded` response to the second `NegotiateSession` command, the subscriber will be waiting for either a `Succeeded` or `Failed` response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber will disconnect.
 
 If the subscriber receives a `Succeeded` response from the publisher, the subscriber will consider the session negotiations to be completed successfully.
 
-#### Metadata Refresh Function
+#### Metadata Refresh Command
 
 * Wire Format: Binary
   * Includes current metadata version number
 
-#### Subscribe Function
+#### Subscribe Command
 
 * Wire Format: Binary
   * Includes metadata expression and/or individual Guids for desired data points
 
-#### Unsubscribe Function
+#### Unsubscribe Command
 
   * Wire Format: Binary
 
-#### Secure Data Channel Function
+#### Secure Data Channel Command
 
   * Wire Format: Binary
 
-#### Data Point Packet Function
+#### Data Point Packet Command
 
 * Wire Format: Binary
   * Includes a byte flag indicating content, e.g.:
@@ -117,14 +116,14 @@ If the subscriber receives a `Succeeded` response from the publisher, the subscr
 
 > :information_source: The data point packet commands are sent continuously after a successful `subscribe` command and will continue to flow for available measurements until an `unsubscribe` command is issued.
 
-#### Signal Mapping Function
+#### Signal Mapping Command
 
 * Wire Format: Binary
   * Includes a mapping of data point Guids to run-time signal IDs
   * Includes per data point ownership state, rights and delivery characteristic details
 
-#### NoOp Function
+#### NoOp Command
 
-When data channel functions are operating over a lossy communications protocol, e.g., UDP, and command channel functions are operating over a reliable communications protocol, e.g., TCP, then command channel activity may remain quiet for some time. To make sure the connection for the command channel is still established the `NoOp` function allows a periodic test of connectivity.
+When data channel functions are operating over a lossy communications protocol, e.g., UDP, and command channel functions are operating over a reliable communications protocol, e.g., TCP, then command channel activity may remain quiet for some time. To make sure the connection for the command channel is still established the `NoOp` command allows a periodic test of connectivity.
 
 The `NoOp` function is always sent with an empty payload. The command is designed to be sent over the command channel on a configurable schedule. For implementations of STTP, when the command is sent any exceptions are monitored such that if there are any then the command channel connection can be reestablished.

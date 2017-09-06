@@ -44,6 +44,6 @@ Response;
 - The `responseCode` field defines the response code value for the response message, see defined [response codes](Responses.md#responses).
 - The `commandCode` field defines the command code value that this message is in response to, see defined [command codes](Commands.md#commands).
 - The `length` field defines the length of the `payload` in bytes.
-- The `payload` field is a byte array representing the serialized payload associated with the response `responseCode`.
+- The `payload` field is a byte array representing the serialized payload associated with the `responseCode`.
 
 Empty payloads have a `length` field value of `0` and a `payload` field value of `null`.
