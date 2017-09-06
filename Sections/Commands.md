@@ -50,7 +50,7 @@ After sending a `Succeeded` response to the first `NegotiateSession` command, th
 
 ##### Operational Modes Negotiation
 
-For version `1.0` of STTP, if the protocol version negotiation step succeeds the next negotiation will be for the desired operational modes. The payload of the second `NegotiateSession` command sent by the publisher will be an instance of the `OperationalModes` structure, defined as follows, that iterates the supported string encodings, if UDP broadcasts are allowed and available stateful and stateless [compression algorithms](Compression.md#compression):
+For version `1.0` of STTP, if the protocol version negotiation step succeeds the next negotiation will be for the desired operational modes. The payload of the second `NegotiateSession` command sent by the publisher will be an instance of the `OperationalModes` structure, defined as follows, that iterates the supported string encodings, if UDP broadcasts are allowed and available stateful and stateless compression algorithms (see [Compression Algorithms](Compression.md#compression)):
 
 ```C
 enum {

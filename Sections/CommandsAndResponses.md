@@ -8,7 +8,18 @@ This section describes the available commands and responses that define the func
 
 ### Message Formats
 
-Commands and responses are defined as simple binary message structures. The details for the payload of the message will depend on command or response code which is detailed in the following sections.
+Commands and responses are defined as simple binary message structures that include a payload. The details for the payload of the message will depend on the specific command or response code.
+
+#### Message Payloads
+
+Payloads in STTP are defined as a byte arrays prefixed by an unsigned 16-bit integer representing the array length. Implementations of STTP should make target payload sizes configurable, but all payloads delivered by STTP must have a fixed maximum upper length of `2^14`, i.e., `16,384`, bytes.
+
+```C
+  uint16 length;
+  uint8[] payload;
+```
+
+Empty payloads have a `length` value of `0` and a `payload` value of `null`. When serialized, an empty payload would be represented by only a `0x00` value for the length.
 
 #### Command Structure
 
@@ -25,8 +36,6 @@ Command;
 - The `commandCode` field defines the command code value for the command message, see defined [command codes](Commands.md#commands).
 - The `length` field defines the length of the `payload` in bytes.
 - The `payload` field is a byte array representing the serialized payload associated with the `commandCode`.
-
-Empty payloads have a `length` field value of `0` and a `payload` field value of `null`.
 
 #### Response Structure
 
@@ -45,5 +54,3 @@ Response;
 - The `commandCode` field defines the command code value that this message is in response to, see defined [command codes](Commands.md#commands).
 - The `length` field defines the length of the `payload` in bytes.
 - The `payload` field is a byte array representing the serialized payload associated with the `responseCode`.
-
-Empty payloads have a `length` field value of `0` and a `payload` field value of `null`.

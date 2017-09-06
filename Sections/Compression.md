@@ -12,7 +12,11 @@ The negotiation process specifies both the stateful compression algorithm to use
 
 The following compression algorithms are expected to always be available for STTP implementations such that a minimal set of compression algorithms will always be available for a publisher/subscription connection session negotiation.
 
-> :wrench: TLS includes options to allow for payload level compression algorithms. When using TLS security and an STTP defined compression option, reference implementations should not allow compression options for TLS should to also be enabled.
+> :wrench: TLS includes options to allow for payload level compression algorithms. When STTP implementations are configured with TLS security and an STTP defined compression option, the implementations should not allow TLS compression options to also be enabled.
+
+Any compression algorithms used by STTP may not increase the content length by more than `1,024` bytes. If the decompression function is used with a compressed data packet that would decompress to a length greater than `16,384` bytes, it must report a decompression failure error.
+
+> :information_source: The `2^14` upper limit for decompressed buffers is the maximum payload size allowed by STTP.
 
 #### No Compression
 
