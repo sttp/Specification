@@ -13,6 +13,11 @@ The following table defines the commands available to STTP. Commands that expect
 | 0x06 | [DataPointPacket](#data-point-packet-command) | Publisher | No | Payload contains data points. |
 | 0xFF | [NoOp](#noop-command) | Both | Yes | Periodic message to allow validation of connectivity. |
 
+> :tomato: SEC: _I don't think commands should be so rigidly defined, this prohibits a user from extending the protocol
+> for their specific purpose. These should be GUIDs, or variable length strings. When the protocol enters the negotiate stage,
+> it should negotiate every command that is supported and assign a runtime ID associated with that command. I would prefer variable
+> length strings and require users to prefix their custom defined commands with something. Ex: STTP.NegotiateSession, USER.Special_Command_
+
 #### Negotiate Session Command
 
 After a successful connection has been established, the publisher and subscriber will participate in an initial set of negotiations that will determine the STTP protocol version and operational modes of the session. The negotiation happens with the `NegotiateSession` command code which will be the first command sent after a successful publisher/subscriber connection. The command is sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. Once the sessions negotiations for the protocol version and operational modes have been established they will not change for the lifetime of the session.
@@ -20,6 +25,9 @@ After a successful connection has been established, the publisher and subscriber
 Session negotiation is a multi-step process with commands and responses being sent by the publisher and subscriber until negotiation terms are either established or the connection is terminated because terms could not be agreed upon.
 
 ##### Protocol Version Negotiation
+
+> :tomato: SEC: _It would be better to version each command, rather than the protocol as a whole. 
+> That would allow partial implementations of the protocol to be supported rather than the entire protocol._
 
 Future STTP protocol versions can include different session negotiation options, so the first session negotiation step is always to establish the protocol version to use. Immediately after connecting, the publisher will start the protocol version negotiation process by sending the `NegotiateSession` command to the subscriber that will contain information on the available protocol versions that the publisher supports. The subscriber will be waiting for this initial publisher command; if the subscriber does not receive the command in a timely fashion (time interval controlled by configuration), the subscriber will disconnect.
 
