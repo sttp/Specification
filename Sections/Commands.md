@@ -4,17 +4,17 @@ This section defines the command functions available to STTP. Commands that expe
 
 | Code | Function | Source | Response | Description |
 |:----:|---------|:------:|:--------:|-------------|
-| 0x00 | [NegotiateSession](#negotiate-session-command) | Publisher | Yes | Starts session negotiation of operational modes. |
-| 0x01 | [MetadataRefresh](#metadata-refresh-command) | Subscriber | Yes  | Requests publisher send updated metadata. |
-| 0x02 | [Subscribe](#subscribe-command) | Subscriber | Yes | Defines desired set of data points to begin receiving. |
-| 0x03 | [Unsubscribe](#unsubscribe-command) | Subscriber | Yes | Requests publisher terminate current subscription. |
-| 0x04 | [SecureDataChannel](#)  | Subscriber | Yes | Requests publisher secure the data channel.  |
-| 0x05 | [SignalMapping](#signal-mapping) | Publisher | Yes | Response contains data point Guid to run-time ID mappings. |
-| 0x06 | [DataPointPacket](#data-point-packet) | Publisher | No | Response contains data points. |
+| 0x00 | [NegotiateSession](#negotiate-session-function) | Publisher | Yes | Starts session negotiation of operational modes. |
+| 0x01 | [MetadataRefresh](#metadata-refresh-function) | Subscriber | Yes  | Requests publisher send updated metadata. |
+| 0x02 | [Subscribe](#subscribe-function) | Subscriber | Yes | Defines desired set of data points to begin receiving. |
+| 0x03 | [Unsubscribe](#unsubscribe-function) | Subscriber | Yes | Requests publisher terminate current subscription. |
+| 0x04 | [SecureDataChannel](#secure-data-channel-function)  | Subscriber | Yes | Requests publisher secure the data channel.  |
+| 0x05 | [SignalMapping](#signal-mapping-function) | Publisher | Yes | Response contains data point Guid to run-time ID mappings. |
+| 0x06 | [DataPointPacket](#data-point-packet-function) | Publisher | No | Response contains data points. |
 | 0x0n | etc. | | | |
-| 0xFF | [NoOp](#noop-command) | Both | Yes | Periodic message to allow validation of connectivity. |
+| 0xFF | [NoOp](#noop-function) | Both | Yes | Periodic message to allow validation of connectivity. |
 
-#### Negotiate Session Command
+#### Negotiate Session Function
 
 After a successful connection has been established, the publisher and subscriber will participate in an initial set of negotiations that will determine the STTP protocol version and operational modes of the session. The negotiation happens with the `NegotiateSession` command code which will be the first command sent after a successful publisher/subscriber connection. The command is sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. Once the sessions negotiations for the protocol version and operational modes have been established they will not change for the lifetime of the session.
 
@@ -89,25 +89,25 @@ After sending a `Succeeded` response to the second `NegotiateSession` command, t
 
 If the subscriber receives a `Succeeded` response from the publisher, the subscriber will consider the session negotiations to be completed successfully.
 
-#### Metadata Refresh Command
+#### Metadata Refresh Function
 
 * Wire Format: Binary
   * Includes current metadata version number
 
-#### Subscribe Command
+#### Subscribe Function
 
 * Wire Format: Binary
   * Includes metadata expression and/or individual Guids for desired data points
 
-#### Unsubscribe Command
+#### Unsubscribe Function
 
   * Wire Format: Binary
 
-#### Secure Data Channel
+#### Secure Data Channel Function
 
   * Wire Format: Binary
 
-#### Data Point Packet
+#### Data Point Packet Function
 
 * Wire Format: Binary
   * Includes a byte flag indicating content, e.g.:
@@ -117,14 +117,14 @@ If the subscriber receives a `Succeeded` response from the publisher, the subscr
 
 > :information_source: The data point packet commands are sent continuously after a successful `subscribe` command and will continue to flow for available measurements until an `unsubscribe` command is issued.
 
-#### Signal Mapping
+#### Signal Mapping Function
 
 * Wire Format: Binary
   * Includes a mapping of data point Guids to run-time signal IDs
   * Includes per data point ownership state, rights and delivery characteristic details
 
-#### NoOp Command
+#### NoOp Function
 
-When data channel functions are operating over a lossy communications protocol, e.g., UDP, and command channel functions are operating over a reliable communications protocol, e.g., TCP, then command channel activity may remain quiet for some time. To make sure the connection for the command channel is still established the `NoOp` command allows a periodic test of connectivity.
+When data channel functions are operating over a lossy communications protocol, e.g., UDP, and command channel functions are operating over a reliable communications protocol, e.g., TCP, then command channel activity may remain quiet for some time. To make sure the connection for the command channel is still established the `NoOp` function allows a periodic test of connectivity.
 
-The `NoOp` command is always sent with an empty payload. The command is designed to be sent over the command channel on a configurable schedule. For implementations of STTP, when the command is sent any exceptions are monitored such that if there are any then the command channel connection can be reestablished.
+The `NoOp` function is always sent with an empty payload. The command is designed to be sent over the command channel on a configurable schedule. For implementations of STTP, when the command is sent any exceptions are monitored such that if there are any then the command channel connection can be reestablished.
