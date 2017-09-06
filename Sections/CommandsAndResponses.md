@@ -22,7 +22,6 @@ struct {
 }
 Command;
 ```
-
 - The `commandCode` field defines the command code value for the command message, see defined [command codes](Commands.md#commands).
 - The `length` field defines the length of the `payload` in bytes.
 - The `payload` field is a byte array representing the serialized payload associated with the `commandCode`.
