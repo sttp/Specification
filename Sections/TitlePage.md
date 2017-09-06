@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.1.29 - September 5, 2017
+**Version:** 0.1.30 - September 6, 2017
 
 **Status:** Initial Development
 
