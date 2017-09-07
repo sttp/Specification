@@ -144,7 +144,7 @@ Upon the publisher sending the `Succeeded` response for the `SecureDataChannel` 
 
 After sending a `SecureDataChannel` command to the publisher, the subscriber will be waiting for either a `Succeeded` or `Failed` response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber will disconnect.
 
-If the subscriber receives a `Failed` response for the `SecureDataChannel` command from the publisher, the subscriber should disconnect and not attempt to subscribe to data.
+If the subscriber receives a `Failed` response for the `SecureDataChannel` command from the publisher, the subscriber will disconnect.
 
 Upon reception of a `Succeeded` response for the `SecureDataChannel` command from the publisher, the subscriber will take the received key and initialization vector and decrypt each payload received over the lossy communications protocol using the AES symmetric encryption algorithm with a key size of 256.
 
