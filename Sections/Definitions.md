@@ -166,35 +166,25 @@ NamedVersions;
 - The `count` field defines the total number of elements in the `items` array.
 - The `items` field is an array of [`NamedVersion`](#namedversion-structure) structures.
 
-##### uint15 Structure
+##### 15-bit Encoding
 
-Represents a 15 bit unsigned integer that will be serialized as 1 or 2 bytes, depending on the value of the integer:
+The following functions take an unsigned 16-bit integer and apply a 15-bit encoding scheme that will serialize the provided 16-bit unsigned integer as either 1 or 2 bytes, depending on its value:
 
 ```C
-struct {
-  uint16 value; //Where value <= 32767
+// Values greater than 32767 will return null
+uint8[] Encode15Bits(uint16 value) {
+  if (value <= 127)
+    return { (uint8)value };
+  else if (value <= 32767)
+    return { (uint8)((value & 127) + 128), (uint8)(value >> 7) };
 
-  byte[] Save()
-  {
-    if (value <= 127)
-    {
-       return new byte[] {(byte) value}
-    }
-    else
-    {
-       return new byte[] {(byte)((value & 127) + 128), (byte)(value >> 7)};
-    }
-  }
-  void Load(byte[] data)
-  {
-    if (data[0] <= 127)
-    {
-       value = data[0];
-    }
-    else
-    {
-       value = (data[0] - 128) | (data[1] << 7);
-    }
-  }
+  return null;
+}
+
+uint16 Decode15Bits(uint8[] data) {
+  if (data[0] <= 127)
+    return data[0];
+
+  return (data[0] - 128) | (data[1] << 7);
 }
 ```
