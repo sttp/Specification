@@ -185,6 +185,6 @@ uint16 Decode15Bits(uint8[] data) {
   if (data[0] <= 127)
     return data[0];
 
-  return (data[0] - 128) | (data[1] << 7);
+  return (uint16)(data[0] - 128) | (uint16)(data[1] << 7);
 }
 ```
