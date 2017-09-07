@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.1.30 - September 6, 2017
+**Version:** 0.1.31 - September 7, 2017
 
 **Status:** Initial Development
 
@@ -514,7 +514,18 @@ This section describes the available commands and responses that define the func
 
 ### Message Formats
 
-Commands and responses are defined as simple binary message structures. The details for the payload of the message will depend on command or response code which is detailed in the following sections.
+Commands and responses are defined as simple binary message structures that include a payload. The details for the payload of the message will depend on the specific command or response code.
+
+#### Message Payloads
+
+Payloads in STTP are defined as a byte arrays prefixed by an unsigned 16-bit integer representing the array length. Implementations of STTP should make target payload sizes configurable, but all payloads delivered by STTP must have a fixed maximum upper length of `2^14`, i.e., `16,384`, bytes.
+
+```C
+  uint16 length;
+  uint8[] payload;
+```
+
+Empty payloads have a `length` value of `0` and a `payload` value of `null`. When serialized, an empty payload would be represented by only a `0x00` value for the length.
 
 #### Command Structure
 
@@ -532,8 +543,6 @@ Command;
 - The `length` field defines the length of the `payload` in bytes.
 - The `payload` field is a byte array representing the serialized payload associated with the `commandCode`.
 
-Empty payloads have a `length` field value of `0` and a `payload` field value of `null`.
-
 #### Response Structure
 
 Responses for most commands will be either `Succeeded` to `Failed`. The following structure defines the binary format of a `Response`:
@@ -550,35 +559,40 @@ Response;
 - The `responseCode` field defines the response code value for the response message, see defined [response codes](Responses.md#responses).
 - The `commandCode` field defines the command code value that this message is in response to, see defined [command codes](Commands.md#commands).
 - The `length` field defines the length of the `payload` in bytes.
-- The `payload` field is a byte array representing the serialized payload associated with the response `responseCode`.
-
-Empty payloads have a `length` field value of `0` and a `payload` field value of `null`.
+- The `payload` field is a byte array representing the serialized payload associated with the `responseCode`.
 
 ### Commands
 
-This section defines the command functions available to STTP. Commands that expect a response define _command channel_ functions and commands that do not expect a response define _data channel_ functions.
+The following table defines the commands available to STTP. Commands that expect a response define the command channel functions, those that do not define the data channel functions.
 
-| Code | Function | Source | Response | Description |
+| Code | Command | Source | Response | Description |
 |:----:|---------|:------:|:--------:|-------------|
-| 0x00 | [NegotiateSession](#negotiate-session-function) | Publisher | Yes | Starts session negotiation of operational modes. |
-| 0x01 | [MetadataRefresh](#metadata-refresh-function) | Subscriber | Yes  | Requests publisher send updated metadata. |
-| 0x02 | [Subscribe](#subscribe-function) | Subscriber | Yes | Defines desired set of data points to begin receiving. |
-| 0x03 | [Unsubscribe](#unsubscribe-function) | Subscriber | Yes | Requests publisher terminate current subscription. |
-| 0x04 | [SecureDataChannel](#secure-data-channel-function)  | Subscriber | Yes | Requests publisher secure the data channel.  |
-| 0x05 | [SignalMapping](#signal-mapping-function) | Publisher | Yes | Response contains data point Guid to run-time ID mappings. |
-| 0x06 | [DataPointPacket](#data-point-packet-function) | Publisher | No | Response contains data points. |
-| 0x0n | etc. | | | |
-| 0xFF | [NoOp](#noop-function) | Both | Yes | Periodic message to allow validation of connectivity. |
+| 0x00 | [NegotiateSession](#negotiate-session-command) | Publisher | Yes | Starts session negotiation for a new connection. |
+| 0x01 | [MetadataRefresh](#metadata-refresh-command) | Subscriber | Yes  | Requests publisher send updated metadata. |
+| 0x02 | [Subscribe](#subscribe-command) | Subscriber | Yes | Defines desired set of data points to begin receiving. |
+| 0x03 | [Unsubscribe](#unsubscribe-command) | Subscriber | Yes | Requests publisher terminate current subscription. |
+| 0x04 | [SecureDataChannel](#secure-data-channel-command)  | Subscriber | Yes | Requests publisher secure the data channel.  |
+| 0x05 | [SignalMapping](#signal-mapping-command) | Publisher | Yes | Defines data point Guid to run-time ID mappings. |
+| 0x06 | [DataPointPacket](#data-point-packet-command) | Publisher | No | Payload contains data points. |
+| 0xFF | [NoOp](#noop-command) | Both | Yes | Periodic message to allow validation of connectivity. |
 
-#### Negotiate Session Function
+> :tomato::question: SEC: _I don't think commands should be so rigidly defined, this prohibits a user from extending the protocol for their specific purpose. These should be GUIDs, or variable length strings. When the protocol enters the negotiate stage, it should negotiate every command that is supported and assign a runtime ID associated with that command. I would prefer variable length strings and require users to prefix their custom defined commands with something. Ex: STTP.NegotiateSession, USER.Special-Command_
+
+> :information_source: JRC: _I suppose the short answer is for simplicity in order to keep the scope of protocol limited. Strings could be used to identify commands as you suggest which might make the wire protocol more human readable, but this seems to have limited value. The benefit of allowing unlimited user commands in the protocol raises many questions in my opinion, any at all opens the possibility of introducing security issues for implementations of the protocol, a separate discussion all together. Perhaps the fundamental question is if allowing the flexibility for STTP implementations to create their own set of low level commands simply for the purposes of RPC is a worthwhile endeavor within the defined scope of the protocol. So if the protocol is designed to exchange time-series data and meta-data then what is the minimum set of commands need to accomplish this task? The original HTTP specification defined three commands GET, POST and HEAD - later versions added a few more, but the others are rarely used. HTTP accomplishes much more than its original design intentions with these three simple commands. The limited set of commands keeps the basic protocol functionality very simple, but does not limit its overall functionality. Most of the "functionality" provided through HTTP happens at a layer that exists above the wire protocol layer. I think the same can be true with STTP, i.e., functionality can be extended at an application and API layer above the wire protocol, even within the constraints of the defined commands._
+
+#### Negotiate Session Command
 
 After a successful connection has been established, the publisher and subscriber will participate in an initial set of negotiations that will determine the STTP protocol version and operational modes of the session. The negotiation happens with the `NegotiateSession` command code which will be the first command sent after a successful publisher/subscriber connection. The command is sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. Once the sessions negotiations for the protocol version and operational modes have been established they will not change for the lifetime of the session.
 
-Session negotiation is a multi-step process with commands being sent by the publisher and responses being sent by the subscriber until negotiation terms are either established or the connection is terminated because terms could not be agreed upon.
+Session negotiation is a multi-step process with commands and responses being sent by the publisher and subscriber until negotiation terms are either established or the connection is terminated because terms could not be agreed upon.
 
 ##### Protocol Version Negotiation
 
-It is possible that future STTP protocol versions will include different session negotiation options, so the first session negotiation step is always to establish the protocol version to use. Immediately after connecting, the publisher will start the protocol version negotiation process by sending the `NegotiateSession` command to the subscriber that will contain information on the available protocol versions that the publisher supports. The subscriber will be waiting for this initial publisher command; if the subscriber does not receive the command in a timely fashion (time interval controlled by configuration), the subscriber will disconnect.
+> :tomato::question: SEC: _It would be better to version each command, rather than the protocol as a whole. That would allow partial implementations of the protocol to be supported rather than the entire protocol._
+
+> :information_source: JRC: _Keeping the command set small helps with this task too - partial implementation of "features" can also occur at application / API layer _
+
+Future STTP protocol versions can include different session negotiation options, so the first session negotiation step is always to establish the protocol version to use. Immediately after connecting, the publisher will start the protocol version negotiation process by sending the `NegotiateSession` command to the subscriber that will contain information on the available protocol versions that the publisher supports. The subscriber will be waiting for this initial publisher command; if the subscriber does not receive the command in a timely fashion (time interval controlled by configuration), the subscriber will disconnect.
 
 The payload of the first `NegotiateSession` command sent by the publisher will be an instance of the `ProtocolVersions` structure, defined as follows, that iterates the versions of the STTP protocol that are supported:
 
@@ -595,19 +609,19 @@ ProtocolVersions;
 
 Since the current version of this specification only defines details for version 1.0 of STTP, the initial `NegotiateSession` command payload from the publisher will be an instance of the `ProtocolVersions` structure with a `count` value of `1` and a single element `versions` array where `versions[0].major` is `1` and `versions[0].minor` is `0`.
 
-When the first `NegotiateSession` command is received from the publisher, the subscriber will send either a `Succeeded` or `Failed` response indicating its ability to support one of the specified protocol versions.
+When the first `NegotiateSession` command is received from the publisher, the subscriber will send either a `Succeeded` or `Failed` response for the `NegotiateSession` command indicating its ability to support one of the specified protocol versions.
 
 If the subscriber can support one of the protocols specified by the publisher, the `Succeeded` response payload will be an instance of the `ProtocolVersions` structure with a `count` of `1` and a single element `versions` array that indicates the protocol version to be used.
 
 If the subscriber cannot support one of the protocols specified by the publisher, the `Failed` response payload will be an instance of the `ProtocolVersions` structure filled out with the supported protocols. In case of failure, both the publisher and subscriber should terminate the connection since no protocol version could be agreed upon.
 
-When a `Succeeded` response for the first `NegotiateSession` command is received from the subscriber, the publisher will validate the subscriber selected protocol version. If the publisher does not agree with the protocol version selected by the subscriber, the publisher will send a `Failed` response with an empty payload and terminate the connection since no protocol version could be agreed upon. If the publisher accepts the subscriber selected protocol version, the negotiation will continue with the selection of operational modes.
+When a `Succeeded` response for the first `NegotiateSession` command is received from the subscriber, the publisher will validate the subscriber selected protocol version. If the publisher does not agree with the protocol version selected by the subscriber, the publisher will send a `Failed` response for the `NegotiateSession` command with an empty payload and terminate the connection since no protocol version could be agreed upon. If the publisher accepts the subscriber selected protocol version, the negotiation will continue with the selection of operational modes.
 
 After sending a `Succeeded` response to the first `NegotiateSession` command, the subscriber will be waiting for either a `Failed` response from the publisher or the second `NegotiateSession` command; if the subscriber does not receive a command or response in a timely fashion (time interval controlled by configuration), the subscriber will disconnect.
 
 ##### Operational Modes Negotiation
 
-For version `1.0` of STTP, if the protocol version negotiation step succeeds the next negotiation will be for the desired operational modes. The payload of the second `NegotiateSession` command sent by the publisher will be an instance of the `OperationalModes` structure, defined as follows, that iterates the supported string encodings, if UDP broadcasts are allowed and available stateful and stateless [compression algorithms](Compression.md#compression):
+For version `1.0` of STTP, if the protocol version negotiation step succeeds, the next negotiation will be for the desired operational modes. The payload of the second `NegotiateSession` command sent by the publisher will be an instance of the `OperationalModes` structure, defined as follows, that iterates the supported string encodings, if UDP broadcasts are allowed and available stateful and stateless compression algorithms (see [Compression Algorithms](Compression.md#compression)):
 
 ```C
 enum {
@@ -633,37 +647,47 @@ OperationalModes;
 - The `statefulCompressionAlgorithms` field defines the [`NamedVersions`](Definitions.md#namedversions-structure) representing the algorithms to use for stateful compression operations.
 - The `statelessCompressionAlgorithms` field defines the [`NamedVersions`](Definitions.md#namedversions-structure) representing the algorithms to use for stateless compression operations.
 
-When the second `NegotiateSession` command is received from the publisher, the subscriber will send either a `Succeeded` or `Failed` response indicating its ability to support a subset of the specified operational modes.
+When the second `NegotiateSession` command is received from the publisher, the subscriber will send either a `Succeeded` or `Failed` response for the `NegotiateSession` command indicating its ability to support a subset of the specified operational modes.
 
 If the subscriber can support a subset of the operational modes allowed by the publisher, the `Succeeded` response payload will be an instance of the `OperationalModes` structure with the specific values for the `encodings`, `udpPort`, `statefulCompressionAlgorithms` and `statelessCompressionAlgorithms` fields. The `encodings` field should specify a single flag designating the string encoding to use and both the `statefulCompressionAlgorithms` and `statelessCompressionAlgorithms` fields should define a `count` of `1` and a single element array that indicates the [compression algorithm](Compression.md#compression) to be used where a named value of `NONE` with a version of `0.0` indicates that no compression should be used.
 
 If the subscriber cannot support a subset of the operational modes allowed by the publisher, the `Failed` response payload will be an instance of the `OperationalModes` structure filled out with the supported operational modes. In case of failure, both the publisher and subscriber should terminate the connection since no protocol version could be agreed upon.
 
-When a `Succeeded` response for the second `NegotiateSession` command is received from the subscriber, the publisher will validate the subscriber selected operational modes. If the publisher does not agree with the operational modes selected by the subscriber, the publisher will send a `Failed` response with an empty payload and terminate the connection since no operational modes could be agreed upon. If the publisher accepts the subscriber selected operational modes, then the publisher will send a `Succeeded` response with an empty payload and the publisher will consider the session negotiations to be completed successfully.
+When a `Succeeded` response for the second `NegotiateSession` command is received from the subscriber, the publisher will validate the subscriber selected operational modes. If the publisher does not agree with the operational modes selected by the subscriber, the publisher will send a `Failed` response for the `NegotiateSession` command with an empty payload and terminate the connection since no operational modes could be agreed upon. If the publisher accepts the subscriber selected operational modes, then the publisher will send a `Succeeded` response for the `NegotiateSession` command with an empty payload and the publisher will consider the session negotiations to be completed successfully.
 
 After sending a `Succeeded` response to the second `NegotiateSession` command, the subscriber will be waiting for either a `Succeeded` or `Failed` response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber will disconnect.
 
-If the subscriber receives a `Succeeded` response from the publisher, the subscriber will consider the session negotiations to be completed successfully.
+If the subscriber receives a `Succeeded` response for the `NegotiateSession` command from the publisher, the subscriber will consider the session negotiations to be completed successfully.
 
-#### Metadata Refresh Function
+#### Metadata Refresh Command
 
 * Wire Format: Binary
   * Includes current metadata version number
 
-#### Subscribe Function
+#### Subscribe Command
 
 * Wire Format: Binary
   * Includes metadata expression and/or individual Guids for desired data points
 
-#### Unsubscribe Function
+#### Unsubscribe Command
+
+The subscriber will issue an `Unsubscribe` with an empty payload to stop any existing data subscription.
+
+Upon reception of the `Unsubscribe` command from a subscriber, the publisher will immediately cease publication of `DataPointPacket` commands to the specific subscriber that issued the command; also, the publisher will send a `Succeeded` response for the `Unsubscribe` command with an empty payload. If for any reason the publisher cannot terminate the subscription, the publisher will send a `Failed` response for the `Unsubscribe` command with a string based payload, encoded according to the pre-negotiated subscriber string encoding, that describes the reason the subscription cannot be terminated.
+
+After sending an `Unsubscribe` command to the publisher, the subscriber will be waiting for either a `Succeeded` or `Failed` response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect and not attempt to send further commands to stop the data subscription.
+
+If the subscriber receives a `Failed` response for the `Unsubscribe` command from the publisher, the subscriber should disconnect and not attempt to send further commands to stop the data subscription.
+
+Upon reception of a `Succeeded` response for the `Unsubscribe` command from the publisher, the subscriber should consider any cached signal mapping previously received from the publisher to now be invalid - accordingly any allocated memory for the cache should now be released.
+
+> :wrench: With reception of the `Succeeded` response for the `Unsubscribe` command the subscriber can be assured that the publisher has stopped sending further `DataPointPacket` commands, however, STTP implementations should anticipate that some data packets could still arrive depending on how much data was already queued for transmission. This may be more evident when a lossy communications protocol, e.g., UDP, is being used for data channel functionality and the `Succeeded` response for the `Unsubscribe` command is received on a reliable communications protocol, e.g., TCP.
+
+#### Secure Data Channel Command
 
   * Wire Format: Binary
 
-#### Secure Data Channel Function
-
-  * Wire Format: Binary
-
-#### Data Point Packet Function
+#### Data Point Packet Command
 
 * Wire Format: Binary
   * Includes a byte flag indicating content, e.g.:
@@ -673,26 +697,34 @@ If the subscriber receives a `Succeeded` response from the publisher, the subscr
 
 > :information_source: The data point packet commands are sent continuously after a successful `subscribe` command and will continue to flow for available measurements until an `unsubscribe` command is issued.
 
-#### Signal Mapping Function
+#### Signal Mapping Command
 
 * Wire Format: Binary
   * Includes a mapping of data point Guids to run-time signal IDs
   * Includes per data point ownership state, rights and delivery characteristic details
 
-#### NoOp Function
+#### NoOp Command
 
-When data channel functions are operating over a lossy communications protocol, e.g., UDP, and command channel functions are operating over a reliable communications protocol, e.g., TCP, then command channel activity may remain quiet for some time. To make sure the connection for the command channel is still established the `NoOp` function allows a periodic test of connectivity.
+When data channel functions are operating over a lossy communications protocol, e.g., UDP, and command channel functions are operating over a reliable communications protocol, e.g., TCP, then command channel activity may remain quiet for some time. To make sure the connection for the command channel is still established the `NoOp` command allows for a periodic test of connectivity.
 
-The `NoOp` function is always sent with an empty payload. The command is designed to be sent over the command channel on a configurable schedule. For implementations of STTP, when the command is sent any exceptions are monitored such that if there are any then the command channel connection can be reestablished.
+The `NoOp` command will be initiated by either the publisher or subscriber, in this case the command _sender_, whereby the other party will be the command _receiver_. The `NoOp` command is always sent with an empty payload and is designed to be sent over a reliable communications channel, e.g., TCP, on a configurable schedule.
+
+Upon reception of the `NoOp` command from a sender, the receiver will send a `Succeeded` response for the `NoOp` command with an empty payload.
+
+After sending an `NoOp` command to the receiver, the sender will be waiting for a `Succeeded` response from the receiver; if the sender does not receive a response in a timely fashion (time interval controlled by configuration), the sender will disconnect. If the sender uses a client-style socket, the sender should reestablish the connection cycle.
+
+Upon reception of a `Succeeded` response for the `NoOp` command from the receiver, the sender should consider the connection valid and reset the timer for the next `NoOp` test.
+
+> :wrench: For implementations of STTP the `NoOp` command will be used to test that the reliable communications channel is still available. Implementations will check for exceptions that occur during transmission of the command as well as timeouts due to lack of responses, in either case the communications channel can be considered failed and placed back into a connection cycle state.
 
 ### Responses
 
-This section the responses to commands that can be sent by STTP. Currently the only defined responses will be `Succeeded` or `Failed`. The payload of response message depends on the command code the message is in response to.
+The following table defines the responses to commands that can be sent by STTP. Currently the only defined responses will be `Succeeded` or `Failed`. The payload of response message depends on the command code the message is in response to.
 
 | Code | Type | Source | Description |
-|:----:|----------|:------:|-------------|
-| 0x80 | [Succeeded](#succeeded-response) | Any | Command request succeeded. Response success details follow. |
-| 0x81 | [Failed](#failed-response) | Any | Command request failed. Response error details follow. |
+|:----:|------|:------:|-------------|
+| 0x80 | [Succeeded](#succeeded-response) | Any | Command request succeeded. Response success payload, if any, included. |
+| 0x81 | [Failed](#failed-response) | Any | Command request failed. Response error payload, if any, included. |
 
 #### Succeeded Response
 
@@ -982,7 +1014,11 @@ The negotiation process specifies both the stateful compression algorithm to use
 
 The following compression algorithms are expected to always be available for STTP implementations such that a minimal set of compression algorithms will always be available for a publisher/subscription connection session negotiation.
 
-> :wrench: TLS includes options to allow for payload level compression algorithms. When using TLS security and an STTP defined compression option, reference implementations should not allow compression options for TLS should to also be enabled.
+> :wrench: TLS includes options to allow for payload level compression algorithms. When STTP implementations are configured with TLS security and an STTP defined compression option, the implementations should not allow TLS compression options to also be enabled.
+
+Any compression algorithms used by STTP may not increase the content length by more than `1,024` bytes. If the decompression function is used with a compressed data packet that would decompress to a length greater than `16,384` bytes, it must report a decompression failure error.
+
+> :information_source: The `2^14` upper limit for decompressed buffers is the maximum payload size allowed by STTP.
 
 #### No Compression
 
@@ -1372,7 +1408,7 @@ The Time-series Special Compression algorithm (TSSC) was specifically designed f
 
 TSSC is a stateful compression algorithm is intended to be used when the STTP data channel functions are established with a reliable transport protocol, e.g., TCP.
 
-Fundamentally TSSC works by applying simple XOR based compression techniques and only sending bits of data that have changed since the last saved state. Although many compression algorithms use this technique for compression, TSSC achieves high compression ratios with the same techniques by taking advantage of the data point structure in use by STTP, i.e., that data points are based on a fixed set of elements, specifically an identifier, a timestamp, a set of quality flags and a value block. From a stateful compression perspective, each of these structural elements can be treated as four separate compression streams and handled differently based on their nature and repeating patterns in the continuous data.
+Fundamentally TSSC works by applying simple XOR based compression techniques and only sending bits of data that have changed since the last saved state. Although many compression algorithms use this technique for compression, TSSC achieves high compression ratios with the same techniques by taking advantage of the data point structure in use by STTP, i.e., that data points are based on a fixed set of elements, specifically an identifier, a timestamp, a set of quality flags and a value block. From a stateful compression perspective, each of these structural elements can be treated as four separate compression streams and handled differently based on their homogeneous nature and repeating patterns in the continuous data.
 
 Contributing to the compression algorithm's success is that streaming data has a tendency to have some level of sequencing. For example one measured value will often follow another where a new measured value will have a timestamp that will have only slightly changed since the last measurement. Also, if the measurements are taken very rapidly, the difference in the actual measured value may also be small. By taking advantage of these non-entropic states for individual structure elements, compression is improved.
 
