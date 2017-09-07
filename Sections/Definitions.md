@@ -163,3 +163,36 @@ NamedVersions;
 ```
 - The `count` field defines the total number of elements in the `items` array.
 - The `items` field is an array of [`NamedVersion`](#namedversion-structure) structures.
+
+##### uint15 Structure
+
+Represents a 15 bit unsigned integer that will be serialized as 1 or 2 bytes, depending on the value of the integer:
+
+```C
+struct {
+  uint16 value; //Where value <= 32767
+  
+  byte[] Save()
+  {
+    if (value <= 127)
+    {
+       return new byte[] {(byte) value}
+    }
+    else
+    {
+       return new byte[] {(byte)((value & 127) + 128), (byte)(value >> 7)};
+    }
+  }
+  void Load(byte[] data)
+  {
+    if (data[0] <= 127)
+    {
+       value = data[0];
+    }
+    else
+    {
+       value = (data[0] - 128) | (data[1] << 7);
+    }
+  }
+}
+```
