@@ -78,7 +78,7 @@ Validation of self-signed client certificates are similar to those for CA signed
 
 When a UDP data channel is in use and needs to be secured, it is expected that it will be associated with a command channel that is secured using TLS. With communications for the command channel already secured, it will be safe to exchange encryption keys that can be used to secure the UDP traffic.
 
-STTP will secure UDP traffic using the AES encryption algorithm and a 256-bit publisher generated symmetric encryption key that will be provided to the subscriber over the TLS secured command channel.
+STTP will secure UDP traffic using the AES encryption algorithm and a 256-bit publisher generated symmetric encryption key and initialization vector that will be provided to the subscriber over the TLS secured command channel, see the [Secure Data Channel Command](#secure-data-channel-command).
 
 > :construction: Update text above with link to the proper subscriber command request that establishes data channel security for UDP connections.
 

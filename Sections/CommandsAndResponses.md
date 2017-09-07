@@ -19,11 +19,11 @@ Payloads in STTP are defined as a byte arrays prefixed by an unsigned 16-bit int
   uint8[] payload;
 ```
 
-Empty payloads have a `length` value of `0` and a `payload` value of `null`. When serialized, an empty payload would be represented by only a `0x00` value for the length.
+Empty payloads have a `length` value of `0` and a `payload` value of `null`. When serialized, an empty payload would be represented by only a `0x0000` value for the length.
 
 #### Command Structure
 
-Commands are used to manage primary STTP functionality. The following defines the binary format of a `Command`:
+Commands are used to manage primary STTP functionality. The following defines the binary format of a `Command`, see [Figure 3](#user-content-figure2) for an example:
 
 ```C
 struct {
@@ -36,6 +36,15 @@ Command;
 - The `commandCode` field defines the command code value for the command message, see defined [command codes](Commands.md#commands).
 - The `length` field defines the length of the `payload` in bytes.
 - The `payload` field is a byte array representing the serialized payload associated with the `commandCode`.
+
+<a name="figure3"></a> <center>
+
+**Example Command Structure for a `DataPointPacket`**
+
+![Mapping Data Structure Elements to Data Points](Images/command-structure.png)
+
+<sup>Figure 3</sup>
+</center>
 
 #### Response Structure
 
