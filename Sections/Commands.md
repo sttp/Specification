@@ -142,7 +142,7 @@ SymmetricSecurity;
 
 Upon the publisher sending the `Succeeded` response for the `SecureDataChannel` command, all data function payloads for commands and responses sent by the publisher to the subscriber over the lossy communications protocol will be encrypted using the AES symmetric encryption algorithm with a key size of 256 using the specified subscriber key and initialization vector.
 
-After sending a `SecureDataChannel` command to the publisher, the subscriber will be waiting for either a `Succeeded` or `Failed` response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect and not attempt to send further commands to stop the data subscription.
+After sending a `SecureDataChannel` command to the publisher, the subscriber will be waiting for either a `Succeeded` or `Failed` response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber will disconnect.
 
 If the subscriber receives a `Failed` response for the `SecureDataChannel` command from the publisher, the subscriber should disconnect and not attempt to subscribe to data.
 
