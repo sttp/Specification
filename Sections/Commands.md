@@ -13,10 +13,9 @@ The following table defines the commands available to STTP. Commands that expect
 | 0x06 | [DataPointPacket](#data-point-packet-command) | Publisher | No | Payload contains data points. |
 | 0xFF | [NoOp](#noop-command) | Both | Yes | Periodic message to allow validation of connectivity. |
 
-> :tomato: SEC: _I don't think commands should be so rigidly defined, this prohibits a user from extending the protocol
-> for their specific purpose. These should be GUIDs, or variable length strings. When the protocol enters the negotiate stage,
-> it should negotiate every command that is supported and assign a runtime ID associated with that command. I would prefer variable
-> length strings and require users to prefix their custom defined commands with something. Ex: STTP.NegotiateSession, USER.Special_Command_
+> :tomato::question: SEC: _I don't think commands should be so rigidly defined, this prohibits a user from extending the protocol for their specific purpose. These should be GUIDs, or variable length strings. When the protocol enters the negotiate stage, it should negotiate every command that is supported and assign a runtime ID associated with that command. I would prefer variable length strings and require users to prefix their custom defined commands with something. Ex: STTP.NegotiateSession, USER.Special-Command_
+
+> :information_source: JRC: _I suppose the short answer is for simplicity in order to keep the scope of protocol limited. Strings could be used to identify commands as you suggest which might make the wire protocol more human readable, but this seems to have limited value. The benefit of allowing unlimited user commands in the protocol raises many questions in my opinion, any at all opens the possibility of introducing security issues for implementations of the protocol, a separate discussion all together. Perhaps the fundamental question is if allowing the flexibility for STTP implementations to create their own set of low level commands simply for the purposes of RPC is a worthwhile endeavor within the defined scope of the protocol. So if the protocol is designed to exchange time-series data and meta-data then what is the minimum set of commands need to accomplish this task? The original HTTP specification defined three commands GET, POST and HEAD - later versions added a few more, but the others are rarely used. HTTP accomplishes much more than its original design intentions with these three simple commands. The limited set of commands keeps the basic protocol functionality very simple, but does not limit its overall functionality. Most of the "functionality" provided through HTTP happens at a layer that exists above the wire protocol layer. I think the same can be true with STTP, i.e., functionality can be extended at an application and API layer above the wire protocol, even within the constraints of the defined commands._
 
 #### Negotiate Session Command
 
@@ -26,8 +25,9 @@ Session negotiation is a multi-step process with commands and responses being se
 
 ##### Protocol Version Negotiation
 
-> :tomato: SEC: _It would be better to version each command, rather than the protocol as a whole. 
-> That would allow partial implementations of the protocol to be supported rather than the entire protocol._
+> :tomato::question: SEC: _It would be better to version each command, rather than the protocol as a whole. That would allow partial implementations of the protocol to be supported rather than the entire protocol._
+
+> :information_source: JRC: _Keeping the command set small helps with this task too - partial implementation of "features" can also occur at application / API layer _
 
 Future STTP protocol versions can include different session negotiation options, so the first session negotiation step is always to establish the protocol version to use. Immediately after connecting, the publisher will start the protocol version negotiation process by sending the `NegotiateSession` command to the subscriber that will contain information on the available protocol versions that the publisher supports. The subscriber will be waiting for this initial publisher command; if the subscriber does not receive the command in a timely fashion (time interval controlled by configuration), the subscriber will disconnect.
 
