@@ -2,7 +2,7 @@
 
 Compression algorithms used with STTP can be either stateful, i.e., the compressor maintains its state through all compressed records, or stateless, i.e., the compressor compresses each data packet independently.
 
-Stateful compression algorithms will provide the best possible compression for STTP data transmission but will require use of a reliable transport protocol, e.g., TCP. Stateless compression methods will be required when an unreliable transport protocol is being used for data transmission, e.g., UDP.
+Stateful compression algorithms will provide the best possible compression for STTP data transmission but will require use of a reliable transport protocol, e.g., TCP. Stateless compression methods will be required when a lossy transport protocol is being used for data transmission, e.g., UDP.
 
 ### Compression Algorithms
 
