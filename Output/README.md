@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.1.31 - September 7, 2017
+**Version:** 0.1.32 - September 8, 2017
 
 **Status:** Initial Development
 
@@ -132,10 +132,12 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 | [**endianess**](https://en.wikipedia.org/wiki/Endianness) | The hardware prescribed ordinal direction of the bits used to represent a numerical value in computer memory; usually noted as either _big-endian_ or _little-endian_. |
 | [**endpoint**](https://en.wikipedia.org/wiki/Communication_endpoint) | A combination of an IP address (or hostname) and port number that represents a unique identification for establishing communications on an IP network. Endpoints, along with an IP transport protocol, are used by a socket to establish inter-device network communications. <br/> Also called _network endpoint_. |
 | [**Ethernet**](https://en.wikipedia.org/wiki/Ethernet) | Frame based data transmission technology used in local area networks. |
+| [**encryption key**](https://en.wikipedia.org/wiki/Key_%28cryptography%29) | A set of numbers that are used by an encryption algorithm to transform data into form that cannot be easily interpreted without knowing the key.  |
 | [**firewall**](https://en.wikipedia.org/wiki/Firewall_%28computing%29) | A security system used on a computer network, existing as software on an operating system or a standalone hardware appliance, used to control the ingress and egress of network communication paths , i.e., access to endpoints, based on a configured set of rules. Security zones between networks are established using firewalls to limit accessible resources between _secure_ internal networks and _untrusted_ external networks, like the Internet. |
 | [**fragmentation**](https://en.wikipedia.org/wiki/IP_fragmentation) | A process in computer networking that breaks frames into smaller fragments, called packets, that can pass over a network according to an MTU size limit. Fragments are reassembled by the receiver. <br/> Also called _network fragmentation_ |
 | [**gateway**](https://en.wikipedia.org/wiki/Gateway_%28telecommunications%29) | A network system used to handle multi-protocol data exchange on the edge of a network boundary. For this specification, an edge system that uses STTP to bidirectionally exchange data with another system that uses STTP. |
 | [**hostname**](https://en.wikipedia.org/wiki/Hostname) | A human readable label used in a computer network that maps to an IP address. A hostname can be used instead of an IP address to establish a socket connection for inter-device network communications. Resolution of a hostname to its IP address is handled by a DNS service which is defined as part of a system's IP configuration. |
+| [**initialization vector**](https://en.wikipedia.org/wiki/Initialization_vector) | A set of random numbers used to initialize an encryption algorithm to reduce recognizable patterns in encrypted data. |
 | [**IP address**](https://en.wikipedia.org/wiki/IP_address) | An unsigned integer, either 32-bits for version 4 addresses or 128-bits for version 6 address, used to uniquely identify all devices connected to a computer network using Internet Protocol. The address combined with a port number creates a unique endpoint that is used by a socket to establish a communications channel on a host system. |
 | [**IP transport protocol**](https://en.wikipedia.org/wiki/Transport_layer) | An established set of governing principals that define the rules and behaviors for the transmission of data between two entities when using Internet Protocol. The most commonly used IP transport protocols are TCP and UDP. |
 | **measurement** |  |
@@ -276,6 +278,29 @@ NamedVersions;
 ```
 - The `count` field defines the total number of elements in the `items` array.
 - The `items` field is an array of [`NamedVersion`](#namedversion-structure) structures.
+
+##### 15-bit Encoding
+
+The following functions take an unsigned 16-bit integer and apply a 15-bit encoding scheme that will serialize the provided 16-bit unsigned integer as either 1 or 2 bytes, depending on its value:
+
+```C
+// Values greater than 32767 will return null
+uint8[] Encode15Bits(uint16 value) {
+  if (value <= 127)
+    return { (uint8)value };
+  else if (value <= 32767)
+    return { (uint8)((value & 127) + 128), (uint8)(value >> 7) };
+
+  return null;
+}
+
+uint16 Decode15Bits(uint8[] data) {
+  if (data[0] <= 127)
+    return data[0];
+
+  return (uint16)(data[0] - 128) | (uint16)(data[1] << 7);
+}
+```
 
 ## Protocol Overview
 
@@ -498,7 +523,7 @@ Validation of self-signed client certificates are similar to those for CA signed
 
 When a UDP data channel is in use and needs to be secured, it is expected that it will be associated with a command channel that is secured using TLS. With communications for the command channel already secured, it will be safe to exchange encryption keys that can be used to secure the UDP traffic.
 
-STTP will secure UDP traffic using the AES encryption algorithm and a 256-bit publisher generated symmetric encryption key that will be provided to the subscriber over the TLS secured command channel.
+STTP will secure UDP traffic using the AES encryption algorithm and a 256-bit publisher generated symmetric encryption key and initialization vector that will be provided to the subscriber over the TLS secured command channel, see the [Secure Data Channel Command](#secure-data-channel-command).
 
 > :construction: Update text above with link to the proper subscriber command request that establishes data channel security for UDP connections.
 
@@ -525,11 +550,11 @@ Payloads in STTP are defined as a byte arrays prefixed by an unsigned 16-bit int
   uint8[] payload;
 ```
 
-Empty payloads have a `length` value of `0` and a `payload` value of `null`. When serialized, an empty payload would be represented by only a `0x00` value for the length.
+Empty payloads have a `length` value of `0` and a `payload` value of `null`. When serialized, an empty payload would be represented by only a `0x0000` value for the length.
 
 #### Command Structure
 
-Commands are used to manage primary STTP functionality. The following defines the binary format of a `Command`:
+Commands are used to manage primary STTP functionality. The following defines the binary format of a `Command`, see [Figure 4](#user-content-figure4) for an example:
 
 ```C
 struct {
@@ -542,6 +567,15 @@ Command;
 - The `commandCode` field defines the command code value for the command message, see defined [command codes](Commands.md#commands).
 - The `length` field defines the length of the `payload` in bytes.
 - The `payload` field is a byte array representing the serialized payload associated with the `commandCode`.
+
+<a name="figure4"></a> <center>
+
+**Example Command Structure for a [`DataPointPacket`](Commands.md#data-point-packet-command)**
+
+![Mapping Data Structure Elements to Data Points](Images/command-structure.png)
+
+<sup>Figure 4</sup>
+</center>
 
 #### Response Structure
 
@@ -576,10 +610,6 @@ The following table defines the commands available to STTP. Commands that expect
 | 0x06 | [DataPointPacket](#data-point-packet-command) | Publisher | No | Payload contains data points. |
 | 0xFF | [NoOp](#noop-command) | Both | Yes | Periodic message to allow validation of connectivity. |
 
-> :tomato::question: SEC: _I don't think commands should be so rigidly defined, this prohibits a user from extending the protocol for their specific purpose. These should be GUIDs, or variable length strings. When the protocol enters the negotiate stage, it should negotiate every command that is supported and assign a runtime ID associated with that command. I would prefer variable length strings and require users to prefix their custom defined commands with something. Ex: STTP.NegotiateSession, USER.Special-Command_
-
-> :information_source: JRC: _I suppose the short answer is for simplicity in order to keep the scope of protocol limited. Strings could be used to identify commands as you suggest which might make the wire protocol more human readable, but this seems to have limited value. The benefit of allowing unlimited user commands in the protocol raises many questions in my opinion, any at all opens the possibility of introducing security issues for implementations of the protocol, a separate discussion all together. Perhaps the fundamental question is if allowing the flexibility for STTP implementations to create their own set of low level commands simply for the purposes of RPC is a worthwhile endeavor within the defined scope of the protocol. So if the protocol is designed to exchange time-series data and meta-data then what is the minimum set of commands need to accomplish this task? The original HTTP specification defined three commands GET, POST and HEAD - later versions added a few more, but the others are rarely used. HTTP accomplishes much more than its original design intentions with these three simple commands. The limited set of commands keeps the basic protocol functionality very simple, but does not limit its overall functionality. Most of the "functionality" provided through HTTP happens at a layer that exists above the wire protocol layer. I think the same can be true with STTP, i.e., functionality can be extended at an application and API layer above the wire protocol, even within the constraints of the defined commands._
-
 #### Negotiate Session Command
 
 After a successful connection has been established, the publisher and subscriber will participate in an initial set of negotiations that will determine the STTP protocol version and operational modes of the session. The negotiation happens with the `NegotiateSession` command code which will be the first command sent after a successful publisher/subscriber connection. The command is sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. Once the sessions negotiations for the protocol version and operational modes have been established they will not change for the lifetime of the session.
@@ -587,10 +617,6 @@ After a successful connection has been established, the publisher and subscriber
 Session negotiation is a multi-step process with commands and responses being sent by the publisher and subscriber until negotiation terms are either established or the connection is terminated because terms could not be agreed upon.
 
 ##### Protocol Version Negotiation
-
-> :tomato::question: SEC: _It would be better to version each command, rather than the protocol as a whole. That would allow partial implementations of the protocol to be supported rather than the entire protocol._
-
-> :information_source: JRC: _Keeping the command set small helps with this task too - partial implementation of "features" can also occur at application / API layer _
 
 Future STTP protocol versions can include different session negotiation options, so the first session negotiation step is always to establish the protocol version to use. Immediately after connecting, the publisher will start the protocol version negotiation process by sending the `NegotiateSession` command to the subscriber that will contain information on the available protocol versions that the publisher supports. The subscriber will be waiting for this initial publisher command; if the subscriber does not receive the command in a timely fashion (time interval controlled by configuration), the subscriber will disconnect.
 
@@ -659,6 +685,8 @@ After sending a `Succeeded` response to the second `NegotiateSession` command, t
 
 If the subscriber receives a `Succeeded` response for the `NegotiateSession` command from the publisher, the subscriber will consider the session negotiations to be completed successfully.
 
+Once operational modes have been established for a session, the publisher and subscriber will exchange any string based payloads using the negotiated string encoding as specified by the subscriber.
+
 #### Metadata Refresh Command
 
 * Wire Format: Binary
@@ -673,7 +701,7 @@ If the subscriber receives a `Succeeded` response for the `NegotiateSession` com
 
 The subscriber will issue an `Unsubscribe` with an empty payload to stop any existing data subscription.
 
-Upon reception of the `Unsubscribe` command from a subscriber, the publisher will immediately cease publication of `DataPointPacket` commands to the specific subscriber that issued the command; also, the publisher will send a `Succeeded` response for the `Unsubscribe` command with an empty payload. If for any reason the publisher cannot terminate the subscription, the publisher will send a `Failed` response for the `Unsubscribe` command with a string based payload, encoded according to the pre-negotiated subscriber string encoding, that describes the reason the subscription cannot be terminated.
+Upon reception of the `Unsubscribe` command from a subscriber, the publisher will immediately cease publication of `DataPointPacket` commands to the specific subscriber that issued the command; also, the publisher will send a `Succeeded` response for the `Unsubscribe` command with an empty payload. If for any reason the publisher cannot terminate the subscription, the publisher will send a `Failed` response for the `Unsubscribe` command with a string based payload that describes the reason the subscription cannot be terminated.
 
 After sending an `Unsubscribe` command to the publisher, the subscriber will be waiting for either a `Succeeded` or `Failed` response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect and not attempt to send further commands to stop the data subscription.
 
@@ -685,7 +713,41 @@ Upon reception of a `Succeeded` response for the `Unsubscribe` command from the 
 
 #### Secure Data Channel Command
 
-  * Wire Format: Binary
+When data channel functions that are operating over a lossy communications protocol, e.g., UDP, and command channel functions are operating over a reliable communications protocol, e.g., TCP, that has been secured with TLS, then the subscriber can request that data channel functions can be secured by issuing a `SecureDataChannel` command.
+
+The `SecureDataChannel` command should only be issued when a lossy communications protocol, e.g., UDP has been defined for data channel functions. If a subscriber issues the `SecureDataChannel` command for a session that has not defined a lossy communications protocol for data channel functions, the publisher will send a `Failed` response for the `SecureDataChannel` command with a string based payload that indicates that data channel functions can only be secured when a lossy communications protocol has been established. This error condition should equally apply when UDP broadcasts are not supported by the publisher.
+
+The `SecureDataChannel` command should only be issued when command channel functions are already secured using TLS. If a subscriber issues the `SecureDataChannel` command for a session with a command channel connection that has not been secured using TLS, the publisher will send a `Failed` response for the `SecureDataChannel` command with a string based payload that indicates that data channel functions can only be secured when command channel functions already secured using TLS.
+
+The `SecureDataChannel` command should be issued prior to the `Subscribe` command to ensure data channel functions are secured before transmission of `DataPointPacket` commands. If a subscriber issues the `SecureDataChannel` command for a session that already has an active subscription, the publisher will send a `Failed` response for the `SecureDataChannel` command with a string based payload that indicates that data channel functions cannot be secured after a subscription has already been initiated.
+
+If data channel functions can be secured, the publisher will send a `Succeeded` response for the `SecureDataChannel` command with a payload that will be an instance of the `SymmetricSecurity` structure, defined as follows, that establishes the symmetric encryption keys and associated initialization vector used to secure the data channel:
+
+```C
+struct {
+  uint16 ivLength;
+  uint8[] iv;
+  uint16 keyLength;
+  uint8[] key;
+}
+SymmetricSecurity;
+```
+- The `ivLength` field defines the length of the `iv` in bytes.
+- The `iv` field is a byte array representing the initialization vector.
+- The `keyLength` field defines the length of the `key` in bytes.
+- The `key` field is a byte array representing the encryption key.
+
+Upon the publisher sending the `Succeeded` response for the `SecureDataChannel` command, all data function payloads for commands and responses sent by the publisher to the subscriber over the lossy communications protocol will be encrypted using the AES symmetric encryption algorithm with a key size of 256 using the specified subscriber key and initialization vector.
+
+After sending a `SecureDataChannel` command to the publisher, the subscriber will be waiting for either a `Succeeded` or `Failed` response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber will disconnect.
+
+If the subscriber receives a `Failed` response for the `SecureDataChannel` command from the publisher, the subscriber will disconnect.
+
+> :wrench: Failure responses from the publisher will either be from a configuration mismatch or an order of operations issue, STTP implementations should make subscribers aware of the possible exception causes so that the issue can be corrected.
+
+Upon reception of a `Succeeded` response for the `SecureDataChannel` command from the publisher, the subscriber will take the received key and initialization vector and decrypt each payload received over the lossy communications protocol using the AES symmetric encryption algorithm with a key size of 256.
+
+> :wrench: It is presumed that communications over a lossy communications protocol, e.g., UDP, will flow from the publisher to the subscriber. If an implementation of STTP is ever established such traffic would flow from the subscriber to the publisher over a lossy communications channel, then this traffic would need to be encrypted by the subscriber and decrypted by the publisher.
 
 #### Data Point Packet Command
 
@@ -711,7 +773,7 @@ The `NoOp` command will be initiated by either the publisher or subscriber, in t
 
 Upon reception of the `NoOp` command from a sender, the receiver will send a `Succeeded` response for the `NoOp` command with an empty payload.
 
-After sending an `NoOp` command to the receiver, the sender will be waiting for a `Succeeded` response from the receiver; if the sender does not receive a response in a timely fashion (time interval controlled by configuration), the sender will disconnect. If the sender uses a client-style socket, the sender should reestablish the connection cycle.
+After sending a `NoOp` command to the receiver, the sender will be waiting for a `Succeeded` response from the receiver; if the sender does not receive a response in a timely fashion (time interval controlled by configuration), the sender will disconnect. If the sender uses a client-style socket, the sender should reestablish the connection cycle.
 
 Upon reception of a `Succeeded` response for the `NoOp` command from the receiver, the sender should consider the connection valid and reset the timer for the next `NoOp` test.
 
