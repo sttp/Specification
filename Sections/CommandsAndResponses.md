@@ -23,7 +23,7 @@ Empty payloads have a `length` value of `0` and a `payload` value of `null`. Whe
 
 #### Command Structure
 
-Commands are used to manage primary STTP functionality. The following defines the binary format of a `Command`, see [Figure 4](#user-content-figure3) for an example:
+Commands are used to manage primary STTP functionality. The following defines the binary format of a `Command`, see [Figure 4](#user-content-figure4) for an example:
 
 ```C
 struct {
