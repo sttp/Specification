@@ -101,15 +101,19 @@ Code is also shown `inline` as well.
 
 This specification deals with the serialization and representation of data in external contexts. To help describe the format of the data a high-level programming syntax will be used. The syntax resembles the "C" programming language, however its purpose is to be illustrative and not language accurate.
 
+#### Comments
+
+Code comments in this specification begin with `//` and continue to the end of the line. Optionally comments can be represented as beginning with `/*` and ending with `*/`.
+
 #### Numeric Types
 
-Representation of all data types is explicitly specified. The most fundamental unit of data is one byte, i.e., 8-bits. The basic numeric data type is an unsigned byte called a `uint8`. All larger numeric data types are multi-byte values encoded as a contiguous sequence of bytes. The following numeric types are predefined:
+Representation of all data types is explicitly specified. The most fundamental unit of data is one byte, i.e., 8-bits. The basic numeric data type is an unsigned byte, called a `uint8`, which represents integers between 0 and 255. All larger numeric data types are multi-byte values encoded as a contiguous sequence of bytes. The following numeric types are predefined:
 
 ```C
-  uint8 uint16[2];
-  uint8 uint24[3];
-  uint8 uint32[4];
-  uint8 uint64[8];
+  uint8 uint16[2]; // Represents integers between 0 and 65,535
+  uint8 uint24[3]; // Represents integers between 0 and 16,777,215
+  uint8 uint32[4]; // Represents integers between 0 and 4,294,967,295
+  uint8 uint64[8]; // Represents integers between 0 and 18,446,744,073,709,551,615
 ```
 
 #### Enumerated Types
@@ -122,7 +126,7 @@ To represent an enumerated set of possible values, a numeric type is defined cal
     Green = 1,
     Blue = 2
   }
-  Colors;
+  Color;
 ```
 
 Unless otherwise specified, all enumerated types are considered unsigned.
@@ -136,10 +140,6 @@ When extracted from a stream of bytes on a system whose native byte-ordering is 
 ```C
   uint32 value = buffer[0] << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
 ```
-
-#### Comments
-
-Code comments in this specification begin with `//` and continue to the end of the line. Optionally comments can be represented as beginning with `/*` and ending with `*/`.
 
 #### Common Structures
 
