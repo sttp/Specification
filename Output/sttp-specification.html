@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.1.33 - September 9, 2017</p>
+<p><strong>Version:</strong> 0.1.34 - September 11, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -898,11 +898,8 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <h4 id="built-upon-a-proven-approach">Built Upon A Proven Approach</h4>
 <p>STTP will enhance the successful design elements of the Gateway Exchange Protocol (GEP) as a foundation and improve upon it. GEP is currently in production use by Dominion, Entergy, MISO, PeakRC, TVA, FP&amp;L, Southern Company, among others.</p>
 <h2 id="definitions-and-nomenclature">Definitions and Nomenclature</h2>
-<blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Please add liberally to this section as terms are introduced in the spec</p>
-</blockquote>
-<h3 id="definition-of-key-terms">Definition of Key Terms</h3>
 <p>The words "must", "must not", "required", "shall", "shall not", "should", "should not", "recommended", "may", and "optional" in this document are to be interpreted as described in RFC 2119 <sup>[<a href="#ref3">3</a>]</sup>.</p>
+<h3 id="definition-of-key-terms">Definition of Key Terms</h3>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> All the terms below are hyperlinked to a key source for the definition or to a reference where more information is available.</p>
 </blockquote>
@@ -1173,17 +1170,31 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> (author's initials): <em>May be used by anyone to toss out questions and comments that are temporal. These may be inserted at any point in any of the markdown documents.  These questions will preserved as they are migrated to the <a href="https://github.com/sttp/Specification/blob/master/Sections/QuestionsSummary.md">QuestionsSummary.md</a> file from time-to-time.</em></p>
 </blockquote>
 <p>Code blocks are shown as:</p>
-<pre><code class="C language-C">    void DisplayHelloWorld()
-    {
+<pre><code class="C language-C">    void DisplayHelloWorld() {
         printf("Hello World!");
     }</code></pre>
 <p>Code is also shown <code>inline</code> as well.</p>
 <h3 id="presentation-language">Presentation Language</h3>
 <p>This specification deals with the serialization and representation of data in external contexts. To help describe the format of the data a high-level programming syntax will be used. The syntax resembles the "C" programming language, however its purpose is to be illustrative and not language accurate.</p>
+<h4 id="numeric-types">Numeric Types</h4>
+<p>Representation of all data types is explicitly specified. The most fundamental unit of data is one byte, i.e., 8-bits. The basic numeric data type is an unsigned byte called a <code>uint8</code>. All larger numeric data types are multi-byte values encoded as a contiguous sequence of bytes. The following numeric types are predefined:</p>
+<pre><code class="C language-C">  uint8 uint16[2];
+  uint8 uint24[3];
+  uint8 uint32[4];
+  uint8 uint64[8];</code></pre>
+<h4 id="enumerated-types">Enumerated Types</h4>
+<p>To represent an enumerated set of possible values, a numeric type is defined called an <code>enum</code>. An enumerated type can only represent its defined values. Every element of an enumerated type must be assigned a value, as a result values can be defined in any order. Importantly, an enumerated type will only occupy space needed for its maximum defined value when serialized. For example, the following enumerated type would only require one byte:</p>
+<pre><code class="C language-C">  enum {
+    Red = 0,
+    Green = 1,
+    Blue = 2
+  }
+  Colors;</code></pre>
+<p>Unless otherwise specified, all enumerated types are considered unsigned.</p>
 <h4 id="standard-endianness">Standard Endianness</h4>
-<p>Representation of all data types is explicitly specified. The most fundamental unit of data is one byte, i.e., 8-bits. Multi-byte data items are encoded as a sequence of contiguous bytes, from left to right when shown horizontally or from top to bottom when shown vertically. Unless otherwise specified, byte-ordering for encoded multi-byte values, e.g., a binary representation of integer values, will always be in big-endian order.</p>
+<p>When multi-byte data items are encoded as a sequence of contiguous bytes, they are shown from left to right when described horizontally or from top to bottom when described vertically. Unless otherwise specified, byte-ordering for encoded multi-byte values will always be in big-endian order, i.e., common network byte order.</p>
 <p>When extracted from a stream of bytes on a system whose native byte-ordering is little-endian, a multi-byte item, e.g., a 32-bit integer value, could be decoded as follows:</p>
-<pre><code class="C language-C">    uint32 value = buffer[0] &lt;&lt; 24 | buffer[1] &lt;&lt; 16 | buffer[2] &lt;&lt; 8 | buffer[3];</code></pre>
+<pre><code class="C language-C">  uint32 value = buffer[0] &lt;&lt; 24 | buffer[1] &lt;&lt; 16 | buffer[2] &lt;&lt; 8 | buffer[3];</code></pre>
 <h4 id="comments">Comments</h4>
 <p>Code comments in this specification begin with <code>//</code> and continue to the end of the line. Optionally comments can be represented as beginning with <code>/*</code> and ending with <code>*/</code>.</p>
 <h4 id="common-structures">Common Structures</h4>
@@ -1224,7 +1235,9 @@ NamedVersions;</code></pre>
 <li>The <code>count</code> field defines the total number of elements in the <code>items</code> array.</li>
 <li>The <code>items</code> field is an array of <a href="#namedversion-structure"><code>NamedVersion</code></a> structures.</li>
 </ul>
-<h5 id="15-bit-encoding">15-bit Encoding</h5>
+<h4 id="common-functions">Common Functions</h4>
+<p>The following common functions are predefined for use within other STTP functions.</p>
+<h5 id="15-bit-encoding-functions">15-bit Encoding Functions</h5>
 <p>The following functions take an unsigned 16-bit integer and apply a 15-bit encoding scheme that will serialize the provided 16-bit unsigned integer as either 1 or 2 bytes, depending on its value:</p>
 <pre><code class="C language-C">// Values greater than 32767 will return null
 uint8[] Encode15Bits(uint16 value) {
@@ -1398,12 +1411,12 @@ uint16 Decode15Bits(uint8[] data) {
 }
 Command;</code></pre>
 <ul>
-<li>The <code>commandCode</code> field defines the command code value for the command message, see defined <a href="Commands.md#commands">command codes</a>.</li>
+<li>The <code>commandCode</code> field defines the command code value for the command message, see defined <a href="#commands">command codes</a>.</li>
 <li>The <code>length</code> field defines the length of the <code>payload</code> in bytes.</li>
 <li>The <code>payload</code> field is a byte array representing the serialized payload associated with the <code>commandCode</code>.</li>
 </ul>
 <p><a name="figure4"></a> <center></p>
-<p><strong>Example Command Structure for a <a href="Commands.md#data-point-packet-command"><code>DataPointPacket</code></a></strong></p>
+<p><strong>Example Command Structure for a <a href="#data-point-packet-command"><code>DataPointPacket</code></a></strong></p>
 <p><img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/command-structure.png" alt="Mapping Data Structure Elements to Data Points" /></p>
 <p><sup>Figure 4</sup><br />
 </center></p>
@@ -1417,8 +1430,8 @@ Command;</code></pre>
 }
 Response;</code></pre>
 <ul>
-<li>The <code>responseCode</code> field defines the response code value for the response message, see defined <a href="Responses.md#responses">response codes</a>.</li>
-<li>The <code>commandCode</code> field defines the command code value that this message is in response to, see defined <a href="Commands.md#commands">command codes</a>.</li>
+<li>The <code>responseCode</code> field defines the response code value for the response message, see defined <a href="#responses">response codes</a>.</li>
+<li>The <code>commandCode</code> field defines the command code value that this message is in response to, see defined <a href="#commands">command codes</a>.</li>
 <li>The <code>length</code> field defines the length of the <code>payload</code> in bytes.</li>
 <li>The <code>payload</code> field is a byte array representing the serialized payload associated with the <code>responseCode</code>.</li>
 </ul>
@@ -1522,7 +1535,7 @@ ProtocolVersions;</code></pre>
   UTF8 = 1 &lt;&lt; 2,
   Unicode  = 1 &lt;&lt; 3
 }
-Encodings;
+Encodings; // sizeof(uint8)
 
 struct {
   Encodings encodings;
@@ -1647,9 +1660,9 @@ SymmetricSecurity;</code></pre>
 </tbody>
 </table>
 <h4 id="succeeded-response">Succeeded Response</h4>
-<p>A response with a type <code>Succeeded</code> is intended to represent a successful reply for a command function. See associated <a href="Commands.md#commands">command code</a> for proper response payload.</p>
+<p>A response with a type <code>Succeeded</code> is intended to represent a successful reply for a command function. See associated <a href="#commands">command code</a> for proper response payload.</p>
 <h4 id="failed-response">Failed Response</h4>
-<p>A response with a type <code>Failed</code> is intended to represent a failure reply for a command function. See associated <a href="Commands.md#commands">command code</a> for proper response payload.</p>
+<p>A response with a type <code>Failed</code> is intended to represent a failure reply for a command function. See associated <a href="#commands">command code</a> for proper response payload.</p>
 <h2 id="data-point-structure">Data Point Structure</h2>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Lead with paragraph on purpose / value of the section - (1) what is a data point structure and (2) why have a data point structure / value? Next paragraph would be contents of section...</p>
@@ -1879,7 +1892,7 @@ would require access to a repository that would maintain this data.
 <p>Compression algorithms used with STTP can be either stateful, i.e., the compressor maintains its state through all compressed records, or stateless, i.e., the compressor compresses each data packet independently.</p>
 <p>Stateful compression algorithms will provide the best possible compression for STTP data transmission but will require use of a reliable transport protocol, e.g., TCP. Stateless compression methods will be required when a lossy transport protocol is being used for data transmission, e.g., UDP.</p>
 <h3 id="compression-algorithms">Compression Algorithms</h3>
-<p>STTP is designed so that new compression algorithms can be implemented and used without requiring revisions to the specification. To accommodate this, compression algorithms are negotiated, by text name and numeric version, after a connection is established along with other operational modes for the session. See <a href="Commands.md#negotiate-session-command">session negotiation</a> for more details.</p>
+<p>STTP is designed so that new compression algorithms can be implemented and used without requiring revisions to the specification. To accommodate this, compression algorithms are negotiated, by text name and numeric version, after a connection is established along with other operational modes for the session. See <a href="#negotiate-session-command">session negotiation</a> for more details.</p>
 <p>The negotiation process specifies both the stateful compression algorithm to use as well as the stateless compression algorithm, when applicable.  </p>
 <p>The following compression algorithms are expected to always be available for STTP implementations such that a minimal set of compression algorithms will always be available for a publisher/subscription connection session negotiation.</p>
 <blockquote>
