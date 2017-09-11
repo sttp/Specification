@@ -1,10 +1,8 @@
 ## Definitions and Nomenclature
 
-> :construction: Please add liberally to this section as terms are introduced in the spec
+The words "must", "must not", "required", "shall", "shall not", "should", "should not", "recommended", "may", and "optional" in this document are to be interpreted as described in RFC 2119 <sup>[[3](References.md#user-content-ref3)]</sup>.
 
 ### Definition of Key Terms
-
-The words "must", "must not", "required", "shall", "shall not", "should", "should not", "recommended", "may", and "optional" in this document are to be interpreted as described in RFC 2119 <sup>[[3](References.md#user-content-ref3)]</sup>.
 
 >:information_source: All the terms below are hyperlinked to a key source for the definition or to a reference where more information is available.
 
@@ -92,8 +90,7 @@ Markdown notes in combination with the [Github Emogi](https://gist.github.com/rx
 
 Code blocks are shown as:
 ```C
-    void DisplayHelloWorld()
-    {
+    void DisplayHelloWorld() {
         printf("Hello World!");
     }
 ```
@@ -104,14 +101,40 @@ Code is also shown `inline` as well.
 
 This specification deals with the serialization and representation of data in external contexts. To help describe the format of the data a high-level programming syntax will be used. The syntax resembles the "C" programming language, however its purpose is to be illustrative and not language accurate.
 
+#### Numbers
+
+Representation of all data types is explicitly specified. The most fundamental unit of data is one byte, i.e., 8-bits. The basic numeric data type is an unsigned byte called a `uint8`. All larger numeric data types are multi-byte values encoded as a contiguous sequence of bytes. The following numeric types are predefined:
+
+```C
+  uint8 uint16[2];
+  uint8 uint24[3];
+  uint8 uint32[4];
+  uint8 uint64[8];
+```
+
+#### Enumerated Values
+
+To represent an enumerated set of possible values, a numeric type is defined called an `enum`. An enumerated type can only represent its defined values. Every element of an enumerated type must be assigned a value, as a result values can be defined in any order. Importantly, an enumerated type will only occupy space needed for its maximum defined value when serialized. For example, the following enumerated type would only require one byte:
+
+```C
+  enum {
+    Red = 0,
+    Green = 1,
+    Blue = 2
+  }
+  Colors;
+```
+
+Unless otherwise specified, all enumerated types are considered unsigned.
+
 #### Standard Endianness
 
-Representation of all data types is explicitly specified. The most fundamental unit of data is one byte, i.e., 8-bits. Multi-byte data items are encoded as a sequence of contiguous bytes, from left to right when shown horizontally or from top to bottom when shown vertically. Unless otherwise specified, byte-ordering for encoded multi-byte values, e.g., a binary representation of integer values, will always be in big-endian order.
+When multi-byte data items are encoded as a sequence of contiguous bytes, they are shown from left to right when described horizontally or from top to bottom when described vertically. Unless otherwise specified, byte-ordering for encoded multi-byte values will always be in big-endian order, i.e., common network byte order.
 
 When extracted from a stream of bytes on a system whose native byte-ordering is little-endian, a multi-byte item, e.g., a 32-bit integer value, could be decoded as follows:
 
 ```C
-    uint32 value = buffer[0] << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
+  uint32 value = buffer[0] << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
 ```
 
 #### Comments
@@ -166,7 +189,11 @@ NamedVersions;
 - The `count` field defines the total number of elements in the `items` array.
 - The `items` field is an array of [`NamedVersion`](#namedversion-structure) structures.
 
-##### 15-bit Encoding
+#### Common Functions
+
+The following common functions are predefined for use within other STTP functions.
+
+##### 15-bit Encoding Functions
 
 The following functions take an unsigned 16-bit integer and apply a 15-bit encoding scheme that will serialize the provided 16-bit unsigned integer as either 1 or 2 bytes, depending on its value:
 
