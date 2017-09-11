@@ -29,3 +29,27 @@ Notes and questions will be removed from the documentation at key publication po
 > :tomato::question: SEC: _It would be better to version each command, rather than the protocol as a whole. That would allow partial implementations of the protocol to be supported rather than the entire protocol._
 
 > :information_source: JRC: _Keeping the command set small helps with this task too - partial implementation of "features" can also occur at application / API layer_
+
+#### From DataPointStructure.md - Data Point Structure
+
+
+> :tomato::question: SEC: Rather than require all data to be mapped into a predefined Data Point, the lowest level of the protocol that defines how data is serialized should be a free-form data block that is defined at runtime. Instead, the Data Point Structure should be more like:
+> * C37.118 Data Point Structure
+> * DNP Data Point Structure
+> * ICCP Data Point Structure
+> * IEC 61850-90-5 Data Point Structure
+> * Generic Time-Series Data Point Structure (Original Data Point Structure listed above)
+>
+> At some level, all measurements can be mapped to Generic Time-Series Data Point Structure, but they shouldn't be required to be from the get-go. This would allow the creation of a front-end data transport that could move any kind of time series data in its raw format and the consumer of the data can decide how to translate the data. This also means that these raw protocols could be encapsulated and transported over encrypted channels without requiring a stateful metadata repository to map all measurements to a GUID.
+
+> :thumbsup: JRC: I think this could be supported in an automated process (and perhaps starting with code) found in serialization technologies like Google Protocol Buffers. The openECA style data structure handling has been on my mind as a way to handle "mappings" of other protocols, basically as data structures like you mention. Cannot get away from some sort of Identification of the "instance" of a mapping though - even if the mapping ID defaulted to something simple. At a wire protocol level though, sticking to primitive types helps keep protocol parsing very simple - and- there are just too many other technologies that already exist to serialize data structures- STTP should not be trying to re-solve that problem. A consumer of STTP should be able to parse any packet of data even when what the data represented was unknown.
+
+#### From DataPointStructure.md - Data Point Value Types
+
+> :tomato::question: KEM: _Is decimal the same as float?_
+
+> :bulb: JRC: _Actually "decimal" is an IEEE standard data type, standard 754-2008 - I added that parenthetically above. It's a floating point number that doesn't suffer from typical floating point rounding issues - often used for currency operations. See here for more detail:_ https://en.wikipedia.org/wiki/Decimal_data_type
+
+> :construction: Need to determine safe maximum upper limit of per-packet strings and byte[] data, especially since implementation could simply _span_ multiple data points to collate a larger string or buffer back together.
+
+> :tomato::question: JRC: _Should API automatically handle collation of larger data types, e.g., strings and buffers?_

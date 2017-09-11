@@ -7,7 +7,7 @@
 * Identification - maps to 128-bit Guid, transport mapping should be small
 * Timestamp (required? could simply be a auto-incrementing counter)
 * Value - multiple native types supports
-* Flags - standardize minimal set of simple flags, complex state can be new data point
+* Flags - standardize minimal set of simple flags, complex state can be new data point - should include collation index
 
 > :tomato::question: SEC: Rather than require all data to be mapped into a predefined Data Point, the lowest level of the protocol that defines how data is serialized should be a free-form data block that is defined at runtime. Instead, the Data Point Structure should be more like:
 > * C37.118 Data Point Structure
@@ -22,17 +22,18 @@
 
 ### Data Point Value Types
 
-* Null
-* Byte
-* Int16
-* Int32
-* Int64
-* UInt16
-* UInt32
-* UInt64
-* Decimal (IEEE Standard 754-2008)
-* Double
-* Single
+* `Null`: No space occupied
+* `SByte`: [8-bit Signed Byte](https://en.wikipedia.org/wiki/Byte) (big-endian)
+* `Int16`: [16-bit Signed Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (big-endian)
+* `Int32`: [32-bit Signed Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (big-endian)
+* `Int64`: [64-bit Signed Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (big-endian)
+* `Byte`: [8-bit Unsigned Byte](https://en.wikipedia.org/wiki/Byte) (big-endian)
+* `UInt16`: [16-bit Unsigned Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (big-endian)
+* `UInt32`: [32-bit Unsigned Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (big-endian)
+* `UInt64`: [64-bit Unsigned Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (big-endian)
+* `Decimal`: [128-bit Decimal Floating Point](https://en.wikipedia.org/wiki/Decimal128_floating-point_format) (per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
+* `Double`: [64-bit Double Precision Floating Point](https://en.wikipedia.org/wiki/Double-precision_floating-point_format) (per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
+* `Single`: [32-bit Single Precision Floating Point](https://en.wikipedia.org/wiki/Single-precision_floating-point_format) (per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
 * DateTime (need some thought on proper encoding, perhaps options)
 * TimeSpan (Tick level resolution, or better, would be ideal)
 * Char (2-byte Unicode)

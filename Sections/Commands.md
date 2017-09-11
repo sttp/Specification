@@ -154,6 +154,8 @@ Upon reception of a `Succeeded` response for the `SecureDataChannel` command fro
 
 #### Data Point Packet Command
 
+Data point packet commands are sent without the expectation of a response, as such data point packet commands can be transmitted over a lossy communications protocol, e.g., UDP, and thus suitable for data channel functionality.
+
 * Wire Format: Binary
   * Includes a byte flag indicating content, e.g.:
     * Data compression mode, if any
