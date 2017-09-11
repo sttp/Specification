@@ -54,12 +54,12 @@ For version `1.0` of STTP, if the protocol version negotiation step succeeds, th
 
 ```C
 enum {
-  ASCII = 1 << 0,
-  ANSI = 1 << 1,
-  UTF8 = 1 << 2,
-  Unicode  = 1 << 3
+  ASCII = 0,
+  ANSI = 1 << 0,
+  UTF8 = 1 << 1,
+  Unicode  = 1 << 2
 }
-Encodings; // sizeof(uint8)
+Encodings; // sizeof(uint8), 1-byte
 
 struct {
   Encodings encodings;
@@ -150,7 +150,7 @@ If the subscriber receives a `Failed` response for the `SecureDataChannel` comma
 
 Upon reception of a `Succeeded` response for the `SecureDataChannel` command from the publisher, the subscriber must take the received key and initialization vector and decrypt each payload received over the lossy communications protocol using the AES symmetric encryption algorithm with a key size of 256.
 
-> :wrench: It is presumed that communications over a lossy communications protocol, e.g., UDP, will flow from the publisher to the subscriber. If an implementation of STTP is ever established such traffic would flow from the subscriber to the publisher over a lossy communications channel, then this traffic would need to be encrypted by the subscriber and decrypted by the publisher.
+> :wrench: It is presumed that communications over a lossy communications protocol, e.g., UDP, will flow from the publisher to the subscriber. If an implementation of STTP is ever established such traffic would flow from the subscriber to the publisher over a lossy communications channel, then to be secured, this traffic would need to be encrypted by the subscriber and decrypted by the publisher.
 
 #### Data Point Packet Command
 
