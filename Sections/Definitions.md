@@ -99,21 +99,25 @@ Code is also shown `inline` as well.
 
 ### Presentation Language
 
-This specification deals with the serialization and representation of data in external contexts. To help describe the format of the data a high-level programming syntax will be used. The syntax resembles the "C" programming language, however its purpose is to be illustrative and not language accurate.
+This specification deals with the serialization and representation of data in external contexts. To help describe the format of the data a high-level programming syntax will be used. The syntax used resembles the "C" programming language, however its purpose is to be illustrative and not language accurate.
 
 #### Comments
 
 Code comments in this specification begin with `//` and continue to the end of the line. Optionally comments can be represented as beginning with `/*` and ending with `*/`.
+
+#### Array Types
+
+Any types of data that exist in a series are represented with brackets, i.e., `data[]`, and called arrays. Arrays are defined as a pointer to a block of memory representing the series of data types. Since the array is a pointer, it will be assumed to be pointing to nothing when its value is `null`. An array declared with empty brackets indicates an array of variable size. An array that represents a specific number of elements will be declared with an integer count within the brackets, e.g., `data[2]`. An array with zero elements is considered an empty array.
 
 #### Numeric Types
 
 Representation of all data types is explicitly specified. The most fundamental unit of data is one byte, i.e., 8-bits. The basic numeric data type is an unsigned byte, called a `uint8`, which represents integers between 0 and 255. All larger numeric data types are multi-byte values encoded as a contiguous sequence of bytes. The following numeric types are predefined:
 
 ```C
-  uint8 uint16[2]; // Represents integers between 0 and 65,535
-  uint8 uint24[3]; // Represents integers between 0 and 16,777,215
-  uint8 uint32[4]; // Represents integers between 0 and 4,294,967,295
-  uint8 uint64[8]; // Represents integers between 0 and 18,446,744,073,709,551,615
+  uint8[2] uint16; // Represents integers between 0 and 65,535
+  uint8[3] uint24; // Represents integers between 0 and 16,777,215
+  uint8[4] uint32; // Represents integers between 0 and 4,294,967,295
+  uint8[8] uint64; // Represents integers between 0 and 18,446,744,073,709,551,615
 ```
 
 #### Enumerated Types
