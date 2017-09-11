@@ -101,7 +101,7 @@ Code is also shown `inline` as well.
 
 This specification deals with the serialization and representation of data in external contexts. To help describe the format of the data a high-level programming syntax will be used. The syntax resembles the "C" programming language, however its purpose is to be illustrative and not language accurate.
 
-#### Numbers
+#### Numeric Types
 
 Representation of all data types is explicitly specified. The most fundamental unit of data is one byte, i.e., 8-bits. The basic numeric data type is an unsigned byte called a `uint8`. All larger numeric data types are multi-byte values encoded as a contiguous sequence of bytes. The following numeric types are predefined:
 
@@ -112,7 +112,7 @@ Representation of all data types is explicitly specified. The most fundamental u
   uint8 uint64[8];
 ```
 
-#### Enumerated Values
+#### Enumerated Types
 
 To represent an enumerated set of possible values, a numeric type is defined called an `enum`. An enumerated type can only represent its defined values. Every element of an enumerated type must be assigned a value, as a result values can be defined in any order. Importantly, an enumerated type will only occupy space needed for its maximum defined value when serialized. For example, the following enumerated type would only require one byte:
 

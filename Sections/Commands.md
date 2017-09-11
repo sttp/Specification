@@ -59,7 +59,7 @@ enum {
   UTF8 = 1 << 2,
   Unicode  = 1 << 3
 }
-Encodings;
+Encodings; // sizeof(uint8)
 
 struct {
   Encodings encodings;
