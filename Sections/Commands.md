@@ -50,7 +50,7 @@ After sending a `Succeeded` response to the first `NegotiateSession` command, th
 
 ##### Operational Modes Negotiation
 
-For version `1.0` of STTP, if the protocol version negotiation step succeeds, the next negotiation will be for the desired operational modes. The payload of the second `NegotiateSession` command sent by the publisher shall be an instance of the `OperationalModes` structure, defined as follows, that iterates the supported string encodings, if UDP broadcasts are allowed and available stateful and stateless compression algorithms (see [Compression Algorithms](Compression.md#compression)):
+For version `1.0` of STTP, if the protocol version negotiation step succeeds, the next negotiation will be for the desired operational modes. The payload of the second `NegotiateSession` command sent by the publisher shall be an instance of the `OperationalModes` structure, defined as follows, that iterates the supported string encodings, whether UDP broadcasts are allowed and the available stateful and stateless compression algorithms (see [compression algorithms](Compression.md)):
 
 ```C
 enum {
@@ -78,7 +78,7 @@ OperationalModes;
 
 When the second `NegotiateSession` command is received from the publisher, the subscriber shall send either a `Succeeded` or `Failed` response for the `NegotiateSession` command indicating its ability to support a subset of the specified operational modes.
 
-If the subscriber can support a subset of the operational modes allowed by the publisher, the `Succeeded` response payload shall be an instance of the `OperationalModes` structure with the specific values for the `encodings`, `udpPort`, `statefulCompressionAlgorithms` and `statelessCompressionAlgorithms` fields. The `encodings` field should specify a single flag designating the string encoding to use and both the `statefulCompressionAlgorithms` and `statelessCompressionAlgorithms` fields should define a `count` of `1` and a single element array that indicates the [compression algorithm](Compression.md#compression) to be used where a named value of `NONE` with a version of `0.0` indicates that no compression should be used.
+If the subscriber can support a subset of the operational modes allowed by the publisher, the `Succeeded` response payload shall be an instance of the `OperationalModes` structure with the specific values for the `encodings`, `udpPort`, `statefulCompressionAlgorithms` and `statelessCompressionAlgorithms` fields. The `encodings` field should specify a single flag designating the string encoding to use and both the `statefulCompressionAlgorithms` and `statelessCompressionAlgorithms` fields should define a `count` of `1` and a single element array that indicates the [compression algorithm](Compression.md) to be used where a named value of `NONE` with a version of `0.0` indicates that no compression should be used.
 
 If the subscriber cannot support a subset of the operational modes allowed by the publisher, the `Failed` response payload shall be an instance of the `OperationalModes` structure filled out with the supported operational modes. In case of failure, both the publisher and subscriber should terminate the connection since no protocol version could be agreed upon.
 
