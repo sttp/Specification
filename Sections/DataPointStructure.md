@@ -24,11 +24,20 @@ enum {
 }
 ValueType; // sizeof(uint8), 1-byte
 
+enum {
+  None = 0,           // No state is defined
+  Timestamp = 1 << 0, // State includes Timestamp
+  Quality = 1 << 1,   // State includes QualityFlags
+  Sequence = 1 << 2,  // State includes sequence number as uint16
+}
+StateFlags;
+
 struct {
   uint32 id;
-  ValueType type; // 1-byte
-  uint8[] value;  // Size based on ValueType
-  uint8[] state;  // Size based on ValueType
+  ValueType type;   // 1-byte
+  StateFlags flags; // 1-byte
+  uint8[] value;    // Size based on type
+  uint8[] state;    // Size based on flags
 }
 DataPoint;
 
