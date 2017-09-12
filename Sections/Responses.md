@@ -1,6 +1,6 @@
 ### Responses
 
-The following table defines the responses to commands that can be sent by STTP. Currently the only defined responses are `Succeeded` or `Failed`. The payload of response message depends on the command code the message is in response to.
+The following table defines the responses to commands that can be sent by STTP. Currently the only defined responses are `Succeeded` or `Failed`. The payload of the response message depends on the command code the message is in response to.
 
 | Code | Type | Source | Description |
 |:----:|------|:------:|-------------|
