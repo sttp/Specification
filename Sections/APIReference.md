@@ -12,7 +12,7 @@ The Core class contains the basic elements of the API.
 * `Disconnect() : void`
     > [Required] terminates a connection.
 * `ValidateConnection() : string`
-    > [Required] validates whether a connection has been successfully established. Returns the connection string, or an empty string if no connection is established. 
+    > [Required] validates whether a connection has been successfully established. Returns the connection string, or an empty string if no connection is established.
 
 ### Data
 The Data class contains elements for querying and manipulating data points (or measurements, if "measurements" is the right term to describe something that has a PointTag on an STTP server).
@@ -35,3 +35,5 @@ The Security class contains elements for querying and manipulating the security 
 The Utility class contains utility methods.
 
 > :bulb: Links to language specific auto-generated XML code comment based API documentation would be useful.
+
+more...
