@@ -149,6 +149,28 @@ When extracted from a stream of bytes on a system whose native byte-ordering is 
 
 The following common code structures are predefined for use within other STTP protocol structures.
 
+##### DateTime2 Structure
+
+Uniquely represent time and supports leap seconds. This structure is designed to work hand in hand with native DateTime structure in .NET. This structure will also sort as expected when encountering a leap second. 
+
+```C
+struct {
+  uint22 days;
+  uint40 ticks;
+  uint2 flags;
+}
+Version;
+```
+- The `days` field defines the number of days that have elapsed since Jan 1, 0001.
+- The `ticks` field defines the number of 100 nanosecond ticks that have elapsed since the start of the day.
+- The `flags` field defines currently unused bits that will be later defined.
+
+In order to properly support leap seconds, the time must be represented in UTC, and the `ticks` field will be >= 864,000,000,000 (The number of ticks in a day). This will represent that 1 second was added to the end of the current day.
+
+The intent of this structure is for the sole purpose of storing and transporting leap second related time. 
+When transformations are done on this structure, it will be converted into a language native type to perform this functions. 
+This will result in a loss of leap second data, but would yield more predictable results. For example: adding 1 minute to 12/31/2006 11:59:03 should not return 1/1/2017 12:00:02, even though that is technically the correct answer.
+
 ##### Version Structure
 
 Represents a versioned entity, e.g., a protocol version, consisting of a byte for the major and minor components of the version:
