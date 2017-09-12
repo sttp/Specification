@@ -25,14 +25,7 @@ enum {
 ValueType; // sizeof(uint8), 1-byte
 
 struct {
-  uint64 value;
-  uint8 flags;
-}
-Timestamp;
-
-struct {
   uint32 id;
-  Timestamp time; // 9-bytes
   ValueType type; // 1-byte
   uint8[] value;  // Size based on ValueType
   uint8[] state;  // Size based on ValueType
@@ -51,6 +44,12 @@ struct {
   uint8[] data; // Maximum size of 63
 }
 BufferValue;
+
+struct {
+  uint64 value;
+  uint8 flags;
+}
+Timestamp;
 
 enum {
   Normal = 0,                 // Defines normal state

@@ -104,6 +104,7 @@ const sectionLinks = [
   /* Special replacements */
   [ "(References.md#", "(#" ],
   [ "(Commands.md#", "(#" ],
+  [ "(DataPointStructure.md#", "(#" ],
   [ "(QuestionsSummary.md)", "(" + viewPath + "Sections/QuestionsSummary.md)" ],
   [ "(../LICENSE)", "(" + viewPath + "LICENSE)" ]
 ];
