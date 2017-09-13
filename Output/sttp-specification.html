@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.1.36 - September 12, 2017</p>
+<p><strong>Version:</strong> 0.1.37 - September 13, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -1032,6 +1032,10 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <td style="text-align:left;">A phasor calculated from data samples using a standard time signal as the reference for the measurement. Synchronized phasors from remote sites have a defined common phase relationship.</td>
 </tr>
 <tr>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Network_switch"><strong>switch</strong></a></td>
+<td style="text-align:left;">A network system, usually existing as a physical hardware, that routes network packets directly to the intended targets. <br/> Also called <em>network switch</em>.</td>
+</tr>
+<tr>
 <td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Time_series"><strong>time series</strong></a></td>
 <td style="text-align:left;">A series of data points indexed in time order, most commonly measured as a sequence taken at successive equally spaced points in time.</td>
 </tr>
@@ -1175,7 +1179,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
     }</code></pre>
 <p>Code is also shown <code>inline</code> as well.</p>
 <h3 id="presentation-language">Presentation Language</h3>
-<p>This specification deals with the serialization and representation of data in external contexts. To help describe the format of the data a high-level programming syntax will be used. The syntax used resembles the "C" programming language, however its purpose is to be illustrative and not language accurate.</p>
+<p>This specification deals with the serialization and representation of data in external contexts. To help describe the format of the data a high-level programming syntax will be used. These formats are intended to represent data as it would be structured for transmission, i.e., on the wire format, and not necessarily that of how the data would be stored in memory. The syntax used resembles the "C" programming language, however its purpose is to be illustrative and not language accurate.</p>
 <h4 id="comments">Comments</h4>
 <p>Code comments in this specification begin with <code>//</code> and continue to the end of the line. Optionally comments can be represented as beginning with <code>/*</code> and ending with <code>*/</code>.</p>
 <h4 id="array-types">Array Types</h4>
@@ -1259,11 +1263,11 @@ uint16 Decode15Bits(uint8[] data) {
 }</code></pre>
 <h2 id="protocol-overview">Protocol Overview</h2>
 <p>STTP is an open, data point centric publish/subscribe transport protocol that can be used to securely exchange time-series style data and automatically synchronize metadata between two applications. The protocol supports sending real-time and historical data at full or down-sampled resolutions. When sending historical data, the replay speed can be controlled dynamically for use in visualizations to enable users to see data faster or slower than recorded in real-time.</p>
-<p>The wire protocol employed by STTP implements a publish/subscribe data exchange model using simple commands with a compressed binary serialization of data points. The protocol does not require a predefined or fixed configuration - that is, the data points values arriving in one data packet can be different than those arriving in another. Each packet of data consists of a collection of data points where each instance is a compact structure containing an ID, a timestamp or sequence, a value and any associated flags.</p>
+<p>The wire protocol employed by STTP implements a publish/subscribe data exchange model using simple commands with a compressed binary serialization of data points. The protocol does not require a predefined or fixed configuration - that is, the data points values arriving in one data packet can be different than those arriving in another. Each packet of data consists of a collection of data points where each instance is a compact structure containing an ID, a timestamp or sequence, a value and any associated state, e.g., quality flags.</p>
 <p>STTP is implemented using functionality called a <em>command channel</em> and a <em>data channel</em>. The actual IP transport protocols for these channels varies based on need, but is often either a single TCP/IP transport for both the command and data channel -or- a TCP/IP based command channel with a UDP/IP based data channel.</p>
 <p>The command channel is used to reliably negotiate session specific required communication, state and protocol parameters. The command channel is also used to authenticate with other STTP instances, exchange metadata on available data points, and request specific data points for subscription. The data channel is used to send compact, binary encoded packets of data points.</p>
-<p>STTP includes strong access control and encryption and is configurable to allow use of private keys in a highly isolated environment. When encryption and strong identity verification is enabled, STTP utilizes standard key management services with X.509 identity certificates for authentication.</p>
-<p>In this section of the STTP specification, first data communication fundamentals are presented that set the boundary conditions for protocol design. These are followed by an introduction to the major components STTP.</p>
+<p>STTP includes strong access control and encryption and is configurable to allow use of private keys in a highly isolated environment. When encryption and strong identity verification is enabled, STTP utilizes standard Transport Layer Security (TLS) with X.509 identity certificates for authentication.</p>
+<p>In this section of the STTP specification, first data communication fundamentals are presented that set the boundary conditions for protocol design. These are followed by an introduction to the major components of STTP.</p>
 <h3 id="background">Background</h3>
 <p>In typical messaging exchange paradigms, a source application hosts a block of structured data, composed in memory, with the intent to transmit the data to one or more receiving applications. The data has <em>structure</em> in the sense that it exists as a collection of simpler primitive data types where each of the data elements is given a name to provide useful context and meaning; most programming languages represent data structures using a primary key word, e.g., <code>class</code> or <code>struct</code>. Before transmission, the data structure must be serialized - this is necessary because the programming language of the source application which hosts the data structure defines the structure in memory using a format that is optimized for use in the application. The process of serializing the data structure causes each of the data elements to be translated into a format that is easily transmitted over a network and is suitable for deserialization by a receiving application.</p>
 <p>The applications that are sending and receiving data structures can be running on the same machine or on different physical hardware with disparate operating systems. As a result, the details of the data structure serialization format can be complex and diverse. Such complexities can include issues with proper handling of the endianness of the primitive data types during serialization which may differ from the system that is deserializing the data, or differences in the interpretation of how character data is encoded <sup>[<a href="#ref6">6</a>]</sup>.</p>
@@ -1272,16 +1276,23 @@ uint16 Decode15Bits(uint8[] data) {
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> For the purposes of this specification, serialized data structures will be referred to as a <em>frames</em>, regardless of the actual binary format.</p>
 </blockquote>
-<p>For smaller sized, discrete data structures, the existing available serialization technologies are very fast and highly effective. However, as the data structures become larger, the process of serialization and deserialization becomes more costly in terms of both memory allocation and computational processing. Because of this, large frames of data are not recommended for use by these serialization technologies <sup>[<a href="#ref9">9</a>]</sup> <sup>[<a href="#ref10">10</a>]</sup>. Additionally, and perhaps more importantly, there are also penalties that occur at the network transport layer.</p>
-<h4 id="data-structure-serialization-in-the-power-industry">Data Structure Serialization in the Power Industry</h4>
-<p>In the electric power industry, the IEEE C37.118 <sup>[<a href="#ref1">1</a>]</sup> protocol exists as a standard serialization format for the exchange of synchrophasor data. Synchrophasor data is typically measured with an accurate time source, e.g., a GPS clock, and transmitted at high-speed data rates, up to 120 frames per second. Measured data sent by this protocol is still simply a frame of serialized primitive types which includes data elements such as a timestamp, status flags, phasor angle / magnitude pairs, etc. The IEEE C37.118 protocol also prescribes the combination of data frames received from multiple source devices for the same timestamp into one large combined frame in a process known as concentration. The concentration process demands that a waiting period be established to make sure all the expected data frames for a given timestamp arrive. If any frames of data do not arrive before the waiting period expires, the overall combined frame is published anyway. Since the frame format is fixed, empty data elements that have no defined value, e.g., NaN or null, still occupy space for the missing frames.</p>
+<p>For smaller sized, discrete data structures, the existing available serialization technologies are very fast and highly effective. However, as the data structures become larger, the process of serialization and deserialization becomes more costly in terms of both memory allocation and computational processing. Because of this, large frames of data are not recommended for use by these serialization technologies <sup>[<a href="#ref9">9</a>]</sup> <sup>[<a href="#ref10">10</a>]</sup>. Additionally, and perhaps more importantly, there are also penalties that occur with large frames at the network transport layer.</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> In the electric power industry, the IEEE C37.118 <sup>[<a href="#ref1">1</a>]</sup> protocol exists as a standard serialization format for the exchange of synchrophasor data. Synchrophasor data is typically measured with an accurate time source, e.g., a GPS clock, and transmitted at high-speed data rates, up to 120 frames per second. Measured data sent by this protocol is still simply a frame of serialized primitive types which includes data elements such as a timestamp, status flags, phasor angle / magnitude pairs, etc. The IEEE C37.118 protocol also prescribes the combination of data frames received from multiple source devices for the same timestamp into one large combined frame in a process known as concentration. The concentration process demands that a waiting period be established to make sure all the expected data frames for a given timestamp arrive. If any frames of data do not arrive before the waiting period expires, the overall combined frame is published anyway. Since the frame format is fixed, empty data elements that have no defined value, e.g., NaN or null, still occupy space for the missing frames.</p>
+</blockquote>
 <h3 id="large-frame-network-impact">Large Frame Network Impact</h3>
-<p>Under the Internet Protocol (IP), all frames of data to be transmitted that exceed the negotiated maximum transmission unit (MTU) size (typically 1,500 bytes for Ethernet networks <sup>[<a href="#ref11">11</a>]</sup>) are divided into multiple fragments where each fragment is called a network packet, see <a href="#figure1">Figure 1</a>.</p>
+<p>For the Internet Protocol (IP), all frames of data to be transmitted that exceed the negotiated maximum transmission unit (MTU) size (typically 1,500 bytes for Ethernet networks <sup>[<a href="#ref11">11</a>]</sup>) are divided into multiple fragments where each fragment is called a network packet, see <a href="#figure1">Figure 1</a>.</p>
 <p><a name="figure1"></a> <center></p>
 <p><img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/packet-fragmentation.png" alt="Packet Fragmentation" /></p>
 <p><sup>Figure 1</sup><br />
 </center></p>
-<p>Since IP is inherently unreliable, the impact of large frames on an IP network can be determined by the number of network packets required to send the frame.  Network packets can only be transmitted over a connection one packet at a time; when two or more network packets arrive for transmission at the same time on any physical network media, the result is a collision. When a collision occurs, only one packet gets sent and the others get dropped <sup>[<a href="#ref12">12</a>]</sup>. IP defines a variety of different transport protocols for network packet transmission, each of which behave in different manners when dealing with packet loss. Consequently, many of the impacts a large frame has on an IP network is dependent upon the transport protocol used to send the frame.</p>
+<p>Since IP is inherently unreliable, the impact of large frames on an IP network can be determined by the number of network packets required to send the frame.</p>
+<p>Network packets can only be transmitted over a connection one packet at a time; when two or more network packets arrive for transmission at the same time on any physical network media, the result is a collision. When a collision occurs, only one packet gets sent and the others get dropped <sup>[<a href="#ref12">12</a>]</sup>.</p>
+<p>Collisions, however, are generally a thing of the past as common network infrastructure now uses <em>switch</em> based technology with physical links that are full-duplex with no shared channels making collisions impossible, but heavy network traffic can cause similar issues. When two or more devices are simultaneously transmitting data at high speed to a single device, the switch can find itself in a position where it cannot send all the traffic to the destination port. This is not considered a collision, but the result will often be the same, dropped packets.</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> Switch technology can also allow for a <em>pause</em> frame that is used for flow control at the Ethernet layer. When the connected devices have enabled support for the pause frame, the frame is normally sent when the device is overloaded with data. In this case the data will get buffered by the senders inducing delays, but if send buffers are filled to capacity the result is still the same, dropped packets.</p>
+</blockquote>
+<p>IP defines a variety of different transport protocols for network packet transmission, each of which behave in different manners when dealing with packet loss. Consequently, many of the impacts a large frame has on an IP network is dependent upon the transport protocol used to send the frame.</p>
 <h4 id="large-frame-impacts-on-tcpip">Large Frame Impacts on TCP/IP</h4>
 <p>The most common Internet protocol, TCP/IP, creates an index for each of the network packets being sent for a frame of data and verifies that each are successfully delivered, retransmitting packets as many times as needed in the case of loss. This functionality is the basis for TCP being considered a <em>reliable</em> data transmission protocol.</p>
 <p>Since each packet of data for the transmitted frame is sequentially ordered, TCP is able to fully reconstruct and deliver the original frame once all the packets have arrived. However, for very large frames of data this causes TCP to suffer from the same kinds of impacts on memory allocation and computational burden as the aforementioned serialization technologies, i.e., Protocol Buffers and Thrift. The unique distinction for IP based protocols is that at some level, these issues also affect every element of the interconnected network infrastructure between the source and sync of the data being exchanged.</p>
@@ -1322,7 +1333,7 @@ uint16 Decode15Bits(uint8[] data) {
 <p>Although it will be common for use cases that demand a protocol like STTP, e.g., transmission of large data sets with variable availability at high speeds, to be deployed in environments that are not bandwidth constrained - simple testing has shown that deviation based compression techniques that have negligible processing impact can yield overall bandwidth requirements for STTP that are equal to or less than other serialization technologies, even when carrying extra information. For synchrophasor data, tests have shown data point serializations to have less than half the bandwidth requirements of IEEE C37.118 <sup>[<a href="#ref1">1</a>]</sup> when used over TCP with simple stateful methods for lossless compression <sup>[<a href="#ref5">5</a>]</sup>.</p>
 <p>Bandwidth requirements for STTP can often be further lowered by reducing the amount of data being transmitted. For most data structure serialization technologies and protocols, the very process of packaging and sending data in the form of data structures means that some data ends up being transmitted that is not used nor needed by receiving applications. Data reduction for these technologies means creating smaller data structures where it can be costly to maintain separate configuration models for multiple data structures just to achieve bandwidth improvements. Since STTP is designed as a publish / subscribe technology, a receiving application can choose to subscribe to only the individual data points it needs.</p>
 <h4 id="data-point-level-publish--subscribe">Data Point Level Publish / Subscribe</h4>
-<p>STTP intrinsically manages data at its most fundamental level, primitive types. Each uniquely identified primitive type value represents some form of physical measurement. When measured with periodicity and associated with a timestamp at the moment of measurement, the resulting sequence of measured values and associated timestamps are known as <em>time series</em> data. Since data points that are serialized by STTP can include time as part the state information for a value, STTP can be considered a time series data transmission protocol. However, the state information for values being transmitted is flexible - what is <em>time</em> for one data point could simply be a <em>sequence</em> for another. Additionally, the existence of some data points can be temporal, for example, to exchange a set of binary data, a temporary data point ID may be created that only exists until the binary data transfer is complete.</p>
+<p>STTP intrinsically manages data at its most fundamental level, primitive types, see <a href="#data-point-value-types">data point value types</a>. Each uniquely identified primitive type value represents some form of physical measurement. When measured with periodicity and associated with a timestamp at the moment of measurement, the resulting sequence of measured values and associated timestamps are known as <em>time series</em> data. Since data points that are serialized by STTP can include time as part the state information for a value, STTP can be considered a time series data transmission protocol. However, the state information for values being transmitted is flexible - what is <em>time</em> for one data point could simply be a <em>sequence</em> for another. Additionally, the existence of some data points can be temporal, for example, to exchange a set of binary data, a temporary data point ID may be created that only exists until the binary data transfer is complete.</p>
 <p>STTP uses a publish / subscribe based model for control of the data to be exchanged. This exchange is managed at the data point level where data sourced at a sending application, i.e., the <em>publisher</em>, makes a set of data points available for publication. A receiving application, i.e., the <em>subscriber</em>, will select a subset of the available points for subscription. As new data is made available at the publisher, the subset of the data as selected by the subscriber is transmitted.</p>
 <h5 id="data-point-metadata">Data Point Metadata</h5>
 <p>A critical part of the publish / subscribe process is defining the data points that are available for subscription. An STTP publisher will define a tabular list of available data point identifiers and associated descriptive information as the <em>metadata</em> that is available to a subscriber.</p>
@@ -1342,7 +1353,7 @@ uint16 Decode15Bits(uint8[] data) {
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> UDP only style deliveries, either unicast or multicast, of data using STTP can only be accommodated with substantial capability restrictions. That is, with no reliable command channel, consumers of STTP data provided over a UDP only connection would be subject to publisher established formats, content and resolution of the data being delivered. Alternately, establishment of a UDP based command channel would require adjustments in protocol behavior to accommodate failures to send command requests and/or receive responses due to lack of delivery guarantees.  While it is expected that with the right set of initial assumptions and capability restrictions that STTP could effectively operate with a UDP only connection, the main text of this specification will intentionally remain silent on such details for the sake of simplicity, clarity and brevity.</p>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Add an appendix to discuss how a UDP only STTP transmission should work so that needed caveats and capability restrictions can be established for this behavior. Describing this operation is important given that UDP only data transmissions for synchrophasors is widely used in production environments today. UDP only deployments, e.g., multicast, can also be very useful in lab environments for simplicity in data distribution. Regardless of the veracity and logic for the technical arguments that can be made to not use UDP, either by itself or in combination with TCP, by not defining the protocol behavior in these modes of operation there is increased risk of the protocol not being initially adopted or accepted. Having these behaviors documented will help alleviate any non-standard implementations that may crop up otherwise. Reference implementations will be adjusted to accommodate these use-cases as time allows, however UDP options will be implemented at lower priority. During code development, UDP use cases will be kept in-mind such that future iterations of the reference implementations can accommodate UDP based behaviors and functionality more readily.</p>
 </blockquote>
-<p>All STTP connections shall be established using standard IP sockets. The actual details of establishing a socket connection are specific to an operating system and ultimately the programming language being used. However, the minimum information needed to create a socket is (1) an endpoint, i.e., the IP address and port number, (2) the desired IP transport protocol, e.g., TCP or UDP, and (3) the type connection to be established, i.e., a <em>server-style</em> socket or a <em>client-style</em> socket. A server-style socket is one that listens for connections from clients. A client-style socket is one that connects to a listening server socket. Client-style sockets are always the <em>initiators</em> of any given connection, i.e., client sockets always "make the call" to server sockets to begin communications.</p>
+<p>For STTP connections that are established using standard IP sockets, the actual details of establishing a socket connection are specific to an operating system and ultimately the programming language being used. However, the minimum information needed to create a socket is (1) an endpoint, i.e., the IP address and port number, (2) the desired IP transport protocol, e.g., TCP or UDP, and (3) the type connection to be established, i.e., a <em>server-style</em> socket or a <em>client-style</em> socket. A server-style socket is one that listens for connections from clients. A client-style socket is one that connects to a listening server socket. Client-style sockets are always the <em>initiators</em> of any given connection, i.e., client sockets always "make the call" to server sockets to begin communications.</p>
 <h3 id="forward-connections">Forward Connections</h3>
 <p>Under typical conditions STTP publishers, as data providers, will use server-style listening sockets, and STTP subscribers, as data consumers, will use client-style sockets to initiate connections to a publisher's listening socket. Establishing a server-style socket for a publisher and client-style sockets for any subscribers describes a connectivity model for STTP that is called a <em>forward connection</em>. Forward connections are expected to be the normal use case for STTP publisher/subscriber connections. However, for an STTP connection it does not matter which party, publisher or subscriber, is the server or the client from a socket perspective.</p>
 <h3 id="reverse-connections">Reverse Connections</h3>
@@ -1635,7 +1646,7 @@ SymmetricSecurity;</code></pre>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> For implementations of STTP the <code>NoOp</code> command will be used to test that the reliable communications channel is still available. Implementations will check for exceptions that occur during transmission of the command as well as timeouts due to lack of responses, in either case the communications channel can be considered failed and placed back into a connection cycle state.</p>
 </blockquote>
 <h3 id="responses">Responses</h3>
-<p>The following table defines the responses to commands that can be sent by STTP. Currently the only defined responses are <code>Succeeded</code> or <code>Failed</code>. The payload of response message depends on the command code the message is in response to.</p>
+<p>The following table defines the responses to commands that can be sent by STTP. Currently the only defined responses are <code>Succeeded</code> or <code>Failed</code>. The payload of the response message depends on the command code the message is in response to.</p>
 <table>
 <thead>
 <tr>
@@ -1687,18 +1698,20 @@ SymmetricSecurity;</code></pre>
 }
 ValueType; // sizeof(uint8), 1-byte
 
-struct {
-  uint64 value;
-  uint8 flags;
+enum {
+  None = 0,           // No state is defined
+  Timestamp = 1 &lt;&lt; 0, // State includes Timestamp
+  Quality = 1 &lt;&lt; 1,   // State includes QualityFlags
+  Sequence = 1 &lt;&lt; 2,  // State includes sequence number as uint16
 }
-Timestamp;
+StateFlags;
 
 struct {
   uint32 id;
-  Timestamp time; // 9-bytes
-  ValueType type; // 1-byte
-  uint8[] value;  // Size based on ValueType
-  uint8[] state;  // Size based on ValueType
+  ValueType type;   // 1-byte
+  StateFlags flags; // 1-byte
+  uint8[] value;    // Size based on type
+  uint8[] state;    // Size based on flags
 }
 DataPoint;
 
@@ -1714,6 +1727,12 @@ struct {
   uint8[] data; // Maximum size of 63
 }
 BufferValue;
+
+struct {
+  uint64 value;
+  uint8 flags;
+}
+Timestamp;
 
 enum {
   Normal = 0,                 // Defines normal state
@@ -2220,7 +2239,7 @@ Publisher will likely want to validate size of historical requests, or least thr
 <li><code>Disconnect() : void</code><br />
 &gt; [Required] terminates a connection.</li>
 <li><code>ValidateConnection() : string</code><br />
-&gt; [Required] validates whether a connection has been successfully established. Returns the connection string, or an empty string if no connection is established. </li>
+&gt; [Required] validates whether a connection has been successfully established. Returns the connection string, or an empty string if no connection is established.</li>
 </ul>
 <h3 id="data">Data</h3>
 <p>The Data class contains elements for querying and manipulating data points (or measurements, if "measurements" is the right term to describe something that has a PointTag on an STTP server).</p>
@@ -2243,8 +2262,9 @@ Publisher will likely want to validate size of historical requests, or least thr
 <p>The Utility class contains utility methods.</p>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> Links to language specific auto-generated XML code comment based API documentation would be useful.</p>
-  <h2 id="appendix-c---ieee-c37118-mapping">Appendix C - IEEE C37.118 Mapping</h2>
 </blockquote>
+<p>more...</p>
+<h2 id="appendix-c---ieee-c37118-mapping">Appendix C - IEEE C37.118 Mapping</h2>
 <p>Today most all synchrophasor deployments include IEEE C37.118 in various parts of the infrastructure, this section describes how STTP will be mapped to and from IEEE C37.118 streams so that interoperability can be established with the existing protocol implementations and STTP.</p>
 <h2 id="appendix-d---other-protocol-evaluations">Appendix D - Other Protocol Evaluations</h2>
 <p>Various other standard protocols were evaluated for suitability as a starting point for STTP, most were quickly eliminated for one of the following reasons:</p>
