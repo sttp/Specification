@@ -1,6 +1,6 @@
 ## Data Point Structure
 
-When a subscriber has issued a [subscribe command](Commands.md#subscribe-command) to its publisher for select set of data points, the publisher will start sending [data point packet commands](Commands.md#data-point-packet-commands) each with a payload of several _data point structures_, defined as follows, where the actual number of data point structures contained in the command packet depends the configured maximum payload size and the serialized size of the data point structures:
+When a subscriber has issued a [subscribe command](Commands.md#subscribe-command) to its publisher for select set of data points, the publisher will start sending [data point packet commands](Commands.md#data-point-packet-commands) each with a payload of several _data point_ structures, defined as follows, where the actual number of data point structures contained in the command packet depends the configured maximum payload size and the serialized size of the data point structures:
 
 ```C
 enum {
@@ -25,12 +25,20 @@ enum {
 ValueType; // sizeof(uint8), 1-byte
 
 enum {
-  None = 0,           // No state is defined
-  Timestamp = 1 << 0, // State includes Timestamp
-  Quality = 1 << 1,   // State includes QualityFlags
-  Sequence = 1 << 2,  // State includes sequence number as uint16
+  NoTime = 0, // No timestamp included
+  Unix64 = 1  // Using Unix64Timestamp
+  Ticks = 2,  // Using TicksTimestamp
+  NTP128 = 3  // Using NTP128Timestamp
 }
-StateFlags;
+TimestampType;
+
+enum {
+  None = 0,                 // No state is defined
+  TimestampTypeMask = 0x3;  // Mask for TimestampType
+  Quality = 1 << 2,         // State includes QualityFlags
+  Sequence = 1 << 3,        // State includes sequence number as uint16
+}
+StateFlags; // sizeof(uint8), 1-byte
 
 struct {
   uint32 id;
@@ -54,11 +62,51 @@ struct {
 }
 BufferValue;
 
-struct {
-  uint64 value;
-  uint8 flags;
+enum {
+  Locked = 0x0,                       // Clock locked, Normal operation
+  Failure =  0xF,                     // Clock fault, time not reliable
+  Unlocked10Seconds = 0xB,            // Clock unlocked, time within 10^1s
+  Unlocked1Second = 0xA,              // Clock unlocked, time within 10^0s
+  UnlockedPoint1Seconds = 0x9,        // Clock unlocked, time within 10^-1s
+  UnlockedPoint01Seconds = 0x8,       // Clock unlocked, time within 10^-2s
+  UnlockedPoint001Seconds = 0x7,      // Clock unlocked, time within 10^-3s
+  UnlockedPoint0001Seconds = 0x6,     // Clock unlocked, time within 10^-4s
+  UnlockedPoint00001Seconds = 0x5,    // Clock unlocked, time within 10^-5s
+  UnlockedPoint000001Seconds = 0x4,   // Clock unlocked, time within 10^-6s
+  UnlockedPoint0000001Seconds = 0x3,  // Clock unlocked, time within 10^-7s
+  UnlockedPoint00000001Seconds = 0x2, // Clock unlocked, time within 10^-8s
+  UnlockedPoint000000001Seconds = 0x1 // Clock unlocked, time within 10^-9s
 }
-Timestamp;
+TimeQuality; // 4-bits, 1-nibble
+
+enum {
+  None = 0,
+  TimeQualityMask = 0xF,        // Mask for TimeQuality
+  LeapsecondPending = 1 << 4,   // Set before a leap second occurs and then cleared after
+  LeapsecondOccurred = 1 << 5,  // Set in the first second after the leap second occurs and remains set for 24 hours
+  LeapsecondDirection = 1 << 6, // Clear for add, set for delete
+  Reserved = 1 << 7
+}
+TimestampFlags; // sizeof(uint8), 1-byte
+
+struct {
+  int64 value; // Seconds since 1/1/1970, 292 billion year span
+  TimestampFlags flags;
+}
+Unix64Timestamp; // 9-bytes
+
+struct {
+  int64 value; // 100-nanosecond intervals since 1/1/0001, 32,768 year span
+  TimestampFlags flags;
+}
+TicksTimestamp; // 9-bytes
+
+struct {
+  int64 seconds;    // Seconds since 1/1/1900, 584 billion year span
+  uint64 fraction;  // Resolution down to .05 attoseconds (i.e., 0.5e-18 second)
+  TimestampFlags flags;
+}
+NTP128Timestamp; // 16-bytes
 
 enum {
   Normal = 0,                 // Defines normal state

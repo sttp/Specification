@@ -115,6 +115,10 @@ Any types of data that exist in a series are represented with brackets, i.e., `d
 Representation of all data types is explicitly specified. The most fundamental unit of data is one byte, i.e., 8-bits. The basic numeric data type is an unsigned byte, called a `uint8`, which represents integers between 0 and 255. All larger numeric data types are multi-byte values encoded as a contiguous sequence of bytes. The following numeric types are predefined:
 
 ```C
+  uint8[2] int16;  // Represents integers between -32768 and 32767
+  uint8[3] int24;  // Represents integers between -8,388,608 and 8,388,607
+  uint8[4] int32;  // Represents integers between -2,147,483,648 and 2,147,483,647
+  uint8[8] int64;  // Represents integers between -9,223,372,036,854,775,808 and 9,223,372,036,854,775,807
   uint8[2] uint16; // Represents integers between 0 and 65,535
   uint8[3] uint24; // Represents integers between 0 and 16,777,215
   uint8[4] uint32; // Represents integers between 0 and 4,294,967,295
