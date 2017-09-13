@@ -59,6 +59,7 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 | **GUID** | [Globally Unique Identifer](https://en.wikipedia.org/wiki/Universally_unique_identifier) |
 | **ICCP** | [Inter-Control Center Communications Protocol](https://en.wikipedia.org/wiki/IEC_60870-6) |
 | **IP** | [Internet Protocol](https://en.wikipedia.org/wiki/Internet_Protocol) |
+| **IRIG** | [Inter-range Instrumentation Group Time Codes](https://en.wikipedia.org/wiki/IRIG_timecode) |
 | **ISO** | [Independent System Operator](https://en.wikipedia.org/wiki/Regional_transmission_organization_%28North_America%29) |
 | **MTU** | [Maximum Transmission Unit](https://en.wikipedia.org/wiki/Maximum_transmission_unit) |
 | **NaN** | [Not a Number](https://en.wikipedia.org/wiki/NaN) |
