@@ -26,9 +26,9 @@ ValueType; // sizeof(uint8), 1-byte
 
 enum {
   NoTime = 0, // No timestamp included
-  Unix64 = 1  // Using Unix64Timestamp
-  Ticks = 2,  // Using TicksTimestamp
-  NTP128 = 3  // Using NTP128Timestamp
+  Ticks = 1,  // Using TicksTimestamp - 9-byte 100-nanosecond resolution spanning 32,768 years
+  Unix64 = 2, // Using Unix64Timestamp - 9-byte second resolution spanning 584 billion years
+  NTP128 = 3  // Using NTP128Timestamp - 17-byte attosecond resolution spanning 584 billion years
 }
 TimestampType;
 
@@ -90,23 +90,23 @@ enum {
 TimestampFlags; // sizeof(uint8), 1-byte
 
 struct {
-  int64 value; // Seconds since 1/1/1970, 292 billion year span
-  TimestampFlags flags;
-}
-Unix64Timestamp; // 9-bytes
-
-struct {
-  int64 value; // 100-nanosecond intervals since 1/1/0001, 32,768 year span
+  int64 value; // 100-nanosecond intervals since 1/1/0001, +/-16,384 years
   TimestampFlags flags;
 }
 TicksTimestamp; // 9-bytes
 
 struct {
-  int64 seconds;    // Seconds since 1/1/1900, 584 billion year span
-  uint64 fraction;  // Resolution down to .05 attoseconds (i.e., 0.5e-18 second)
+  int64 value; // Seconds since 1/1/1970, +/-292 billion years
   TimestampFlags flags;
 }
-NTP128Timestamp; // 16-bytes
+Unix64Timestamp; // 9-bytes
+
+struct {
+  int64 seconds;    // Seconds since 1/1/1900, +/-292 billion years
+  uint64 fraction;  // .05 attosecond resolution (i.e., 0.5e-18 second)
+  TimestampFlags flags;
+}
+NTP128Timestamp; // 17-bytes
 
 enum {
   Normal = 0,                 // Defines normal state
