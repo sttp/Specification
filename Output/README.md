@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.1.37 - September 13, 2017
+**Version:** 0.1.38 - September 14, 2017
 
 **Status:** Initial Development
 
@@ -172,6 +172,7 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 | **GUID** | [Globally Unique Identifer](https://en.wikipedia.org/wiki/Universally_unique_identifier) |
 | **ICCP** | [Inter-Control Center Communications Protocol](https://en.wikipedia.org/wiki/IEC_60870-6) |
 | **IP** | [Internet Protocol](https://en.wikipedia.org/wiki/Internet_Protocol) |
+| **IRIG** | [Inter-range Instrumentation Group Time Codes](https://en.wikipedia.org/wiki/IRIG_timecode) |
 | **ISO** | [Independent System Operator](https://en.wikipedia.org/wiki/Regional_transmission_organization_%28North_America%29) |
 | **MTU** | [Maximum Transmission Unit](https://en.wikipedia.org/wiki/Maximum_transmission_unit) |
 | **NaN** | [Not a Number](https://en.wikipedia.org/wiki/NaN) |
@@ -228,10 +229,15 @@ Any types of data that exist in a series are represented with brackets, i.e., `d
 Representation of all data types is explicitly specified. The most fundamental unit of data is one byte, i.e., 8-bits. The basic numeric data type is an unsigned byte, called a `uint8`, which represents integers between 0 and 255. All larger numeric data types are multi-byte values encoded as a contiguous sequence of bytes. The following numeric types are predefined:
 
 ```C
+  uint8[2] int16;  // Represents integers between -32768 and 32767
+  uint8[3] int24;  // Represents integers between -8,388,608 and 8,388,607
+  uint8[4] int32;  // Represents integers between -2,147,483,648 and 2,147,483,647
+  uint8[8] int64;  // Represents integers between -9,223,372,036,854,775,808 and 9,223,372,036,854,775,807
   uint8[2] uint16; // Represents integers between 0 and 65,535
   uint8[3] uint24; // Represents integers between 0 and 16,777,215
   uint8[4] uint32; // Represents integers between 0 and 4,294,967,295
   uint8[8] uint64; // Represents integers between 0 and 18,446,744,073,709,551,615
+  uint8[16] guid;  // Represents a 128-bit globally unique identifier
 ```
 
 #### Enumerated Types
@@ -640,7 +646,7 @@ The following table defines the commands available to STTP. Commands that expect
 | 0x02 | [Subscribe](#subscribe-command) | Subscriber | Yes | Defines desired set of data points to begin receiving. |
 | 0x03 | [Unsubscribe](#unsubscribe-command) | Subscriber | Yes | Requests publisher terminate current subscription. |
 | 0x04 | [SecureDataChannel](#secure-data-channel-command)  | Subscriber | Yes | Requests publisher secure the data channel.  |
-| 0x05 | [SignalMapping](#signal-mapping-command) | Publisher | Yes | Defines data point Guid to run-time ID mappings. |
+| 0x05 | [RuntimeIDMapping](#runtime-id-mapping-command) | Publisher | Yes | Defines data point Guid to runtime ID mappings. |
 | 0x06 | [DataPointPacket](#data-point-packet-command) | Publisher | No | Payload contains data points. |
 | 0xFF | [NoOp](#noop-command) | Both | Yes | Periodic message to allow validation of connectivity. |
 
@@ -690,13 +696,13 @@ enum {
   UTF8 = 1 << 1,
   Unicode  = 1 << 2
 }
-Encodings; // sizeof(uint8), 1-byte
+StringEncodingFlags; // sizeof(uint8), 1-byte
 
 struct {
-  Encodings encodings;
+  StringEncodingFlags encodings;
   uint16 udpPort;
-  NamedVersions statefulCompressionAlgorithms;
-  NamedVersions statelessCompressionAlgorithms;
+  NamedVersions stateful;
+  NamedVersions stateless;
 }
 OperationalModes;
 ```
@@ -704,12 +710,12 @@ OperationalModes;
 - The `udpPort` field meaning depends on the usage context:
   - When sent with the publisher command payload, field is used to indicate publisher support of UDP. A value of zero indicates that UDP broadcasts are not supported and any non-zero value indicates that UDP broadcasts are supported.
   - When sent with the subscriber response payload, field is used to indicate the desired subscriber UDP port for data channel functionality. A value of zero indicates that a UDP connection should not be established for subscriber data channel functionality.
-- The `statefulCompressionAlgorithms` field defines the [`NamedVersions`](Definitions.md#namedversions-structure) representing the algorithms to use for stateful compression operations.
-- The `statelessCompressionAlgorithms` field defines the [`NamedVersions`](Definitions.md#namedversions-structure) representing the algorithms to use for stateless compression operations.
+- The `stateful` field defines the [`NamedVersions`](Defintions.md#namedversions-structure) representing the algorithms to use for stateful compression operations.
+- The `stateless` field defines the [`NamedVersions`](Defintions.md#namedversions-structure) representing the algorithms to use for stateless compression operations.
 
 When the second `NegotiateSession` command is received from the publisher, the subscriber shall send either a `Succeeded` or `Failed` response for the `NegotiateSession` command indicating its ability to support a subset of the specified operational modes.
 
-If the subscriber can support a subset of the operational modes allowed by the publisher, the `Succeeded` response payload shall be an instance of the `OperationalModes` structure with the specific values for the `encodings`, `udpPort`, `statefulCompressionAlgorithms` and `statelessCompressionAlgorithms` fields. The `encodings` field should specify a single flag designating the string encoding to use and both the `statefulCompressionAlgorithms` and `statelessCompressionAlgorithms` fields should define a `count` of `1` and a single element array that indicates the [compression algorithm](#compression) to be used where a named value of `NONE` with a version of `0.0` indicates that no compression should be used.
+If the subscriber can support a subset of the operational modes allowed by the publisher, the `Succeeded` response payload shall be an instance of the `OperationalModes` structure with the specific values for the `encodings`, `udpPort`, `stateful` and `stateless` fields. The `encodings` field should specify a single flag designating the string encoding to use and both the `stateful` and `stateless` fields should define a `count` of `1` and a single element array that indicates the [compression algorithm](#compression) to be used where a named value of `NONE` with a version of `0.0` indicates that no compression should be used.
 
 If the subscriber cannot support a subset of the operational modes allowed by the publisher, the `Failed` response payload shall be an instance of the `OperationalModes` structure filled out with the supported operational modes. In case of failure, both the publisher and subscriber should terminate the connection since no protocol version could be agreed upon.
 
@@ -795,11 +801,102 @@ Data point packet commands are sent without the expectation of a response, as su
 
 > :information_source: The data point packet commands are sent continuously after a successful `subscribe` command and will continue to flow for available measurements until an `unsubscribe` command is issued.
 
-#### Signal Mapping Command
+#### Runtime ID Mapping Command
 
 * Wire Format: Binary
   * Includes a mapping of data point Guids to run-time signal IDs
   * Includes per data point ownership state, rights and delivery characteristic details
+
+Signal mapping structures:
+
+```C
+enum {
+  Null = 0,     // 0-bytes
+  SByte = 1,    // 1-byte
+  Int16 = 2,    // 2-bytes
+  Int32 = 3,    // 4-bytes
+  Int64 = 4,    // 8-bytes
+  Byte = 5,     // 1-byte
+  UInt16 = 6,   // 2-bytes
+  UInt32 = 7,   // 4-bytes
+  UInt64 = 8,   // 8-bytes
+  Decimal = 9,  // 16-bytes
+  Double = 10,  // 8-bytes
+  Single = 11,  // 4-bytes
+  Ticks = 12,   // 8-bytes
+  Bool = 13,    // 1-byte
+  Guid = 14,    // 16-bytes
+  String = 15,  // 64-bytes, max
+  Buffer = 16   // 64-bytes, max
+}
+ValueType; // sizeof(uint8), 1-byte
+
+// Publisher determines timestamp type for data point - should be stored in metadata
+enum {
+  NoTime = 0x0, // No timestamp included
+  Ticks = 0x1,  // Using TicksTimestamp - 9-byte 100-nanosecond resolution spanning 32,768 years
+  Unix64 = 0x2, // Using Unix64Timestamp - 9-byte second resolution spanning 584 billion years
+  NTP128 = 0x3  // Using NTP128Timestamp - 17-byte attosecond resolution spanning 584 billion years
+}
+TimestampType; // 2-bits
+
+enum {
+  Level0 = 0, // User level 0 priority, lowest
+  Level1 = 1, // User level 1 priority
+  Level2 = 2, // User level 2 priority
+  Level3 = 3, // User level 3 priority
+  Level4 = 4, // User level 4 priority
+  Level5 = 5, // User level 5 priority
+  Level6 = 6, // User level 6 priority, highest
+  Level7 = 7  // Reserved system level priority
+}
+Priority; // 3-bits
+
+enum {
+  Latest = 0,           // Data down-sampled to latest received
+  Closest = 0x800,      // Data down-sampled to closest timestamp
+  BestQuality = 0x1000, // Data down-sampled to item with best quality
+  Filter = 0x1800       // Data down-sampled with simple DataType specific filter
+}
+ResolutionType; // 2-bits
+
+enum {
+  TimestampTypeMask = 0x3;      // Mask for TimestampType
+  Quality = 1 << 2,             // State includes QualityFlags
+  Sequence = 1 << 3,            // State includes sequence number as uint16
+  PriorityMask = 0x30,          // Mask for Priority, get value with >> 4
+  Reliability = 1 << 7,         // When set, data will use lossy communications
+  Verification = 1 << 8,        // When set, data delivery will be verified
+  Exception = 1 << 9,           // When set, data will be published on change
+  Resolution = 1 << 10,         // When set, data will be down-sampled
+  ResolutionTypeMask = 0x1800,  // Mask for ResolutionType
+  KeyAction = 1 << 13,          // When set key is to be added; otherwise, removed
+  ReservedFlag1 = 1 << 14,      // Reserved flag 1
+  ReservedFlag2 = 1 << 15       // Reserved flag 2
+}
+StateFlags; // sizeof(uint16), 2-bytes
+
+struct {
+  guid uniqueID;    // Unique data point identifier - maps to metadata `Measurement.uniqueID`
+  uint32 runtimeID; // Runtime identifier as referenced by `DataPoint`
+  ValueType type;   // Value type of `DataPoint`
+  StateFlags flags; // State flags for `DataPoint`
+}
+DataPointKey; // 23-bytes
+
+enum {
+  FullSet = 0,    // Data point keys represent a new full set of keys
+  UpdatedSet = 1, // Data point keys represent keys to be added and removed
+}
+SetType; // sizeof(uint8), 1-byte
+
+struct {
+  SetType type;
+  uint32 count;
+  DataPointKey[] keys;
+}
+DataPointKeySet;
+```
 
 #### NoOp Command
 
@@ -834,81 +931,20 @@ A response with a type `Failed` is intended to represent a failure reply for a c
 
 ## Data Point Structure
 
-When a subscriber has issued a [subscribe command](#subscribe-command) to its publisher for select set of data points, the publisher will start sending [data point packet commands](#data-point-packet-commands) each with a payload of several _data point structures_, defined as follows, where the actual number of data point structures contained in the command packet depends the configured maximum payload size and the serialized size of the data point structures:
+When a subscriber has issued a [subscribe command](#subscribe-command) to its publisher for select set of data points, the publisher will start sending [data point packet commands](#data-point-packet-commands) each with a payload of several data point values serialized using the `DataPoint` structure, defined as follows. The actual number of `DataPoint` structures contained in the data point packet command depends the configured maximum payload size and the serialized size of the data point structures:
 
 ```C
-enum {
-  Null = 0,     // 0-bytes
-  SByte = 1,    // 1-byte
-  Int16 = 2,    // 2-bytes
-  Int32 = 3,    // 4-bytes
-  Int64 = 4,    // 8-bytes
-  Byte = 5,     // 1-byte
-  UInt16 = 6,   // 2-bytes
-  UInt32 = 7,   // 4-bytes
-  UInt64 = 8,   // 8-bytes
-  Decimal = 9,  // 16-bytes
-  Double = 10,  // 8-bytes
-  Single = 11,  // 4-bytes
-  Ticks = 12,   // 8-bytes
-  Bool = 13,    // 1-byte
-  Guid = 14,    // 16-bytes
-  String = 15,  // 64-bytes, max
-  Buffer = 16   // 64-bytes, max
-}
-ValueType; // sizeof(uint8), 1-byte
-
-enum {
-  None = 0,           // No state is defined
-  Timestamp = 1 << 0, // State includes Timestamp
-  Quality = 1 << 1,   // State includes QualityFlags
-  Sequence = 1 << 2,  // State includes sequence number as uint16
-}
-StateFlags;
-
 struct {
   uint32 id;
-  ValueType type;   // 1-byte
-  StateFlags flags; // 1-byte
   uint8[] value;    // Size based on type
   uint8[] state;    // Size based on flags
 }
 DataPoint;
-
-struct {
-  uint8 length;
-  Encodings encoding; // 1-byte
-  uint8[] data;       // Maximum size of 62
-}
-StringValue;
-
-struct {
-  uint8 length;
-  uint8[] data; // Maximum size of 63
-}
-BufferValue;
-
-struct {
-  uint64 value;
-  uint8 flags;
-}
-Timestamp;
-
-enum {
-  Normal = 0,                 // Defines normal state
-  BadTime = 1 << 0,           // Defines bad time state
-  BadValue = 1 << 1,          // Defines bad value state
-  UnreasonableValue = 1 << 2, // Defines unreasonable value state
-  CalculatedValue = 1 << 3,   // Defines calculated value state
-  ReservedFlag1 = 1 << 4,     // Defines reserved flag 1
-  ReservedFlag2 = 1 << 5,     // Defines reserved flag 1
-  UserDefinedFlag1 = 1 << 6,  // Defines user defined flag 1
-  UserDefinedFlag2 = 1 << 7   // Defines user defined flag 1
-}
-QualityFlags; // sizeof(uint8), 1-byte
 ```
 
 ### Data Point Value Types
+
+The types in the [`ValueType`](#runtime-id-mapping-command) enumeration are described below, along with any needed associated structures:
 
 * `Null`: No space occupied
 * `SByte`: [8-bit Signed Byte](https://en.wikipedia.org/wiki/Byte) (1-byte, big-endian)
@@ -925,10 +961,138 @@ QualityFlags; // sizeof(uint8), 1-byte
 * `Ticks`: [Time as 64-bit Signed Integer](https://en.wikipedia.org/wiki/System_time) (8-bytes, big-endian, 100-nanosecond ticks since 1 January 0001)
 * `Bool`: [Boolean as 8-bit Unsigned Integer](https://en.wikipedia.org/wiki/Boolean_data_type) (1-byte, big-endian, zero is `false`, non-zero value is `true`)
 * `Guid`: [Globally Unique Identifer](https://en.wikipedia.org/wiki/Universally_unique_identifier) (16-bytes, big-endian for all components)
-* `String` [Character String as `StringValue`](https://en.wikipedia.org/wiki/String_%28computer_science%29) (Maximum of 64-bytes - 2-byte header with 62-bytes of character data, supported encoding for ASCII, ANSI, UTF8 and Unicode)
-* `Buffer` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) (Maximum of 64-bytes - 1-byte header with 63-bytes of data)
+* `String` [Character String as `StringValue`](https://en.wikipedia.org/wiki/String_%28computer_science%29) (Maximum of 16-bytes - 1-byte header with 15-bytes of character data, supported encoding for ASCII, ANSI, UTF8 and Unicode)
+* `Buffer` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) (Maximum of 16-bytes - 1-byte header with 15-bytes of data)
 
-Both the `String` and `Buffer` represent variable length data types. Each variable length data point will have a fixed maximum number of bytes that can be transmitted per instance of the structure. For data sets larger then the specified maximum size, data will need to be fragmented, marked with a collation index and transmitted in small chunks. For this large data set collation scenario, the data packets should only be transmitted over a reliable transport protocol, e.g., TCP.
+Both the `String` and `Buffer` represent variable length data types. Each variable length data point will have a fixed maximum number of bytes that can be transmitted per instance of the `DataPoint` structure. For data sets larger then the specified maximum size, data will need to be fragmented, marked with a [sequence number](#data-point-sequence-number) and transmitted in small chunks, i.e., 63-byte segments. For this large data set collation scenario, it is expected that the data packets will be transmitted over a reliable transport protocol, e.g., TCP, otherwise the subscriber should expect the possibility of missing fragments. Details for the content of the `String` type which is the `StringValue` structure and the `Buffer` type which is the `BufferValue` structure are defined as follows:
+
+```C
+enum {
+  ASCII = 0,
+  ANSI = 0x40,
+  UTF8 = 0x80,
+  Unicode  = 0xC0,
+  EncodingMask = 0xC0,
+  LengthMask = 0x3F
+}
+StringValueState; // sizeof(uint8), 1-byte
+
+struct {
+  StringValueState state;
+  uint8[] data; // Maximum size of 15
+}
+StringValue;
+
+struct {
+  uint8 length;
+  uint8[] data; // Maximum size of 15
+}
+BufferValue;
+```
+
+> :information_source: String value encoding is defined at a data point level when using the `String` data type, this differs from the session negotiated string encoding established by the publisher and subscriber. The negotiated string encoding is always used for strings being exchanged by the publisher and subscriber at a command level, however, the subscriber will be subject to the encoding specified for a `StringValue` - this prevents the publisher from having to handle string encoding translations of available data. Additionally, the data publisher should have a general philosophy of not changing any data being provided to the subscriber.
+
+### Data Point Timestamp Types
+
+The timestamp formats supported by STTP are defined to accommodate foreseeable use cases and defined requirements. The types in the `TimestampType` enumeration are described below along with the associated timestamp structures.
+
+1. The `NoTime` type specifies that no timestamp is included in the data point
+2. The `Ticks` type specifies that the timestamp will be a `TicksTimestamp` structure, defined below, which represents the 100-nanosecond intervals since 1/1/0001 with a range of 32,768 years. This timestamp has a resolution that is ideal for timestamps measured using GPS.
+3. The `Unix64` type specifies a 64-bit Unix, a.k.a., POSIX, industry standard timestamp that will be a `Unix64Timestamp` structure, defined below, which represents one second intervals since 1/1/1970 with a range of 584 billion years. This timestamp has whole second resolution, i.e., no sub-second time.
+4. The `NTP128` type specifies a 128-bit NTP industry standard timestamp that will be a `NTP128Timestamp` structure, defined below, which represents seconds since 1/1/1900 with a range of 584 billion years and fractional seconds with a resolution down to 0.05 attoseconds. This timestamp has a resolution that can accommodate most any conceivable time value.
+
+Timestamps also include a `TimestampFlags` structure, defined below, that describes timestamp level notifications of leap seconds and  as well as timestamp quality defined with the `TimeQuality` enumeration value. This detail is included for devices that have access to a GPS or UTC time synchronization source, e.g., from an IRIG timecode signal. For timestamps that are acquired without an accurate time source, e.g., using the local system clock for new timestamps, the `TimeQuality` value should be set to `Locked` and the `TimestampFlags.NoAccurateTimeSource` should be set.
+
+```C
+enum {
+  Locked = 0x0,                       // Clock locked, Normal operation
+  Failure =  0xF,                     // Clock fault, time not reliable
+  Unlocked10Seconds = 0xB,            // Clock unlocked, time within 10^1s
+  Unlocked1Second = 0xA,              // Clock unlocked, time within 10^0s
+  UnlockedPoint1Seconds = 0x9,        // Clock unlocked, time within 10^-1s
+  UnlockedPoint01Seconds = 0x8,       // Clock unlocked, time within 10^-2s
+  UnlockedPoint001Seconds = 0x7,      // Clock unlocked, time within 10^-3s
+  UnlockedPoint0001Seconds = 0x6,     // Clock unlocked, time within 10^-4s
+  UnlockedPoint00001Seconds = 0x5,    // Clock unlocked, time within 10^-5s
+  UnlockedPoint000001Seconds = 0x4,   // Clock unlocked, time within 10^-6s
+  UnlockedPoint0000001Seconds = 0x3,  // Clock unlocked, time within 10^-7s
+  UnlockedPoint00000001Seconds = 0x2, // Clock unlocked, time within 10^-8s
+  UnlockedPoint000000001Seconds = 0x1 // Clock unlocked, time within 10^-9s
+}
+TimeQuality; // 4-bits, 1-nibble
+
+enum {
+  None = 0,
+  TimeQualityMask = 0xF,        // Mask for TimeQuality
+  LeapsecondPending = 1 << 4,   // Set before a leap second occurs and then cleared after
+  LeapsecondOccurred = 1 << 5,  // Set in the first second after the leap second occurs and remains set for 24 hours
+  LeapsecondDirection = 1 << 6, // Clear for add, set for delete
+  NoAccurateTimeSource = 1 << 7 // Accurate time source is unavailable
+}
+TimestampFlags; // sizeof(uint8), 1-byte
+
+struct {
+  int64 value; // 100-nanosecond intervals since 1/1/0001, +/-16,384 years
+  TimestampFlags flags;
+}
+TicksTimestamp; // 9-bytes
+
+struct {
+  int64 value; // Seconds since 1/1/1970, +/-292 billion years
+  TimestampFlags flags;
+}
+Unix64Timestamp; // 9-bytes
+
+struct {
+  int64 seconds;    // Seconds since 1/1/1900, +/-292 billion years
+  uint64 fraction;  // 0.05 attosecond resolution (i.e., 0.5e-18 second)
+  TimestampFlags flags;
+}
+NTP128Timestamp; // 17-bytes
+```
+
+### Data Point Quality Flags
+
+A set of simple quality flags are defined for STTP data point values in the `QualityFlags` enumeration, defined as follows. These quality flags are only included in the `DataPoint.state` data when the `DataPoint.flags` includes the `StateFlags.Quality` flag. The `QualityFlags` must be serialized into the `DataPoint.state` data in big-endian order following any defined timestamp. If no timestamp is defined for the `DataPoint.state` data, i.e., the `DataPoint.flags` defines a `TimestampType` of `NoTime`, then the `QualityFlags` must be the first value serialized into the `DataPoint.state` data.
+
+> :information_source: These quality flags are intentionally simple to accommodate a very wide set of use cases and still provide some indication of data point value quality. More complex data qualities can exist as new data point values are added to a more complex data type, e.g., a `BufferValue`.
+
+```C
+enum {
+  Normal = 0,                 // Defines normal state
+  BadTime = 1 << 0,           // Defines bad time state
+  BadValue = 1 << 1,          // Defines bad value state
+  UnreasonableValue = 1 << 2, // Defines unreasonable value state
+  CalculatedValue = 1 << 3,   // Defines calculated value state
+  ReservedFlag1 = 1 << 4,     // Defines reserved flag 1
+  ReservedFlag2 = 1 << 5,     // Defines reserved flag 1
+  UserDefinedFlag1 = 1 << 6,  // Defines user defined flag 1
+  UserDefinedFlag2 = 1 << 7   // Defines user defined flag 1
+}
+QualityFlags; // sizeof(uint8), 1-byte
+```
+
+### Data Point Sequence Number
+
+For data that needs to be transmitted with a defined sequence number, the `DataPoint.flags` must include the `StateFlags.Sequence` flag. The sequence number, which is defined as a `uint16`, must be serialized into the `DataPoint.state` data in big-endian order following any defined `QualityFlags` or timestamp. If no timestamp is defined for the `DataPoint.state` data, i.e., the `DataPoint.flags` defines a `TimestampType` of `NoTime` and no `QualityFlags` is defined for the `DtaaPoint.state` data, i.e., the `DataPoint.flags` does not include the `StateFlags.Quality` flag, then the sequence number must be the first value serialized into the `DataPoint.state` data.
+
+## Padded Data Point Structure
+
+In order to accommodate advanced compression algorithms, e.g., [TSSC compression](#appendix-e---tssc-algorithm), an alternate data point encoding is used where values are serialized using the `PaddedDataPoint` structure, defined below. The `PaddedDataPoint` structure aligns data on a word boundary and has a fixed size, so no fields are considered optional. Instead when the `StateFlags` call for an excluded field, the `PaddedDataPoint` structure will simply zero out the values for the field which allows the repeating values to be _compressed out_ of the final result.
+
+```C
+struct {
+  uint32 id;
+  uint64 value1;  // Lower 8 bytes of the value
+  uint64 value2;  // Upper 8 bytes of the value - for types larger than 8 bytes
+  uint64 time1;   // Lower 8 bytes of the time, used by all time structures
+  uint64 time2;   // Upper 8 bytes of the time, used by NTP128.fraction
+  TimestampFlags timestampFlags;
+  QualityFlags qualityflags;
+  uint16 sequence;
+}
+PaddedDataPoint;
+```
 
 ## Data Point Characteristics
 
@@ -1155,7 +1319,35 @@ Stateful compression algorithms provide the best possible compression for STTP d
 
 STTP is designed so that new compression algorithms can be implemented and used without requiring revisions to the specification. To accommodate this, compression algorithms are negotiated, by text name and numeric version, after a connection is established along with other operational modes for the session. See [session negotiation](#negotiate-session-command) for more details.
 
-The negotiation process specifies both the stateful compression algorithm to use as well as the stateless compression algorithm, when applicable.  
+Compression algorithms must be declared with a `DataPointEncoding` type, defined as follows, of either `VariableSize` or `FixedSize` which is chosen to best accommodate the compression.
+
+```C
+enum {
+  VariableSize = 0, // Encode data points with `DataPoint` structure
+  FixedSize = 1     // Encode data points with `PaddedDataPoint` structure
+}
+DataPointEncoding;
+```
+
+The `VariableSize` encoding will serialize data using the [`DataPoint`](#data-point-structure) structure and the `FixedSize` encoding will serialize data using the [`PaddedDataPoint`](#padded-data-point-structure)  structure.
+
+The compression algorithm encodings need to be known by and configured the publisher and subscriber; these encodings are used during _compression_ and _decompression_ stages to the proper data point encoding can be used. The `AlgorithmEncoding` structure, defined as follows, could be used to track these mappings:
+
+```C
+struct {
+  CompressionAlgorithm algorithm;
+  DataPointEncoding encoding;
+}
+AlgorithmEncoding;
+
+struct {
+  uint16 count;
+  AlgorithmEncoding[] items;
+}
+AlgorithmEncodings;
+```
+
+The session negotiation process specifies both the stateful compression algorithm to use as well as the stateless compression algorithm, when applicable.  
 
 The following compression algorithms should always be available for STTP implementations such that a minimal set of compression algorithms are always be available for a publisher/subscription connection session negotiation.
 
