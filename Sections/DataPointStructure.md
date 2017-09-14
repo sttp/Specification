@@ -3,47 +3,8 @@
 When a subscriber has issued a [subscribe command](Commands.md#subscribe-command) to its publisher for select set of data points, the publisher will start sending [data point packet commands](Commands.md#data-point-packet-commands) each with a payload of several data point values serialized using the `DataPoint` structure, defined as follows. The actual number of `DataPoint` structures contained in the data point packet command depends the configured maximum payload size and the serialized size of the data point structures:
 
 ```C
-enum {
-  Null = 0,     // 0-bytes
-  SByte = 1,    // 1-byte
-  Int16 = 2,    // 2-bytes
-  Int32 = 3,    // 4-bytes
-  Int64 = 4,    // 8-bytes
-  Byte = 5,     // 1-byte
-  UInt16 = 6,   // 2-bytes
-  UInt32 = 7,   // 4-bytes
-  UInt64 = 8,   // 8-bytes
-  Decimal = 9,  // 16-bytes
-  Double = 10,  // 8-bytes
-  Single = 11,  // 4-bytes
-  Ticks = 12,   // 8-bytes
-  Bool = 13,    // 1-byte
-  Guid = 14,    // 16-bytes
-  String = 15,  // 64-bytes, max
-  Buffer = 16   // 64-bytes, max
-}
-ValueType; // sizeof(uint8), 1-byte
-
-enum {
-  NoTime = 0x0, // No timestamp included
-  Ticks = 0x1,  // Using TicksTimestamp - 9-byte 100-nanosecond resolution spanning 32,768 years
-  Unix64 = 0x2, // Using Unix64Timestamp - 9-byte second resolution spanning 584 billion years
-  NTP128 = 0x3  // Using NTP128Timestamp - 17-byte attosecond resolution spanning 584 billion years
-}
-TimestampType;
-
-enum {
-  None = 0,                 // No state is defined
-  TimestampTypeMask = 0x3;  // Mask for TimestampType
-  Quality = 1 << 2,         // State includes QualityFlags
-  Sequence = 1 << 3,        // State includes sequence number as uint16
-}
-StateFlags; // sizeof(uint8), 1-byte
-
 struct {
   uint32 id;
-  ValueType type;   // 1-byte
-  StateFlags flags; // 1-byte
   uint8[] value;    // Size based on type
   uint8[] state;    // Size based on flags
 }
@@ -52,7 +13,7 @@ DataPoint;
 
 ### Data Point Value Types
 
-The types in the `ValueType` enumeration are described below, along with any needed associated structures:
+The types in the [`ValueType`](Commands.md#runtime-id-mapping-command) enumeration are described below, along with any needed associated structures:
 
 * `Null`: No space occupied
 * `SByte`: [8-bit Signed Byte](https://en.wikipedia.org/wiki/Byte) (1-byte, big-endian)
@@ -69,8 +30,8 @@ The types in the `ValueType` enumeration are described below, along with any nee
 * `Ticks`: [Time as 64-bit Signed Integer](https://en.wikipedia.org/wiki/System_time) (8-bytes, big-endian, 100-nanosecond ticks since 1 January 0001)
 * `Bool`: [Boolean as 8-bit Unsigned Integer](https://en.wikipedia.org/wiki/Boolean_data_type) (1-byte, big-endian, zero is `false`, non-zero value is `true`)
 * `Guid`: [Globally Unique Identifer](https://en.wikipedia.org/wiki/Universally_unique_identifier) (16-bytes, big-endian for all components)
-* `String` [Character String as `StringValue`](https://en.wikipedia.org/wiki/String_%28computer_science%29) (Maximum of 64-bytes - 1-byte header with 63-bytes of character data, supported encoding for ASCII, ANSI, UTF8 and Unicode)
-* `Buffer` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) (Maximum of 64-bytes - 1-byte header with 63-bytes of data)
+* `String` [Character String as `StringValue`](https://en.wikipedia.org/wiki/String_%28computer_science%29) (Maximum of 16-bytes - 1-byte header with 15-bytes of character data, supported encoding for ASCII, ANSI, UTF8 and Unicode)
+* `Buffer` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) (Maximum of 16-bytes - 1-byte header with 15-bytes of data)
 
 Both the `String` and `Buffer` represent variable length data types. Each variable length data point will have a fixed maximum number of bytes that can be transmitted per instance of the `DataPoint` structure. For data sets larger then the specified maximum size, data will need to be fragmented, marked with a [sequence number](#data-point-sequence-number) and transmitted in small chunks, i.e., 63-byte segments. For this large data set collation scenario, it is expected that the data packets will be transmitted over a reliable transport protocol, e.g., TCP, otherwise the subscriber should expect the possibility of missing fragments. Details for the content of the `String` type which is the `StringValue` structure and the `Buffer` type which is the `BufferValue` structure are defined as follows:
 
@@ -87,13 +48,13 @@ StringValueState; // sizeof(uint8), 1-byte
 
 struct {
   StringValueState state;
-  uint8[] data; // Maximum size of 63
+  uint8[] data; // Maximum size of 15
 }
 StringValue;
 
 struct {
   uint8 length;
-  uint8[] data; // Maximum size of 63
+  uint8[] data; // Maximum size of 15
 }
 BufferValue;
 ```

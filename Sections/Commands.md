@@ -9,7 +9,7 @@ The following table defines the commands available to STTP. Commands that expect
 | 0x02 | [Subscribe](#subscribe-command) | Subscriber | Yes | Defines desired set of data points to begin receiving. |
 | 0x03 | [Unsubscribe](#unsubscribe-command) | Subscriber | Yes | Requests publisher terminate current subscription. |
 | 0x04 | [SecureDataChannel](#secure-data-channel-command)  | Subscriber | Yes | Requests publisher secure the data channel.  |
-| 0x05 | [SignalMapping](#signal-mapping-command) | Publisher | Yes | Defines data point Guid to run-time ID mappings. |
+| 0x05 | [RuntimeIDMapping](#runtime-id-mapping-command) | Publisher | Yes | Defines data point Guid to runtime ID mappings. |
 | 0x06 | [DataPointPacket](#data-point-packet-command) | Publisher | No | Payload contains data points. |
 | 0xFF | [NoOp](#noop-command) | Both | Yes | Periodic message to allow validation of connectivity. |
 
@@ -59,13 +59,13 @@ enum {
   UTF8 = 1 << 1,
   Unicode  = 1 << 2
 }
-Encodings; // sizeof(uint8), 1-byte
+StringEncodingFlags; // sizeof(uint8), 1-byte
 
 struct {
-  Encodings encodings;
+  StringEncodingFlags encodings;
   uint16 udpPort;
-  NamedVersions statefulCompressionAlgorithms;
-  NamedVersions statelessCompressionAlgorithms;
+  NamedVersions stateful;
+  NamedVersions stateless;
 }
 OperationalModes;
 ```
@@ -73,12 +73,12 @@ OperationalModes;
 - The `udpPort` field meaning depends on the usage context:
   - When sent with the publisher command payload, field is used to indicate publisher support of UDP. A value of zero indicates that UDP broadcasts are not supported and any non-zero value indicates that UDP broadcasts are supported.
   - When sent with the subscriber response payload, field is used to indicate the desired subscriber UDP port for data channel functionality. A value of zero indicates that a UDP connection should not be established for subscriber data channel functionality.
-- The `statefulCompressionAlgorithms` field defines the [`NamedVersions`](Definitions.md#namedversions-structure) representing the algorithms to use for stateful compression operations.
-- The `statelessCompressionAlgorithms` field defines the [`NamedVersions`](Definitions.md#namedversions-structure) representing the algorithms to use for stateless compression operations.
+- The `stateful` field defines the [`NamedVersions`](Defintions.md#namedversions-structure) representing the algorithms to use for stateful compression operations.
+- The `stateless` field defines the [`NamedVersions`](Defintions.md#namedversions-structure) representing the algorithms to use for stateless compression operations.
 
 When the second `NegotiateSession` command is received from the publisher, the subscriber shall send either a `Succeeded` or `Failed` response for the `NegotiateSession` command indicating its ability to support a subset of the specified operational modes.
 
-If the subscriber can support a subset of the operational modes allowed by the publisher, the `Succeeded` response payload shall be an instance of the `OperationalModes` structure with the specific values for the `encodings`, `udpPort`, `statefulCompressionAlgorithms` and `statelessCompressionAlgorithms` fields. The `encodings` field should specify a single flag designating the string encoding to use and both the `statefulCompressionAlgorithms` and `statelessCompressionAlgorithms` fields should define a `count` of `1` and a single element array that indicates the [compression algorithm](Compression.md) to be used where a named value of `NONE` with a version of `0.0` indicates that no compression should be used.
+If the subscriber can support a subset of the operational modes allowed by the publisher, the `Succeeded` response payload shall be an instance of the `OperationalModes` structure with the specific values for the `encodings`, `udpPort`, `stateful` and `stateless` fields. The `encodings` field should specify a single flag designating the string encoding to use and both the `stateful` and `stateless` fields should define a `count` of `1` and a single element array that indicates the [compression algorithm](Compression.md) to be used where a named value of `NONE` with a version of `0.0` indicates that no compression should be used.
 
 If the subscriber cannot support a subset of the operational modes allowed by the publisher, the `Failed` response payload shall be an instance of the `OperationalModes` structure filled out with the supported operational modes. In case of failure, both the publisher and subscriber should terminate the connection since no protocol version could be agreed upon.
 
@@ -164,11 +164,102 @@ Data point packet commands are sent without the expectation of a response, as su
 
 > :information_source: The data point packet commands are sent continuously after a successful `subscribe` command and will continue to flow for available measurements until an `unsubscribe` command is issued.
 
-#### Signal Mapping Command
+#### Runtime ID Mapping Command
 
 * Wire Format: Binary
   * Includes a mapping of data point Guids to run-time signal IDs
   * Includes per data point ownership state, rights and delivery characteristic details
+
+Signal mapping structures:
+
+```C
+enum {
+  Null = 0,     // 0-bytes
+  SByte = 1,    // 1-byte
+  Int16 = 2,    // 2-bytes
+  Int32 = 3,    // 4-bytes
+  Int64 = 4,    // 8-bytes
+  Byte = 5,     // 1-byte
+  UInt16 = 6,   // 2-bytes
+  UInt32 = 7,   // 4-bytes
+  UInt64 = 8,   // 8-bytes
+  Decimal = 9,  // 16-bytes
+  Double = 10,  // 8-bytes
+  Single = 11,  // 4-bytes
+  Ticks = 12,   // 8-bytes
+  Bool = 13,    // 1-byte
+  Guid = 14,    // 16-bytes
+  String = 15,  // 64-bytes, max
+  Buffer = 16   // 64-bytes, max
+}
+ValueType; // sizeof(uint8), 1-byte
+
+// Publisher determines timestamp type for data point - should be stored in metadata
+enum {
+  NoTime = 0x0, // No timestamp included
+  Ticks = 0x1,  // Using TicksTimestamp - 9-byte 100-nanosecond resolution spanning 32,768 years
+  Unix64 = 0x2, // Using Unix64Timestamp - 9-byte second resolution spanning 584 billion years
+  NTP128 = 0x3  // Using NTP128Timestamp - 17-byte attosecond resolution spanning 584 billion years
+}
+TimestampType; // 2-bits
+
+enum {
+  Level0 = 0, // User level 0 priority, lowest
+  Level1 = 1, // User level 1 priority
+  Level2 = 2, // User level 2 priority
+  Level3 = 3, // User level 3 priority
+  Level4 = 4, // User level 4 priority
+  Level5 = 5, // User level 5 priority
+  Level6 = 6, // User level 6 priority, highest
+  Level7 = 7  // Reserved system level priority
+}
+Priority; // 3-bits
+
+enum {
+  Latest = 0,           // Data down-sampled to latest received
+  Closest = 0x800,      // Data down-sampled to closest timestamp
+  BestQuality = 0x1000, // Data down-sampled to item with best quality
+  Filter = 0x1800       // Data down-sampled with simple DataType specific filter
+}
+ResolutionType; // 2-bits
+
+enum {
+  TimestampTypeMask = 0x3;      // Mask for TimestampType
+  Quality = 1 << 2,             // State includes QualityFlags
+  Sequence = 1 << 3,            // State includes sequence number as uint16
+  PriorityMask = 0x30,          // Mask for Priority, get value with >> 4
+  Reliability = 1 << 7,         // When set, data will use lossy communications
+  Verification = 1 << 8,        // When set, data delivery will be verified
+  Exception = 1 << 9,           // When set, data will be published on change
+  Resolution = 1 << 10,         // When set, data will be down-sampled
+  ResolutionTypeMask = 0x1800,  // Mask for ResolutionType
+  KeyAction = 1 << 13,          // When set key is to be added; otherwise, removed
+  ReservedFlag1 = 1 << 14,      // Reserved flag 1
+  ReservedFlag2 = 1 << 15       // Reserved flag 2
+}
+StateFlags; // sizeof(uint16), 2-bytes
+
+struct {
+  guid uniqueID;    // Unique data point identifier - maps to metadata `Measurement.uniqueID`
+  uint32 runtimeID; // Runtime identifier as referenced by `DataPoint`
+  ValueType type;   // Value type of `DataPoint`
+  StateFlags flags; // State flags for `DataPoint`
+}
+DataPointKey; // 23-bytes
+
+enum {
+  FullSet = 0,    // Data point keys represent a new full set of keys
+  UpdatedSet = 1, // Data point keys represent keys to be added and removed
+}
+SetType; // sizeof(uint8), 1-byte
+
+struct {
+  SetType type;
+  uint32 count;
+  DataPointKey[] keys;
+}
+DataPointKeySet;
+```
 
 #### NoOp Command
 

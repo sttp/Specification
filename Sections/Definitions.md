@@ -124,6 +124,7 @@ Representation of all data types is explicitly specified. The most fundamental u
   uint8[3] uint24; // Represents integers between 0 and 16,777,215
   uint8[4] uint32; // Represents integers between 0 and 4,294,967,295
   uint8[8] uint64; // Represents integers between 0 and 18,446,744,073,709,551,615
+  uint8[16] guid;  // Represents a 128-bit globally unique identifier
 ```
 
 #### Enumerated Types

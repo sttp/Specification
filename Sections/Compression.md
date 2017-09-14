@@ -8,7 +8,35 @@ Stateful compression algorithms provide the best possible compression for STTP d
 
 STTP is designed so that new compression algorithms can be implemented and used without requiring revisions to the specification. To accommodate this, compression algorithms are negotiated, by text name and numeric version, after a connection is established along with other operational modes for the session. See [session negotiation](Commands.md#negotiate-session-command) for more details.
 
-The negotiation process specifies both the stateful compression algorithm to use as well as the stateless compression algorithm, when applicable.  
+Compression algorithms must be declared with a `DataPointEncoding` type, defined as follows, of either `VariableSize` or `FixedSize` which is chosen to best accommodate the compression.
+
+```C
+enum {
+  VariableSize = 0, // Encode data points with `DataPoint` structure
+  FixedSize = 1     // Encode data points with `PaddedDataPoint` structure
+}
+DataPointEncoding;
+```
+
+The `VariableSize` encoding will serialize data using the [`DataPoint`](DataPointStructure.md) structure and the `FixedSize` encoding will serialize data using the [`PaddedDataPoint`](PaddedDataPointStructure.md)  structure.
+
+The compression algorithm encodings need to be known by and configured the publisher and subscriber; these encodings are used during _compression_ and _decompression_ stages to the proper data point encoding can be used. The `AlgorithmEncoding` structure, defined as follows, could be used to track these mappings:
+
+```C
+struct {
+  CompressionAlgorithm algorithm;
+  DataPointEncoding encoding;
+}
+AlgorithmEncoding;
+
+struct {
+  uint16 count;
+  AlgorithmEncoding[] items;
+}
+AlgorithmEncodings;
+```
+
+The session negotiation process specifies both the stateful compression algorithm to use as well as the stateless compression algorithm, when applicable.  
 
 The following compression algorithms should always be available for STTP implementations such that a minimal set of compression algorithms are always be available for a publisher/subscription connection session negotiation.
 
