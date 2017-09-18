@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.1.38 - September 14, 2017</p>
+<p><strong>Version:</strong> 0.1.39 - September 18, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -2034,28 +2034,408 @@ PaddedDataPoint;</code></pre>
   </ul>
 </blockquote>
 <h2 id="metadata">Metadata</h2>
-<p>JRC: Following needs some extra thought<br />
-<del>Metadata information will be described in one of two formats. <strong>Basic Metadata</strong> or <strong>Advance Metadata</strong>. 
-Basic Metadata has fewer restrictions and intended for use where a persistent metadata repository 
-is not desired and limited programming support exists where XML encoding would be cumbersome. 
-(Ex. PMU or intermediate PDCs)</del></p>
-<p><del>Advance Metadata contains more formally defined metadata structures necessary to version 
-the metadata and provide synchronizing and filtering and permission based access. This
-would require access to a repository that would maintain this data. 
-(Ex. Large Scale PDCs, Gateways, Historians)</del></p>
-<p><del>## Basic Metadata</del></p>
-<p><del>* Attributes are Key/Value pairs</del><br />
-<del>* Supports Nodal Relationships (Site Information -> Device Information -> Point Information)</del><br />
-<del>* Data requests are full dumps</del><br />
-<del>* Data can be sent on demand when streaming measurements</del><br />
-<del>* Contains a Runtime Version Number</del><br />
-<del>* This number is incremented on any metadata change</del><br />
-<del>* This number also changes every process restart</del></p>
-<p><del>## Advance Metadata</del></p>
-<p><del>* Wire Format: Tabular XML format (XML) - highly compressible</del><br />
-<del>* Primary data point identifier is Guid (describe)</del><br />
-<del>* Extensibility</del><br />
-<del>* Rights based content restriction</del></p>
+<p>Metadata is exchanged in STTP as a table of records with attributes. When requesting all of the tables, a structure is returned as follows:</p>
+<ul>
+<li>(Guid) Base Version ID - Identifies a major change that requires a resync of all metadata. This is also used for devices that don't support metadata revision. This value can then be changed with each revision to the metadata.</li>
+<li>(Int32) Latest Version Number - A incrementing change counter when metadata is modified.</li>
+<li>(Int32) Table Count<ul>
+<li>(Byte) Length of Table Name</li>
+<li>(String) Table Name</li>
+<li>(Int32) Last Modified Version Number</li></ul></li>
+</ul>
+<p>When requesting data from a Table, the following structure will be returned:</p>
+<ul>
+<li>(Byte) Length of Table Name</li>
+<li>(String) Table Name - Limited to 100 ASCII characters.</li>
+<li>(Int32) Record Count<ul>
+<li>(Guid) Record Identifier </li>
+<li>(Int32) Last Modified Version Number</li>
+<li>(Int32) Attribute Count </li>
+<li>(byte) Attribute Name Length.</li>
+<li>(String) Attribute Name - Limited to 100 ASCII characters.</li>
+<li>(Int32) Array Index - Defaults to 0. For attributes that support multiple values, these are indexed here.</li>
+<li>(Byte) The attribute value code. </li>
+<li>(Int16) The size of the Attribute Value.</li>
+<li>(byte[]) Attribute Value</li></ul></li>
+</ul>
+<h3 id="attribute-value-types">Attribute Value Types</h3>
+<p>When defining each attribute, it's important to identify the type of data that is expected in that field. The wireline<br />
+protocol itself will not enforce these requirements, but rather provides encoding mechanisms for transporting the data <br />
+and rules for how items can be converted to the desired type.  </p>
+<h4 id="encoding">Encoding</h4>
+<p>When attributes are serialized, the value field must be encoded using one of the following encoding types:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">Code</th>
+<th style="text-align:center;">Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">0x00</td>
+<td style="text-align:center;">Null</td>
+<td>A null value.</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x01</td>
+<td style="text-align:center;">XML Decimal</td>
+<td>Corresponds to xs:decimal</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x02</td>
+<td style="text-align:center;">XML Integer</td>
+<td>Corresponds to xs:integer</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x03</td>
+<td style="text-align:center;">XML Date</td>
+<td>Corresponds to xs:date</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x04</td>
+<td style="text-align:center;">XML Time</td>
+<td>Corresponds to xs:time</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x05</td>
+<td style="text-align:center;">XML DateTime</td>
+<td>Corresponds to xs:dateTime</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x06</td>
+<td style="text-align:center;">XML Duration</td>
+<td>Corresponds to xs:duration</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x07</td>
+<td style="text-align:center;">XML Boolean</td>
+<td>Corresponds to xs:boolean</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x08</td>
+<td style="text-align:center;">XML Binary</td>
+<td>Corresponds to xs:hexBinary</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x09</td>
+<td style="text-align:center;">XML URI</td>
+<td>Corresponds to xs:anyURI</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x0A</td>
+<td style="text-align:center;">XML Base64</td>
+<td>Corresponds to xs:base64Binary</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x0B</td>
+<td style="text-align:center;">String</td>
+<td>A UTF8 encoded string</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x0C</td>
+<td style="text-align:center;">Single</td>
+<td>A 32-bit floating point number encoded Big Endian</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x0D</td>
+<td style="text-align:center;">Double</td>
+<td>A 64-bit floating point number encoded Big Endian</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x0E</td>
+<td style="text-align:center;">Decimal</td>
+<td>A 128-bit floating point number encoded Big Endian</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x0F</td>
+<td style="text-align:center;">Int32</td>
+<td>A 32-bit integer number encoded Big Endian</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x10</td>
+<td style="text-align:center;">Int64</td>
+<td>A 64-bit integer number encoded Big Endian</td>
+</tr>
+<tr>
+<td style="text-align:center;">0X11</td>
+<td style="text-align:center;">Guid</td>
+<td>A 128-bit GUID encoded Big Endian</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x12</td>
+<td style="text-align:center;">Ticks</td>
+<td>A 64-bit date/time value encoded Big Endian</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x13</td>
+<td style="text-align:center;">Binary</td>
+<td>An array binary values</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x14</td>
+<td style="text-align:center;">Boolean</td>
+<td>A boolean value</td>
+</tr>
+</tbody>
+</table>
+<h4 id="defining">Defining</h4>
+<p>The list below defines how the measurement fields can be restricted and what types are permitted under each restriction.</p>
+<ul>
+<li>Integer<ul>
+<li>Supported Types: Null | XML Decimal | XML Integer | Single | Double | Decimal | Int32 | Int64</li></ul></li>
+<li>Float<ul>
+<li>Supported Types: Null | XML Decimal | XML Integer | Single | Double | Decimal | Int32 | Int64</li></ul></li>
+<li>Date<ul>
+<li>Supported Types: Null | XML Date | XML Time | XML DateTime | Ticks</li></ul></li>
+<li>Time<ul>
+<li>Supported Types: Null | XML Date | XML Time | XML DateTime | Ticks</li></ul></li>
+<li>Date Time<ul>
+<li>Supported Types: Null | XML Date | XML Time | XML DateTime | Ticks</li></ul></li>
+<li>Duration<ul>
+<li>Supported Types: Null | XML Duration | Ticks</li></ul></li>
+<li>Boolean<ul>
+<li>Supported Types: Null | XML Boolean | Boolean</li></ul></li>
+<li>Binary<ul>
+<li>Supported Types: Null | XML Binary | XML Base64 | Binary</li></ul></li>
+<li>String<ul>
+<li>Supported Types: All since all types can be represented as a string.</li></ul></li>
+<li>Guid<ul>
+<li>Supported Types: Null | String | Guid</li></ul></li>
+</ul>
+<h3 id="measurement-table">Measurement Table</h3>
+<p>For the measurement table, the record identifier will correspond to the Measurement's ID. The following table is a list of all of the optional attributes that can be associated with a measurement.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">Attribute Name</th>
+<th style="text-align:center;">Supports Arrays</th>
+<th style="text-align:center;">Attribute Value Type</th>
+<th style="text-align:center;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">DeviceID</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The GUID associated with the device record stored in the Device Table</td>
+</tr>
+<tr>
+<td style="text-align:center;">PointTag</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A string based unique identifier</td>
+</tr>
+<tr>
+<td style="text-align:center;">SignalReference</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A string based unique identifier</td>
+</tr>
+<tr>
+<td style="text-align:center;">SignalTypeID</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">Integer</td>
+<td style="text-align:center;">A code describing the signal type</td>
+</tr>
+<tr>
+<td style="text-align:center;">Adder</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">An adjustment factor</td>
+</tr>
+<tr>
+<td style="text-align:center;">Multiplier</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">An adjustment factor</td>
+</tr>
+<tr>
+<td style="text-align:center;">Description</td>
+<td style="text-align:center;">Y</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A description for this measurement</td>
+</tr>
+<tr>
+<td style="text-align:center;">Channel Name</td>
+<td style="text-align:center;">Y</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">C37.118 Channel Name. For Digital types, an array of 16 elements are permitted.</td>
+</tr>
+<tr>
+<td style="text-align:center;">Signal Type</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">C37.118 related signal type. Ex: (STAT|FREQ|DFREQ|PM|PA|PR|PI|ANALOG|DIGITAL)</td>
+</tr>
+<tr>
+<td style="text-align:center;">PositionIndex</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">Integer</td>
+<td style="text-align:center;">C37.118 position index in a PMU frame</td>
+</tr>
+<tr>
+<td style="text-align:center;">Phase Designation</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The phase this field is computed from. Ex: A,B,C,0,+,-</td>
+</tr>
+<tr>
+<td style="text-align:center;">Engineering Units</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The base units of this field. (Ex: Volts, Amps, Watts)</td>
+</tr>
+<tr>
+<td style="text-align:center;">Engineering Scale</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">The scaling factor of these units (Ex: 1, 1000, 1000,000)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="device-table">Device Table</h3>
+<p>For the device table, the record identifier is the DeviceID. The following table is a list of all of the optional attributes that can be associated with a device.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">Attribute Name</th>
+<th style="text-align:center;">Supports Arrays</th>
+<th style="text-align:center;">Attribute Value Type</th>
+<th style="text-align:center;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">Acronym</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A name of the device.</td>
+</tr>
+<tr>
+<td style="text-align:center;">Name</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A friendly name of the device</td>
+</tr>
+<tr>
+<td style="text-align:center;">Company</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The company who owns the device</td>
+</tr>
+<tr>
+<td style="text-align:center;">Protocol</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The protocol the device is communicating with</td>
+</tr>
+<tr>
+<td style="text-align:center;">Latitude</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">The latitude of the device</td>
+</tr>
+<tr>
+<td style="text-align:center;">Longitude</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">The location of the device</td>
+</tr>
+<tr>
+<td style="text-align:center;">TimeZone</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The time zone for the data</td>
+</tr>
+<tr>
+<td style="text-align:center;">FrameRate</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The sample rate</td>
+</tr>
+<tr>
+<td style="text-align:center;">FNOM</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">C37.118 Nominal Frequency</td>
+</tr>
+<tr>
+<td style="text-align:center;">IDCODE</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">C37.118 ID Code</td>
+</tr>
+<tr>
+<td style="text-align:center;">STN</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">C37.118 Station Name</td>
+</tr>
+<tr>
+<td style="text-align:center;">Nominal Voltage</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">The factor required to convert this voltage to a per unit base.</td>
+</tr>
+<tr>
+<td style="text-align:center;">CT Ratio</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">The ratio of a connected CT</td>
+</tr>
+<tr>
+<td style="text-align:center;">Rated MVA</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">The nominal rating of this device</td>
+</tr>
+<tr>
+<td style="text-align:center;">Vendor</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The vendor of this device</td>
+</tr>
+<tr>
+<td style="text-align:center;">Model</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The model number of this device</td>
+</tr>
+<tr>
+<td style="text-align:center;">Equipment Type</td>
+<td style="text-align:center;">Y</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The type of equipment this device is monitoring (Ex: Line, Transformer)</td>
+</tr>
+<tr>
+<td style="text-align:center;">Substation</td>
+<td style="text-align:center;">N</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The substation this device is from</td>
+</tr>
+<tr>
+<td style="text-align:center;">Serial Number</td>
+<td style="text-align:center;">Y</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">Serial numbers or other identifying information about this equipment)</td>
+</tr>
+<tr>
+<td style="text-align:center;">In Service Date</td>
+<td style="text-align:center;">Y</td>
+<td style="text-align:center;">Date</td>
+<td style="text-align:center;">The date this device was put in service</td>
+</tr>
+<tr>
+<td style="text-align:center;">Out Service Date</td>
+<td style="text-align:center;">Y</td>
+<td style="text-align:center;">Date</td>
+<td style="text-align:center;">The date this device was removed from service</td>
+</tr>
+</tbody>
+</table>
 <h3 id="dataset-contents">Dataset Contents</h3>
 <ul>
 <li>Minimum required dataset for STTP operation</li>
@@ -2509,7 +2889,7 @@ Publisher will likely want to validate size of historical requests, or least thr
   const byte ValueXOR24 = 26;
   const byte ValueXOR28 = 27;
   const byte ValueXOR32 = 28;</code></pre>
-<h3 id="encoding">Encoding</h3>
+<h3 id="encoding-1">Encoding</h3>
 <p>The following defines a class that represents the encoder for each STTP data point.</p>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Break down functions into details and describe</p>

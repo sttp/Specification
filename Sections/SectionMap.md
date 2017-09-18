@@ -38,6 +38,9 @@
 | [Exception Characteristic (3)](DataPointCharacteristics.md#exception-characteristic) | [DataPointCharacteristics.md](DataPointCharacteristics.md) |
 | [Resolution Characteristic (3)](DataPointCharacteristics.md#resolution-characteristic) | [DataPointCharacteristics.md](DataPointCharacteristics.md) |
 | [Metadata (2)](Metadata.md#metadata) | [Metadata.md](Metadata.md) |
+| [Attribute Value Types (3)](Metadata.md#attribute-value-types) | [Metadata.md](Metadata.md) |
+| [Measurement Table (3)](Metadata.md#measurement-table) | [Metadata.md](Metadata.md) |
+| [Device Table (3)](Metadata.md#device-table) | [Metadata.md](Metadata.md) |
 | [Dataset Contents (3)](Metadata.md#dataset-contents) | [Metadata.md](Metadata.md) |
 | [Dataset Filtering (3)](Metadata.md#dataset-filtering) | [Metadata.md](Metadata.md) |
 | [Dataset Versioning (3)](Metadata.md#dataset-versioning) | [Metadata.md](Metadata.md) |
