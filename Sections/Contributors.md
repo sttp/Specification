@@ -9,6 +9,8 @@ The following individuals actively participated in the development of this stand
 - Kenneth E. Martin, Electric Power Group
 - Matt Donnelly, T&D Consulting Engineers
 - Jeff Otto, Schweitzer Engineering Laboratories
+- Kevin D. Jones, Dominion Energy
+- Paul Myrda, Electric Power Institute
 
 ### ASP Project Participants
 ![Project Participants](Images/participant-logos.png)
