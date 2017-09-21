@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.1.39 - September 18, 2017
+**Version:** 0.1.40 - September 21, 2017
 
 **Status:** Initial Development
 
@@ -690,23 +690,13 @@ After sending a `Succeeded` response to the first `NegotiateSession` command, th
 For version `1.0` of STTP, if the protocol version negotiation step succeeds, the next negotiation will be for the desired operational modes. The payload of the second `NegotiateSession` command sent by the publisher shall be an instance of the `OperationalModes` structure, defined as follows, that iterates the supported string encodings, whether UDP broadcasts are allowed and the available stateful and stateless compression algorithms (see [compression algorithms](#compression)):
 
 ```C
-enum {
-  ASCII = 0,
-  ANSI = 1 << 0,
-  UTF8 = 1 << 1,
-  Unicode  = 1 << 2
-}
-StringEncodingFlags; // sizeof(uint8), 1-byte
-
 struct {
-  StringEncodingFlags encodings;
   uint16 udpPort;
   NamedVersions stateful;
   NamedVersions stateless;
 }
 OperationalModes;
 ```
-- The `encodings` field defines a set of string encodings <sup>[[6](#user-content-ref6)]</sup> supported by the publisher, this is a bit flag that indicates each of the supported string encodings.
 - The `udpPort` field meaning depends on the usage context:
   - When sent with the publisher command payload, field is used to indicate publisher support of UDP. A value of zero indicates that UDP broadcasts are not supported and any non-zero value indicates that UDP broadcasts are supported.
   - When sent with the subscriber response payload, field is used to indicate the desired subscriber UDP port for data channel functionality. A value of zero indicates that a UDP connection should not be established for subscriber data channel functionality.
@@ -831,15 +821,6 @@ enum {
 }
 ValueType; // sizeof(uint8), 1-byte
 
-// Publisher determines timestamp type for data point - should be stored in metadata
-enum {
-  NoTime = 0x0, // No timestamp included
-  Ticks = 0x1,  // Using TicksTimestamp - 9-byte 100-nanosecond resolution spanning 32,768 years
-  Unix64 = 0x2, // Using Unix64Timestamp - 9-byte second resolution spanning 584 billion years
-  NTP128 = 0x3  // Using NTP128Timestamp - 17-byte attosecond resolution spanning 584 billion years
-}
-TimestampType; // 2-bits
-
 enum {
   Level0 = 0, // User level 0 priority, lowest
   Level1 = 1, // User level 1 priority
@@ -856,15 +837,16 @@ enum {
   Latest = 0,           // Data down-sampled to latest received
   Closest = 0x800,      // Data down-sampled to closest timestamp
   BestQuality = 0x1000, // Data down-sampled to item with best quality
-  Filter = 0x1800       // Data down-sampled with simple DataType specific filter
+  Filter = 0x1800       // Data down-sampled with DataType specific filter, e.g., average
 }
 ResolutionType; // 2-bits
 
 enum {
-  TimestampTypeMask = 0x3;      // Mask for TimestampType
-  Quality = 1 << 2,             // State includes QualityFlags
-  Sequence = 1 << 3,            // State includes sequence number as uint16
-  PriorityMask = 0x30,          // Mask for Priority, get value with >> 4
+  Timestamp = 1 << 0;           // State includes Timestamp
+  Quality = 1 << 1,             // State includes QualityFlags
+  Sequence = 1 << 2,            // State includes sequence ID as uint32
+  Fragment = 1 << 3,            // State includes fragment number as uint32
+  PriorityMask = 0x70,          // Mask for Priority, get value with >> 3
   Reliability = 1 << 7,         // When set, data will use lossy communications
   Verification = 1 << 8,        // When set, data delivery will be verified
   Exception = 1 << 9,           // When set, data will be published on change
@@ -1553,6 +1535,8 @@ The following individuals actively participated in the development of this stand
 - Kenneth E. Martin, Electric Power Group
 - Matt Donnelly, T&D Consulting Engineers
 - Jeff Otto, Schweitzer Engineering Laboratories
+- Kevin D. Jones, Dominion Energy
+- Paul Myrda, Electric Power Institute
 
 ### ASP Project Participants
 ![Project Participants](Images/participant-logos.png)

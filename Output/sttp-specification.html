@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.1.39 - September 18, 2017</p>
+<p><strong>Version:</strong> 0.1.40 - September 21, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -1549,23 +1549,13 @@ ProtocolVersions;</code></pre>
 <p>After sending a <code>Succeeded</code> response to the first <code>NegotiateSession</code> command, the subscriber shall be waiting for either a <code>Failed</code> response from the publisher or the second <code>NegotiateSession</code> command; if the subscriber does not receive a command or response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect.</p>
 <h5 id="operational-modes-negotiation">Operational Modes Negotiation</h5>
 <p>For version <code>1.0</code> of STTP, if the protocol version negotiation step succeeds, the next negotiation will be for the desired operational modes. The payload of the second <code>NegotiateSession</code> command sent by the publisher shall be an instance of the <code>OperationalModes</code> structure, defined as follows, that iterates the supported string encodings, whether UDP broadcasts are allowed and the available stateful and stateless compression algorithms (see <a href="#compression">compression algorithms</a>):</p>
-<pre><code class="C language-C">enum {
-  ASCII = 0,
-  ANSI = 1 &lt;&lt; 0,
-  UTF8 = 1 &lt;&lt; 1,
-  Unicode  = 1 &lt;&lt; 2
-}
-StringEncodingFlags; // sizeof(uint8), 1-byte
-
-struct {
-  StringEncodingFlags encodings;
+<pre><code class="C language-C">struct {
   uint16 udpPort;
   NamedVersions stateful;
   NamedVersions stateless;
 }
 OperationalModes;</code></pre>
 <ul>
-<li>The <code>encodings</code> field defines a set of string encodings <sup>[<a href="#ref6">6</a>]</sup> supported by the publisher, this is a bit flag that indicates each of the supported string encodings.</li>
 <li>The <code>udpPort</code> field meaning depends on the usage context:<ul>
 <li>When sent with the publisher command payload, field is used to indicate publisher support of UDP. A value of zero indicates that UDP broadcasts are not supported and any non-zero value indicates that UDP broadcasts are supported.</li>
 <li>When sent with the subscriber response payload, field is used to indicate the desired subscriber UDP port for data channel functionality. A value of zero indicates that a UDP connection should not be established for subscriber data channel functionality.</li></ul></li>
@@ -1667,15 +1657,6 @@ SymmetricSecurity;</code></pre>
 }
 ValueType; // sizeof(uint8), 1-byte
 
-// Publisher determines timestamp type for data point - should be stored in metadata
-enum {
-  NoTime = 0x0, // No timestamp included
-  Ticks = 0x1,  // Using TicksTimestamp - 9-byte 100-nanosecond resolution spanning 32,768 years
-  Unix64 = 0x2, // Using Unix64Timestamp - 9-byte second resolution spanning 584 billion years
-  NTP128 = 0x3  // Using NTP128Timestamp - 17-byte attosecond resolution spanning 584 billion years
-}
-TimestampType; // 2-bits
-
 enum {
   Level0 = 0, // User level 0 priority, lowest
   Level1 = 1, // User level 1 priority
@@ -1692,15 +1673,16 @@ enum {
   Latest = 0,           // Data down-sampled to latest received
   Closest = 0x800,      // Data down-sampled to closest timestamp
   BestQuality = 0x1000, // Data down-sampled to item with best quality
-  Filter = 0x1800       // Data down-sampled with simple DataType specific filter
+  Filter = 0x1800       // Data down-sampled with DataType specific filter, e.g., average
 }
 ResolutionType; // 2-bits
 
 enum {
-  TimestampTypeMask = 0x3;      // Mask for TimestampType
-  Quality = 1 &lt;&lt; 2,             // State includes QualityFlags
-  Sequence = 1 &lt;&lt; 3,            // State includes sequence number as uint16
-  PriorityMask = 0x30,          // Mask for Priority, get value with &gt;&gt; 4
+  Timestamp = 1 &lt;&lt; 0;           // State includes Timestamp
+  Quality = 1 &lt;&lt; 1,             // State includes QualityFlags
+  Sequence = 1 &lt;&lt; 2,            // State includes sequence ID as uint32
+  Fragment = 1 &lt;&lt; 3,            // State includes fragment number as uint32
+  PriorityMask = 0x70,          // Mask for Priority, get value with &gt;&gt; 3
   Reliability = 1 &lt;&lt; 7,         // When set, data will use lossy communications
   Verification = 1 &lt;&lt; 8,        // When set, data delivery will be verified
   Exception = 1 &lt;&lt; 9,           // When set, data will be published on change
@@ -2577,6 +2559,8 @@ AlgorithmEncodings;</code></pre>
 <li>Kenneth E. Martin, Electric Power Group</li>
 <li>Matt Donnelly, T&amp;D Consulting Engineers</li>
 <li>Jeff Otto, Schweitzer Engineering Laboratories</li>
+<li>Kevin D. Jones, Dominion Energy</li>
+<li>Paul Myrda, Electric Power Institute</li>
 </ul>
 <h3 id="asp-project-participants">ASP Project Participants</h3>
 <p><img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/participant-logos.png" alt="Project Participants" /></p>
