@@ -164,27 +164,6 @@ Signal mapping structures:
 
 ```C
 enum {
-  Null = 0,     // 0-bytes
-  SByte = 1,    // 1-byte
-  Int16 = 2,    // 2-bytes
-  Int32 = 3,    // 4-bytes
-  Int64 = 4,    // 8-bytes
-  Byte = 5,     // 1-byte
-  UInt16 = 6,   // 2-bytes
-  UInt32 = 7,   // 4-bytes
-  UInt64 = 8,   // 8-bytes
-  Decimal = 9,  // 16-bytes
-  Double = 10,  // 8-bytes
-  Single = 11,  // 4-bytes
-  Ticks = 12,   // 8-bytes
-  Bool = 13,    // 1-byte
-  Guid = 14,    // 16-bytes
-  String = 15,  // 64-bytes, max
-  Buffer = 16   // 64-bytes, max
-}
-ValueType; // sizeof(uint8), 1-byte
-
-enum {
   Level0 = 0, // User level 0 priority, lowest
   Level1 = 1, // User level 1 priority
   Level2 = 2, // User level 2 priority
@@ -197,32 +176,32 @@ enum {
 Priority; // 3-bits
 
 enum {
-  Latest = 0,           // Data down-sampled to latest received
-  Closest = 0x800,      // Data down-sampled to closest timestamp
-  BestQuality = 0x1000, // Data down-sampled to item with best quality
-  Filter = 0x1800       // Data down-sampled with DataType specific filter, e.g., average
+  Latest = 0,       // Data down-sampled to latest received
+  Closest = 1,      // Data down-sampled to closest timestamp
+  BestQuality = 2,  // Data down-sampled to item with best quality
+  Filter = 3        // Data down-sampled with DataType specific filter, e.g., average
 }
 ResolutionType; // 2-bits
 
 enum {
-  Timestamp = 1 << 0;           // State includes Timestamp
-  Quality = 1 << 1,             // State includes QualityFlags
-  Sequence = 1 << 2,            // State includes sequence ID as uint32
-  Fragment = 1 << 3,            // State includes fragment number as uint32
-  PriorityMask = 0x70,          // Mask for Priority, get value with >> 3
-  Reliability = 1 << 7,         // When set, data will use lossy communications
-  Verification = 1 << 8,        // When set, data delivery will be verified
-  Exception = 1 << 9,           // When set, data will be published on change
-  Resolution = 1 << 10,         // When set, data will be down-sampled
-  ResolutionTypeMask = 0x1800,  // Mask for ResolutionType
-  KeyAction = 1 << 13,          // When set key is to be added; otherwise, removed
-  ReservedFlag1 = 1 << 14,      // Reserved flag 1
-  ReservedFlag2 = 1 << 15       // Reserved flag 2
+  Timestamp = 1 << 0;           // When set, State includes Timestamp
+  TimeQuality = 1 << 1,         // When set, State includes TimeQualityFlags
+  DataQuality = 1 << 2,         // When set, State includes DataQualityFlags
+  Sequence = 1 << 3,            // When set, State includes sequence ID as uint32
+  Fragment = 1 << 4,            // When set, State includes fragment number as uint32
+  PriorityMask = 0xE0,          // Mask for Priority, value = (flags >> 5) & 0xE
+  Reliability = 1 << 8,         // When set, data will use lossy communications
+  Verification = 1 << 9,        // When set, data delivery will be verified
+  Exception = 1 << 10,          // When set, data will be published on change
+  Resolution = 1 << 11,         // When set, data will be down-sampled
+  ResolutionTypeMask = 0x3000,  // Mask for ResolutionType
+  KeyAction = 1 << 14,          // When set key is to be added; otherwise, removed
+  ReservedFlag = 1 << 15        // Reserved flag
 }
 StateFlags; // sizeof(uint16), 2-bytes
 
 struct {
-  guid uniqueID;    // Unique data point identifier - maps to metadata `Measurement.uniqueID`
+  guid uniqueID;    // Unique data point identifier - maps to metadata `DataPoint.uniqueID`
   uint32 runtimeID; // Runtime identifier as referenced by `DataPoint`
   ValueType type;   // Value type of `DataPoint`
   StateFlags flags; // State flags for `DataPoint`
