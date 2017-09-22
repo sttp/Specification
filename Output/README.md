@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.1.40 - September 21, 2017
+**Version:** 0.1.41 - September 22, 2017
 
 **Status:** Initial Development
 
@@ -801,27 +801,6 @@ Signal mapping structures:
 
 ```C
 enum {
-  Null = 0,     // 0-bytes
-  SByte = 1,    // 1-byte
-  Int16 = 2,    // 2-bytes
-  Int32 = 3,    // 4-bytes
-  Int64 = 4,    // 8-bytes
-  Byte = 5,     // 1-byte
-  UInt16 = 6,   // 2-bytes
-  UInt32 = 7,   // 4-bytes
-  UInt64 = 8,   // 8-bytes
-  Decimal = 9,  // 16-bytes
-  Double = 10,  // 8-bytes
-  Single = 11,  // 4-bytes
-  Ticks = 12,   // 8-bytes
-  Bool = 13,    // 1-byte
-  Guid = 14,    // 16-bytes
-  String = 15,  // 64-bytes, max
-  Buffer = 16   // 64-bytes, max
-}
-ValueType; // sizeof(uint8), 1-byte
-
-enum {
   Level0 = 0, // User level 0 priority, lowest
   Level1 = 1, // User level 1 priority
   Level2 = 2, // User level 2 priority
@@ -834,32 +813,32 @@ enum {
 Priority; // 3-bits
 
 enum {
-  Latest = 0,           // Data down-sampled to latest received
-  Closest = 0x800,      // Data down-sampled to closest timestamp
-  BestQuality = 0x1000, // Data down-sampled to item with best quality
-  Filter = 0x1800       // Data down-sampled with DataType specific filter, e.g., average
+  Latest = 0,       // Data down-sampled to latest received
+  Closest = 1,      // Data down-sampled to closest timestamp
+  BestQuality = 2,  // Data down-sampled to item with best quality
+  Filter = 3        // Data down-sampled with DataType specific filter, e.g., average
 }
 ResolutionType; // 2-bits
 
 enum {
-  Timestamp = 1 << 0;           // State includes Timestamp
-  Quality = 1 << 1,             // State includes QualityFlags
-  Sequence = 1 << 2,            // State includes sequence ID as uint32
-  Fragment = 1 << 3,            // State includes fragment number as uint32
-  PriorityMask = 0x70,          // Mask for Priority, get value with >> 3
-  Reliability = 1 << 7,         // When set, data will use lossy communications
-  Verification = 1 << 8,        // When set, data delivery will be verified
-  Exception = 1 << 9,           // When set, data will be published on change
-  Resolution = 1 << 10,         // When set, data will be down-sampled
-  ResolutionTypeMask = 0x1800,  // Mask for ResolutionType
-  KeyAction = 1 << 13,          // When set key is to be added; otherwise, removed
-  ReservedFlag1 = 1 << 14,      // Reserved flag 1
-  ReservedFlag2 = 1 << 15       // Reserved flag 2
+  Timestamp = 1 << 0;           // When set, State includes Timestamp
+  TimeQuality = 1 << 1,         // When set, State includes TimeQualityFlags
+  DataQuality = 1 << 2,         // When set, State includes DataQualityFlags
+  Sequence = 1 << 3,            // When set, State includes sequence ID as uint32
+  Fragment = 1 << 4,            // When set, State includes fragment number as uint32
+  PriorityMask = 0xE0,          // Mask for Priority, value = (flags >> 5) & 0xE
+  Reliability = 1 << 8,         // When set, data will use lossy communications
+  Verification = 1 << 9,        // When set, data delivery will be verified
+  Exception = 1 << 10,          // When set, data will be published on change
+  Resolution = 1 << 11,         // When set, data will be down-sampled
+  ResolutionTypeMask = 0x3000,  // Mask for ResolutionType
+  KeyAction = 1 << 14,          // When set key is to be added; otherwise, removed
+  ReservedFlag = 1 << 15        // Reserved flag
 }
 StateFlags; // sizeof(uint16), 2-bytes
 
 struct {
-  guid uniqueID;    // Unique data point identifier - maps to metadata `Measurement.uniqueID`
+  guid uniqueID;    // Unique data point identifier - maps to metadata `DataPoint.uniqueID`
   uint32 runtimeID; // Runtime identifier as referenced by `DataPoint`
   ValueType type;   // Value type of `DataPoint`
   StateFlags flags; // State flags for `DataPoint`
@@ -926,7 +905,30 @@ DataPoint;
 
 ### Data Point Value Types
 
-The types in the [`ValueType`](#runtime-id-mapping-command) enumeration are described below, along with any needed associated structures:
+The data types available to a `DataPoint` are described in the `ValueType` enumeration, defined below, along with any needed associated structures:
+
+```C
+enum {
+  Null = 0,     // 0-bytes
+  SByte = 1,    // 1-byte
+  Int16 = 2,    // 2-bytes
+  Int32 = 3,    // 4-bytes
+  Int64 = 4,    // 8-bytes
+  Byte = 5,     // 1-byte
+  UInt16 = 6,   // 2-bytes
+  UInt32 = 7,   // 4-bytes
+  UInt64 = 8,   // 8-bytes
+  Decimal = 9,  // 16-bytes
+  Double = 10,  // 8-bytes
+  Single = 11,  // 4-bytes
+  Ticks = 12,   // 8-bytes
+  Bool = 13,    // 1-byte
+  Guid = 14,    // 16-bytes
+  String = 15,  // 64-bytes, max
+  Buffer = 16   // 64-bytes, max
+}
+ValueType; // sizeof(uint8), 1-byte
+```
 
 * `Null`: No space occupied
 * `SByte`: [8-bit Signed Byte](https://en.wikipedia.org/wiki/Byte) (1-byte, big-endian)
@@ -940,50 +942,64 @@ The types in the [`ValueType`](#runtime-id-mapping-command) enumeration are desc
 * `Decimal`: [128-bit Decimal Floating Point](https://en.wikipedia.org/wiki/Decimal128_floating-point_format) (16-bytes, per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
 * `Double`: [64-bit Double Precision Floating Point](https://en.wikipedia.org/wiki/Double-precision_floating-point_format) (8-bytes, per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
 * `Single`: [32-bit Single Precision Floating Point](https://en.wikipedia.org/wiki/Single-precision_floating-point_format) (4-bytes, per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
-* `Ticks`: [Time as 64-bit Signed Integer](https://en.wikipedia.org/wiki/System_time) (8-bytes, big-endian, 100-nanosecond ticks since 1 January 0001)
 * `Bool`: [Boolean as 8-bit Unsigned Integer](https://en.wikipedia.org/wiki/Boolean_data_type) (1-byte, big-endian, zero is `false`, non-zero value is `true`)
 * `Guid`: [Globally Unique Identifer](https://en.wikipedia.org/wiki/Universally_unique_identifier) (16-bytes, big-endian for all components)
-* `String` [Character String as `StringValue`](https://en.wikipedia.org/wiki/String_%28computer_science%29) (Maximum of 16-bytes - 1-byte header with 15-bytes of character data, supported encoding for ASCII, ANSI, UTF8 and Unicode)
-* `Buffer` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) (Maximum of 16-bytes - 1-byte header with 15-bytes of data)
+* `Time`: [Time as `Timestamp`](https://en.wikipedia.org/wiki/System_time) (16-bytes, see [timestamp types](#data-point-timestamp-types))
+* `String` [Character String as `StringValue`](https://en.wikipedia.org/wiki/String_%28computer_science%29) (Maximum of 64-bytes - 1-byte header with 63-bytes of character data, encoding is UTF8)
+* `Buffer` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) (Maximum of 64-bytes - 1-byte header with 63-bytes of data)
 
 Both the `String` and `Buffer` represent variable length data types. Each variable length data point will have a fixed maximum number of bytes that can be transmitted per instance of the `DataPoint` structure. For data sets larger then the specified maximum size, data will need to be fragmented, marked with a [sequence number](#data-point-sequence-number) and transmitted in small chunks, i.e., 63-byte segments. For this large data set collation scenario, it is expected that the data packets will be transmitted over a reliable transport protocol, e.g., TCP, otherwise the subscriber should expect the possibility of missing fragments. Details for the content of the `String` type which is the `StringValue` structure and the `Buffer` type which is the `BufferValue` structure are defined as follows:
 
 ```C
-enum {
-  ASCII = 0,
-  ANSI = 0x40,
-  UTF8 = 0x80,
-  Unicode  = 0xC0,
-  EncodingMask = 0xC0,
-  LengthMask = 0x3F
-}
-StringValueState; // sizeof(uint8), 1-byte
-
 struct {
-  StringValueState state;
-  uint8[] data; // Maximum size of 15
+  uint8 length;
+  uint8[] data; // Maximum size of 63
 }
 StringValue;
 
 struct {
   uint8 length;
-  uint8[] data; // Maximum size of 15
+  uint8[] data; // Maximum size of 63
 }
 BufferValue;
 ```
 
-> :information_source: String value encoding is defined at a data point level when using the `String` data type, this differs from the session negotiated string encoding established by the publisher and subscriber. The negotiated string encoding is always used for strings being exchanged by the publisher and subscriber at a command level, however, the subscriber will be subject to the encoding specified for a `StringValue` - this prevents the publisher from having to handle string encoding translations of available data. Additionally, the data publisher should have a general philosophy of not changing any data being provided to the subscriber.
-
 ### Data Point Timestamp Types
 
-The timestamp formats supported by STTP are defined to accommodate foreseeable use cases and defined requirements. The types in the `TimestampType` enumeration are described below along with the associated timestamp structures.
+The timestamp format defined by STTP is defined to accommodate foreseeable use cases and defined requirements for representations of time, including elapsed time spans and indication of a leap-second in progress.
 
-1. The `NoTime` type specifies that no timestamp is included in the data point
-2. The `Ticks` type specifies that the timestamp will be a `TicksTimestamp` structure, defined below, which represents the 100-nanosecond intervals since 1/1/0001 with a range of 32,768 years. This timestamp has a resolution that is ideal for timestamps measured using GPS.
-3. The `Unix64` type specifies a 64-bit Unix, a.k.a., POSIX, industry standard timestamp that will be a `Unix64Timestamp` structure, defined below, which represents one second intervals since 1/1/1970 with a range of 584 billion years. This timestamp has whole second resolution, i.e., no sub-second time.
-4. The `NTP128` type specifies a 128-bit NTP industry standard timestamp that will be a `NTP128Timestamp` structure, defined below, which represents seconds since 1/1/1900 with a range of 584 billion years and fractional seconds with a resolution down to 0.05 attoseconds. This timestamp has a resolution that can accommodate most any conceivable time value.
+```C
+enum {
+  MillisecondMask = 0x0FFC000000000000, // (fraction >> 50) & 1023
+  MicrosecondMask = 0x0003FF0000000000, // (fraction >> 40) & 1023
+  NanosecondMask  = 0x000000FFC0000000, // (fraction >> 30) & 1023
+  PicosecondMask  = 0x000000003FF00000, // (fraction >> 20) & 1023
+  FemtosecondMask = 0x00000000000FFC00, // (fraction >> 10) & 1023
+  AttosecondMask  = 0x00000000000003FF, // fraction & 1023
+  Leapsecond      = 0x1000000000000000, // Set if leap second is in progress
+  ReservedBits    = 0xE000000000000000
+}
+FractionFlags; // sizeof(uint64), 8-bytes
 
-Timestamps also include a `TimestampFlags` structure, defined below, that describes timestamp level notifications of leap seconds and  as well as timestamp quality defined with the `TimeQuality` enumeration value. This detail is included for devices that have access to a GPS or UTC time synchronization source, e.g., from an IRIG timecode signal. For timestamps that are acquired without an accurate time source, e.g., using the local system clock for new timestamps, the `TimeQuality` value should be set to `Locked` and the `TimestampFlags.NoAccurateTimeSource` should be set.
+struct {
+  int64 seconds;          // Seconds since 1/1/1001
+  FractionFlags fraction; // Fractional seconds
+}
+Timestamp; // 16-bytes
+```
+* The `seconds` field defines the whole seconds since 1/1/0001 with a range of 584 billion years, i.e., +/-292 billion years.
+* The `fraction` field is an instance of the `FractionFlags` enumeration that defines the fractional seconds for the timestamp with a resolution down to attoseconds. Specially the `fraction` field is broken up into 10-bit segments where each segment represents 1,000 units, 0 to 999, of fractional time. There are 10-bits for milliseconds, 10-bits for microseconds, 10-bits for nanoseconds, 10-bits for picoseconds, 10-bits for femtoseconds, and 10-bits for attoseconds. There is 1-bit defined to indicate a leap-second in progress and 3-bits are reserved.
+- The `flags` field is an instance of the `TimestampFlags` enumeration.
+
+> :information_source: Although the timestamp size is large, encoding techniques make it so that unused and repeating sections of time can be compressed out of the data point `state`.
+
+### Data Point Time Quality Flags
+
+Data points can also include a `TimestampFlags` structure in the serialized state data, defined below, that describes both the timestamp quality, defined with the `TimeQuality` enumeration value, as well as an indication of if a timestamp was not measured with an accurate time source.
+
+The time quality detail is included for devices that have access to a GPS or UTC time synchronization source, e.g., from an IRIG timecode signal. For timestamps that are acquired without an accurate time source, e.g., using the local system clock, the `TimeQuality` value should be set to `Locked` and the `TimestampFlags.NoAccurateTimeSource` should be set.
+
+The time quality flags are only included in the `DataPoint.state` data when the `DataPointKey.flags` includes the `StateFlags.TimeQuality` flag. The `TimeQualityFlags` must be serialized into the `DataPoint.state` data in big-endian order following any defined timestamp. If no timestamp is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` defines `Timestamp` as `0`, then the `TimeQualityFlags` should not be serialized into the `DataPoint.state` data.
 
 ```C
 enum {
@@ -1006,57 +1022,36 @@ TimeQuality; // 4-bits, 1-nibble
 enum {
   None = 0,
   TimeQualityMask = 0xF,        // Mask for TimeQuality
-  LeapsecondPending = 1 << 4,   // Set before a leap second occurs and then cleared after
-  LeapsecondOccurred = 1 << 5,  // Set in the first second after the leap second occurs and remains set for 24 hours
-  LeapsecondDirection = 1 << 6, // Clear for add, set for delete
+  // Could map remaining bits to IEEE C37.118 leap-second flags...
   NoAccurateTimeSource = 1 << 7 // Accurate time source is unavailable
 }
 TimestampFlags; // sizeof(uint8), 1-byte
-
-struct {
-  int64 value; // 100-nanosecond intervals since 1/1/0001, +/-16,384 years
-  TimestampFlags flags;
-}
-TicksTimestamp; // 9-bytes
-
-struct {
-  int64 value; // Seconds since 1/1/1970, +/-292 billion years
-  TimestampFlags flags;
-}
-Unix64Timestamp; // 9-bytes
-
-struct {
-  int64 seconds;    // Seconds since 1/1/1900, +/-292 billion years
-  uint64 fraction;  // 0.05 attosecond resolution (i.e., 0.5e-18 second)
-  TimestampFlags flags;
-}
-NTP128Timestamp; // 17-bytes
 ```
 
-### Data Point Quality Flags
+### Data Point Data Quality Flags
 
-A set of simple quality flags are defined for STTP data point values in the `QualityFlags` enumeration, defined as follows. These quality flags are only included in the `DataPoint.state` data when the `DataPoint.flags` includes the `StateFlags.Quality` flag. The `QualityFlags` must be serialized into the `DataPoint.state` data in big-endian order following any defined timestamp. If no timestamp is defined for the `DataPoint.state` data, i.e., the `DataPoint.flags` defines a `TimestampType` of `NoTime`, then the `QualityFlags` must be the first value serialized into the `DataPoint.state` data.
+A set of data quality flags are defined for STTP data point values in the `DataQualityFlags` enumeration, defined as follows. These quality flags are only included in the `DataPoint.state` data when the `DataPointKey.flags` includes the `StateFlags.DataQuality` flag. The `DataQualityFlags` must be serialized into the `DataPoint.state` data in big-endian order following any defined time quality flags. If no time quality flags are defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` defines `Timestamp` as `0`, then the `DataQualityFlags` must be the first value serialized into the `DataPoint.state` data.
 
-> :information_source: These quality flags are intentionally simple to accommodate a very wide set of use cases and still provide some indication of data point value quality. More complex data qualities can exist as new data point values are added to a more complex data type, e.g., a `BufferValue`.
+> :information_source: These quality flags are intentionally simple to accommodate a very wide set of use cases and still provide some indication of data point value quality. More complex data qualities can exist as new data points.
 
 ```C
 enum {
   Normal = 0,                 // Defines normal state
-  BadTime = 1 << 0,           // Defines bad time state
-  BadValue = 1 << 1,          // Defines bad value state
-  UnreasonableValue = 1 << 2, // Defines unreasonable value state
-  CalculatedValue = 1 << 3,   // Defines calculated value state
-  ReservedFlag1 = 1 << 4,     // Defines reserved flag 1
-  ReservedFlag2 = 1 << 5,     // Defines reserved flag 1
-  UserDefinedFlag1 = 1 << 6,  // Defines user defined flag 1
-  UserDefinedFlag2 = 1 << 7   // Defines user defined flag 1
+  BadTime = 1 << 0,           // Defines bad time state when set
+  BadValue = 1 << 1,          // Defines bad value state when set
+  UnreasonableValue = 1 << 2, // Defines unreasonable value state when set
+  CalculatedValue = 1 << 3,   // Defines calculated value state when set
+  MissingValue = 1 << 4,      // Defines missing value when set
+  ReservedFlag = 1 << 5,      // Reserved flag
+  UserDefinedFlag1 = 1 << 6,  // User defined flag 1
+  UserDefinedFlag2 = 1 << 7   // User defined flag 2
 }
-QualityFlags; // sizeof(uint8), 1-byte
+DataQualityFlags; // sizeof(uint8), 1-byte
 ```
 
 ### Data Point Sequence Number
 
-For data that needs to be transmitted with a defined sequence number, the `DataPoint.flags` must include the `StateFlags.Sequence` flag. The sequence number, which is defined as a `uint16`, must be serialized into the `DataPoint.state` data in big-endian order following any defined `QualityFlags` or timestamp. If no timestamp is defined for the `DataPoint.state` data, i.e., the `DataPoint.flags` defines a `TimestampType` of `NoTime` and no `QualityFlags` is defined for the `DtaaPoint.state` data, i.e., the `DataPoint.flags` does not include the `StateFlags.Quality` flag, then the sequence number must be the first value serialized into the `DataPoint.state` data.
+For data that needs to be transmitted with a defined sequence number, the `DataPoint.flags` must include the `StateFlags.Sequence` flag. The sequence number, which is defined as a `uint16`, must be serialized into the `DataPoint.state` data in big-endian order following any defined `DataQualityFlags`, `TimeQualityFlags` or timestamp. If no timestamp is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` defines `Timestamp` as `0` and no `DataQualityFlags` is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` does not include the `StateFlags.DataQuality` flag, then the sequence number must be the first value serialized into the `DataPoint.state` data.
 
 ## Padded Data Point Structure
 

@@ -28,7 +28,8 @@
 | [Data Point Structure (2)](DataPointStructure.md#data-point-structure) | [DataPointStructure.md](DataPointStructure.md) |
 | [Data Point Value Types (3)](DataPointStructure.md#data-point-value-types) | [DataPointStructure.md](DataPointStructure.md) |
 | [Data Point Timestamp Types (3)](DataPointStructure.md#data-point-timestamp-types) | [DataPointStructure.md](DataPointStructure.md) |
-| [Data Point Quality Flags (3)](DataPointStructure.md#data-point-quality-flags) | [DataPointStructure.md](DataPointStructure.md) |
+| [Data Point Time Quality Flags (3)](DataPointStructure.md#data-point-time-quality-flags) | [DataPointStructure.md](DataPointStructure.md) |
+| [Data Point Data Quality Flags (3)](DataPointStructure.md#data-point-data-quality-flags) | [DataPointStructure.md](DataPointStructure.md) |
 | [Data Point Sequence Number (3)](DataPointStructure.md#data-point-sequence-number) | [DataPointStructure.md](DataPointStructure.md) |
 | [Padded Data Point Structure (2)](PaddedDataPointStructure.md#padded-data-point-structure) | [PaddedDataPointStructure.md](PaddedDataPointStructure.md) |
 | [Data Point Characteristics (2)](DataPointCharacteristics.md#data-point-characteristics) | [DataPointCharacteristics.md](DataPointCharacteristics.md) |
