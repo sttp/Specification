@@ -1,15 +1,24 @@
 ## Data Point Structure
 
-When a subscriber has issued a [subscribe command](Commands.md#subscribe-command) to its publisher for select set of data points, the publisher will start sending [data point packet commands](Commands.md#data-point-packet-commands) each with a payload of several data point values serialized using the `DataPoint` structure, defined as follows. The actual number of `DataPoint` structures contained in the data point packet command depends the configured maximum payload size and the serialized size of the data point structures:
+When a subscriber has issued a [subscribe command](Commands.md#subscribe-command) to its publisher for select set of data points, the publisher will start sending [data point packet commands](Commands.md#data-point-packet-commands) each with a payload of several data point values serialized using the `DataPoint` structure, defined as follows. The actual number of `DataPoint` structures contained in the data point packet command depends the configured maximum payload size and the serialized size of the data point structures, see [Figure 6](#user-content-figure6):
 
 ```C
 struct {
   uint32 id;
-  uint8[] value;    // Size based on type
-  uint8[] state;    // Size based on flags
+  uint8[] value;    // Size based on type, up to 64-bytes
+  uint8[] state;    // Size based on flags, up to 12-bytes
 }
 DataPoint;
 ```
+
+<a name="figure6"></a> <center>
+
+![Data Packet Command Details](Images/data-packet-command-details.png)
+
+<sup>Figure 6</sup>
+</center>
+
+> :information_source: The maximum size of a `DataPoint` structure instance is 88-bytes, however, with simple encoding techniques this size can be reduced down to a few bytes for most value types.
 
 ### Data Point Value Types
 
@@ -72,9 +81,11 @@ struct {
 BufferValue;
 ```
 
+> :construction: Some tests need to be run to determine if 64-bytes of variable string / buffer data is an effective use of space and provides optimal performance in data point packets. This target size may need to be an adjustable parameter in initial STTP implementations.
+
 ### Data Point Timestamp
 
-The timestamp format defined by STTP is defined to accommodate foreseeable use cases and defined requirements for representations of time and elapsed time spans. The timestamp includes an indication of a leap-second in progress.
+The timestamp format defined by STTP is defined to accommodate foreseeable use cases and defined requirements for representations of time and elapsed time spans. The following defines the binary format of a `Timestamp` in STTP which consists basically epoch seconds and fraction of a second. The timestamp fraction also include a bit for indication of a leap-second in progress.
 
 ```C
 enum {
@@ -84,7 +95,7 @@ enum {
   PicosecondMask  = 0x000000003FF00000, // (fraction >> 20) & 1023
   FemtosecondMask = 0x00000000000FFC00, // (fraction >> 10) & 1023
   AttosecondMask  = 0x00000000000003FF, // fraction & 1023
-  Leapsecond      = 0x1000000000000000, // Set if leap second is in progress
+  Leapsecond      = 0x1000000000000000, // Set if leap-second is in progress
   ReservedBits    = 0xE000000000000000
 }
 FractionFlags; // sizeof(uint64), 8-bytes
@@ -96,10 +107,9 @@ struct {
 Timestamp; // 16-bytes
 ```
 * The `seconds` field defines the whole seconds since 1/1/0001 with a range of 584 billion years, i.e., +/-292 billion years.
-* The `fraction` field is an instance of the `FractionFlags` enumeration that defines the fractional seconds for the timestamp with a resolution down to attoseconds. Specially the `fraction` field is broken up into 10-bit segments where each segment represents 1,000 units, 0 to 999, of fractional time - similar to a binary coded decimal. There are 10-bits for milliseconds, 10-bits for microseconds, 10-bits for nanoseconds, 10-bits for picoseconds, 10-bits for femtoseconds, and 10-bits for attoseconds. There is 1-bit defined to indicate a leap-second in progress and 3-bits are reserved.
-- The `flags` field is an instance of the `TimestampFlags` enumeration.
+* The `fraction` field is an instance of the `FractionFlags` enumeration that defines the fractional seconds for the timestamp with a resolution down to attoseconds. More specifically, the `fraction` field is broken up into 10-bit segments where each segment represents 1,000 units, 0 to 999, of fractional time - similar to a binary coded decimal. There are 10-bits for milliseconds, 10-bits for microseconds, 10-bits for nanoseconds, 10-bits for picoseconds, 10-bits for femtoseconds, and 10-bits for attoseconds. Bit 60 is used to indicate a leap-second is in progress; the remaining 3-bits, 61-63, are reserved.
 
-> :information_source: Although the timestamp size is large, encoding techniques make it so that unused and repeating sections of time can be compressed out of the data point `state`.
+> :information_source: The size of a `Timestamp` structure instance is 16-bytes, however, simple encoding techniques make it so that unused and repeating sections of time can be compressed out of the data point `state` so that it consumes much less space.
 
 ### Data Point Time Quality Flags
 
@@ -129,11 +139,18 @@ TimeQuality; // 4-bits, 1-nibble
 
 enum {
   None = 0,
-  TimeQualityMask = 0xF,        // Mask for TimeQuality
-  // Could map remaining bits to IEEE C37.118 leap-second flags...
+  TimeQualityMask = 0xF,        // Mask for TimeQuality  
   NoAccurateTimeSource = 1 << 7 // Accurate time source is unavailable
 }
 TimestampFlags; // sizeof(uint8), 1-byte
+```
+
+> :construction: The remaining available bits in the `TimestampFlags` enumeration could be made to directly map to IEEE C37.118 leap-second flags. Existing IEEE text could then be used to describe the function of these bits if deemed useful:
+
+```C
+LeapsecondPending = 1 << 4,   // Set before a leap second occurs and then cleared after
+LeapsecondOccurred = 1 << 5,  // Set in the first second after the leap second occurs and remains set for 24 hours
+LeapsecondDirection = 1 << 6, // Clear for add, set for delete
 ```
 
 ### Data Point Data Quality Flags
