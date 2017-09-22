@@ -85,7 +85,7 @@ BufferValue;
 
 ### Data Point Timestamp
 
-The timestamp format defined by STTP is defined to accommodate foreseeable use cases and defined requirements for representations of time and elapsed time spans. The following defines the binary format of a `Timestamp` in STTP which consists basically epoch seconds and fraction of a second. The timestamp fraction also include a bit for indication of a leap-second in progress.
+The timestamp format defined by STTP is defined to accommodate foreseeable use cases and defined requirements for representations of time and elapsed time spans. The following defines the binary format of a `Timestamp` in STTP which consists of epoch based whole seconds and any fraction of a second. The timestamp fraction also includes a bit for indication of a leap-second in progress.
 
 ```C
 enum {
