@@ -130,7 +130,7 @@ Representation of all data types is explicitly specified. The most fundamental u
 
 #### Enumerated Types
 
-To represent an enumerated set of possible values, a numeric type is defined called an `enum`. An enumerated type can only represent its defined values, however, when the enumerated type values represent bit values the enumerated type can represent any number of its defined values at once. Every element of an enumerated type must be assigned a value, as a result values can be defined in any order. Importantly, an enumerated type will only occupy space needed for its maximum defined value when serialized. For example, the following enumerated type would only require one byte:
+To represent an enumerated set of possible values, a numeric type is defined called an `enum`. Normally an enumerated type only represents its defined values, however, when the enumerated type values represent bit values, or flags, the enumerated type can represent any number of its possible values at once. Every element of an enumerated type must be assigned a value, as a result values can be defined in any order. Importantly, an enumerated type will only occupy space needed for its maximum defined value when serialized. For example, the following enumerated type would only require one byte:
 
 ```C
   enum {
