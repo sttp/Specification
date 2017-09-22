@@ -194,17 +194,17 @@ enum {
   Verification = 1 << 9,        // When set, data delivery will be verified
   Exception = 1 << 10,          // When set, data will be published on change
   Resolution = 1 << 11,         // When set, data will be down-sampled
-  ResolutionTypeMask = 0x3000,  // Mask for ResolutionType
+  ResolutionTypeMask = 0x3000,  // Mask for ResolutionType, value = (flags >> 12) & 0x2
   KeyAction = 1 << 14,          // When set key is to be added; otherwise, removed
   ReservedFlag = 1 << 15        // Reserved flag
 }
 StateFlags; // sizeof(uint16), 2-bytes
 
 struct {
-  guid uniqueID;    // Unique data point identifier - maps to metadata `DataPoint.uniqueID`
-  uint32 runtimeID; // Runtime identifier as referenced by `DataPoint`
-  ValueType type;   // Value type of `DataPoint`
-  StateFlags flags; // State flags for `DataPoint`
+  guid uniqueID;    // Unique data point identifier - maps to metadata DataPoint.UniqueID
+  uint32 runtimeID; // Runtime identifier as referenced by DataPoint
+  ValueType type;   // Value type of DataPoint
+  StateFlags flags; // State flags for DataPoint
 }
 DataPointKey; // 23-bytes
 

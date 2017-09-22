@@ -23,7 +23,7 @@ Empty payloads have a `length` value of `0` and a `payload` value of `null`. Whe
 
 #### Command Structure
 
-Commands are used to manage primary STTP functionality. The following defines the binary format of a `Command`, see [Figure 4](#user-content-figure4) for an example:
+Commands are used to manage primary STTP functionality. The following defines the binary format of a `Command`, see [Figure 5](#user-content-figure5) for an example:
 
 ```C
 struct {
@@ -37,13 +37,13 @@ Command;
 - The `length` field defines the length of the `payload` in bytes.
 - The `payload` field is a byte array representing the serialized payload associated with the `commandCode`.
 
-<a name="figure4"></a> <center>
+<a name="figure5"></a> <center>
 
 **Example Command Structure for a [`DataPointPacket`](Commands.md#data-point-packet-command)**
 
 ![Mapping Data Structure Elements to Data Points](Images/command-structure.png)
 
-<sup>Figure 4</sup>
+<sup>Figure 5</sup>
 </center>
 
 #### Response Structure

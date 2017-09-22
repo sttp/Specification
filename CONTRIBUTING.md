@@ -35,7 +35,7 @@ Since this site is a [git](https://en.wikipedia.org/wiki/Git) based repository, 
 ## Section Editing
 
 All document sections are defined as GitHub markdown, i.e., `*.md` files, in the [Sections](Sections) folder. When linking one section to another, link to the file name using a relative path, e.g.:
-`For more information, see [API reference](APIReference.md))` - this allows section pages to link together when rendered and enables the nightly build process to manage the translation from `file.md` links to `#header-links` when combining the sections into a single file.
+`For more information, see [API reference](APIReference.md)` - this allows section pages to link together when rendered and enables the nightly build process to manage the translation from `file.md` links to `#header-links` when combining the sections into a single file.
 
 When new sections are added, the "make file" used for compiling the sections will need to be modified. The script used for this process is the [Gulp](http://gulpjs.com/) based [gulpfile.js](gulpfile.js) - this file will need to be updated to include the markdown file name for the new section and its associated header mapping so that it can be combined into a single overall document in the nightly build process. Also, links to new major sections should be added to the table of contents which is located in the [Sections/README.md](Sections/README.md) file.
 

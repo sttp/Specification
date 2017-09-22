@@ -52,7 +52,7 @@ ValueType; // sizeof(uint8), 1-byte
 * `Single`: [32-bit Single Precision Floating Point](https://en.wikipedia.org/wiki/Single-precision_floating-point_format) (4-bytes, per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
 * `Bool`: [Boolean as 8-bit Unsigned Integer](https://en.wikipedia.org/wiki/Boolean_data_type) (1-byte, big-endian, zero is `false`, non-zero value is `true`)
 * `Guid`: [Globally Unique Identifer](https://en.wikipedia.org/wiki/Universally_unique_identifier) (16-bytes, big-endian for all components)
-* `Time`: [Time as `Timestamp`](https://en.wikipedia.org/wiki/System_time) (16-bytes, see [timestamp types](#data-point-timestamp-types))
+* `Time`: [Time as `Timestamp`](https://en.wikipedia.org/wiki/System_time) (16-bytes, see [timestamp types](#data-point-timestamp))
 * `String` [Character String as `StringValue`](https://en.wikipedia.org/wiki/String_%28computer_science%29) (Maximum of 64-bytes - 1-byte header with 63-bytes of character data, encoding is UTF8)
 * `Buffer` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) (Maximum of 64-bytes - 1-byte header with 63-bytes of data)
 
@@ -72,9 +72,9 @@ struct {
 BufferValue;
 ```
 
-### Data Point Timestamp Types
+### Data Point Timestamp
 
-The timestamp format defined by STTP is defined to accommodate foreseeable use cases and defined requirements for representations of time, including elapsed time spans and indication of a leap-second in progress.
+The timestamp format defined by STTP is defined to accommodate foreseeable use cases and defined requirements for representations of time and elapsed time spans. The timestamp includes an indication of a leap-second in progress.
 
 ```C
 enum {
@@ -90,13 +90,13 @@ enum {
 FractionFlags; // sizeof(uint64), 8-bytes
 
 struct {
-  int64 seconds;          // Seconds since 1/1/1001
+  int64 seconds;          // Seconds since 1/1/0001
   FractionFlags fraction; // Fractional seconds
 }
 Timestamp; // 16-bytes
 ```
 * The `seconds` field defines the whole seconds since 1/1/0001 with a range of 584 billion years, i.e., +/-292 billion years.
-* The `fraction` field is an instance of the `FractionFlags` enumeration that defines the fractional seconds for the timestamp with a resolution down to attoseconds. Specially the `fraction` field is broken up into 10-bit segments where each segment represents 1,000 units, 0 to 999, of fractional time. There are 10-bits for milliseconds, 10-bits for microseconds, 10-bits for nanoseconds, 10-bits for picoseconds, 10-bits for femtoseconds, and 10-bits for attoseconds. There is 1-bit defined to indicate a leap-second in progress and 3-bits are reserved.
+* The `fraction` field is an instance of the `FractionFlags` enumeration that defines the fractional seconds for the timestamp with a resolution down to attoseconds. Specially the `fraction` field is broken up into 10-bit segments where each segment represents 1,000 units, 0 to 999, of fractional time - similar to a binary coded decimal. There are 10-bits for milliseconds, 10-bits for microseconds, 10-bits for nanoseconds, 10-bits for picoseconds, 10-bits for femtoseconds, and 10-bits for attoseconds. There is 1-bit defined to indicate a leap-second in progress and 3-bits are reserved.
 - The `flags` field is an instance of the `TimestampFlags` enumeration.
 
 > :information_source: Although the timestamp size is large, encoding techniques make it so that unused and repeating sections of time can be compressed out of the data point `state`.
