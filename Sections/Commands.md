@@ -110,11 +110,11 @@ When data channel functions that are operating over a lossy communications proto
 
 The `SecureDataChannel` command should only be issued when a lossy communications protocol, e.g., UDP, has been defined for data channel functions. If a subscriber issues the `SecureDataChannel` command for a session that has not defined a lossy communications protocol for data channel functions, the publisher shall send a `Failed` response for the `SecureDataChannel` command with a string based payload that indicates that data channel functions can only be secured when a lossy communications protocol has been established. This error condition should equally apply when UDP broadcasts are not supported by the publisher.
 
-The `SecureDataChannel` command should only be issued when command channel functions are already secured using TLS. If a subscriber issues the `SecureDataChannel` command for a session with a command channel connection that has not been secured using TLS, the publisher shall send a `Failed` response for the `SecureDataChannel` command with a string based payload that indicates that data channel functions can only be secured when command channel functions already secured using TLS.
+The `SecureDataChannel` command should only be issued when command channel functions are already secured using TLS. If a subscriber issues the `SecureDataChannel` command for a session with a command channel connection that has not been secured using TLS, the publisher shall send a `Failed` response for the `SecureDataChannel` command with a string based payload that indicates that data channel functions can only be secured when command channel functions are already secured using TLS.
 
 The `SecureDataChannel` command should be issued prior to the `Subscribe` command to ensure data channel functions are secured before transmission of `DataPointPacket` commands. If a subscriber issues the `SecureDataChannel` command for a session that already has an active subscription, the publisher shall send a `Failed` response for the `SecureDataChannel` command with a string based payload that indicates that data channel functions cannot be secured after a subscription has already been initiated.
 
-If data channel functions can be secured, the publisher shall send a `Succeeded` response for the `SecureDataChannel` command with a payload that shall be an instance of the `SymmetricSecurity` structure, defined as follows, that establishes the symmetric encryption keys and associated initialization vector used to secure the data channel:
+If data channel functions can be secured, the publisher shall send a `Succeeded` response for the `SecureDataChannel` command with a payload that shall be an instance of the `DataChannelKeys` structure, defined as follows, that establishes the symmetric encryption keys and associated initialization vector used to secure the data channel:
 
 ```C
 struct {
@@ -123,11 +123,11 @@ struct {
   uint16 keyLength;
   uint8[] key;
 }
-SymmetricSecurity;
+DataChannelKeys;
 ```
-- The `ivLength` field defines the length of the `iv` in bytes.
+- The `ivLength` field defines the length of the `iv` array in bytes.
 - The `iv` field is a byte array representing the initialization vector.
-- The `keyLength` field defines the length of the `key` in bytes.
+- The `keyLength` field defines the length of the `key` array in bytes.
 - The `key` field is a byte array representing the encryption key.
 
 Upon the publisher sending the `Succeeded` response for the `SecureDataChannel` command, all data function payloads for commands and responses sent by the publisher to the subscriber over the lossy communications protocol must be encrypted using the AES symmetric encryption algorithm with a key size of 256 using the specified subscriber key and initialization vector.
@@ -144,7 +144,7 @@ Upon reception of a `Succeeded` response for the `SecureDataChannel` command fro
 
 #### Data Point Packet Command
 
-Data point packet commands are sent without the expectation of a response, as such data point packet commands can be transmitted over a lossy communications protocol, e.g., UDP, and thus suitable for data channel functionality.
+Data point packet commands are sent without the expectation of a response, as such data point packet commands can be transmitted over a lossy communications protocol, e.g., UDP, and thus are suitable for data channel functionality.
 
 * Wire Format: Binary
   * Includes a byte flag indicating content, e.g.:

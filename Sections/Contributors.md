@@ -11,6 +11,7 @@ The following individuals actively participated in the development of this stand
 - Jeff Otto, Schweitzer Engineering Laboratories
 - Kevin D. Jones, Dominion Energy
 - Paul Myrda, Electric Power Institute
+- Bob Braden, USC Information Sciences Institute
 
 ### ASP Project Participants
 ![Project Participants](Images/participant-logos.png)
