@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.1.41 - September 22, 2017
+**Version:** 0.1.42 - September 23, 2017
 
 **Status:** Initial Development
 
@@ -121,6 +121,7 @@ The words "must", "must not", "required", "shall", "shall not", "should", "shoul
 
 | Term | Definition |
 |-----:|:-----------|
+| [**binary coded decimal**](https://en.wikipedia.org/wiki/Binary-coded_decimal) | A binary encoding scheme for decimal numbers that represents each digit with fixed number of bits.  |
 | [**certificate**](https://en.wikipedia.org/wiki/X.509#Certificates) | A file that contains a public key and identity information, e.g., an organization name, hostnames, IP addresses, etc. The X.509 standard defines a standard format for certificate files that can either be self-signed or signed by a certificate authority. Certificates are used in conjunction with public-key infrastructure to provide identity validation and encryption keys used to secure IP transport protocol communications, such as with the TLS protocol. <br/> Also called _X.509 Certificate_. |
 | **command channel** | STTP functionality, usually implemented using a reliable communications protocol, that is used to exchange command messages in a publisher/subscriber connection. |
 | **data channel** | STTP functionality, implemented using either a reliable or lossy communications protocol, that is used to send data messages in a publisher/subscriber connection. |
@@ -242,7 +243,7 @@ Representation of all data types is explicitly specified. The most fundamental u
 
 #### Enumerated Types
 
-To represent an enumerated set of possible values, a numeric type is defined called an `enum`. An enumerated type can only represent its defined values, however, when the enumerated type values represent bit values the enumerated type can represent any number of its defined values at once. Every element of an enumerated type must be assigned a value, as a result values can be defined in any order. Importantly, an enumerated type will only occupy space needed for its maximum defined value when serialized. For example, the following enumerated type would only require one byte:
+To represent an enumerated set of possible values, a numeric type is defined called an `enum`. Normally an enumerated type only represents its defined values, however, when the enumerated type values represent bit values, or flags, the enumerated type can represent any number of its possible values at once. Every element of an enumerated type must be assigned a value, as a result values can be defined in any order. Importantly, an enumerated type will only occupy space needed for its maximum defined value when serialized. For example, the following enumerated type would only require one byte:
 
 ```C
   enum {
@@ -509,7 +510,14 @@ Reverse connections flip the normal responsibilities of a publish/subscribe mess
 
 Regardless of how a connection is established, forward or reverse, the functions, roles and responsibilities of the participants will not change, i.e., a publisher shall still be the provider of data and the subscriber shall still be the consumer of data. Additionally, any required protocol negotiations by the parties continues as normal once the connection has been established.
 
-> :information_source: Increased flexibility in the connectivity models for STTP is necessary so that security boundaries that have been enforced with firewall rules can be maintained. A common use case is that the publisher, and the data it is has access to, will exist in a secure network environment and the subscribers, which need access to the data, will exist in less secure network environments. In these scenarios, firewall rules will prohibit any connections to be initiated from an environment that is considered to be less secure. However, such environments normally allow connections to be initiated from inside the secure environment out to listening connections in less secure environments. Described more simply, nothing can reach in to systems in the secure environment, but systems in the secure environment can reach out - this is much like how a computer in a home network can access the public Internet through a router, but the router's built-in firewall prevents systems on the Internet from accessing the home computer. Although reverse connections may initially seem counter-intuitive, they exist as a firm STTP requirement to allow for successful data exchange from within secure environments.
+> :information_source: Increased flexibility in the connectivity models for STTP is necessary so that security boundaries that have been enforced with firewall rules can be maintained. A common use case is that the publisher, and the data it is has access to, will exist in a secure network environment and the subscribers, which need access to the data, will exist in less secure network environments. In these scenarios, firewall rules will prohibit any connections to be initiated from an environment that is considered to be less secure. However, such environments normally allow connections to be initiated from inside the secure environment out to listening connections in less secure environments, see [Figure 4](#user-content-figure4). Described more simply, nothing can reach in to systems in the secure environment, but systems in the secure environment can reach out - this is much like how a computer in a home network can access the public Internet through a router, but the router's built-in firewall prevents systems on the Internet from accessing the home computer. Although reverse connections may initially seem counter-intuitive, they exist as a firm STTP requirement to allow for successful data exchange from within secure environments.
+
+<a name="figure4"></a> <center>
+
+![Reverse Connection User Case](Images/reverse-connection-use-case.png)
+
+<sup>Figure 4</sup>
+</center>
 
 ### Bidirectional Data Exchange
 
@@ -594,7 +602,7 @@ Empty payloads have a `length` value of `0` and a `payload` value of `null`. Whe
 
 #### Command Structure
 
-Commands are used to manage primary STTP functionality. The following defines the binary format of a `Command`, see [Figure 4](#user-content-figure4) for an example:
+Commands are used to manage primary STTP functionality. The following defines the binary format of a `Command`, see [Figure 5](#user-content-figure5) for an example:
 
 ```C
 struct {
@@ -608,13 +616,13 @@ Command;
 - The `length` field defines the length of the `payload` in bytes.
 - The `payload` field is a byte array representing the serialized payload associated with the `commandCode`.
 
-<a name="figure4"></a> <center>
+<a name="figure5"></a> <center>
 
 **Example Command Structure for a [`DataPointPacket`](#data-point-packet-command)**
 
 ![Mapping Data Structure Elements to Data Points](Images/command-structure.png)
 
-<sup>Figure 4</sup>
+<sup>Figure 5</sup>
 </center>
 
 #### Response Structure
@@ -747,11 +755,11 @@ When data channel functions that are operating over a lossy communications proto
 
 The `SecureDataChannel` command should only be issued when a lossy communications protocol, e.g., UDP, has been defined for data channel functions. If a subscriber issues the `SecureDataChannel` command for a session that has not defined a lossy communications protocol for data channel functions, the publisher shall send a `Failed` response for the `SecureDataChannel` command with a string based payload that indicates that data channel functions can only be secured when a lossy communications protocol has been established. This error condition should equally apply when UDP broadcasts are not supported by the publisher.
 
-The `SecureDataChannel` command should only be issued when command channel functions are already secured using TLS. If a subscriber issues the `SecureDataChannel` command for a session with a command channel connection that has not been secured using TLS, the publisher shall send a `Failed` response for the `SecureDataChannel` command with a string based payload that indicates that data channel functions can only be secured when command channel functions already secured using TLS.
+The `SecureDataChannel` command should only be issued when command channel functions are already secured using TLS. If a subscriber issues the `SecureDataChannel` command for a session with a command channel connection that has not been secured using TLS, the publisher shall send a `Failed` response for the `SecureDataChannel` command with a string based payload that indicates that data channel functions can only be secured when command channel functions are already secured using TLS.
 
 The `SecureDataChannel` command should be issued prior to the `Subscribe` command to ensure data channel functions are secured before transmission of `DataPointPacket` commands. If a subscriber issues the `SecureDataChannel` command for a session that already has an active subscription, the publisher shall send a `Failed` response for the `SecureDataChannel` command with a string based payload that indicates that data channel functions cannot be secured after a subscription has already been initiated.
 
-If data channel functions can be secured, the publisher shall send a `Succeeded` response for the `SecureDataChannel` command with a payload that shall be an instance of the `SymmetricSecurity` structure, defined as follows, that establishes the symmetric encryption keys and associated initialization vector used to secure the data channel:
+If data channel functions can be secured, the publisher shall send a `Succeeded` response for the `SecureDataChannel` command with a payload that shall be an instance of the `DataChannelKeys` structure, defined as follows, that establishes the symmetric encryption keys and associated initialization vector used to secure the data channel:
 
 ```C
 struct {
@@ -760,11 +768,11 @@ struct {
   uint16 keyLength;
   uint8[] key;
 }
-SymmetricSecurity;
+DataChannelKeys;
 ```
-- The `ivLength` field defines the length of the `iv` in bytes.
+- The `ivLength` field defines the length of the `iv` array in bytes.
 - The `iv` field is a byte array representing the initialization vector.
-- The `keyLength` field defines the length of the `key` in bytes.
+- The `keyLength` field defines the length of the `key` array in bytes.
 - The `key` field is a byte array representing the encryption key.
 
 Upon the publisher sending the `Succeeded` response for the `SecureDataChannel` command, all data function payloads for commands and responses sent by the publisher to the subscriber over the lossy communications protocol must be encrypted using the AES symmetric encryption algorithm with a key size of 256 using the specified subscriber key and initialization vector.
@@ -781,7 +789,7 @@ Upon reception of a `Succeeded` response for the `SecureDataChannel` command fro
 
 #### Data Point Packet Command
 
-Data point packet commands are sent without the expectation of a response, as such data point packet commands can be transmitted over a lossy communications protocol, e.g., UDP, and thus suitable for data channel functionality.
+Data point packet commands are sent without the expectation of a response, as such data point packet commands can be transmitted over a lossy communications protocol, e.g., UDP, and thus are suitable for data channel functionality.
 
 * Wire Format: Binary
   * Includes a byte flag indicating content, e.g.:
@@ -831,17 +839,17 @@ enum {
   Verification = 1 << 9,        // When set, data delivery will be verified
   Exception = 1 << 10,          // When set, data will be published on change
   Resolution = 1 << 11,         // When set, data will be down-sampled
-  ResolutionTypeMask = 0x3000,  // Mask for ResolutionType
+  ResolutionTypeMask = 0x3000,  // Mask for ResolutionType, value = (flags >> 12) & 0x2
   KeyAction = 1 << 14,          // When set key is to be added; otherwise, removed
   ReservedFlag = 1 << 15        // Reserved flag
 }
 StateFlags; // sizeof(uint16), 2-bytes
 
 struct {
-  guid uniqueID;    // Unique data point identifier - maps to metadata `DataPoint.uniqueID`
-  uint32 runtimeID; // Runtime identifier as referenced by `DataPoint`
-  ValueType type;   // Value type of `DataPoint`
-  StateFlags flags; // State flags for `DataPoint`
+  guid uniqueID;    // Unique data point identifier - maps to metadata DataPoint.UniqueID
+  uint32 runtimeID; // Runtime identifier as referenced by DataPoint
+  ValueType type;   // Value type of DataPoint
+  StateFlags flags; // State flags for DataPoint
 }
 DataPointKey; // 23-bytes
 
@@ -892,18 +900,29 @@ A response with a type `Failed` is intended to represent a failure reply for a c
 
 ## Data Point Structure
 
-When a subscriber has issued a [subscribe command](#subscribe-command) to its publisher for select set of data points, the publisher will start sending [data point packet commands](#data-point-packet-commands) each with a payload of several data point values serialized using the `DataPoint` structure, defined as follows. The actual number of `DataPoint` structures contained in the data point packet command depends the configured maximum payload size and the serialized size of the data point structures:
+When a subscriber has issued a [subscribe command](#subscribe-command) to its publisher for select set of data points, the publisher will start sending [data point packet commands](#data-point-packet-commands) each with a payload of several data point values serialized using the `DataPoint` structure, defined as follows:
 
 ```C
 struct {
   uint32 id;
-  uint8[] value;    // Size based on type
-  uint8[] state;    // Size based on flags
+  uint8[] value;    // Size based on type, up to 64-bytes
+  uint8[] state;    // Size based on flags, up to 26-bytes
 }
 DataPoint;
 ```
 
-### Data Point Value Types
+The actual number of `DataPoint` structures contained in the data point packet command depends the configured maximum payload size and the serialized size of the data point structures, see [Figure 6](#user-content-figure6).
+
+<a name="figure6"></a> <center>
+
+![Data Packet Command Details](Images/data-packet-command-details.png)
+
+<sup>Figure 6</sup>
+</center>
+
+> :information_source: The maximum size of a `DataPoint` structure instance is 98-bytes, however, with simple encoding techniques this size can be reduced down to a few bytes for most value types.
+
+## Data Point Value Types
 
 The data types available to a `DataPoint` are described in the `ValueType` enumeration, defined below, along with any needed associated structures:
 
@@ -930,23 +949,23 @@ enum {
 ValueType; // sizeof(uint8), 1-byte
 ```
 
-* `Null`: No space occupied
-* `SByte`: [8-bit Signed Byte](https://en.wikipedia.org/wiki/Byte) (1-byte, big-endian)
-* `Int16`: [16-bit Signed Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (2-bytes, big-endian)
-* `Int32`: [32-bit Signed Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (4-bytes, big-endian)
-* `Int64`: [64-bit Signed Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (8-bytes, big-endian)
-* `Byte`: [8-bit Unsigned Byte](https://en.wikipedia.org/wiki/Byte) (1-byte, big-endian)
-* `UInt16`: [16-bit Unsigned Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (2-bytes, big-endian)
-* `UInt32`: [32-bit Unsigned Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (4-bytes, big-endian)
-* `UInt64`: [64-bit Unsigned Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (8-bytes, big-endian)
-* `Decimal`: [128-bit Decimal Floating Point](https://en.wikipedia.org/wiki/Decimal128_floating-point_format) (16-bytes, per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
-* `Double`: [64-bit Double Precision Floating Point](https://en.wikipedia.org/wiki/Double-precision_floating-point_format) (8-bytes, per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
-* `Single`: [32-bit Single Precision Floating Point](https://en.wikipedia.org/wiki/Single-precision_floating-point_format) (4-bytes, per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
-* `Bool`: [Boolean as 8-bit Unsigned Integer](https://en.wikipedia.org/wiki/Boolean_data_type) (1-byte, big-endian, zero is `false`, non-zero value is `true`)
-* `Guid`: [Globally Unique Identifer](https://en.wikipedia.org/wiki/Universally_unique_identifier) (16-bytes, big-endian for all components)
-* `Time`: [Time as `Timestamp`](https://en.wikipedia.org/wiki/System_time) (16-bytes, see [timestamp types](#data-point-timestamp-types))
-* `String` [Character String as `StringValue`](https://en.wikipedia.org/wiki/String_%28computer_science%29) (Maximum of 64-bytes - 1-byte header with 63-bytes of character data, encoding is UTF8)
-* `Buffer` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) (Maximum of 64-bytes - 1-byte header with 63-bytes of data)
+- `Null`: No space occupied
+- `SByte`: [8-bit Signed Byte](https://en.wikipedia.org/wiki/Byte) (1-byte, big-endian)
+- `Int16`: [16-bit Signed Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (2-bytes, big-endian)
+- `Int32`: [32-bit Signed Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (4-bytes, big-endian)
+- `Int64`: [64-bit Signed Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (8-bytes, big-endian)
+- `Byte`: [8-bit Unsigned Byte](https://en.wikipedia.org/wiki/Byte) (1-byte, big-endian)
+- `UInt16`: [16-bit Unsigned Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (2-bytes, big-endian)
+- `UInt32`: [32-bit Unsigned Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (4-bytes, big-endian)
+- `UInt64`: [64-bit Unsigned Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (8-bytes, big-endian)
+- `Decimal`: [128-bit Decimal Floating Point](https://en.wikipedia.org/wiki/Decimal128_floating-point_format) (16-bytes, per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
+- `Double`: [64-bit Double Precision Floating Point](https://en.wikipedia.org/wiki/Double-precision_floating-point_format) (8-bytes, per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
+- `Single`: [32-bit Single Precision Floating Point](https://en.wikipedia.org/wiki/Single-precision_floating-point_format) (4-bytes, per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
+- `Bool`: [Boolean as 8-bit Unsigned Integer](https://en.wikipedia.org/wiki/Boolean_data_type) (1-byte, big-endian, zero is `false`, non-zero value is `true`)
+- `Guid`: [Globally Unique Identifer](https://en.wikipedia.org/wiki/Universally_unique_identifier) (16-bytes, big-endian for all components)
+- `Time`: [Time as `Timestamp`](https://en.wikipedia.org/wiki/System_time) (16-bytes, see [data point timestamp](#data-point-timestamp))
+- `String` [Character String as `StringValue`](https://en.wikipedia.org/wiki/String_%28computer_science%29) (Maximum of 64-bytes - 1-byte header with 63-bytes of character data, encoding is UTF8)
+- `Buffer` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) (Maximum of 64-bytes - 1-byte header with 63-bytes of data)
 
 Both the `String` and `Buffer` represent variable length data types. Each variable length data point will have a fixed maximum number of bytes that can be transmitted per instance of the `DataPoint` structure. For data sets larger then the specified maximum size, data will need to be fragmented, marked with a [sequence number](#data-point-sequence-number) and transmitted in small chunks, i.e., 63-byte segments. For this large data set collation scenario, it is expected that the data packets will be transmitted over a reliable transport protocol, e.g., TCP, otherwise the subscriber should expect the possibility of missing fragments. Details for the content of the `String` type which is the `StringValue` structure and the `Buffer` type which is the `BufferValue` structure are defined as follows:
 
@@ -964,9 +983,11 @@ struct {
 BufferValue;
 ```
 
-### Data Point Timestamp Types
+> :construction: Some tests need to be run to determine if 64-bytes of variable string / buffer data is an effective use of space and provides optimal performance in data point packets. This target size may need to be an adjustable parameter in initial STTP implementations.
 
-The timestamp format defined by STTP is defined to accommodate foreseeable use cases and defined requirements for representations of time, including elapsed time spans and indication of a leap-second in progress.
+## Data Point Timestamp
+
+The timestamp format for STTP is defined to accommodate foreseeable use cases and requirements for representations of time and elapsed time spans. The following defines the binary format of a `Timestamp` structure which consists of epoch based whole seconds and any fraction of a second. The timestamp fraction also includes a bit for indication of a leap-second in progress.
 
 ```C
 enum {
@@ -976,30 +997,32 @@ enum {
   PicosecondMask  = 0x000000003FF00000, // (fraction >> 20) & 1023
   FemtosecondMask = 0x00000000000FFC00, // (fraction >> 10) & 1023
   AttosecondMask  = 0x00000000000003FF, // fraction & 1023
-  Leapsecond      = 0x1000000000000000, // Set if leap second is in progress
+  Leapsecond      = 0x1000000000000000, // Set if leap-second is in progress
   ReservedBits    = 0xE000000000000000
 }
 FractionFlags; // sizeof(uint64), 8-bytes
 
 struct {
-  int64 seconds;          // Seconds since 1/1/1001
+  int64 seconds;          // Seconds since 1/1/0001
   FractionFlags fraction; // Fractional seconds
 }
 Timestamp; // 16-bytes
 ```
-* The `seconds` field defines the whole seconds since 1/1/0001 with a range of 584 billion years, i.e., +/-292 billion years.
-* The `fraction` field is an instance of the `FractionFlags` enumeration that defines the fractional seconds for the timestamp with a resolution down to attoseconds. Specially the `fraction` field is broken up into 10-bit segments where each segment represents 1,000 units, 0 to 999, of fractional time. There are 10-bits for milliseconds, 10-bits for microseconds, 10-bits for nanoseconds, 10-bits for picoseconds, 10-bits for femtoseconds, and 10-bits for attoseconds. There is 1-bit defined to indicate a leap-second in progress and 3-bits are reserved.
-- The `flags` field is an instance of the `TimestampFlags` enumeration.
 
-> :information_source: Although the timestamp size is large, encoding techniques make it so that unused and repeating sections of time can be compressed out of the data point `state`.
+- The `seconds` field defines the whole seconds since 1/1/0001 with a range of 584 billion years, i.e., +/-292 billion years.
+- The `fraction` field is an instance of the `FractionFlags` enumeration that defines the fractional seconds for the timestamp with a resolution down to attoseconds. More specifically, the `fraction` field is broken up into 10-bit segments where each segment represents 1,000 units, 0 to 999, of fractional time - similar to a binary coded decimal. There are 10-bits for milliseconds, 10-bits for microseconds, 10-bits for nanoseconds, 10-bits for picoseconds, 10-bits for femtoseconds, and 10-bits for attoseconds. Bit 60 is used to indicate a leap-second is in progress; the remaining 3-bits, 61-63, are reserved.
 
-### Data Point Time Quality Flags
+When using the raw encoding scheme, the timestamp value is only included in the `DataPoint.state` data when the `DataPointKey.flags` includes the `StateFlags.Timestamp` flag. When included, the `Timestamp` structure must be the first value serialized into the `DataPoint.state` data.
+
+> :information_source: The size of a `Timestamp` structure instance is 16-bytes, however, simple encoding techniques make it so that unused and repeating sections of time can be compressed out of the data point `state` so that it consumes much less space.
+
+## Data Point Time Quality Flags
 
 Data points can also include a `TimestampFlags` structure in the serialized state data, defined below, that describes both the timestamp quality, defined with the `TimeQuality` enumeration value, as well as an indication of if a timestamp was not measured with an accurate time source.
 
 The time quality detail is included for devices that have access to a GPS or UTC time synchronization source, e.g., from an IRIG timecode signal. For timestamps that are acquired without an accurate time source, e.g., using the local system clock, the `TimeQuality` value should be set to `Locked` and the `TimestampFlags.NoAccurateTimeSource` should be set.
 
-The time quality flags are only included in the `DataPoint.state` data when the `DataPointKey.flags` includes the `StateFlags.TimeQuality` flag. The `TimeQualityFlags` must be serialized into the `DataPoint.state` data in big-endian order following any defined timestamp. If no timestamp is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` defines `Timestamp` as `0`, then the `TimeQualityFlags` should not be serialized into the `DataPoint.state` data.
+When using the raw encoding scheme, the time quality flags are only included in the `DataPoint.state` data when the `DataPointKey.flags` includes the `StateFlags.TimeQuality` flag. The `TimeQualityFlags` must be serialized into the `DataPoint.state` data in big-endian order following any defined timestamp. If no timestamp is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` defines `Timestamp` as `0`, then the `TimeQualityFlags` should not be serialized into the `DataPoint.state` data.
 
 ```C
 enum {
@@ -1021,18 +1044,23 @@ TimeQuality; // 4-bits, 1-nibble
 
 enum {
   None = 0,
-  TimeQualityMask = 0xF,        // Mask for TimeQuality
-  // Could map remaining bits to IEEE C37.118 leap-second flags...
+  TimeQualityMask = 0xF,        // Mask for TimeQuality  
   NoAccurateTimeSource = 1 << 7 // Accurate time source is unavailable
 }
 TimestampFlags; // sizeof(uint8), 1-byte
 ```
 
-### Data Point Data Quality Flags
+> :construction: The remaining available bits in the `TimestampFlags` enumeration could be made to directly map to IEEE C37.118 leap-second flags. Existing IEEE text could then be used to describe the function of these bits if deemed useful:
 
-A set of data quality flags are defined for STTP data point values in the `DataQualityFlags` enumeration, defined as follows. These quality flags are only included in the `DataPoint.state` data when the `DataPointKey.flags` includes the `StateFlags.DataQuality` flag. The `DataQualityFlags` must be serialized into the `DataPoint.state` data in big-endian order following any defined time quality flags. If no time quality flags are defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` defines `Timestamp` as `0`, then the `DataQualityFlags` must be the first value serialized into the `DataPoint.state` data.
+```C
+LeapsecondPending = 1 << 4,   // Set before a leap second occurs and then cleared after
+LeapsecondOccurred = 1 << 5,  // Set in the first second after the leap second occurs and remains set for 24 hours
+LeapsecondDirection = 1 << 6, // Clear for add, set for delete
+```
 
-> :information_source: These quality flags are intentionally simple to accommodate a very wide set of use cases and still provide some indication of data point value quality. More complex data qualities can exist as new data points.
+## Data Point Data Quality Flags
+
+A set of data quality flags are defined for STTP data point values in the `DataQualityFlags` enumeration, defined as follows:
 
 ```C
 enum {
@@ -1045,13 +1073,33 @@ enum {
   ReservedFlag = 1 << 5,      // Reserved flag
   UserDefinedFlag1 = 1 << 6,  // User defined flag 1
   UserDefinedFlag2 = 1 << 7   // User defined flag 2
-}
+ }
 DataQualityFlags; // sizeof(uint8), 1-byte
 ```
 
-### Data Point Sequence Number
+> :information_source: These quality flags are intentionally simple to accommodate a very wide set of use cases and still provide some indication of data point value quality. More complex data qualities can exist as new data points.
 
-For data that needs to be transmitted with a defined sequence number, the `DataPoint.flags` must include the `StateFlags.Sequence` flag. The sequence number, which is defined as a `uint16`, must be serialized into the `DataPoint.state` data in big-endian order following any defined `DataQualityFlags`, `TimeQualityFlags` or timestamp. If no timestamp is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` defines `Timestamp` as `0` and no `DataQualityFlags` is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` does not include the `StateFlags.DataQuality` flag, then the sequence number must be the first value serialized into the `DataPoint.state` data.
+When using the raw encoding scheme, these quality flags are only included in the `DataPoint.state` data when the `DataPointKey.flags` includes the `StateFlags.DataQuality` flag. The `DataQualityFlags` must be serialized into the `DataPoint.state` data in big-endian order following any defined time quality flags. n If no time quality flags are defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` defines `Timestamp` as `0`, then the `DataQualityFlags` must be the first value serialized into the `DataPoint.state` data.
+
+## Data Point Sequence Identifier
+
+For large buffers or strings being sent that span multiple data points, a new session based identifier needs to be established that represents the sequence. This is needed since different values for the same `DataPointKey.uniqueID` could overlap during interleave processing.
+
+For data that needs to be transmitted with a defined sequence identifier, the `DataPoint.flags` must include the `StateFlags.Sequence` flag.
+
+When using the raw encoding scheme, the sequence identifier, which is defined as a `uint32`, must be serialized into the `DataPoint.state` data in big-endian order following any defined `DataQualityFlags`, `TimeQualityFlags` or timestamp.
+
+If no timestamp is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` defines `Timestamp` as `0` and no `DataQualityFlags` is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` does not include the `StateFlags.DataQuality` flag, then the sequence identifier must be the first value serialized into the `DataPoint.state` data.
+
+## Data Point Fragment Number
+
+For large buffers or strings being sent that span multiple data points, a fragment number defines the buffer index of a given sequence that can be used reassemble the sequence.
+
+For data that needs to be transmitted with a defined fragment number, the `DataPoint.flags` must include the `StateFlags.Fragment` flag.
+
+When using the raw encoding scheme, the fragment number, which is defined as a `uint32`, must be serialized into the `DataPoint.state` data in big-endian order following any defined sequence identifier, `DataQualityFlags`, `TimeQualityFlags` or timestamp.
+
+If no timestamp is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` defines `Timestamp` as `0` and no `DataQualityFlags` is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` does not include the `StateFlags.DataQuality` flag, and no sequence identifier is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` does not include the `StateFlags.Sequence` flag, then the fragment number must be the first value serialized into the `DataPoint.state` data.
 
 ## Padded Data Point Structure
 
@@ -1532,6 +1580,7 @@ The following individuals actively participated in the development of this stand
 - Jeff Otto, Schweitzer Engineering Laboratories
 - Kevin D. Jones, Dominion Energy
 - Paul Myrda, Electric Power Institute
+- Bob Braden, USC Information Sciences Institute
 
 ### ASP Project Participants
 ![Project Participants](Images/participant-logos.png)

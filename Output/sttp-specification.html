@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.1.41 - September 22, 2017</p>
+<p><strong>Version:</strong> 0.1.42 - September 23, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -911,6 +911,10 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/Binary-coded_decimal"><strong>binary coded decimal</strong></a></td>
+<td style="text-align:left;">A binary encoding scheme for decimal numbers that represents each digit with fixed number of bits.</td>
+</tr>
 <tr>
 <td style="text-align:right;"><a href="https://en.wikipedia.org/wiki/X.509#Certificates"><strong>certificate</strong></a></td>
 <td style="text-align:left;">A file that contains a public key and identity information, e.g., an organization name, hostnames, IP addresses, etc. The X.509 standard defines a standard format for certificate files that can either be self-signed or signed by a certificate authority. Certificates are used in conjunction with public-key infrastructure to provide identity validation and encryption keys used to secure IP transport protocol communications, such as with the TLS protocol. <br/> Also called <em>X.509 Certificate</em>.</td>
@@ -1200,7 +1204,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
   uint8[8] uint64; // Represents integers between 0 and 18,446,744,073,709,551,615
   uint8[16] guid;  // Represents a 128-bit globally unique identifier</code></pre>
 <h4 id="enumerated-types">Enumerated Types</h4>
-<p>To represent an enumerated set of possible values, a numeric type is defined called an <code>enum</code>. An enumerated type can only represent its defined values, however, when the enumerated type values represent bit values the enumerated type can represent any number of its defined values at once. Every element of an enumerated type must be assigned a value, as a result values can be defined in any order. Importantly, an enumerated type will only occupy space needed for its maximum defined value when serialized. For example, the following enumerated type would only require one byte:</p>
+<p>To represent an enumerated set of possible values, a numeric type is defined called an <code>enum</code>. Normally an enumerated type only represents its defined values, however, when the enumerated type values represent bit values, or flags, the enumerated type can represent any number of its possible values at once. Every element of an enumerated type must be assigned a value, as a result values can be defined in any order. Importantly, an enumerated type will only occupy space needed for its maximum defined value when serialized. For example, the following enumerated type would only require one byte:</p>
 <pre><code class="C language-C">  enum {
     Red = 0,
     Green = 1,
@@ -1370,8 +1374,12 @@ uint16 Decode15Bits(uint8[] data) {
 <p>Reverse connections flip the normal responsibilities of a publish/subscribe messaging pattern by having parties that provision the data also the be the initiators of a connection. Data subscribers, which might otherwise come and go as needed, now become a persistent network resource that needs to be readily available for a connection from its publisher. Reverse connections can require more data flow planning and network engineering to ensure that connections are initiated from the proper locations while having the data reliably flow to the desired locations.</p>
 <p>Regardless of how a connection is established, forward or reverse, the functions, roles and responsibilities of the participants will not change, i.e., a publisher shall still be the provider of data and the subscriber shall still be the consumer of data. Additionally, any required protocol negotiations by the parties continues as normal once the connection has been established.</p>
 <blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> Increased flexibility in the connectivity models for STTP is necessary so that security boundaries that have been enforced with firewall rules can be maintained. A common use case is that the publisher, and the data it is has access to, will exist in a secure network environment and the subscribers, which need access to the data, will exist in less secure network environments. In these scenarios, firewall rules will prohibit any connections to be initiated from an environment that is considered to be less secure. However, such environments normally allow connections to be initiated from inside the secure environment out to listening connections in less secure environments. Described more simply, nothing can reach in to systems in the secure environment, but systems in the secure environment can reach out - this is much like how a computer in a home network can access the public Internet through a router, but the router's built-in firewall prevents systems on the Internet from accessing the home computer. Although reverse connections may initially seem counter-intuitive, they exist as a firm STTP requirement to allow for successful data exchange from within secure environments.</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> Increased flexibility in the connectivity models for STTP is necessary so that security boundaries that have been enforced with firewall rules can be maintained. A common use case is that the publisher, and the data it is has access to, will exist in a secure network environment and the subscribers, which need access to the data, will exist in less secure network environments. In these scenarios, firewall rules will prohibit any connections to be initiated from an environment that is considered to be less secure. However, such environments normally allow connections to be initiated from inside the secure environment out to listening connections in less secure environments, see <a href="#figure4">Figure 4</a>. Described more simply, nothing can reach in to systems in the secure environment, but systems in the secure environment can reach out - this is much like how a computer in a home network can access the public Internet through a router, but the router's built-in firewall prevents systems on the Internet from accessing the home computer. Although reverse connections may initially seem counter-intuitive, they exist as a firm STTP requirement to allow for successful data exchange from within secure environments.</p>
 </blockquote>
+<p><a name="figure4"></a> <center></p>
+<p><img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/reverse-connection-use-case.png" alt="Reverse Connection User Case" /></p>
+<p><sup>Figure 4</sup><br />
+</center></p>
 <h3 id="bidirectional-data-exchange">Bidirectional Data Exchange</h3>
 <p>For simple TCP only based connectivity configurations, once a connection has been established between two systems a communications pathway exists such that data can flow bidirectionally. This is true regardless of which party uses a client or server socket or the connectivity model in use, i.e., a forward or reverse connection.</p>
 <p>Since data in a TCP based connection can easily move in both directions, both parties can simultaneously enable both publisher and subscriber functions. This allows STTP to be used in a data exchange <em>gateway</em> capacity allowing for bidirectional data exchange with simplified connectivity requirements. The only decision two parties would need to make in this mode of operation is which STTP instance acts as a server and which instance acts as a client.</p>
@@ -1423,7 +1431,7 @@ uint16 Decode15Bits(uint8[] data) {
   uint8[] payload;</code></pre>
 <p>Empty payloads have a <code>length</code> value of <code>0</code> and a <code>payload</code> value of <code>null</code>. When serialized, an empty payload would be represented by only a <code>0x0000</code> value for the length.</p>
 <h4 id="command-structure">Command Structure</h4>
-<p>Commands are used to manage primary STTP functionality. The following defines the binary format of a <code>Command</code>, see <a href="#figure4">Figure 4</a> for an example:</p>
+<p>Commands are used to manage primary STTP functionality. The following defines the binary format of a <code>Command</code>, see <a href="#figure5">Figure 5</a> for an example:</p>
 <pre><code class="C language-C">struct {
   uint8 commandCode;
   uint16 length;
@@ -1435,10 +1443,10 @@ Command;</code></pre>
 <li>The <code>length</code> field defines the length of the <code>payload</code> in bytes.</li>
 <li>The <code>payload</code> field is a byte array representing the serialized payload associated with the <code>commandCode</code>.</li>
 </ul>
-<p><a name="figure4"></a> <center></p>
+<p><a name="figure5"></a> <center></p>
 <p><strong>Example Command Structure for a <a href="#data-point-packet-command"><code>DataPointPacket</code></a></strong></p>
 <p><img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/command-structure.png" alt="Mapping Data Structure Elements to Data Points" /></p>
-<p><sup>Figure 4</sup><br />
+<p><sup>Figure 5</sup><br />
 </center></p>
 <h4 id="response-structure">Response Structure</h4>
 <p>Responses for most commands will be either <code>Succeeded</code> to <code>Failed</code>. The following structure defines the binary format of a <code>Response</code>:</p>
@@ -1591,20 +1599,20 @@ OperationalModes;</code></pre>
 <h4 id="secure-data-channel-command">Secure Data Channel Command</h4>
 <p>When data channel functions that are operating over a lossy communications protocol, e.g., UDP, and command channel functions are operating over a reliable communications protocol, e.g., TCP, that has been secured with TLS, then the subscriber can request that data channel functions can be secured by issuing a <code>SecureDataChannel</code> command.</p>
 <p>The <code>SecureDataChannel</code> command should only be issued when a lossy communications protocol, e.g., UDP, has been defined for data channel functions. If a subscriber issues the <code>SecureDataChannel</code> command for a session that has not defined a lossy communications protocol for data channel functions, the publisher shall send a <code>Failed</code> response for the <code>SecureDataChannel</code> command with a string based payload that indicates that data channel functions can only be secured when a lossy communications protocol has been established. This error condition should equally apply when UDP broadcasts are not supported by the publisher.</p>
-<p>The <code>SecureDataChannel</code> command should only be issued when command channel functions are already secured using TLS. If a subscriber issues the <code>SecureDataChannel</code> command for a session with a command channel connection that has not been secured using TLS, the publisher shall send a <code>Failed</code> response for the <code>SecureDataChannel</code> command with a string based payload that indicates that data channel functions can only be secured when command channel functions already secured using TLS.</p>
+<p>The <code>SecureDataChannel</code> command should only be issued when command channel functions are already secured using TLS. If a subscriber issues the <code>SecureDataChannel</code> command for a session with a command channel connection that has not been secured using TLS, the publisher shall send a <code>Failed</code> response for the <code>SecureDataChannel</code> command with a string based payload that indicates that data channel functions can only be secured when command channel functions are already secured using TLS.</p>
 <p>The <code>SecureDataChannel</code> command should be issued prior to the <code>Subscribe</code> command to ensure data channel functions are secured before transmission of <code>DataPointPacket</code> commands. If a subscriber issues the <code>SecureDataChannel</code> command for a session that already has an active subscription, the publisher shall send a <code>Failed</code> response for the <code>SecureDataChannel</code> command with a string based payload that indicates that data channel functions cannot be secured after a subscription has already been initiated.</p>
-<p>If data channel functions can be secured, the publisher shall send a <code>Succeeded</code> response for the <code>SecureDataChannel</code> command with a payload that shall be an instance of the <code>SymmetricSecurity</code> structure, defined as follows, that establishes the symmetric encryption keys and associated initialization vector used to secure the data channel:</p>
+<p>If data channel functions can be secured, the publisher shall send a <code>Succeeded</code> response for the <code>SecureDataChannel</code> command with a payload that shall be an instance of the <code>DataChannelKeys</code> structure, defined as follows, that establishes the symmetric encryption keys and associated initialization vector used to secure the data channel:</p>
 <pre><code class="C language-C">struct {
   uint16 ivLength;
   uint8[] iv;
   uint16 keyLength;
   uint8[] key;
 }
-SymmetricSecurity;</code></pre>
+DataChannelKeys;</code></pre>
 <ul>
-<li>The <code>ivLength</code> field defines the length of the <code>iv</code> in bytes.</li>
+<li>The <code>ivLength</code> field defines the length of the <code>iv</code> array in bytes.</li>
 <li>The <code>iv</code> field is a byte array representing the initialization vector.</li>
-<li>The <code>keyLength</code> field defines the length of the <code>key</code> in bytes.</li>
+<li>The <code>keyLength</code> field defines the length of the <code>key</code> array in bytes.</li>
 <li>The <code>key</code> field is a byte array representing the encryption key.</li>
 </ul>
 <p>Upon the publisher sending the <code>Succeeded</code> response for the <code>SecureDataChannel</code> command, all data function payloads for commands and responses sent by the publisher to the subscriber over the lossy communications protocol must be encrypted using the AES symmetric encryption algorithm with a key size of 256 using the specified subscriber key and initialization vector.</p>
@@ -1618,7 +1626,7 @@ SymmetricSecurity;</code></pre>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> It is presumed that communications over a lossy communications protocol, e.g., UDP, will flow from the publisher to the subscriber. If an implementation of STTP is ever established such traffic would flow from the subscriber to the publisher over a lossy communications channel, then to be secured, this traffic would need to be encrypted by the subscriber and decrypted by the publisher.</p>
 </blockquote>
 <h4 id="data-point-packet-command">Data Point Packet Command</h4>
-<p>Data point packet commands are sent without the expectation of a response, as such data point packet commands can be transmitted over a lossy communications protocol, e.g., UDP, and thus suitable for data channel functionality.</p>
+<p>Data point packet commands are sent without the expectation of a response, as such data point packet commands can be transmitted over a lossy communications protocol, e.g., UDP, and thus are suitable for data channel functionality.</p>
 <ul>
 <li>Wire Format: Binary<ul>
 <li>Includes a byte flag indicating content, e.g.:</li>
@@ -1667,17 +1675,17 @@ enum {
   Verification = 1 &lt;&lt; 9,        // When set, data delivery will be verified
   Exception = 1 &lt;&lt; 10,          // When set, data will be published on change
   Resolution = 1 &lt;&lt; 11,         // When set, data will be down-sampled
-  ResolutionTypeMask = 0x3000,  // Mask for ResolutionType
+  ResolutionTypeMask = 0x3000,  // Mask for ResolutionType, value = (flags &gt;&gt; 12) &amp; 0x2
   KeyAction = 1 &lt;&lt; 14,          // When set key is to be added; otherwise, removed
   ReservedFlag = 1 &lt;&lt; 15        // Reserved flag
 }
 StateFlags; // sizeof(uint16), 2-bytes
 
 struct {
-  guid uniqueID;    // Unique data point identifier - maps to metadata `DataPoint.uniqueID`
-  uint32 runtimeID; // Runtime identifier as referenced by `DataPoint`
-  ValueType type;   // Value type of `DataPoint`
-  StateFlags flags; // State flags for `DataPoint`
+  guid uniqueID;    // Unique data point identifier - maps to metadata DataPoint.UniqueID
+  uint32 runtimeID; // Runtime identifier as referenced by DataPoint
+  ValueType type;   // Value type of DataPoint
+  StateFlags flags; // State flags for DataPoint
 }
 DataPointKey; // 23-bytes
 
@@ -1733,14 +1741,22 @@ DataPointKeySet;</code></pre>
 <h4 id="failed-response">Failed Response</h4>
 <p>A response with a type <code>Failed</code> is intended to represent a failure reply for a command function. See associated <a href="#commands">command code</a> for proper response payload.</p>
 <h2 id="data-point-structure">Data Point Structure</h2>
-<p>When a subscriber has issued a <a href="#subscribe-command">subscribe command</a> to its publisher for select set of data points, the publisher will start sending <a href="#data-point-packet-commands">data point packet commands</a> each with a payload of several data point values serialized using the <code>DataPoint</code> structure, defined as follows. The actual number of <code>DataPoint</code> structures contained in the data point packet command depends the configured maximum payload size and the serialized size of the data point structures:</p>
+<p>When a subscriber has issued a <a href="#subscribe-command">subscribe command</a> to its publisher for select set of data points, the publisher will start sending <a href="#data-point-packet-commands">data point packet commands</a> each with a payload of several data point values serialized using the <code>DataPoint</code> structure, defined as follows:</p>
 <pre><code class="C language-C">struct {
   uint32 id;
-  uint8[] value;    // Size based on type
-  uint8[] state;    // Size based on flags
+  uint8[] value;    // Size based on type, up to 64-bytes
+  uint8[] state;    // Size based on flags, up to 26-bytes
 }
 DataPoint;</code></pre>
-<h3 id="data-point-value-types">Data Point Value Types</h3>
+<p>The actual number of <code>DataPoint</code> structures contained in the data point packet command depends the configured maximum payload size and the serialized size of the data point structures, see <a href="#figure6">Figure 6</a>.</p>
+<p><a name="figure6"></a> <center></p>
+<p><img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/data-packet-command-details.png" alt="Data Packet Command Details" /></p>
+<p><sup>Figure 6</sup><br />
+</center></p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> The maximum size of a <code>DataPoint</code> structure instance is 98-bytes, however, with simple encoding techniques this size can be reduced down to a few bytes for most value types.</p>
+</blockquote>
+<h2 id="data-point-value-types">Data Point Value Types</h2>
 <p>The data types available to a <code>DataPoint</code> are described in the <code>ValueType</code> enumeration, defined below, along with any needed associated structures:</p>
 <pre><code class="C language-C">enum {
   Null = 0,     // 0-bytes
@@ -1777,7 +1793,7 @@ ValueType; // sizeof(uint8), 1-byte</code></pre>
 <li><code>Single</code>: <a href="https://en.wikipedia.org/wiki/Single-precision_floating-point_format">32-bit Single Precision Floating Point</a> (4-bytes, per <a href="https://en.wikipedia.org/wiki/IEEE_754">IEEE 754-2008</a>)</li>
 <li><code>Bool</code>: <a href="https://en.wikipedia.org/wiki/Boolean_data_type">Boolean as 8-bit Unsigned Integer</a> (1-byte, big-endian, zero is <code>false</code>, non-zero value is <code>true</code>)</li>
 <li><code>Guid</code>: <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">Globally Unique Identifer</a> (16-bytes, big-endian for all components)</li>
-<li><code>Time</code>: <a href="https://en.wikipedia.org/wiki/System_time">Time as <code>Timestamp</code></a> (16-bytes, see <a href="#data-point-timestamp-types">timestamp types</a>)</li>
+<li><code>Time</code>: <a href="https://en.wikipedia.org/wiki/System_time">Time as <code>Timestamp</code></a> (16-bytes, see <a href="#data-point-timestamp">data point timestamp</a>)</li>
 <li><code>String</code> <a href="https://en.wikipedia.org/wiki/String_%28computer_science%29">Character String as <code>StringValue</code></a> (Maximum of 64-bytes - 1-byte header with 63-bytes of character data, encoding is UTF8)</li>
 <li><code>Buffer</code> <a href="https://en.wikipedia.org/wiki/Data_buffer">Untyped Data Buffer as <code>BufferValue</code></a> (Maximum of 64-bytes - 1-byte header with 63-bytes of data)</li>
 </ul>
@@ -1793,8 +1809,11 @@ struct {
   uint8[] data; // Maximum size of 63
 }
 BufferValue;</code></pre>
-<h3 id="data-point-timestamp-types">Data Point Timestamp Types</h3>
-<p>The timestamp format defined by STTP is defined to accommodate foreseeable use cases and defined requirements for representations of time, including elapsed time spans and indication of a leap-second in progress.</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Some tests need to be run to determine if 64-bytes of variable string / buffer data is an effective use of space and provides optimal performance in data point packets. This target size may need to be an adjustable parameter in initial STTP implementations.</p>
+</blockquote>
+<h2 id="data-point-timestamp">Data Point Timestamp</h2>
+<p>The timestamp format for STTP is defined to accommodate foreseeable use cases and requirements for representations of time and elapsed time spans. The following defines the binary format of a <code>Timestamp</code> structure which consists of epoch based whole seconds and any fraction of a second. The timestamp fraction also includes a bit for indication of a leap-second in progress.</p>
 <pre><code class="C language-C">enum {
   MillisecondMask = 0x0FFC000000000000, // (fraction &gt;&gt; 50) &amp; 1023
   MicrosecondMask = 0x0003FF0000000000, // (fraction &gt;&gt; 40) &amp; 1023
@@ -1802,28 +1821,28 @@ BufferValue;</code></pre>
   PicosecondMask  = 0x000000003FF00000, // (fraction &gt;&gt; 20) &amp; 1023
   FemtosecondMask = 0x00000000000FFC00, // (fraction &gt;&gt; 10) &amp; 1023
   AttosecondMask  = 0x00000000000003FF, // fraction &amp; 1023
-  Leapsecond      = 0x1000000000000000, // Set if leap second is in progress
+  Leapsecond      = 0x1000000000000000, // Set if leap-second is in progress
   ReservedBits    = 0xE000000000000000
 }
 FractionFlags; // sizeof(uint64), 8-bytes
 
 struct {
-  int64 seconds;          // Seconds since 1/1/1001
+  int64 seconds;          // Seconds since 1/1/0001
   FractionFlags fraction; // Fractional seconds
 }
 Timestamp; // 16-bytes</code></pre>
 <ul>
 <li>The <code>seconds</code> field defines the whole seconds since 1/1/0001 with a range of 584 billion years, i.e., +/-292 billion years.</li>
-<li>The <code>fraction</code> field is an instance of the <code>FractionFlags</code> enumeration that defines the fractional seconds for the timestamp with a resolution down to attoseconds. Specially the <code>fraction</code> field is broken up into 10-bit segments where each segment represents 1,000 units, 0 to 999, of fractional time. There are 10-bits for milliseconds, 10-bits for microseconds, 10-bits for nanoseconds, 10-bits for picoseconds, 10-bits for femtoseconds, and 10-bits for attoseconds. There is 1-bit defined to indicate a leap-second in progress and 3-bits are reserved.</li>
-<li>The <code>flags</code> field is an instance of the <code>TimestampFlags</code> enumeration.</li>
+<li>The <code>fraction</code> field is an instance of the <code>FractionFlags</code> enumeration that defines the fractional seconds for the timestamp with a resolution down to attoseconds. More specifically, the <code>fraction</code> field is broken up into 10-bit segments where each segment represents 1,000 units, 0 to 999, of fractional time - similar to a binary coded decimal. There are 10-bits for milliseconds, 10-bits for microseconds, 10-bits for nanoseconds, 10-bits for picoseconds, 10-bits for femtoseconds, and 10-bits for attoseconds. Bit 60 is used to indicate a leap-second is in progress; the remaining 3-bits, 61-63, are reserved.</li>
 </ul>
+<p>When using the raw encoding scheme, the timestamp value is only included in the <code>DataPoint.state</code> data when the <code>DataPointKey.flags</code> includes the <code>StateFlags.Timestamp</code> flag. When included, the <code>Timestamp</code> structure must be the first value serialized into the <code>DataPoint.state</code> data.</p>
 <blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> Although the timestamp size is large, encoding techniques make it so that unused and repeating sections of time can be compressed out of the data point <code>state</code>.</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> The size of a <code>Timestamp</code> structure instance is 16-bytes, however, simple encoding techniques make it so that unused and repeating sections of time can be compressed out of the data point <code>state</code> so that it consumes much less space.</p>
 </blockquote>
-<h3 id="data-point-time-quality-flags">Data Point Time Quality Flags</h3>
+<h2 id="data-point-time-quality-flags">Data Point Time Quality Flags</h2>
 <p>Data points can also include a <code>TimestampFlags</code> structure in the serialized state data, defined below, that describes both the timestamp quality, defined with the <code>TimeQuality</code> enumeration value, as well as an indication of if a timestamp was not measured with an accurate time source.</p>
 <p>The time quality detail is included for devices that have access to a GPS or UTC time synchronization source, e.g., from an IRIG timecode signal. For timestamps that are acquired without an accurate time source, e.g., using the local system clock, the <code>TimeQuality</code> value should be set to <code>Locked</code> and the <code>TimestampFlags.NoAccurateTimeSource</code> should be set.</p>
-<p>The time quality flags are only included in the <code>DataPoint.state</code> data when the <code>DataPointKey.flags</code> includes the <code>StateFlags.TimeQuality</code> flag. The <code>TimeQualityFlags</code> must be serialized into the <code>DataPoint.state</code> data in big-endian order following any defined timestamp. If no timestamp is defined for the <code>DataPoint.state</code> data, i.e., the <code>DataPointKey.flags</code> defines <code>Timestamp</code> as <code>0</code>, then the <code>TimeQualityFlags</code> should not be serialized into the <code>DataPoint.state</code> data.</p>
+<p>When using the raw encoding scheme, the time quality flags are only included in the <code>DataPoint.state</code> data when the <code>DataPointKey.flags</code> includes the <code>StateFlags.TimeQuality</code> flag. The <code>TimeQualityFlags</code> must be serialized into the <code>DataPoint.state</code> data in big-endian order following any defined timestamp. If no timestamp is defined for the <code>DataPoint.state</code> data, i.e., the <code>DataPointKey.flags</code> defines <code>Timestamp</code> as <code>0</code>, then the <code>TimeQualityFlags</code> should not be serialized into the <code>DataPoint.state</code> data.</p>
 <pre><code class="C language-C">enum {
   Locked = 0x0,                       // Clock locked, Normal operation
   Failure =  0xF,                     // Clock fault, time not reliable
@@ -1843,16 +1862,18 @@ TimeQuality; // 4-bits, 1-nibble
 
 enum {
   None = 0,
-  TimeQualityMask = 0xF,        // Mask for TimeQuality
-  // Could map remaining bits to IEEE C37.118 leap-second flags...
+  TimeQualityMask = 0xF,        // Mask for TimeQuality  
   NoAccurateTimeSource = 1 &lt;&lt; 7 // Accurate time source is unavailable
 }
 TimestampFlags; // sizeof(uint8), 1-byte</code></pre>
-<h3 id="data-point-data-quality-flags">Data Point Data Quality Flags</h3>
-<p>A set of data quality flags are defined for STTP data point values in the <code>DataQualityFlags</code> enumeration, defined as follows. These quality flags are only included in the <code>DataPoint.state</code> data when the <code>DataPointKey.flags</code> includes the <code>StateFlags.DataQuality</code> flag. The <code>DataQualityFlags</code> must be serialized into the <code>DataPoint.state</code> data in big-endian order following any defined time quality flags. If no time quality flags are defined for the <code>DataPoint.state</code> data, i.e., the <code>DataPointKey.flags</code> defines <code>Timestamp</code> as <code>0</code>, then the <code>DataQualityFlags</code> must be the first value serialized into the <code>DataPoint.state</code> data.</p>
 <blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> These quality flags are intentionally simple to accommodate a very wide set of use cases and still provide some indication of data point value quality. More complex data qualities can exist as new data points.</p>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> The remaining available bits in the <code>TimestampFlags</code> enumeration could be made to directly map to IEEE C37.118 leap-second flags. Existing IEEE text could then be used to describe the function of these bits if deemed useful:</p>
 </blockquote>
+<pre><code class="C language-C">LeapsecondPending = 1 &lt;&lt; 4,   // Set before a leap second occurs and then cleared after
+LeapsecondOccurred = 1 &lt;&lt; 5,  // Set in the first second after the leap second occurs and remains set for 24 hours
+LeapsecondDirection = 1 &lt;&lt; 6, // Clear for add, set for delete</code></pre>
+<h2 id="data-point-data-quality-flags">Data Point Data Quality Flags</h2>
+<p>A set of data quality flags are defined for STTP data point values in the <code>DataQualityFlags</code> enumeration, defined as follows:</p>
 <pre><code class="C language-C">enum {
   Normal = 0,                 // Defines normal state
   BadTime = 1 &lt;&lt; 0,           // Defines bad time state when set
@@ -1863,10 +1884,22 @@ TimestampFlags; // sizeof(uint8), 1-byte</code></pre>
   ReservedFlag = 1 &lt;&lt; 5,      // Reserved flag
   UserDefinedFlag1 = 1 &lt;&lt; 6,  // User defined flag 1
   UserDefinedFlag2 = 1 &lt;&lt; 7   // User defined flag 2
-}
+ }
 DataQualityFlags; // sizeof(uint8), 1-byte</code></pre>
-<h3 id="data-point-sequence-number">Data Point Sequence Number</h3>
-<p>For data that needs to be transmitted with a defined sequence number, the <code>DataPoint.flags</code> must include the <code>StateFlags.Sequence</code> flag. The sequence number, which is defined as a <code>uint16</code>, must be serialized into the <code>DataPoint.state</code> data in big-endian order following any defined <code>DataQualityFlags</code>, <code>TimeQualityFlags</code> or timestamp. If no timestamp is defined for the <code>DataPoint.state</code> data, i.e., the <code>DataPointKey.flags</code> defines <code>Timestamp</code> as <code>0</code> and no <code>DataQualityFlags</code> is defined for the <code>DataPoint.state</code> data, i.e., the <code>DataPointKey.flags</code> does not include the <code>StateFlags.DataQuality</code> flag, then the sequence number must be the first value serialized into the <code>DataPoint.state</code> data.</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> These quality flags are intentionally simple to accommodate a very wide set of use cases and still provide some indication of data point value quality. More complex data qualities can exist as new data points.</p>
+</blockquote>
+<p>When using the raw encoding scheme, these quality flags are only included in the <code>DataPoint.state</code> data when the <code>DataPointKey.flags</code> includes the <code>StateFlags.DataQuality</code> flag. The <code>DataQualityFlags</code> must be serialized into the <code>DataPoint.state</code> data in big-endian order following any defined time quality flags. n If no time quality flags are defined for the <code>DataPoint.state</code> data, i.e., the <code>DataPointKey.flags</code> defines <code>Timestamp</code> as <code>0</code>, then the <code>DataQualityFlags</code> must be the first value serialized into the <code>DataPoint.state</code> data.</p>
+<h2 id="data-point-sequence-identifier">Data Point Sequence Identifier</h2>
+<p>For large buffers or strings being sent that span multiple data points, a new session based identifier needs to be established that represents the sequence. This is needed since different values for the same <code>DataPointKey.uniqueID</code> could overlap during interleave processing.</p>
+<p>For data that needs to be transmitted with a defined sequence identifier, the <code>DataPoint.flags</code> must include the <code>StateFlags.Sequence</code> flag.</p>
+<p>When using the raw encoding scheme, the sequence identifier, which is defined as a <code>uint32</code>, must be serialized into the <code>DataPoint.state</code> data in big-endian order following any defined <code>DataQualityFlags</code>, <code>TimeQualityFlags</code> or timestamp.</p>
+<p>If no timestamp is defined for the <code>DataPoint.state</code> data, i.e., the <code>DataPointKey.flags</code> defines <code>Timestamp</code> as <code>0</code> and no <code>DataQualityFlags</code> is defined for the <code>DataPoint.state</code> data, i.e., the <code>DataPointKey.flags</code> does not include the <code>StateFlags.DataQuality</code> flag, then the sequence identifier must be the first value serialized into the <code>DataPoint.state</code> data.</p>
+<h2 id="data-point-fragment-number">Data Point Fragment Number</h2>
+<p>For large buffers or strings being sent that span multiple data points, a fragment number defines the buffer index of a given sequence that can be used reassemble the sequence.</p>
+<p>For data that needs to be transmitted with a defined fragment number, the <code>DataPoint.flags</code> must include the <code>StateFlags.Fragment</code> flag.</p>
+<p>When using the raw encoding scheme, the fragment number, which is defined as a <code>uint32</code>, must be serialized into the <code>DataPoint.state</code> data in big-endian order following any defined sequence identifier, <code>DataQualityFlags</code>, <code>TimeQualityFlags</code> or timestamp.</p>
+<p>If no timestamp is defined for the <code>DataPoint.state</code> data, i.e., the <code>DataPointKey.flags</code> defines <code>Timestamp</code> as <code>0</code> and no <code>DataQualityFlags</code> is defined for the <code>DataPoint.state</code> data, i.e., the <code>DataPointKey.flags</code> does not include the <code>StateFlags.DataQuality</code> flag, and no sequence identifier is defined for the <code>DataPoint.state</code> data, i.e., the <code>DataPointKey.flags</code> does not include the <code>StateFlags.Sequence</code> flag, then the fragment number must be the first value serialized into the <code>DataPoint.state</code> data.</p>
 <h2 id="padded-data-point-structure">Padded Data Point Structure</h2>
 <p>In order to accommodate advanced compression algorithms, e.g., <a href="#appendix-e---tssc-algorithm">TSSC compression</a>, an alternate data point encoding is used where values are serialized using the <code>PaddedDataPoint</code> structure, defined below. The <code>PaddedDataPoint</code> structure aligns data on a word boundary and has a fixed size, so no fields are considered optional. Instead when the <code>StateFlags</code> call for an excluded field, the <code>PaddedDataPoint</code> structure will simply zero out the values for the field which allows the repeating values to be <em>compressed out</em> of the final result.</p>
 <pre><code class="C language-C">struct {
@@ -2548,6 +2581,7 @@ AlgorithmEncodings;</code></pre>
 <li>Jeff Otto, Schweitzer Engineering Laboratories</li>
 <li>Kevin D. Jones, Dominion Energy</li>
 <li>Paul Myrda, Electric Power Institute</li>
+<li>Bob Braden, USC Information Sciences Institute</li>
 </ul>
 <h3 id="asp-project-participants">ASP Project Participants</h3>
 <p><img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/participant-logos.png" alt="Project Participants" /></p>

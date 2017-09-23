@@ -26,11 +26,12 @@
 | [Commands (3)](Commands.md#commands) | [Commands.md](Commands.md) |
 | [Responses (3)](Responses.md#responses) | [Responses.md](Responses.md) |
 | [Data Point Structure (2)](DataPointStructure.md#data-point-structure) | [DataPointStructure.md](DataPointStructure.md) |
-| [Data Point Value Types (3)](DataPointStructure.md#data-point-value-types) | [DataPointStructure.md](DataPointStructure.md) |
-| [Data Point Timestamp Types (3)](DataPointStructure.md#data-point-timestamp-types) | [DataPointStructure.md](DataPointStructure.md) |
-| [Data Point Time Quality Flags (3)](DataPointStructure.md#data-point-time-quality-flags) | [DataPointStructure.md](DataPointStructure.md) |
-| [Data Point Data Quality Flags (3)](DataPointStructure.md#data-point-data-quality-flags) | [DataPointStructure.md](DataPointStructure.md) |
-| [Data Point Sequence Number (3)](DataPointStructure.md#data-point-sequence-number) | [DataPointStructure.md](DataPointStructure.md) |
+| [Data Point Value Types (2)](DataPointStructure.md#data-point-value-types) | [DataPointStructure.md](DataPointStructure.md) |
+| [Data Point Timestamp (2)](DataPointStructure.md#data-point-timestamp) | [DataPointStructure.md](DataPointStructure.md) |
+| [Data Point Time Quality Flags (2)](DataPointStructure.md#data-point-time-quality-flags) | [DataPointStructure.md](DataPointStructure.md) |
+| [Data Point Data Quality Flags (2)](DataPointStructure.md#data-point-data-quality-flags) | [DataPointStructure.md](DataPointStructure.md) |
+| [Data Point Sequence Identifier (2)](DataPointStructure.md#data-point-sequence-identifier) | [DataPointStructure.md](DataPointStructure.md) |
+| [Data Point Fragment Number (2)](DataPointStructure.md#data-point-fragment-number) | [DataPointStructure.md](DataPointStructure.md) |
 | [Padded Data Point Structure (2)](PaddedDataPointStructure.md#padded-data-point-structure) | [PaddedDataPointStructure.md](PaddedDataPointStructure.md) |
 | [Data Point Characteristics (2)](DataPointCharacteristics.md#data-point-characteristics) | [DataPointCharacteristics.md](DataPointCharacteristics.md) |
 | [Priority Characteristic (3)](DataPointCharacteristics.md#priority-characteristic) | [DataPointCharacteristics.md](DataPointCharacteristics.md) |
