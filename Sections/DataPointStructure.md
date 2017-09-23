@@ -2,7 +2,7 @@
 
 When a subscriber has issued a [subscribe command](Commands.md#subscribe-command) to its publisher for select set of data points, the publisher will start sending [data point packet commands](Commands.md#data-point-packet-commands) each with a payload of several data point values serialized using the `DataPoint` structure, defined as follows:
 
-```c
+```C
 struct {
   uint32 id;
   uint8[] value;    // Size based on type, up to 64-bytes
@@ -26,7 +26,7 @@ The actual number of `DataPoint` structures contained in the data point packet c
 
 The data types available to a `DataPoint` are described in the `ValueType` enumeration, defined below, along with any needed associated structures:
 
-```c
+```C
 enum {
   Null = 0,     // 0-bytes
   SByte = 1,    // 1-byte
@@ -69,7 +69,7 @@ ValueType; // sizeof(uint8), 1-byte
 
 Both the `String` and `Buffer` represent variable length data types. Each variable length data point will have a fixed maximum number of bytes that can be transmitted per instance of the `DataPoint` structure. For data sets larger then the specified maximum size, data will need to be fragmented, marked with a [sequence number](#data-point-sequence-number) and transmitted in small chunks, i.e., 63-byte segments. For this large data set collation scenario, it is expected that the data packets will be transmitted over a reliable transport protocol, e.g., TCP, otherwise the subscriber should expect the possibility of missing fragments. Details for the content of the `String` type which is the `StringValue` structure and the `Buffer` type which is the `BufferValue` structure are defined as follows:
 
-```c
+```C
 struct {
   uint8 length;
   uint8[] data; // Maximum size of 63
@@ -89,7 +89,7 @@ BufferValue;
 
 The timestamp format for STTP is defined to accommodate foreseeable use cases and requirements for representations of time and elapsed time spans. The following defines the binary format of a `Timestamp` structure which consists of epoch based whole seconds and any fraction of a second. The timestamp fraction also includes a bit for indication of a leap-second in progress.
 
-```c
+```C
 enum {
   MillisecondMask = 0x0FFC000000000000, // (fraction >> 50) & 1023
   MicrosecondMask = 0x0003FF0000000000, // (fraction >> 40) & 1023
@@ -124,7 +124,7 @@ The time quality detail is included for devices that have access to a GPS or UTC
 
 When using the raw encoding scheme, the time quality flags are only included in the `DataPoint.state` data when the `DataPointKey.flags` includes the `StateFlags.TimeQuality` flag. The `TimeQualityFlags` must be serialized into the `DataPoint.state` data in big-endian order following any defined timestamp. If no timestamp is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` defines `Timestamp` as `0`, then the `TimeQualityFlags` should not be serialized into the `DataPoint.state` data.
 
-```c
+```C
 enum {
   Locked = 0x0,                       // Clock locked, Normal operation
   Failure =  0xF,                     // Clock fault, time not reliable
@@ -152,7 +152,7 @@ TimestampFlags; // sizeof(uint8), 1-byte
 
 > :construction: The remaining available bits in the `TimestampFlags` enumeration could be made to directly map to IEEE C37.118 leap-second flags. Existing IEEE text could then be used to describe the function of these bits if deemed useful:
 
-```c
+```C
 LeapsecondPending = 1 << 4,   // Set before a leap second occurs and then cleared after
 LeapsecondOccurred = 1 << 5,  // Set in the first second after the leap second occurs and remains set for 24 hours
 LeapsecondDirection = 1 << 6, // Clear for add, set for delete
@@ -162,7 +162,7 @@ LeapsecondDirection = 1 << 6, // Clear for add, set for delete
 
 A set of data quality flags are defined for STTP data point values in the `DataQualityFlags` enumeration, defined as follows:
 
-```c
+```C
 enum {
   Normal = 0,                 // Defines normal state
   BadTime = 1 << 0,           // Defines bad time state when set
@@ -183,6 +183,8 @@ When using the raw encoding scheme, these quality flags are only included in the
 
 ## Data Point Sequence Identifier
 
+For large buffers or strings being sent that span multiple data points, a new session based identifier needs to be established that represents the sequence. This is needed since different values for the same `DataPointKey.uniqueID` could overlap during interleave processing.
+
 For data that needs to be transmitted with a defined sequence identifier, the `DataPoint.flags` must include the `StateFlags.Sequence` flag.
 
 When using the raw encoding scheme, the sequence identifier, which is defined as a `uint32`, must be serialized into the `DataPoint.state` data in big-endian order following any defined `DataQualityFlags`, `TimeQualityFlags` or timestamp.
@@ -190,6 +192,8 @@ When using the raw encoding scheme, the sequence identifier, which is defined as
 If no timestamp is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` defines `Timestamp` as `0` and no `DataQualityFlags` is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` does not include the `StateFlags.DataQuality` flag, then the sequence identifier must be the first value serialized into the `DataPoint.state` data.
 
 ## Data Point Fragment Number
+
+For large buffers or strings being sent that span multiple data points, a fragment number defines the buffer index of a given sequence that can be used reassemble the sequence.
 
 For data that needs to be transmitted with a defined fragment number, the `DataPoint.flags` must include the `StateFlags.Fragment` flag.
 
