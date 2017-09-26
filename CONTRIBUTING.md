@@ -51,6 +51,8 @@ File names for sections, see [Sections](Sections) folder, are expected to be in 
 
 File names for images, see [Sections/Images](Sections/Images) folder, are expected to be in all lower [kebab-case](https://en.wikipedia.org/wiki/Letter_case#Special_case_styles) (a.k.a., spinal case), that is new words in the file name are separated by dashes. Abbreviations are generally to be avoided except for well known acronyms, but should remain lower-case. Do not use spaces or underscores, only dashes. All images are expected to by in [PNG](https://en.wikipedia.org/wiki/Portable_Network_Graphics) format with a `.png` extension.
 
+> :information_source: It is important that image file names do not include an extra `.` in the file name other than the one that separates the file name from the extension. Otherwise, the HTML to PDF conversion will have trouble finding the file and fail with a `ContentNotFoundError` exception.
+
 ### Handling References
 
 All document references are enumerated in the [Sections/References.md](Sections/References.md) file.  When adding a new reference, use an HTML bookmark using an anchor tag, i.e.,  [`<a>`](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/a), with a unique `name` element for the listing, for example:

@@ -4,7 +4,7 @@ Today most all synchrophasor deployments include IEEE C37.118 in various parts o
 
 <a name="figure7"></a> <center>
 
-![Common IEEE C37.118 Use Case](Images/ieee-c37.118-mapping.png)
+![Common IEEE C37.118 Use Case](Images/ieee-c37118-mapping.png)
 
 <sup>Figure 7</sup>
 </center>
