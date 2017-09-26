@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.1.42 - September 23, 2017
+**Version:** 0.1.45 - September 26, 2017
 
 **Status:** Initial Development
 
@@ -426,6 +426,8 @@ Instead of serializing an entire data structure as a unit, STTP is designed to p
 
 > :information_source: For the purposes of this specification a data element, its identification and any associated state, e.g., time and quality, will be referred to as a _data point_.  
 
+<p class="insert-page-break-after"></p>
+
 <a name="figure2"></a> <center>
 
 **Mapping Data Structure Elements to Data Points**
@@ -561,6 +563,8 @@ For server certificates issued by a CA that need validation, STTP implementation
 
 Validation of self-signed server certificates are similar to those for CA signed certificates but does not include steps that engage a CA. In this mode, when an STTP client-style socket connects to a server-style socket that has a self-signed certificate, the client shall validate the server's certificate by (1) verifying the certificate's signature, and (2) checking that the information in the certificate is valid, i.e., validating that one of the hostnames or IP addresses listed in the certificate subject field match the connection information for the server.
 
+<p class="insert-page-break-after"></p>
+
 ##### Server Certificate Validation
 
 STTP implementations should support server-style connections with TLS with the ability to validate client certificates issued by a CA. In this mode, when an STTP server-style socket accepts a connection from a client-style socket that has a CA issued certificate, with the certificate being provided by the client as part of the data in the TLS negotiation process, the server shall validate the client's certificate by (1) verifying the certificate's signature, (2) ensuring the certificate has not been revoked by checking the certificate revocation lists, and (3) checking that the information in the certificate information is valid, i.e., validating that one of the hostnames or IP addresses listed in the certificate subject field match the connection information for the client.
@@ -615,6 +619,8 @@ Command;
 - The `commandCode` field defines the command code value for the command message, see defined [command codes](#commands).
 - The `length` field defines the length of the `payload` in bytes.
 - The `payload` field is a byte array representing the serialized payload associated with the `commandCode`.
+
+<p class="insert-page-break-after"></p>
 
 <a name="figure5"></a> <center>
 
@@ -920,9 +926,9 @@ The actual number of `DataPoint` structures contained in the data point packet c
 <sup>Figure 6</sup>
 </center>
 
-> :information_source: The maximum size of a `DataPoint` structure instance is 98-bytes, however, with simple encoding techniques this size can be reduced down to a few bytes for most value types.
+> :information_source: The maximum size of a `DataPoint` structure instance is 94-bytes, however, with simple encoding techniques this size can be reduced down to a few bytes for most value types.
 
-## Data Point Value Types
+### Data Point Value Types
 
 The data types available to a `DataPoint` are described in the `ValueType` enumeration, defined below, along with any needed associated structures:
 
@@ -985,7 +991,7 @@ BufferValue;
 
 > :construction: Some tests need to be run to determine if 64-bytes of variable string / buffer data is an effective use of space and provides optimal performance in data point packets. This target size may need to be an adjustable parameter in initial STTP implementations.
 
-## Data Point Timestamp
+### Data Point Timestamp
 
 The timestamp format for STTP is defined to accommodate foreseeable use cases and requirements for representations of time and elapsed time spans. The following defines the binary format of a `Timestamp` structure which consists of epoch based whole seconds and any fraction of a second. The timestamp fraction also includes a bit for indication of a leap-second in progress.
 
@@ -1012,17 +1018,15 @@ Timestamp; // 16-bytes
 - The `seconds` field defines the whole seconds since 1/1/0001 with a range of 584 billion years, i.e., +/-292 billion years.
 - The `fraction` field is an instance of the `FractionFlags` enumeration that defines the fractional seconds for the timestamp with a resolution down to attoseconds. More specifically, the `fraction` field is broken up into 10-bit segments where each segment represents 1,000 units, 0 to 999, of fractional time - similar to a binary coded decimal. There are 10-bits for milliseconds, 10-bits for microseconds, 10-bits for nanoseconds, 10-bits for picoseconds, 10-bits for femtoseconds, and 10-bits for attoseconds. Bit 60 is used to indicate a leap-second is in progress; the remaining 3-bits, 61-63, are reserved.
 
-When using the raw encoding scheme, the timestamp value is only included in the `DataPoint.state` data when the `DataPointKey.flags` includes the `StateFlags.Timestamp` flag. When included, the `Timestamp` structure must be the first value serialized into the `DataPoint.state` data.
-
 > :information_source: The size of a `Timestamp` structure instance is 16-bytes, however, simple encoding techniques make it so that unused and repeating sections of time can be compressed out of the data point `state` so that it consumes much less space.
 
-## Data Point Time Quality Flags
+### Data Point Time Quality Flags
 
-Data points can also include a `TimestampFlags` structure in the serialized state data, defined below, that describes both the timestamp quality, defined with the `TimeQuality` enumeration value, as well as an indication of if a timestamp was not measured with an accurate time source.
+Data points can also include a `TimeQualityFlags` structure in the serialized state data, defined below, that describes both the timestamp quality, defined with the `TimeQuality` enumeration value, as well as an indication of if a timestamp was not measured with an accurate time source.
 
-The time quality detail is included for devices that have access to a GPS or UTC time synchronization source, e.g., from an IRIG timecode signal. For timestamps that are acquired without an accurate time source, e.g., using the local system clock, the `TimeQuality` value should be set to `Locked` and the `TimestampFlags.NoAccurateTimeSource` should be set.
+The time quality detail is included for devices that have access to a GPS or UTC time synchronization source, e.g., from an IRIG timecode signal. For timestamps that are acquired without an accurate time source, e.g., using the local system clock, the `TimeQuality` value should be set to `Locked` and the `TimeQualityFlags.NoAccurateTimeSource` should be set.
 
-When using the raw encoding scheme, the time quality flags are only included in the `DataPoint.state` data when the `DataPointKey.flags` includes the `StateFlags.TimeQuality` flag. The `TimeQualityFlags` must be serialized into the `DataPoint.state` data in big-endian order following any defined timestamp. If no timestamp is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` defines `Timestamp` as `0`, then the `TimeQualityFlags` should not be serialized into the `DataPoint.state` data.
+
 
 ```C
 enum {
@@ -1047,10 +1051,10 @@ enum {
   TimeQualityMask = 0xF,        // Mask for TimeQuality  
   NoAccurateTimeSource = 1 << 7 // Accurate time source is unavailable
 }
-TimestampFlags; // sizeof(uint8), 1-byte
+TimeQualityFlags; // sizeof(uint8), 1-byte
 ```
 
-> :construction: The remaining available bits in the `TimestampFlags` enumeration could be made to directly map to IEEE C37.118 leap-second flags. Existing IEEE text could then be used to describe the function of these bits if deemed useful:
+> :construction: The remaining available bits in the `TimeQualityFlags` enumeration could be made to directly map to IEEE C37.118 leap-second flags. Existing IEEE text could then be used to describe the function of these bits if deemed useful:
 
 ```C
 LeapsecondPending = 1 << 4,   // Set before a leap second occurs and then cleared after
@@ -1058,7 +1062,7 @@ LeapsecondOccurred = 1 << 5,  // Set in the first second after the leap second o
 LeapsecondDirection = 1 << 6, // Clear for add, set for delete
 ```
 
-## Data Point Data Quality Flags
+### Data Point Data Quality Flags
 
 A set of data quality flags are defined for STTP data point values in the `DataQualityFlags` enumeration, defined as follows:
 
@@ -1079,44 +1083,59 @@ DataQualityFlags; // sizeof(uint8), 1-byte
 
 > :information_source: These quality flags are intentionally simple to accommodate a very wide set of use cases and still provide some indication of data point value quality. More complex data qualities can exist as new data points.
 
-When using the raw encoding scheme, these quality flags are only included in the `DataPoint.state` data when the `DataPointKey.flags` includes the `StateFlags.DataQuality` flag. The `DataQualityFlags` must be serialized into the `DataPoint.state` data in big-endian order following any defined time quality flags. n If no time quality flags are defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` defines `Timestamp` as `0`, then the `DataQualityFlags` must be the first value serialized into the `DataPoint.state` data.
-
-## Data Point Sequence Identifier
+### Data Point Sequence Identifier
 
 For large buffers or strings being sent that span multiple data points, a new session based identifier needs to be established that represents the sequence. This is needed since different values for the same `DataPointKey.uniqueID` could overlap during interleave processing.
 
 For data that needs to be transmitted with a defined sequence identifier, the `DataPoint.flags` must include the `StateFlags.Sequence` flag.
 
-When using the raw encoding scheme, the sequence identifier, which is defined as a `uint32`, must be serialized into the `DataPoint.state` data in big-endian order following any defined `DataQualityFlags`, `TimeQualityFlags` or timestamp.
-
-If no timestamp is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` defines `Timestamp` as `0` and no `DataQualityFlags` is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` does not include the `StateFlags.DataQuality` flag, then the sequence identifier must be the first value serialized into the `DataPoint.state` data.
-
-## Data Point Fragment Number
+### Data Point Fragment Number
 
 For large buffers or strings being sent that span multiple data points, a fragment number defines the buffer index of a given sequence that can be used reassemble the sequence.
 
 For data that needs to be transmitted with a defined fragment number, the `DataPoint.flags` must include the `StateFlags.Fragment` flag.
 
-When using the raw encoding scheme, the fragment number, which is defined as a `uint32`, must be serialized into the `DataPoint.state` data in big-endian order following any defined sequence identifier, `DataQualityFlags`, `TimeQualityFlags` or timestamp.
+## Data Point Encoding Types
 
-If no timestamp is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` defines `Timestamp` as `0` and no `DataQualityFlags` is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` does not include the `StateFlags.DataQuality` flag, and no sequence identifier is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` does not include the `StateFlags.Sequence` flag, then the fragment number must be the first value serialized into the `DataPoint.state` data.
+STTP supports various options for encoding data points within data packet commands. Different levels of encoding functionality allows data to be sent more efficiently and consume less space.
 
-## Padded Data Point Structure
+> :information_source: An STTP publisher implementation is in control of which types of encodings it supports. Encoding is a different activity than compression; compression algorithms often require a specific type of base encoding.
 
-In order to accommodate advanced compression algorithms, e.g., [TSSC compression](#appendix-e---tssc-algorithm), an alternate data point encoding is used where values are serialized using the `PaddedDataPoint` structure, defined below. The `PaddedDataPoint` structure aligns data on a word boundary and has a fixed size, so no fields are considered optional. Instead when the `StateFlags` call for an excluded field, the `PaddedDataPoint` structure will simply zero out the values for the field which allows the repeating values to be _compressed out_ of the final result.
+### Basic Encoding
+
+Structure definitions that represent the basic format of data points as serialized on the wire are as described in the [Data Point Structure](#data-point-structure) section. Basic encoding serializes data elements in their native format without any attempt to reduce the size of the data, except to only include necessary state information. All implementations of STTP must be able to support basic encoding.
+
+The size of the `DataPoint.value` with basic encoding depends on its type as defined in the `DataPointKey.type`. The size and content of the `DataPoint.state` is determined by the `DataPointKey.flags`, see the [runtime ID mapping command](#runtime-id-mapping-command), these flags control the information that is included in the encoded state.
+
+#### Optional States
+
+* **Timestamp** - the timestamp value is only included in the `DataPoint.state` data when the `DataPointKey.flags` includes the `StateFlags.Timestamp` flag. When included, the `Timestamp` structure must be the first value serialized into the `DataPoint.state` data.
+* **Time Quality Flags** - the time quality flags are only included in the `DataPoint.state` data when the `DataPointKey.flags` includes the `StateFlags.TimeQuality` flag. The `TimeQualityFlags` must be serialized into the `DataPoint.state` data in big-endian order following any defined timestamp. If no timestamp is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` defines `Timestamp` as `0`, then the `TimeQualityFlags` should not be serialized into the `DataPoint.state` data.
+* **Data Quality Flags** - the data quality flags are only included in the `DataPoint.state` data when the `DataPointKey.flags` includes the `StateFlags.DataQuality` flag. The `DataQualityFlags` must be serialized into the `DataPoint.s` data in big-endian order following any defined time quality flags. n If no time quality flags are defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` defines `Timestamp` as `0`, then the `DataQualityFlags` must be the first value serialized into the `DataPoint.state` data.
+* **Sequence Identifier** - the sequence identifier, which is defined as a `uint32`, must be serialized into the `DataPoint.state` data in big-endian order following any defined `DataQualityFlags`, `TimeQualityFlags` or timestamp. If no timestamp is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` defines `Timestamp` as `0` and no `DataQualityFlags` is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` does not include the `StateFlags.DataQuality` flag, then the sequence identifier must be the first value serialized into the `DataPoint.state` data.
+* **Fragment Number** - the fragment number, which is defined as a `uint32`, must be serialized into the `DataPoint.state` data in big-endian order following any defined sequence identifier, `DataQualityFlags`, `TimeQualityFlags` or timestamp. If no timestamp is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` defines `Timestamp` as `0` and no `DataQualityFlags` is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` does not include the `StateFlags.DataQuality` flag, and no sequence identifier is defined for the `DataPoint.state` data, i.e., the `DataPointKey.flags` does not include the `StateFlags.Sequence` flag, then the fragment number must be the first value serialized into the `DataPoint.state` data.
+
+### Compact Encoding
+
+> :construction: This mode was enabled in GEP to accommodate a smaller payload size. Specifically timestamps were transmitted as an offset to a base time that maintained two states. Also, GEP focused on 4-byte single-precision floating point numbers only. This along with some compact flags for quality and a 16-bit runtime ID got per data point size to around 9-bytes. It is expected that this mode of operation could still have value when data packets are sent over UDP, however, TCP transmissions would be best served using TSSC because of the gains that can be had with that algorithm.
+
+### Fixed Size Encoding
+
+In order to accommodate advanced compression algorithms, e.g., [TSSC compression](#appendix-e---tssc-algorithm), an alternate data point encoding is used where values are serialized using the `FixedSizeDataPoint` structure, defined below. The `FixedSizeDataPoint` structure aligns data on a word boundary and has a fixed size, so no fields are considered optional. Instead when the `StateFlags` call for an excluded field, the `FixedSizeDataPoint` structure will simply zero out the values for the field which allows the repeating values to be _compressed out_ of the final result.
 
 ```C
 struct {
   uint32 id;
-  uint64 value1;  // Lower 8 bytes of the value
-  uint64 value2;  // Upper 8 bytes of the value - for types larger than 8 bytes
-  uint64 time1;   // Lower 8 bytes of the time, used by all time structures
-  uint64 time2;   // Upper 8 bytes of the time, used by NTP128.fraction
-  TimestampFlags timestampFlags;
-  QualityFlags qualityflags;
-  uint16 sequence;
+  uint64[8] value;  // Bytes of the value
+  uint64 time1;     // Lower 8 bytes of the time, used for Timestsmp.seconds
+  uint64 time2;     // Upper 8 bytes of the time, used for Timestamp.fraction
+  TimeQualityFlags timeQualityFlags;
+  DataQualityFlags dataQualityflags;
+  uint32 sequence;
+  uint32 fragment;
+  uint8 length;
 }
-PaddedDataPoint;
+FixedSizeDataPoint;
 ```
 
 ## Data Point Characteristics
@@ -1458,7 +1477,7 @@ enum {
 DataPointEncoding;
 ```
 
-The `VariableSize` encoding will serialize data using the [`DataPoint`](#data-point-structure) structure and the `FixedSize` encoding will serialize data using the [`PaddedDataPoint`](#padded-data-point-structure)  structure.
+The `VariableSize` encoding will serialize data using the [`DataPoint`](#data-point-structure) structure and the `FixedSize` encoding will serialize data using the [`PaddedDataPoint`](PaddedDataPointStructure.md)  structure.
 
 The compression algorithm encodings need to be known by and configured the publisher and subscriber; these encodings are used during _compression_ and _decompression_ stages to the proper data point encoding can be used. The `AlgorithmEncoding` structure, defined as follows, could be used to track these mappings:
 
@@ -1771,15 +1790,15 @@ The data channel will be used to send compact packets of identifiable measured v
 
 
 #### Subscription Delivery Options
-Per subscription delivery window – this subscription level setting would constrain data delivery to a provided timespan (in terms of UTC based start and stop time). This could either be a maximum (future) time constraint for real-time data or, where supported by publisher, a historical data request.
+Per subscription delivery window - this subscription level setting would constrain data delivery to a provided timespan (in terms of UTC based start and stop time). This could either be a maximum (future) time constraint for real-time data or, where supported by publisher, a historical data request.
 Publisher will likely want to validate size of historical requests, or least throttle responses, for very large historical requests.
 
 #### Other Data Point Delivery Options
-Send a sequence of values – with respect to specified per value delivery settings (think buffer blocks)
+Send a sequence of values - with respect to specified per value delivery settings (think buffer blocks)
 
-Send latest value – command allows for non-steaming request/reply, such as, translation to DNP3
+Send latest value - command allows for non-steaming request/reply, such as, translation to DNP3
 
-Send historical values – subject to availability of local archive / buffer with start and stop time- it has been requested many times that single value data recovery option will be available to accommodate for simple UDP loss, however this should be carefully considered since this basically makes UDP and TCP style protocol – if implemented, restored point should likely flow over TCP channel to reduce repeat recovery requests. Also, this should include detail in response message that recovery either succeeded or failed, where failure mode could include “data not available”. To reduce noise, at connection time publisher should always let know subscriber its capabilities which might include “I Support Historical Data Buffer” and perhaps depth of available data. That said there is true value in recovery of data gaps that occur due to loss of connectivity.
+Send historical values - subject to availability of local archive / buffer with start and stop time- it has been requested many times that single value data recovery option will be available to accommodate for simple UDP loss, however this should be carefully considered since this basically makes UDP and TCP style protocol - if implemented, restored point should likely flow over TCP channel to reduce repeat recovery requests. Also, this should include detail in response message that recovery either succeeded or failed, where failure mode could include "data not available". To reduce noise, at connection time publisher should always let know subscriber its capabilities which might include “I Support Historical Data Buffer” and perhaps depth of available data. That said there is true value in recovery of data gaps that occur due to loss of connectivity.
 
 ## Appendix B - STTP API Reference
 The STTP API describes a set of properties and methods for accessing an STTP server. Elements marked with the tag [Required] are required to be provided by all STTP server implementations.
@@ -1823,7 +1842,14 @@ more...
 
 ## Appendix C - IEEE C37.118 Mapping
 
-Today most all synchrophasor deployments include IEEE C37.118 in various parts of the infrastructure, this section describes how STTP will be mapped to and from IEEE C37.118 streams so that interoperability can be established with the existing protocol implementations and STTP.
+Today most all synchrophasor deployments include IEEE C37.118 in various parts of the infrastructure, this section describes how STTP will be mapped to and from IEEE C37.118 streams so that interoperability can be established with the existing protocol implementations and STTP, see [Figure 7](#user-content-figure7).
+
+<a name="figure7"></a> <center>
+
+![Common IEEE C37.118 Use Case](Images/ieee-c37118-mapping.png)
+
+<sup>Figure 7</sup>
+</center>
 
 ## Appendix D - Other Protocol Evaluations
 
