@@ -37,6 +37,8 @@ Command;
 - The `length` field defines the length of the `payload` in bytes.
 - The `payload` field is a byte array representing the serialized payload associated with the `commandCode`.
 
+<p class="insert-page-break-after"></p>
+
 <a name="figure5"></a> <center>
 
 **Example Command Structure for a [`DataPointPacket`](Commands.md#data-point-packet-command)**

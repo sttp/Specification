@@ -83,6 +83,8 @@ Instead of serializing an entire data structure as a unit, STTP is designed to p
 
 > :information_source: For the purposes of this specification a data element, its identification and any associated state, e.g., time and quality, will be referred to as a _data point_.  
 
+<p class="insert-page-break-after"></p>
+
 <a name="figure2"></a> <center>
 
 **Mapping Data Structure Elements to Data Points**
