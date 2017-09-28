@@ -54,7 +54,6 @@
 | [Encoding (3)](TSSCAlgorithm.md#encoding) | [TSSCAlgorithm.md](TSSCAlgorithm.md) |
 | [Decoding (3)](TSSCAlgorithm.md#decoding) | [TSSCAlgorithm.md](TSSCAlgorithm.md) |
 | [Data Point Metadata (3)](TSSCAlgorithm.md#data-point-metadata) | [TSSCAlgorithm.md](TSSCAlgorithm.md) |
-
 | [Table of Contents (2)](README.md#table-of-contents) | [README.md](README.md) |
 | [Introduction (2)](Introduction.md#introduction) | [Introduction.md](Introduction.md) |
 | [Scope of this Document (3)](Introduction.md#scope-of-this-document) | [Introduction.md](Introduction.md) |
