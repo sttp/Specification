@@ -1,4 +1,7 @@
+## Section Map
 
+| Section Title (Heading Level) | Markdown Filename |
+|:-----------------------------:|:-----------------:|
 | [Responses (3)](Responses.md#responses) | [Responses.md](Responses.md) |
 | [Data Point Structure (2)](DataPointStructure.md#data-point-structure) | [DataPointStructure.md](DataPointStructure.md) |
 | [Data Point Value Types (3)](DataPointStructure.md#data-point-value-types) | [DataPointStructure.md](DataPointStructure.md) |
