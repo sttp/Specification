@@ -69,6 +69,8 @@
 | [Appendix B - STTP API Reference (2)](APIReference.md#appendix-b---sttp-api-reference) | [APIReference.md](APIReference.md) |
 | [Core (3)](APIReference.md#core) | [APIReference.md](APIReference.md) |
 | [Data (3)](APIReference.md#data) | [APIReference.md](APIReference.md) |
+| [Publication Priority (3)](APIReference.md#publication-priority) | [APIReference.md](APIReference.md) |
+| [Transactional Data Exchange (3)](APIReference.md#transactional-data-exchange) | [APIReference.md](APIReference.md) |
 | [Security (3)](APIReference.md#security) | [APIReference.md](APIReference.md) |
 | [Utility (3)](APIReference.md#utility) | [APIReference.md](APIReference.md) |
 | [Appendix C - IEEE C37.118 Mapping (2)](IEEE_C37.118Mapping.md#appendix-c---ieee-c37-118-mapping) | [IEEE_C37.118Mapping.md](IEEE_C37.118Mapping.md) |

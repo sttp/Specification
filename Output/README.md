@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.1.46 - September 28, 2017
+**Version:** 0.1.47 - October 4, 2017
 
 **Status:** Initial Development
 
@@ -1829,6 +1829,18 @@ The Data class contains elements for querying and manipulating data points (or m
     > [Required] initiates a subscription to the measurement specified by id at the delivery rate specified by rate. The underlying measurement shall be resampled using the method prescribed by method, which is a member of the ResampleMethod enumeration.
 
     > :bulb: Basic resample methods must be mathematically defined in the standard and enumerated. If none of the available resample methods satisfy the subscriber's requirements, then the measurement should be subscribed at the native rate and resampled in the client application.
+    
+### Publication Priority
+
+1. As Soon as Possible
+2. Normal Priority
+3. As Able But Within a Timespan
+4. As Able And Do Not Send After a TimeSpan
+5. Throttled (Maximimum of x-Bytes/Second) typically for historical data
+
+### Transactional Data Exchange
+
+How will this work?
 
 ### Security
 The Security class contains elements for querying and manipulating the security features of a connection.
