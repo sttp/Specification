@@ -1,32 +1,59 @@
 ## Metadata
 
-Metadata is exchanged in STTP as a table of records with attributes. When requesting all of the tables, a structure is returned as follows:
+Metadata is exchanged in STTP as a table of records with attributes. The complete list of tables available from an STTP publisher may be requested over the command channel. When requesting all of the tables, a structure is returned as follows:
+
+### Table Types
+Three types of tables are defined in STTP.
+* DataPoint Table - The DataPoint Table conveys metadata related to an STTP data point. Each publisher shall maintain one DataPoint Table. The name of the table shall be 'DataPoint'. The publisher shall maintain one unique record with the DataPoint Table for each data point defined.
+> :todo: Define complex data structure and complex data structure mapping in definitions section. A CDSM may be either 'built-in' or 'user-defined'. 'Built-in' CDSMs may differ by industry. In the electric power industry, an example of a 'built-in' CDSM is a phasor.
+* CDSM Table - A CDSM Table conveys metadata about a complex data structure. A publisher may maintain from zero to 2^15 CDSM tables. A CDSM table shall only describe a CDSM defined at the publisher, and each record within the CDSM Table shall uniquely describe a corresponding mapping. An example of a CDSM in the transportation industry may be 'location', which is defined with two floating point values named 'latitude' and 'longitude'. Carrying forward this example, the desription attribute for a record within the Position Table might be, 'Location of Truck #42'.
+* Resource Table - A Resource Table conveys metadata related to a resource available in the publisher's asset base. A publisher may maintain from zero to 2^15 resource tables to describe the desired asset hierarchy. A resource is any asset, whether hardware, software or physical, that relates to a data point transmitted over the wire. The simplest example of a resource is a sensor, or the transducer used to digitize a measured value.
+
+### Command Channel Responses
 
 * (Guid) Base Version ID - Identifies a major change that requires a resync of all metadata. This is also used for devices that don't support metadata revision. This value can then be changed with each revision to the metadata.
 * (Int32) Latest Version Number - A incrementing change counter when metadata is modified.
 * (Int32) Table Count
   * (Byte) Length of Table Name
   * (String) Table Name
+  * (Int8) Table Type - Limited to 0:DataPoint, 1:CDSM, 2: Resource.
   * (Int32) Last Modified Version Number
 
-When requesting data from a Table, the following structure will be returned:
+The list of attributes available in a given table may be requested over the command channel. When requesting attributes from a table, the following structure will be returned:
 
 * (Byte) Length of Table Name
 * (String) Table Name - Limited to 100 ASCII characters.
+* (Int8) Table Type - Limited to 0:DataPoint, 1:CDSM, 2: Resource.
+* (Int32) Latest Version Number
 * (Int32) Record Count
-  * (Guid) Record Identifier 
+* (Int32) Attribute Count 
+  * (byte) Length of Attribute Name
+  * (String) Attribute Name - Limited to 100 ASCII characters.
+  * (Byte) Attribute Value Type code
+  * (Int16) Size of the Attribute Value
+  * (Int32) Last Modified Version Number
+
+When requesting data from a table, the following structure will be returned:
+
+* (Byte) Length of Table Name
+* (String) Table Name - Limited to 100 ASCII characters.
+* (Int8) Table Type - Limited to 0:DataPoint, 1:CDSM, 2: Resource.
+* (Int32) Latest Version Number
+* (Int32) Record Count
+  * (Guid) Record Identifier
   * (Int32) Last Modified Version Number
   * (Int32) Attribute Count 
-    * (byte) Attribute Name Length.
+    * (byte) Length of Attribute Name
     * (String) Attribute Name - Limited to 100 ASCII characters.
+    * (Byte) Attribute Value Type code
     * (Int32) Array Index - Defaults to 0. For attributes that support multiple values, these are indexed here.
-    * (Byte) The attribute value code. 
-    * (Int16) The size of the Attribute Value.
+    * (Int16) Size of the Attribute Value
+    * (Int32) Last Modified Version Number
     * (byte[]) Attribute Value
 
 ### Attribute Value Types
 
-When defining each attribute, it's important to identify the type of data that is expected in that field. The wireline
+When defining each attribute, it is important to identify the type of data that is expected in that field. The wireline
 protocol itself will not enforce these requirements, but rather provides encoding mechanisms for transporting the data 
 and rules for how items can be converted to the desired type.  
 
@@ -83,59 +110,31 @@ The list below defines how the measurement fields can be restricted and what typ
 * Guid
   * Supported Types: Null | String | Guid
 
+### DataPoint Table Structure
 
-### Measurement Table
-
-For the measurement table, the record identifier will correspond to the Measurement's ID. The following table is a list of all of the optional attributes that can be associated with a measurement.
+For the DataPoint Table, the record identifier will correspond to the ID of the respective data point. The following table defines a minimal list of attributes associated with a data point.
 
 | Attribute Name   | Supports Arrays | Attribute Value Type | Description |
 |:----------------:|:---------------:|:--------------------:|:-----------:|
-| DeviceID         | N | Guid    | The GUID associated with the device record stored in the Device Table |
-| PointTag         | N | String  | A string based unique identifier |
-| SignalReference  | N | String  | A string based unique identifier |
-| SignalTypeID     | N | Integer | A code describing the signal type |
-| Adder            | N | Float   | An adjustment factor |
-| Multiplier       | N | Float   | An adjustment factor |
-| Description      | Y | String  | A description for this measurement |
-| Channel Name     | Y | String  | C37.118 Channel Name. For Digital types, an array of 16 elements are permitted. |
-| Signal Type      | N | String  | C37.118 related signal type. Ex: (STAT\|FREQ\|DFREQ\|PM\|PA\|PR\|PI\|ANALOG\|DIGITAL) |
-| PositionIndex    | N | Integer | C37.118 position index in a PMU frame |
-| Phase Designation| N | String  | The phase this field is computed from. Ex: A,B,C,0,+,-
-| Engineering Units| N | String  | The base units of this field. (Ex: Volts, Amps, Watts)
-| Engineering Scale| N | Float   | The scaling factor of these units (Ex: 1, 1000, 1000,000)
+| PointID          | N | Guid    | The GUID associated with the data point. |
+| PointTag         | N | String  | A string based unique identifier. |
 
-### Device Table
+### CDSM Table Structure
 
-For the device table, the record identifier is the DeviceID. The following table is a list of all of the optional attributes that can be associated with a device.
+It is not mandatory for the publisher to maintain a CDSM Table for every CDSM defined by the publisher. When the publisher optionally defines metadata for a CDSM, the table must contain the following minimal set of attributes. 
+
+| Attribute Name   | Supports Arrays | Attribute Value Type | Description |
+|:----------------:|:---------------:|:--------------------:|:-----------:|
+| CDSMID           | N | Guid    | The GUID associated with the CDSM. |
+| CDSMTag          | N | String  | A string based unique identifier. |
+
+### Resource Table
+
+It is not mandatory for the publisher to maintain Resource Tables. When the publisher optionally defines metadata for resources, the table must contain the following minimal set of attributes.
 
 | Attribute Name  | Supports Arrays | Attribute Value Type | Description |
 |:--------------: |:---------------:|:--------------------:|:-----------:|
-| Acronym         | N | String | A name of the device. |
-| Name            | N | String | A friendly name of the device |
-| Company         | N | String | The company who owns the device |
-| Protocol        | N | String | The protocol the device is communicating with |
-| Latitude        | N | Float  | The latitude of the device |
-| Longitude       | N | Float  | The location of the device |
-| TimeZone        | N | String | The time zone for the data |
-| FrameRate       | N | String | The sample rate |
-| FNOM            | N | String | C37.118 Nominal Frequency |
-| IDCODE          | N | String | C37.118 ID Code |
-| STN             | N | String | C37.118 Station Name |
-| Nominal Voltage | N | Float  | The factor required to convert this voltage to a per unit base. |
-| CT Ratio        | N | Float  | The ratio of a connected CT |
-| Rated MVA       | N | Float  | The nominal rating of this device |
-| Vendor          | N | String | The vendor of this device |
-| Model           | N | String | The model number of this device |
-| Equipment Type  | Y | String | The type of equipment this device is monitoring (Ex: Line, Transformer) |
-| Substation      | N | String | The substation this device is from |
-| Serial Number   | Y | String | Serial numbers or other identifying information about this equipment) |
-| In Service Date | Y | Date   | The date this device was put in service |
-| Out Service Date| Y | Date  | The date this device was removed from service |
-
-### Dataset Contents
-
-* Minimum required dataset for STTP operation
-* Industry specific dataset extensions (outside scope of this doc)
+| ResourceID      | N | Guid    | The GUID associated with the resource. |
 
 ### Dataset Filtering
 
@@ -161,4 +160,91 @@ For the device table, the record identifier is the DeviceID. The following table
   * Merging considerations
   * Conflict resolution
   * Ownership control
+
+## Appendix Z - Power Industry Examples (To be moved later)
+
+Here are some examples of metadata suitable for the electric power industry.
+
+### DataPoint Table
+
+A publisher might try the following DataPoint Table for the power industry.
+
+| Attribute Name   | Supports Arrays | Attribute Value Type | Description |
+|:----------------:|:---------------:|:--------------------:|:-----------:|
+| PointID          | N | Guid    | The GUID associated with the data point. |
+| PointTag         | N | String  | A string based unique identifier. |
+| Description      | Y | String  | A description for this measurement |
+| ProducerTableName| N | String  | The name of the table within which the record for the resource that produced this data point resides. |
+| ProducerTableID  | N | Guid    | The primary key for the record within the Producer Table. |
+| SignalReference  | N | String  | A string based unique identifier |
+| SignalTypeID     | N | Integer | A code describing the signal type |
+| Adder            | N | Float   | An adjustment factor |
+| Multiplier       | N | Float   | An adjustment factor |
+| Signal Type      | N | String  | Fixed set of signal types. I.E.: (STAT\|FREQ\|DFREQ\|PM\|PA\|PR\|PI\|ANALOG\|DIGITAL\|CALC) |
+| Phase Designation| N | String  | The phase this field is computed from. Ex: A,B,C,0,+,-
+| Engineering Units| N | String  | The base units of this field. (Ex: Volts, Amps, Watts)
+| Engineering Scale| N | Float   | The scaling factor of these units (Ex: 1, 1000, 1000,000)
+| Channel Name     | Y | String  | C37.118 Channel Name. For Digital types, an array of 16 elements are permitted. Array length shall be zero if this is not a C37.118 - derived data point.|
+| PositionIndex    | N | Integer | C37.118 position index in a PMU frame. Zero for non-C37.118 data points. |
+
+### PMU Table (a Resource Table example)
+
+| Attribute Name  | Supports Arrays | Attribute Value Type | Description |
+|:--------------: |:---------------:|:--------------------:|:-----------:|
+| ResourceID      | N | Guid   | The GUID associated with the resource. |
+| Acronym         | N | String | A name of the device. |
+| Name            | N | String | A friendly name of the device |
+| SubstationTableName| N | String | The name of the table within which the record for the substation where this PMU resides. |
+| SubstationTableID  | N | Guid    | The primary key for the record within the substation table. |
+| CompanyTableName| N | String | The name of the table within which the record for the company that owns this PMU. |
+| CompanyTableID  | N | Guid   | The primary key for the record within the company table. |
+| Protocol        | N | String | The protocol the device is communicating with |
+| FrameRate       | N | String | The sample rate |
+| FNOM            | N | String | C37.118 Nominal Frequency |
+| IDCODE          | N | String | C37.118 ID Code |
+| STN             | N | String | C37.118 Station Name |
+| Nominal Voltage | N | Float  | The factor required to convert this voltage to a per unit base. |
+| CT Ratio        | N | Float  | The ratio of a connected CT |
+| Rated MVA       | N | Float  | The nominal rating of this device |
+| Vendor          | N | String | The vendor of this device |
+| Model           | N | String | The model number of this device |
+| Equipment Type  | Y | String | The type of equipment this device is monitoring (Ex: Line, Transformer) |
+| Serial Number   | Y | String | Serial numbers or other identifying information about this equipment) |
+| In Service Date | Y | Date   | The date this device was put in service |
+| Out Service Date| Y | Date   | The date this device was removed from service |
+
+### Substation Table (a Resource Table example)
+
+| Attribute Name  | Supports Arrays | Attribute Value Type | Description |
+|:--------------: |:---------------:|:--------------------:|:-----------:|
+| ResourceID      | N | Guid    | The GUID associated with the resource. |
+| Name            | N | String | A friendly name of the substation. |
+| Latitude        | N | Float  | The latitude of the substation. |
+| Longitude       | N | Float  | The location of the substation. |
+| TimeZone        | N | String | The time zone for the substation. |
+
+### Phasor Table (a CDSM Table example)
+
+The existence of this CDSM Table presumes the existence of a 'built-in' CDSM called 'Phasor'. For this example, assume that the Phasor CDSM is comprised of two fields: Magnitude (float) and Angle (float).
+
+| Attribute Name   | Supports Arrays | Attribute Value Type | Description |
+|:----------------:|:---------------:|:--------------------:|:-----------:|
+| CDSMID           | N | Guid   | The GUID associated with an entry in the Phasor CDSM. |
+| CDSMTag          | N | String | A string based unique identifier for the Phasor. |
+| Description      | N | String | A description for this phasor, e.g. 'Smith Substation North Bus Voltage'. |
+| IsCurrent        | N | Bit    | Set if this is a current phasor. |
+| VoltAssociation  | N | Guid   | The ID of the voltage phasor used to compute power. Ignore if IsCurrent is reset. |
+| AlternateVolt    | N | Guid   | An alternate voltage phasor, used when the primary voltage is unavailable. Ignore if IsCurrent is reset. |
+| LineTableName    | N | String | The name of the table within which the record for the line associated with this current phasor resides. Ignore if IsCurrent is reset. |
+| LineTableID      | N | Guid    | The primary key for the record within the line table. Ignore if IsCurrent is reset. |
+
+### VIPair Table (a CDSM example)
+
+The existence of this CDSM Table presumes the existence of a CDSM, 'built-in' or 'user-defined', called 'VIPair'. For this example, assume that the VIPair CDSM is comprised of two fields: Voltage (Phasor CDSM) and Current (Phasor CDSM).
+
+| Attribute Name   | Supports Arrays | Attribute Value Type | Description |
+|:----------------:|:---------------:|:--------------------:|:-----------:|
+| CDSMID           | N | Guid   | The GUID associated with an entry in the VIPair CDSM. |
+| CDSMTag          | N | String | A string based unique identifier for the VIPair. |
+| Description      | N | String | A description for this VIPair, e.g. 'Smith-Jones Line'. |
 
