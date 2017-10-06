@@ -4,10 +4,15 @@ Metadata is exchanged in STTP as a table of records with attributes. The complet
 
 ### Table Types
 Three types of tables are defined in STTP.
-* DataPoint Table - The DataPoint Table conveys metadata related to an STTP data point. Each publisher shall maintain one DataPoint Table. The name of the table shall be 'DataPoint'. The publisher shall maintain one unique record with the DataPoint Table for each data point defined.
+
+* DataPoint Table - The DataPoint Table conveys metadata related to an STTP data point. Each publisher shall maintain zero or one DataPoint Table. The name of the table shall be 'DataPoint'. The publisher shall maintain one unique record with the DataPoint Table for each data point defined.
+
 > :todo: Define complex data structure and complex data structure mapping in definitions section. A CDSM may be either 'built-in' or 'user-defined'. 'Built-in' CDSMs may differ by industry. In the electric power industry, an example of a 'built-in' CDSM is a phasor.
-* CDSM Table - A CDSM Table conveys metadata about a complex data structure. A publisher may maintain from zero to 2^15 CDSM tables. A CDSM table shall only describe a CDSM defined at the publisher, and each record within the CDSM Table shall uniquely describe a corresponding mapping. An example of a CDSM in the transportation industry may be 'location', which is defined with two floating point values named 'latitude' and 'longitude'. Carrying forward this example, the desription attribute for a record within the Position Table might be, 'Location of Truck #42'.
-* Resource Table - A Resource Table conveys metadata related to a resource available in the publisher's asset base. A publisher may maintain from zero to 2^15 resource tables to describe the desired asset hierarchy. A resource is any asset, whether hardware, software or physical, that relates to a data point transmitted over the wire. The simplest example of a resource is a sensor, or the transducer used to digitize a measured value.
+* CDSM Table - A CDSM Table conveys metadata about a complex data structure. A publisher may maintain zero or more CDSM tables. A CDSM table shall only describe a CDSM defined at the publisher, and each record within the CDSM Table shall uniquely describe a corresponding mapping. An example of a CDSM in the transportation industry may be 'location', which is defined with two floating point values named 'latitude' and 'longitude'. Carrying forward this example, the desription attribute for a record within the Position Table might be, 'Location of Truck #42'.
+
+* Resource Table - A Resource Table conveys metadata related to a resource available in the publisher's asset base. A publisher may maintain zero or more resource tables to describe the desired asset hierarchy. A resource is any asset, whether hardware, software or physical, that relates to a data point transmitted over the wire. The simplest example of a resource is a sensor, or the transducer used to digitize a measured value.
+
+A maximum of 2^16 tables in any combination of the allowable types are permitted.
 
 ### Commands
 
@@ -114,7 +119,6 @@ For the DataPoint Table, the record identifier will correspond to the ID of the 
 | Attribute Name   | Attribute Value Type | Description |
 |:----------------:|:--------------------:|:-----------:|
 | PointID          | Guid    | The GUID associated with the data point. |
-| PointTag         | String  | A string based unique identifier. |
 
 ### CDSM Table Structure
 
@@ -123,7 +127,6 @@ It is not mandatory for the publisher to maintain a CDSM Table for every CDSM de
 | Attribute Name   | Attribute Value Type | Description |
 |:----------------:|:--------------------:|:-----------:|
 | CDSMID           | Guid    | The GUID associated with the CDSM. |
-| CDSMTag          | String  | A string based unique identifier. |
 
 ### Resource Table
 
