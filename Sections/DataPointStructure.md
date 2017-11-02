@@ -24,30 +24,49 @@ The actual number of `DataPoint` structures contained in the data point packet c
 
 ### Data Point Value Types
 
-The data types available to a `DataPoint` are described in the `ValueType` enumeration, defined below, along with any needed associated structures:
+The data types available to a `DataPoint` are described in the `ValueType` enumeration, defined below:
 
 ```C
 enum {
   Null = 0,     // 0-bytes
-  SByte = 1,    // 1-byte
-  Int16 = 2,    // 2-bytes
-  Int32 = 3,    // 4-bytes
-  Int64 = 4,    // 8-bytes
-  Byte = 5,     // 1-byte
-  UInt16 = 6,   // 2-bytes
-  UInt32 = 7,   // 4-bytes
-  UInt64 = 8,   // 8-bytes
-  Decimal = 9,  // 16-bytes
-  Double = 10,  // 8-bytes
-  Single = 11,  // 4-bytes
-  Ticks = 12,   // 8-bytes
-  Bool = 13,    // 1-byte
-  Guid = 14,    // 16-bytes
-  String = 15,  // 64-bytes, max
-  Buffer = 16   // 64-bytes, max
+  Int64 = 1,    // 0 to 8-bytes
+  Single = 2,   // 0 to 4-bytes
+  Double = 3,   // 0 to 8-bytes
+  String = 4,   // 1MB Limit, however, if the value is too large, additional overhead will occur to send the value out of band.
+  Buffer = 5    // 1MB Limit, however, if the value is too large, additional overhead will occur to send the value out of band.
 }
 ValueType; // sizeof(uint8), 1-byte
 ```
+
+More complex data types derived from the fundamental type are specified in `DerivedValueType`, along with any needed associated structures.
+The enforcement/decoding of these derived types will occur above the wire protocol level and their types will be exchanged as metadata.
+
+```C
+enum {
+  Null = 0,     // Derives from ValueType.Null, 0-bytes
+  SByte = 1,    // Derives from ValueType.Int64, 1-byte
+  Int16 = 2,    // Derives from ValueType.Int64, 2-bytes
+  Int32 = 3,    // Derives from ValueType.Int64, 4-bytes
+  Int64 = 4,    // Derives from ValueType.Int64, 8-bytes
+  Byte = 5,     // Derives from ValueType.Int64, 1-byte
+  UInt16 = 6,   // Derives from ValueType.Int64, 2-bytes
+  UInt32 = 7,   // Derives from ValueType.Int64, 4-bytes
+  UInt64 = 8,   // Derives from ValueType.Int64, 8-bytes
+  Decimal = 9,  // Derives from ValueType.Buffer, 16-bytes
+  Double = 10,  // Derives from ValueType.Double, 8-bytes
+  Single = 11,  // Derives from ValueType.Single, 4-bytes
+  Ticks = 12,   // Derives from ValueType.Buffer, 8-bytes
+  Bool = 13,    // Derives from ValueType.Int64, 1-byte
+  Guid = 14,    // Derives from ValueType.Buffer, 16-bytes
+  String = 15,  // Derives from ValueType.String, 1MB Limit
+  Buffer = 16   // Derives from ValueType.Buffer, 1MB Limit
+}
+DerivedValueType; // sizeof(uint8), 1-byte
+```
+
+> Note: When encoding unsigned values as 64-bit signed values, they must first be converted to a 64-bit unsigned value, 
+then converted to a 64-bit signed value. Otherwise leading 1's might be appended to the value. 
+Example: A byte value of 255 converted to a sbyte would be -1, then converted to a int64 would maintain it's -1.
 
 - `Null`: No space occupied
 - `SByte`: [8-bit Signed Byte](https://en.wikipedia.org/wiki/Byte) (1-byte, big-endian)
