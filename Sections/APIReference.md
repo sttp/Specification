@@ -1,5 +1,8 @@
 ﻿## Appendix B - STTP API Reference
 The STTP API describes a set of properties and methods for accessing an STTP server. Elements marked with the tag [Required] are required to be provided by all STTP server implementations.
+
+Test if s.stapels can edit this file
+
 ### Core
 The Core class contains the basic elements of the API.
 
