@@ -4,7 +4,8 @@ When a subscriber has issued a [subscribe command](Commands.md#subscribe-command
 
 ```C
 struct {
-  uint32 id;
+  DataPointIdentifier id;
+  ValueTypeCode ValueTypeCode;
   uint8[] value;    // Size based on type, up to 64-bytes
   uint8[] state;    // Size based on flags, up to 26-bytes
 }
@@ -22,51 +23,60 @@ The actual number of `DataPoint` structures contained in the data point packet c
 
 > :information_source: The maximum size of a `DataPoint` structure instance is 94-bytes, however, with simple encoding techniques this size can be reduced down to a few bytes for most value types.
 
-### Data Point Value Types
+### Data Point Identifier
+
+When identifying a Data Point, one of 4 mechanics can be used to identify the source of the time series data.
+
+* [Guid] An integer identifier - This does not have to be a true GUID, but can be any integer that can fit in a 128 bit integer.
+* [String] A string identifier - This is commonly referred to as a tag in a time series databases.
+* [SttpNamedSet] A Connection String - A set of [string Name, SttpValue value] that uniquely identify the source of a point ID.
+* [Int32] Runtime ID - Runtime ID's are negotiated with the connection and are the default value type in the Data Point Structure.
+
+```C
+enum {
+  RuntimeID = 0,   // 4-bytes
+  Guid = 1,        // 16-bytes
+  String = 2,      // variable
+  NamedSet = 3,    // variable
+}
+DataPointIdentifierTypeCode; // 2 bits
+
+struct {
+  DataPointIdentifierTypeCode identifierType;
+  uint8[] identifer;    
+}
+DataPointIdentifier;
+```
+
+While the normal use case is to use RuntimeIDs, for systems that have an indefinite number of IDs, it's not practical to map every 
+point to a Runtime ID. In this case, it's allowed to send the identifier with the measurement.
+
+### Sttp Value Types
 
 The data types available to a `DataPoint` are described in the `ValueType` enumeration, defined below:
 
 ```C
 enum {
   Null = 0,     // 0-bytes
-  Int64 = 1,    // 0 to 8-bytes
-  Single = 2,   // 0 to 4-bytes
-  Double = 3,   // 0 to 8-bytes
-  String = 4,   // 1MB Limit, however, if the value is too large, additional overhead will occur to send the value out of band.
-  Buffer = 5    // 1MB Limit, however, if the value is too large, additional overhead will occur to send the value out of band.
+  SByte = 1,    // 1-byte
+  Int16 = 2,    // 2-bytes
+  Int32 = 3,    // 4-bytes
+  Int64 = 4,    // 8-bytes
+  Byte = 5,     // 1-byte
+  UInt16 = 6,   // 2-bytes
+  UInt32 = 7,   // 4-bytes
+  UInt64 = 8,   // 8-bytes
+  Decimal = 9,  // 16-bytes
+  Double = 10,  // 8-bytes
+  Single = 11,  // 4-bytes
+  Ticks = 12,   // 8-bytes
+  Bool = 13,    // 1-byte
+  Guid = 14,    // 16-bytes
+  String = 15,  // 1MB Limit, however, if the value is too large, additional overhead will occur to send the value out of band.
+  Buffer = 16   // 1MB Limit, however, if the value is too large, additional overhead will occur to send the value out of band.
 }
-ValueType; // sizeof(uint8), 1-byte
+ValueTypeCode; // sizeof(uint8), 1-byte
 ```
-
-More complex data types derived from the fundamental type are specified in `DerivedValueType`, along with any needed associated structures.
-The enforcement/decoding of these derived types will occur above the wire protocol level and their types will be exchanged as metadata.
-
-```C
-enum {
-  Null = 0,     // Derives from ValueType.Null, 0-bytes
-  SByte = 1,    // Derives from ValueType.Int64, 1-byte
-  Int16 = 2,    // Derives from ValueType.Int64, 2-bytes
-  Int32 = 3,    // Derives from ValueType.Int64, 4-bytes
-  Int64 = 4,    // Derives from ValueType.Int64, 8-bytes
-  Byte = 5,     // Derives from ValueType.Int64, 1-byte
-  UInt16 = 6,   // Derives from ValueType.Int64, 2-bytes
-  UInt32 = 7,   // Derives from ValueType.Int64, 4-bytes
-  UInt64 = 8,   // Derives from ValueType.Int64, 8-bytes
-  Decimal = 9,  // Derives from ValueType.Buffer, 16-bytes
-  Double = 10,  // Derives from ValueType.Double, 8-bytes
-  Single = 11,  // Derives from ValueType.Single, 4-bytes
-  Ticks = 12,   // Derives from ValueType.Buffer, 8-bytes
-  Bool = 13,    // Derives from ValueType.Int64, 1-byte
-  Guid = 14,    // Derives from ValueType.Buffer, 16-bytes
-  String = 15,  // Derives from ValueType.String, 1MB Limit
-  Buffer = 16   // Derives from ValueType.Buffer, 1MB Limit
-}
-DerivedValueType; // sizeof(uint8), 1-byte
-```
-
-> Note: When encoding unsigned values as 64-bit signed values, they must first be converted to a 64-bit unsigned value, 
-then converted to a 64-bit signed value. Otherwise leading 1's might be appended to the value. 
-Example: A byte value of 255 converted to a sbyte would be -1, then converted to a int64 would maintain it's -1.
 
 - `Null`: No space occupied
 - `SByte`: [8-bit Signed Byte](https://en.wikipedia.org/wiki/Byte) (1-byte, big-endian)
