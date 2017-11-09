@@ -4,14 +4,139 @@ The following table defines the commands available to STTP. Commands that expect
 
 | Code | Command | Source | Response | Description |
 |:----:|---------|:------:|:--------:|-------------|
-| 0x00 | [NegotiateSession](#negotiate-session-command) | Publisher | Yes | Starts session negotiation for a new connection. |
-| 0x01 | [MetadataRefresh](#metadata-refresh-command) | Subscriber | Yes  | Requests publisher send updated metadata. |
-| 0x02 | [Subscribe](#subscribe-command) | Subscriber | Yes | Defines desired set of data points to begin receiving. |
-| 0x03 | [Unsubscribe](#unsubscribe-command) | Subscriber | Yes | Requests publisher terminate current subscription. |
-| 0x04 | [SecureDataChannel](#secure-data-channel-command)  | Subscriber | Yes | Requests publisher secure the data channel.  |
-| 0x05 | [RuntimeIDMapping](#runtime-id-mapping-command) | Publisher | Yes | Defines data point Guid to runtime ID mappings. |
-| 0x06 | [DataPointPacket](#data-point-packet-command) | Publisher | No | Payload contains data points. |
+| 0x01 | [BeginFragment](#begin-fragment-command) | Both | No | Indicates a large packet is being sent. |
+| 0x02 | [NextFragment](#next-fragment-command) | Both | No | The next fragment of a large packet. Follows `BeginFragment`. |
+| 0x03 | [GetMetadataSchema](#get-metadata-schema-command) | Subscriber | Yes | Requests the database schema and version of the metadata. |
+| 0x04 | [GetMetadata](#get-metadata-command) | Subscriber | Yes | Requests specific records of the metadata based on the schema. |
+| 0x05 | [Subscribe](#subscribe-command) | Subscriber | Yes | Adds/Removes a desired set of data points that will be received. |
+| 0x06 | [SendDataPoints](#send-data-points-command) | Publisher | No | A packet that contains normally encoded data points. |
+| 0x07 | [SendDataPointsCustom](#send-data-points-custom-command) | Publisher | No | A packet that contains specially encoded data points. |
+| 0x08 | [RuntimeIDMapping](#runtime-id-mapping-command) | Publisher | Yes | Defines runtimeIDs for DataPointIDs. |
+| 0x09 | [NegotiateSession](#negotiate-session-command) | Publisher | Yes | Establishes session roles and supported features for a connection. |
+| 0x0A | [BulkTransport](#bulk-transport-command) | Publisher | No | For sending large buffers, like files. |
 | 0xFF | [NoOp](#noop-command) | Both | Yes | Periodic message to allow validation of connectivity. |
+
+
+#### Begin Fragment Command
+
+If sending a packet that is larger than the negotiated maximum packet size, it must be fragmented. This command is the first in a series of fragment commands that define the entire fragment. 
+
+If the session supports it, fragmented data is commonly compress. It's possible that a compressed data fits into a single fragment, therefore this command will not be followed by subsequent `NextFragment` commands. 
+
+Fragmented packets must be sent one at a time in sequence and cannot be interwoven with any other kind of command.
+
+```C
+struct {
+  int32 totalFragmentSize;          //The size of all fragments of the fragmented packet
+  int32 totalRawSize;               //The uncompressed size of all of the compressed segments
+  int8 commandCode;                 //The CommandCode of the data that is fragmented
+  int8 compressionMode;             //The compression algorithm that compressed this packet. Can be None.
+  //(uint16) lengthOfFirstFragment  //This field is not specified and is implied from the packet header. Packet Length - 13
+  uint8[] firstFragment             //This is the first fragment of the data.
+}
+BeginFragmentCommand;
+```
+
+#### Next Fragment Command
+
+This packet always follows `BeginFragment` and will be repeated in order until all of the data has been transmitted. 
+
+There is not a Finished command, therefore, once the total number of bytes have been transmitted as defined in `BeginFragment`. The command has completed. 
+
+```C
+struct {
+  //(int32) offset            //This is implied. It's the total number of bytes that have been received thus far.
+  //(int32) lengthOfFragment  //This field is implied. Packet Length - 3.
+  uint8[] fragment            //The next fragment of the sequence.
+}
+NextFragmentCommand;
+```
+
+#### Get Metadata Schema Command
+
+Requests that the current version of the metadata database be sent, along with the schema. While this information is not required, 
+it's important to know this when checking if one's metadata is out of synchronization or if additional user defined metadata tables exist.
+
+```C
+struct {
+  bool includeSchema   //Without this set, the response will only include the database version and not the schema.
+}
+GetMetadataSchemaCommand;
+```
+
+#### Get Metadata Command
+
+Requests specific tables of metadata. If supported by the connection, custom queries and filters can be also be specified as part of the metadata request. There is only permitted one table per request.
+
+```C
+struct {
+  guid schemaVersion          //If not Guid.Empty, is used to verify that the current schema has not changed.
+  int64 revision              //If isUpdateQuery=true, the query returns all changes since the specified revision
+  bool isUpdateQuery          //specifies if this query should only return the deltas, of the entire metadata result
+  SttpQueryExpresssion query  //The query itself. EX: SELECT * FROM Table where Column = 1234
+}
+GetMetadataCommand;
+```
+
+The results for this command are streamed and can be broken into multiple packets if needed.
+
+
+#### Subscribe Command
+
+Updates the subscription for new measurements. This update can be to add, remove, or replace an existing subscription.
+
+This command is broken up into sub commands that can be combined into a single packet. The sub commands include:
+
+* Subcommands
+  * `ConfigureOptions` - Defines options for the measurements about to be selected. Such as priority; dead-banding; start/stop times; sample resolution.
+  * `AllDataPoints` - Subscribes to everything
+  * `DataPointByID` - Specifies individual data points
+  * `ByQuery` - Specifies some kind of query to use to select the measurements.
+
+```C
+enum {
+  Replace,
+  Remove,
+  Append,
+}
+SubscriptionMode;
+```
+
+```C
+struct {
+  SubCommand ConfigureOptions
+  SubscriptionMode mode
+  SttpNamedSet options  //A set of options for the points about to be specified.
+}
+ConfigureOptions;
+```
+
+```C
+struct {
+  SubCommand AllDataPoints
+  SubscriptionMode mode
+}
+AllDataPoints;
+```
+
+```C
+struct {
+  SubCommand DataPointByID
+  SubscriptionMode mode
+  SttpPointID[] points       //An array of points.
+}
+DataPointByID;
+```
+
+```C
+struct {
+  SubCommand ByQuery
+  SubscriptionMode mode
+  SttpQueryExpression query       //A query that specifies the points to use. The columns specified in the query must be SttpPointID
+}
+ByQuery;
+```
+
 
 #### Negotiate Session Command
 
@@ -80,15 +205,8 @@ If the subscriber receives a `Succeeded` response for the `NegotiateSession` com
 
 Once operational modes have been established for a session, the publisher and subscriber must exchange any string based payloads using the negotiated string encoding as specified by the subscriber.
 
-#### Metadata Refresh Command
 
-* Wire Format: Binary
-  * Includes current metadata version number
 
-#### Subscribe Command
-
-* Wire Format: Binary
-  * Includes metadata expression and/or individual Guids for desired data points
 
 #### Unsubscribe Command
 
