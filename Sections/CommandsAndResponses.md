@@ -12,14 +12,13 @@ Commands and responses are defined as simple binary message structures that incl
 
 #### Message Payloads
 
-Payloads in STTP are defined as a byte arrays prefixed by an unsigned 16-bit integer representing the array length. Implementations of STTP should make target payload sizes configurable, but all payloads delivered by STTP must have a fixed maximum upper length of `2^14`, i.e., `16,384`, bytes.
+Payloads in STTP are defined as a byte arrays prefixed by an unsigned 16-bit integer representing the array length. Implementations of STTP should make target payload sizes configurable, but all payloads delivered by STTP must have a fixed maximum upper length of `2^16`, i.e., `65,535`, less 3 bytes for the packet overhead.
 
 ```C
-  uint16 length;
   uint8[] payload;
 ```
 
-Empty payloads have a `length` value of `0` and a `payload` value of `null`. When serialized, an empty payload would be represented by only a `0x0000` value for the length.
+It is permitted to send an empty payload if the [command code](Commands.md) does not require a payload.
 
 #### Command Structure
 
@@ -34,7 +33,7 @@ struct {
 Command;
 ```
 - The `commandCode` field defines the command code value for the command message, see defined [command codes](Commands.md).
-- The `length` field defines the length of the `payload` in bytes.
+- The `length` field defines the length of the entire packet in bytes.
 - The `payload` field is a byte array representing the serialized payload associated with the `commandCode`.
 
 <p class="insert-page-break-after"></p>
@@ -50,18 +49,16 @@ Command;
 
 #### Response Structure
 
-Responses for most commands will be either `Succeeded` to `Failed`. The following structure defines the binary format of a `Response`:
+Some form of response exists for every command. Responses take the same format as commands but are distinguished with a different command code. Sometimes, successful responses are implied and not expressly stated. However, in these cases, it's still permitted to send a successful response in addition to the command. Responses for most commands will be either `Succeeded` or `Failed`. The following structure defines the binary format of a `Response`:
 
 ```C
 struct {
-  uint8 responsecode;
-  uint8 commandCode;
+  uint8 responseCode;
   uint16 length;
   uint8[] payload;
 }
 Response;
 ```
 - The `responseCode` field defines the response code value for the response message, see defined [response codes](Responses.md).
-- The `commandCode` field defines the command code value that this message is in response to, see defined [command codes](Commands.md).
-- The `length` field defines the length of the `payload` in bytes.
+- The `length` field defines the length of the entire packet in bytes.
 - The `payload` field is a byte array representing the serialized payload associated with the `responseCode`.
