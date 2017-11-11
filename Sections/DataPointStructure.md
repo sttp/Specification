@@ -5,9 +5,11 @@ When a subscriber has issued a [subscribe command](Commands.md#subscribe-command
 ```C
 struct {
   DataPointIdentifier id;
-  ValueTypeCode ValueTypeCode;
-  uint8[] value;    // Size based on type, up to 64-bytes
-  uint8[] state;    // Size based on flags, up to 26-bytes
+  SttpTimestamp timestamp;
+  SttpValue value; 
+  TimeQualityFlags timeQuality;
+  ValueQualityFlags valueQuality;
+  SttpValue[] ExtraFields;        //A set of extra fields that are reserved for future need.
 }
 DataPoint;
 ```
@@ -57,23 +59,31 @@ The data types available to a `DataPoint` are described in the `ValueType` enume
 
 ```C
 enum {
-  Null = 0,     // 0-bytes
-  SByte = 1,    // 1-byte
-  Int16 = 2,    // 2-bytes
-  Int32 = 3,    // 4-bytes
-  Int64 = 4,    // 8-bytes
-  Byte = 5,     // 1-byte
-  UInt16 = 6,   // 2-bytes
-  UInt32 = 7,   // 4-bytes
-  UInt64 = 8,   // 8-bytes
-  Decimal = 9,  // 16-bytes
-  Double = 10,  // 8-bytes
-  Single = 11,  // 4-bytes
-  Ticks = 12,   // 8-bytes
-  Bool = 13,    // 1-byte
-  Guid = 14,    // 16-bytes
-  String = 15,  // 1MB Limit, however, if the value is too large, additional overhead will occur to send the value out of band.
-  Buffer = 16   // 1MB Limit, however, if the value is too large, additional overhead will occur to send the value out of band.
+  Null = 0,              // 0-bytes
+  SByte = 1,             // 1-byte
+  Int16 = 2,             // 2-bytes
+  Int32 = 3,             // 4-bytes
+  Int64 = 4,             // 8-bytes
+  Byte = 5,              // 1-byte
+  UInt16 = 6,            // 2-bytes
+  UInt32 = 7,            // 4-bytes
+  UInt64 = 8,            // 8-bytes
+  Single = 9,            // 4-bytes
+  Double = 10,           // 8-bytes
+  Decimal = 11,          // 16-bytes
+  DateTime = 12,         // Local/Universal/Unspecified/Unambiguous Date Time
+  DateTimeOffset = 13,   // Local/Universal/Unspecified/Unambiguous Date Time with an offset.
+  SttpTime = 14,         // Local/Universal Time with Leap Seconds
+  SttpTimeOffset = 15,   // Local/Universal Time with Leap Seconds and timezone offset.
+  TimeSpan = 16,         // 8 bytes  
+  Bool = 17,             // 1-byte
+  Char = 18,             // 2-bytes
+  Guid = 19,             // 16-bytes
+  String = 20,           // Limit defined in NegotiateSession
+  Buffer = 21,           // Limit defined in NegotiateSession
+  ValueSet = 22,         // An array of SttpValue. Up to 255 elements.
+  NamedSet = 23,         // An array of [string,SttpValue]. Up to 255 elements. Like a connection string.
+  BulkTransportGuid = 24 // A special type of GUID that indicates it is transmitted out of band.
 }
 ValueTypeCode; // sizeof(uint8), 1-byte
 ```
@@ -93,63 +103,19 @@ ValueTypeCode; // sizeof(uint8), 1-byte
 - `Bool`: [Boolean as 8-bit Unsigned Integer](https://en.wikipedia.org/wiki/Boolean_data_type) (1-byte, big-endian, zero is `false`, non-zero value is `true`)
 - `Guid`: [Globally Unique Identifer](https://en.wikipedia.org/wiki/Universally_unique_identifier) (16-bytes, big-endian for all components)
 - `Time`: [Time as `Timestamp`](https://en.wikipedia.org/wiki/System_time) (16-bytes, see [data point timestamp](#data-point-timestamp))
-- `String` [Character String as `StringValue`](https://en.wikipedia.org/wiki/String_%28computer_science%29) (Maximum of 64-bytes - 1-byte header with 63-bytes of character data, encoding is UTF8)
-- `Buffer` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) (Maximum of 64-bytes - 1-byte header with 63-bytes of data)
+- `String` [Character String as `StringValue`](https://en.wikipedia.org/wiki/String_%28computer_science%29) (encoding is UTF8)
+- `Buffer` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) 
 
-Both the `String` and `Buffer` represent variable length data types. Each variable length data point will have a fixed maximum number of bytes that can be transmitted per instance of the `DataPoint` structure. For data sets larger then the specified maximum size, data will need to be fragmented, marked with a [sequence number](#data-point-sequence-number) and transmitted in small chunks, i.e., 63-byte segments. For this large data set collation scenario, it is expected that the data packets will be transmitted over a reliable transport protocol, e.g., TCP, otherwise the subscriber should expect the possibility of missing fragments. Details for the content of the `String` type which is the `StringValue` structure and the `Buffer` type which is the `BufferValue` structure are defined as follows:
-
-```C
-struct {
-  uint8 length;
-  uint8[] data; // Maximum size of 63
-}
-StringValue;
-
-struct {
-  uint8 length;
-  uint8[] data; // Maximum size of 63
-}
-BufferValue;
-```
-
-> :construction: Some tests need to be run to determine if 64-bytes of variable string / buffer data is an effective use of space and provides optimal performance in data point packets. This target size may need to be an adjustable parameter in initial STTP implementations.
 
 ### Data Point Timestamp
 
-The timestamp format for STTP is defined to accommodate foreseeable use cases and requirements for representations of time and elapsed time spans. The following defines the binary format of a `Timestamp` structure which consists of epoch based whole seconds and any fraction of a second. The timestamp fraction also includes a bit for indication of a leap-second in progress.
-
-```C
-enum {
-  MillisecondMask = 0x0FFC000000000000, // (fraction >> 50) & 1023
-  MicrosecondMask = 0x0003FF0000000000, // (fraction >> 40) & 1023
-  NanosecondMask  = 0x000000FFC0000000, // (fraction >> 30) & 1023
-  PicosecondMask  = 0x000000003FF00000, // (fraction >> 20) & 1023
-  FemtosecondMask = 0x00000000000FFC00, // (fraction >> 10) & 1023
-  AttosecondMask  = 0x00000000000003FF, // fraction & 1023
-  Leapsecond      = 0x1000000000000000, // Set if leap-second is in progress
-  ReservedBits    = 0xE000000000000000
-}
-FractionFlags; // sizeof(uint64), 8-bytes
-
-struct {
-  int64 seconds;          // Seconds since 1/1/0001
-  FractionFlags fraction; // Fractional seconds
-}
-Timestamp; // 16-bytes
-```
-
-- The `seconds` field defines the whole seconds since 1/1/0001 with a range of 584 billion years, i.e., +/-292 billion years.
-- The `fraction` field is an instance of the `FractionFlags` enumeration that defines the fractional seconds for the timestamp with a resolution down to attoseconds. More specifically, the `fraction` field is broken up into 10-bit segments where each segment represents 1,000 units, 0 to 999, of fractional time - similar to a binary coded decimal. There are 10-bits for milliseconds, 10-bits for microseconds, 10-bits for nanoseconds, 10-bits for picoseconds, 10-bits for femtoseconds, and 10-bits for attoseconds. Bit 60 is used to indicate a leap-second is in progress; the remaining 3-bits, 61-63, are reserved.
-
-> :information_source: The size of a `Timestamp` structure instance is 16-bytes, however, simple encoding techniques make it so that unused and repeating sections of time can be compressed out of the data point `state` so that it consumes much less space.
+The default timestamp that is used for Sttp has a bit reserved for LeapSecondInProgress. It takes the same structure as DateTime except, DateTimeKind.Ambiguious and DateTimeKind.Unspecified have been sacrificed for a leap second pending bit. 
 
 ### Data Point Time Quality Flags
 
 Data points can also include a `TimeQualityFlags` structure in the serialized state data, defined below, that describes both the timestamp quality, defined with the `TimeQuality` enumeration value, as well as an indication of if a timestamp was not measured with an accurate time source.
 
 The time quality detail is included for devices that have access to a GPS or UTC time synchronization source, e.g., from an IRIG timecode signal. For timestamps that are acquired without an accurate time source, e.g., using the local system clock, the `TimeQuality` value should be set to `Locked` and the `TimeQualityFlags.NoAccurateTimeSource` should be set.
-
-
 
 ```C
 enum {
@@ -206,14 +172,4 @@ DataQualityFlags; // sizeof(uint8), 1-byte
 
 > :information_source: These quality flags are intentionally simple to accommodate a very wide set of use cases and still provide some indication of data point value quality. More complex data qualities can exist as new data points.
 
-### Data Point Sequence Identifier
 
-For large buffers or strings being sent that span multiple data points, a new session based identifier needs to be established that represents the sequence. This is needed since different values for the same `DataPointKey.uniqueID` could overlap during interleave processing.
-
-For data that needs to be transmitted with a defined sequence identifier, the `DataPoint.flags` must include the `StateFlags.Sequence` flag.
-
-### Data Point Fragment Number
-
-For large buffers or strings being sent that span multiple data points, a fragment number defines the buffer index of a given sequence that can be used reassemble the sequence.
-
-For data that needs to be transmitted with a defined fragment number, the `DataPoint.flags` must include the `StateFlags.Fragment` flag.
