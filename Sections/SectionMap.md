@@ -26,12 +26,11 @@
 | [Commands (3)](Commands.md#commands) | [Commands.md](Commands.md) |
 | [Responses (3)](Responses.md#responses) | [Responses.md](Responses.md) |
 | [Data Point Structure (2)](DataPointStructure.md#data-point-structure) | [DataPointStructure.md](DataPointStructure.md) |
-| [Data Point Value Types (3)](DataPointStructure.md#data-point-value-types) | [DataPointStructure.md](DataPointStructure.md) |
+| [Data Point Identifier (3)](DataPointStructure.md#data-point-identifier) | [DataPointStructure.md](DataPointStructure.md) |
+| [Sttp Value Types (3)](DataPointStructure.md#sttp-value-types) | [DataPointStructure.md](DataPointStructure.md) |
 | [Data Point Timestamp (3)](DataPointStructure.md#data-point-timestamp) | [DataPointStructure.md](DataPointStructure.md) |
 | [Data Point Time Quality Flags (3)](DataPointStructure.md#data-point-time-quality-flags) | [DataPointStructure.md](DataPointStructure.md) |
 | [Data Point Data Quality Flags (3)](DataPointStructure.md#data-point-data-quality-flags) | [DataPointStructure.md](DataPointStructure.md) |
-| [Data Point Sequence Identifier (3)](DataPointStructure.md#data-point-sequence-identifier) | [DataPointStructure.md](DataPointStructure.md) |
-| [Data Point Fragment Number (3)](DataPointStructure.md#data-point-fragment-number) | [DataPointStructure.md](DataPointStructure.md) |
 | [Data Point Encoding Types (2)](DataPointEncodingTypes.md#data-point-encoding-types) | [DataPointEncodingTypes.md](DataPointEncodingTypes.md) |
 | [Basic Encoding (3)](DataPointEncodingTypes.md#basic-encoding) | [DataPointEncodingTypes.md](DataPointEncodingTypes.md) |
 | [Compact Encoding (3)](DataPointEncodingTypes.md#compact-encoding) | [DataPointEncodingTypes.md](DataPointEncodingTypes.md) |
@@ -43,13 +42,21 @@
 | [Exception Characteristic (3)](DataPointCharacteristics.md#exception-characteristic) | [DataPointCharacteristics.md](DataPointCharacteristics.md) |
 | [Resolution Characteristic (3)](DataPointCharacteristics.md#resolution-characteristic) | [DataPointCharacteristics.md](DataPointCharacteristics.md) |
 | [Metadata (2)](Metadata.md#metadata) | [Metadata.md](Metadata.md) |
+| [Table Types (3)](Metadata.md#table-types) | [Metadata.md](Metadata.md) |
+| [Commands (3)](Metadata.md#commands) | [Metadata.md](Metadata.md) |
 | [Attribute Value Types (3)](Metadata.md#attribute-value-types) | [Metadata.md](Metadata.md) |
-| [Measurement Table (3)](Metadata.md#measurement-table) | [Metadata.md](Metadata.md) |
-| [Device Table (3)](Metadata.md#device-table) | [Metadata.md](Metadata.md) |
-| [Dataset Contents (3)](Metadata.md#dataset-contents) | [Metadata.md](Metadata.md) |
+| [DataPoint Table Structure (3)](Metadata.md#datapoint-table-structure) | [Metadata.md](Metadata.md) |
+| [CDSM Table Structure (3)](Metadata.md#cdsm-table-structure) | [Metadata.md](Metadata.md) |
+| [Resource Table (3)](Metadata.md#resource-table) | [Metadata.md](Metadata.md) |
 | [Dataset Filtering (3)](Metadata.md#dataset-filtering) | [Metadata.md](Metadata.md) |
 | [Dataset Versioning (3)](Metadata.md#dataset-versioning) | [Metadata.md](Metadata.md) |
 | [Dataset Serialization (3)](Metadata.md#dataset-serialization) | [Metadata.md](Metadata.md) |
+| [Appendix Z - Power Industry Examples (To be moved later) (2)](Metadata.md#appendix-z---power-industry-examples-to-be-moved-later) | [Metadata.md](Metadata.md) |
+| [DataPoint Table (3)](Metadata.md#datapoint-table) | [Metadata.md](Metadata.md) |
+| [PMU Table (a Resource Table example) (3)](Metadata.md#pmu-table-a-resource-table-example) | [Metadata.md](Metadata.md) |
+| [Substation Table (a Resource Table example) (3)](Metadata.md#substation-table-a-resource-table-example) | [Metadata.md](Metadata.md) |
+| [Phasor Table (a CDSM Table example) (3)](Metadata.md#phasor-table-a-cdsm-table-example) | [Metadata.md](Metadata.md) |
+| [VIPair Table (a CDSM example) (3)](Metadata.md#vipair-table-a-cdsm-example) | [Metadata.md](Metadata.md) |
 | [Compression (2)](Compression.md#compression) | [Compression.md](Compression.md) |
 | [Compression Algorithms (3)](Compression.md#compression-algorithms) | [Compression.md](Compression.md) |
 | [Security (2)](Security.md#security) | [Security.md](Security.md) |
@@ -70,7 +77,6 @@
 | [Core (3)](APIReference.md#core) | [APIReference.md](APIReference.md) |
 | [Data (3)](APIReference.md#data) | [APIReference.md](APIReference.md) |
 | [Publication Priority (3)](APIReference.md#publication-priority) | [APIReference.md](APIReference.md) |
-| [Transactional Data Exchange (3)](APIReference.md#transactional-data-exchange) | [APIReference.md](APIReference.md) |
 | [Security (3)](APIReference.md#security) | [APIReference.md](APIReference.md) |
 | [Utility (3)](APIReference.md#utility) | [APIReference.md](APIReference.md) |
 | [Appendix C - IEEE C37.118 Mapping (2)](IEEE_C37.118Mapping.md#appendix-c---ieee-c37-118-mapping) | [IEEE_C37.118Mapping.md](IEEE_C37.118Mapping.md) |

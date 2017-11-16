@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.1.47 - October 4, 2017</p>
+<p><strong>Version:</strong> 0.1.48 - November 16, 2017</p>
 <p><strong>Status:</strong> Initial Development</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -1428,10 +1428,9 @@ uint16 Decode15Bits(uint8[] data) {
 <h3 id="message-formats">Message Formats</h3>
 <p>Commands and responses are defined as simple binary message structures that include a payload. The details for the payload of the message will depend on the specific command or response code.</p>
 <h4 id="message-payloads">Message Payloads</h4>
-<p>Payloads in STTP are defined as a byte arrays prefixed by an unsigned 16-bit integer representing the array length. Implementations of STTP should make target payload sizes configurable, but all payloads delivered by STTP must have a fixed maximum upper length of <code>2^14</code>, i.e., <code>16,384</code>, bytes.</p>
-<pre><code class="C language-C">  uint16 length;
-  uint8[] payload;</code></pre>
-<p>Empty payloads have a <code>length</code> value of <code>0</code> and a <code>payload</code> value of <code>null</code>. When serialized, an empty payload would be represented by only a <code>0x0000</code> value for the length.</p>
+<p>Payloads in STTP are defined as a byte arrays prefixed by an unsigned 16-bit integer representing the array length. Implementations of STTP should make target payload sizes configurable, but all payloads delivered by STTP must have a fixed maximum upper length of <code>2^16</code>, i.e., <code>65,535</code>, less 3 bytes for the packet overhead.</p>
+<pre><code class="C language-C">  uint8[] payload;</code></pre>
+<p>It is permitted to send an empty payload if the <a href="#commands">command code</a> does not require a payload.</p>
 <h4 id="command-structure">Command Structure</h4>
 <p>Commands are used to manage primary STTP functionality. The following defines the binary format of a <code>Command</code>, see <a href="#figure5">Figure 5</a> for an example:</p>
 <pre><code class="C language-C">struct {
@@ -1442,7 +1441,7 @@ uint16 Decode15Bits(uint8[] data) {
 Command;</code></pre>
 <ul>
 <li>The <code>commandCode</code> field defines the command code value for the command message, see defined <a href="#commands">command codes</a>.</li>
-<li>The <code>length</code> field defines the length of the <code>payload</code> in bytes.</li>
+<li>The <code>length</code> field defines the length of the entire packet in bytes.</li>
 <li>The <code>payload</code> field is a byte array representing the serialized payload associated with the <code>commandCode</code>.</li>
 </ul>
 <p class="insert-page-break-after"></p>
@@ -1452,18 +1451,16 @@ Command;</code></pre>
 <p><sup>Figure 5</sup><br />
 </center></p>
 <h4 id="response-structure">Response Structure</h4>
-<p>Responses for most commands will be either <code>Succeeded</code> to <code>Failed</code>. The following structure defines the binary format of a <code>Response</code>:</p>
+<p>Some form of response exists for every command. Responses take the same format as commands but are distinguished with a different command code. Sometimes, successful responses are implied and not expressly stated. However, in these cases, it's still permitted to send a successful response in addition to the command. Responses for most commands will be either <code>Succeeded</code> or <code>Failed</code>. The following structure defines the binary format of a <code>Response</code>:</p>
 <pre><code class="C language-C">struct {
-  uint8 responsecode;
-  uint8 commandCode;
+  uint8 responseCode;
   uint16 length;
   uint8[] payload;
 }
 Response;</code></pre>
 <ul>
 <li>The <code>responseCode</code> field defines the response code value for the response message, see defined <a href="#responses">response codes</a>.</li>
-<li>The <code>commandCode</code> field defines the command code value that this message is in response to, see defined <a href="#commands">command codes</a>.</li>
-<li>The <code>length</code> field defines the length of the <code>payload</code> in bytes.</li>
+<li>The <code>length</code> field defines the length of the entire packet in bytes.</li>
 <li>The <code>payload</code> field is a byte array representing the serialized payload associated with the <code>responseCode</code>.</li>
 </ul>
 <h3 id="commands">Commands</h3>
@@ -1480,53 +1477,74 @@ Response;</code></pre>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center;">0x00</td>
-<td><a href="#negotiate-session-command">NegotiateSession</a></td>
-<td style="text-align:center;">Publisher</td>
-<td style="text-align:center;">Yes</td>
-<td>Starts session negotiation for a new connection.</td>
-</tr>
-<tr>
 <td style="text-align:center;">0x01</td>
-<td><a href="#metadata-refresh-command">MetadataRefresh</a></td>
-<td style="text-align:center;">Subscriber</td>
-<td style="text-align:center;">Yes</td>
-<td>Requests publisher send updated metadata.</td>
+<td><a href="#begin-fragment-command">BeginFragment</a></td>
+<td style="text-align:center;">Both</td>
+<td style="text-align:center;">No</td>
+<td>Indicates a large packet is being sent.</td>
 </tr>
 <tr>
 <td style="text-align:center;">0x02</td>
-<td><a href="#subscribe-command">Subscribe</a></td>
-<td style="text-align:center;">Subscriber</td>
-<td style="text-align:center;">Yes</td>
-<td>Defines desired set of data points to begin receiving.</td>
+<td><a href="#next-fragment-command">NextFragment</a></td>
+<td style="text-align:center;">Both</td>
+<td style="text-align:center;">No</td>
+<td>The next fragment of a large packet. Follows <code>BeginFragment</code>.</td>
 </tr>
 <tr>
 <td style="text-align:center;">0x03</td>
-<td><a href="#unsubscribe-command">Unsubscribe</a></td>
+<td><a href="#get-metadata-schema-command">GetMetadataSchema</a></td>
 <td style="text-align:center;">Subscriber</td>
 <td style="text-align:center;">Yes</td>
-<td>Requests publisher terminate current subscription.</td>
+<td>Requests the database schema and version of the metadata.</td>
 </tr>
 <tr>
 <td style="text-align:center;">0x04</td>
-<td><a href="#secure-data-channel-command">SecureDataChannel</a></td>
+<td><a href="#get-metadata-command">GetMetadata</a></td>
 <td style="text-align:center;">Subscriber</td>
 <td style="text-align:center;">Yes</td>
-<td>Requests publisher secure the data channel.</td>
+<td>Requests specific records of the metadata based on the schema.</td>
 </tr>
 <tr>
 <td style="text-align:center;">0x05</td>
-<td><a href="#runtime-id-mapping-command">RuntimeIDMapping</a></td>
-<td style="text-align:center;">Publisher</td>
+<td><a href="#subscribe-command">Subscribe</a></td>
+<td style="text-align:center;">Subscriber</td>
 <td style="text-align:center;">Yes</td>
-<td>Defines data point Guid to runtime ID mappings.</td>
+<td>Adds/Removes a desired set of data points that will be received.</td>
 </tr>
 <tr>
 <td style="text-align:center;">0x06</td>
-<td><a href="#data-point-packet-command">DataPointPacket</a></td>
+<td><a href="#send-data-points-command">SendDataPoints</a></td>
 <td style="text-align:center;">Publisher</td>
 <td style="text-align:center;">No</td>
-<td>Payload contains data points.</td>
+<td>A packet that contains normally encoded data points.</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x07</td>
+<td><a href="#send-data-points-custom-command">SendDataPointsCustom</a></td>
+<td style="text-align:center;">Publisher</td>
+<td style="text-align:center;">No</td>
+<td>A packet that contains specially encoded data points.</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x08</td>
+<td><a href="#runtime-id-mapping-command">RuntimeIDMapping</a></td>
+<td style="text-align:center;">Publisher</td>
+<td style="text-align:center;">Yes</td>
+<td>Defines runtimeIDs for DataPointIDs.</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x09</td>
+<td><a href="#negotiate-session-command">NegotiateSession</a></td>
+<td style="text-align:center;">Publisher</td>
+<td style="text-align:center;">Yes</td>
+<td>Establishes session roles and supported features for a connection.</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x0A</td>
+<td><a href="#bulk-transport-command">BulkTransport</a></td>
+<td style="text-align:center;">Publisher</td>
+<td style="text-align:center;">No</td>
+<td>For sending large buffers, like files.</td>
 </tr>
 <tr>
 <td style="text-align:center;">0xFF</td>
@@ -1537,115 +1555,85 @@ Response;</code></pre>
 </tr>
 </tbody>
 </table>
-<h4 id="negotiate-session-command">Negotiate Session Command</h4>
-<p>After a successful connection has been established, the publisher and subscriber shall participate in an initial set of negotiations that will determine the STTP protocol version and operational modes of the session. The negotiation happens with the <code>NegotiateSession</code> command code which must be the first command sent after a successful publisher/subscriber connection. The command is sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. Once the session negotiations for the protocol version and operational modes have been established they must not change for the lifetime of the session.</p>
-<p>Session negotiation is a multi-step process with commands and responses being sent by the publisher and subscriber until negotiation terms are either established or the connection is terminated because terms could not be agreed upon.</p>
-<h5 id="protocol-version-negotiation">Protocol Version Negotiation</h5>
-<p>Future STTP protocol versions can include different session negotiation options, so the first session negotiation step is always to establish the protocol version to use. Immediately after connecting, the publisher must start the protocol version negotiation process by sending the <code>NegotiateSession</code> command to the subscriber that shall contain information on the available protocol versions that the publisher supports. The subscriber shall be waiting for this initial publisher command; if the subscriber does not receive the command in a timely fashion (time interval controlled by configuration), the subscriber should disconnect.</p>
-<p>The payload of the first <code>NegotiateSession</code> command sent by the publisher shall be an instance of the <code>ProtocolVersions</code> structure, defined as follows, that iterates the versions of the STTP protocol that are supported:</p>
+<h4 id="begin-fragment-command">Begin Fragment Command</h4>
+<p>If sending a packet that is larger than the negotiated maximum packet size, it must be fragmented. This command is the first in a series of fragment commands that define the entire fragment. </p>
+<p>If the session supports it, fragmented data is commonly compress. It's possible that a compressed data fits into a single fragment, therefore this command will not be followed by subsequent <code>NextFragment</code> commands. </p>
+<p>Fragmented packets must be sent one at a time in sequence and cannot be interwoven with any other kind of command.</p>
 <pre><code class="C language-C">struct {
-  uint8 count;
-  Version[] versions;
+  int32 totalFragmentSize;          //The size of all fragments of the fragmented packet
+  int32 totalRawSize;               //The uncompressed size of all of the compressed segments
+  int8 commandCode;                 //The CommandCode of the data that is fragmented
+  int8 compressionMode;             //The compression algorithm that compressed this packet. Can be None.
+  //(uint16) lengthOfFirstFragment  //This field is not specified and is implied from the packet header. Packet Length - 13
+  uint8[] firstFragment             //This is the first fragment of the data.
 }
-ProtocolVersions;</code></pre>
-<ul>
-<li>The <code>count</code> field defines the total number of elements in the <code>versions</code> field array.</li>
-<li>The <code>versions</code> field is an array of <a href="Definitions.md#version-structure"><code>Version</code></a> structures.</li>
-</ul>
-<p>Since the current version of this specification only defines details for version 1.0 of STTP, the initial <code>NegotiateSession</code> command payload from the publisher shall be an instance of the <code>ProtocolVersions</code> structure with a <code>count</code> value of <code>1</code> and a single element <code>versions</code> array where <code>versions[0].major</code> is <code>1</code> and <code>versions[0].minor</code> is <code>0</code>.</p>
-<p>When the first <code>NegotiateSession</code> command is received from the publisher, the subscriber must send either a <code>Succeeded</code> or <code>Failed</code> response for the <code>NegotiateSession</code> command indicating its ability to support one of the specified protocol versions.</p>
-<p>If the subscriber can support one of the protocols specified by the publisher, the <code>Succeeded</code> response payload shall be an instance of the <code>ProtocolVersions</code> structure with a <code>count</code> of <code>1</code> and a single element <code>versions</code> array that indicates the protocol version to be used.</p>
-<p>If the subscriber cannot support one of the protocols specified by the publisher, the <code>Failed</code> response payload shall be an instance of the <code>ProtocolVersions</code> structure filled out with the supported protocols. In case of failure, both the publisher and subscriber should terminate the connection since no protocol version could be agreed upon.</p>
-<p>When a <code>Succeeded</code> response for the first <code>NegotiateSession</code> command is received from the subscriber, the publisher should validate the subscriber selected protocol version. If the publisher does not agree with the protocol version selected by the subscriber, the publisher shall send a <code>Failed</code> response for the <code>NegotiateSession</code> command with an empty payload and terminate the connection since no protocol version could be agreed upon. If the publisher accepts the subscriber selected protocol version, the negotiation will continue with the selection of operational modes.</p>
-<p>After sending a <code>Succeeded</code> response to the first <code>NegotiateSession</code> command, the subscriber shall be waiting for either a <code>Failed</code> response from the publisher or the second <code>NegotiateSession</code> command; if the subscriber does not receive a command or response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect.</p>
-<h5 id="operational-modes-negotiation">Operational Modes Negotiation</h5>
-<p>For version <code>1.0</code> of STTP, if the protocol version negotiation step succeeds, the next negotiation will be for the desired operational modes. The payload of the second <code>NegotiateSession</code> command sent by the publisher shall be an instance of the <code>OperationalModes</code> structure, defined as follows, that iterates the supported string encodings, whether UDP broadcasts are allowed and the available stateful and stateless compression algorithms (see <a href="#compression">compression algorithms</a>):</p>
+BeginFragmentCommand;</code></pre>
+<h4 id="next-fragment-command">Next Fragment Command</h4>
+<p>This packet always follows <code>BeginFragment</code> and will be repeated in order until all of the data has been transmitted. </p>
+<p>There is not a Finished command, therefore, once the total number of bytes have been transmitted as defined in <code>BeginFragment</code>. The command has completed. </p>
 <pre><code class="C language-C">struct {
-  uint16 udpPort;
-  NamedVersions stateful;
-  NamedVersions stateless;
+  //(int32) offset            //This is implied. It's the total number of bytes that have been received thus far.
+  //(int32) lengthOfFragment  //This field is implied. Packet Length - 3.
+  uint8[] fragment            //The next fragment of the sequence.
 }
-OperationalModes;</code></pre>
-<ul>
-<li>The <code>udpPort</code> field meaning depends on the usage context:<ul>
-<li>When sent with the publisher command payload, field is used to indicate publisher support of UDP. A value of zero indicates that UDP broadcasts are not supported and any non-zero value indicates that UDP broadcasts are supported.</li>
-<li>When sent with the subscriber response payload, field is used to indicate the desired subscriber UDP port for data channel functionality. A value of zero indicates that a UDP connection should not be established for subscriber data channel functionality.</li></ul></li>
-<li>The <code>stateful</code> field defines the <a href="Defintions.md#namedversions-structure"><code>NamedVersions</code></a> representing the algorithms to use for stateful compression operations.</li>
-<li>The <code>stateless</code> field defines the <a href="Defintions.md#namedversions-structure"><code>NamedVersions</code></a> representing the algorithms to use for stateless compression operations.</li>
-</ul>
-<p>When the second <code>NegotiateSession</code> command is received from the publisher, the subscriber shall send either a <code>Succeeded</code> or <code>Failed</code> response for the <code>NegotiateSession</code> command indicating its ability to support a subset of the specified operational modes.</p>
-<p>If the subscriber can support a subset of the operational modes allowed by the publisher, the <code>Succeeded</code> response payload shall be an instance of the <code>OperationalModes</code> structure with the specific values for the <code>encodings</code>, <code>udpPort</code>, <code>stateful</code> and <code>stateless</code> fields. The <code>encodings</code> field should specify a single flag designating the string encoding to use and both the <code>stateful</code> and <code>stateless</code> fields should define a <code>count</code> of <code>1</code> and a single element array that indicates the <a href="#compression">compression algorithm</a> to be used where a named value of <code>NONE</code> with a version of <code>0.0</code> indicates that no compression should be used.</p>
-<p>If the subscriber cannot support a subset of the operational modes allowed by the publisher, the <code>Failed</code> response payload shall be an instance of the <code>OperationalModes</code> structure filled out with the supported operational modes. In case of failure, both the publisher and subscriber should terminate the connection since no protocol version could be agreed upon.</p>
-<p>When a <code>Succeeded</code> response for the second <code>NegotiateSession</code> command is received from the subscriber, the publisher should validate the subscriber selected operational modes. If the publisher does not agree with the operational modes selected by the subscriber, the publisher shall send a <code>Failed</code> response for the <code>NegotiateSession</code> command with an empty payload and terminate the connection since no operational modes could be agreed upon. If the publisher accepts the subscriber selected operational modes, then the publisher shall send a <code>Succeeded</code> response for the <code>NegotiateSession</code> command with an empty payload and the publisher will consider the session negotiations to be completed successfully.</p>
-<p>After sending a <code>Succeeded</code> response to the second <code>NegotiateSession</code> command, the subscriber shall be waiting for either a <code>Succeeded</code> or <code>Failed</code> response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect.</p>
-<p>If the subscriber receives a <code>Succeeded</code> response for the <code>NegotiateSession</code> command from the publisher, the subscriber will consider the session negotiations to be completed successfully.</p>
-<p>Once operational modes have been established for a session, the publisher and subscriber must exchange any string based payloads using the negotiated string encoding as specified by the subscriber.</p>
-<h4 id="metadata-refresh-command">Metadata Refresh Command</h4>
-<ul>
-<li>Wire Format: Binary<ul>
-<li>Includes current metadata version number</li></ul></li>
-</ul>
+NextFragmentCommand;</code></pre>
+<h4 id="get-metadata-schema-command">Get Metadata Schema Command</h4>
+<p>Requests that the current version of the metadata database be sent, along with the schema. While this information is not required, <br />
+it's important to know this when checking if one's metadata is out of synchronization or if additional user defined metadata tables exist.</p>
+<pre><code class="C language-C">struct {
+  bool includeSchema   //Without this set, the response will only include the database version and not the schema.
+}
+GetMetadataSchemaCommand;</code></pre>
+<h4 id="get-metadata-command">Get Metadata Command</h4>
+<p>Requests specific tables of metadata. If supported by the connection, custom queries and filters can be also be specified as part of the metadata request. There is only permitted one table per request.</p>
+<pre><code class="C language-C">struct {
+  guid schemaVersion          //If not Guid.Empty, is used to verify that the current schema has not changed.
+  int64 revision              //If isUpdateQuery=true, the query returns all changes since the specified revision
+  bool isUpdateQuery          //specifies if this query should only return the deltas, of the entire metadata result
+  SttpQueryExpresssion query  //The query itself. EX: SELECT * FROM Table where Column = 1234
+}
+GetMetadataCommand;</code></pre>
+<p>The results for this command are streamed and can be broken into multiple packets if needed.</p>
 <h4 id="subscribe-command">Subscribe Command</h4>
+<p>Updates the subscription for new measurements. This update can be to add, remove, or replace an existing subscription.</p>
+<p>This command is broken up into sub commands that can be combined into a single packet. The sub commands include:</p>
 <ul>
-<li>Wire Format: Binary<ul>
-<li>Includes metadata expression and/or individual Guids for desired data points</li></ul></li>
+<li>Subcommands<ul>
+<li><code>ConfigureOptions</code> - Defines options for the measurements about to be selected. Such as priority; dead-banding; start/stop times; sample resolution.</li>
+<li><code>AllDataPoints</code> - Subscribes to everything</li>
+<li><code>DataPointByID</code> - Specifies individual data points</li>
+<li><code>ByQuery</code> - Specifies some kind of query to use to select the measurements.</li></ul></li>
 </ul>
-<h4 id="unsubscribe-command">Unsubscribe Command</h4>
-<p>The subscriber shall issue an <code>Unsubscribe</code> with an empty payload to stop any existing data subscription.</p>
-<p>Upon reception of the <code>Unsubscribe</code> command from a subscriber, the publisher must immediately cease publication of <code>DataPointPacket</code> commands to the specific subscriber that issued the command; also, the publisher shall send a <code>Succeeded</code> response for the <code>Unsubscribe</code> command with an empty payload. If for any reason the publisher cannot terminate the subscription, the publisher shall send a <code>Failed</code> response for the <code>Unsubscribe</code> command with a string based payload that describes the reason the subscription cannot be terminated.</p>
-<p>After sending an <code>Unsubscribe</code> command to the publisher, the subscriber shall be waiting for either a <code>Succeeded</code> or <code>Failed</code> response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect and not attempt to send further commands to stop the data subscription.</p>
-<p>If the subscriber receives a <code>Failed</code> response for the <code>Unsubscribe</code> command from the publisher, the subscriber should disconnect and not attempt to send further commands to stop the data subscription.</p>
-<p>Upon reception of a <code>Succeeded</code> response for the <code>Unsubscribe</code> command from the publisher, the subscriber should consider any cached signal mapping previously received from the publisher to now be invalid - accordingly any allocated memory for the cache should now be released.</p>
-<blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> With reception of the <code>Succeeded</code> response for the <code>Unsubscribe</code> command the subscriber can be assured that the publisher has stopped sending further <code>DataPointPacket</code> commands, however, STTP implementations should anticipate that some data packets could still arrive depending on how much data was already queued for transmission. This may be more evident when a lossy communications protocol, e.g., UDP, is being used for data channel functionality and the <code>Succeeded</code> response for the <code>Unsubscribe</code> command is received on a reliable communications protocol, e.g., TCP.</p>
-</blockquote>
-<h4 id="secure-data-channel-command">Secure Data Channel Command</h4>
-<p>When data channel functions that are operating over a lossy communications protocol, e.g., UDP, and command channel functions are operating over a reliable communications protocol, e.g., TCP, that has been secured with TLS, then the subscriber can request that data channel functions can be secured by issuing a <code>SecureDataChannel</code> command.</p>
-<p>The <code>SecureDataChannel</code> command should only be issued when a lossy communications protocol, e.g., UDP, has been defined for data channel functions. If a subscriber issues the <code>SecureDataChannel</code> command for a session that has not defined a lossy communications protocol for data channel functions, the publisher shall send a <code>Failed</code> response for the <code>SecureDataChannel</code> command with a string based payload that indicates that data channel functions can only be secured when a lossy communications protocol has been established. This error condition should equally apply when UDP broadcasts are not supported by the publisher.</p>
-<p>The <code>SecureDataChannel</code> command should only be issued when command channel functions are already secured using TLS. If a subscriber issues the <code>SecureDataChannel</code> command for a session with a command channel connection that has not been secured using TLS, the publisher shall send a <code>Failed</code> response for the <code>SecureDataChannel</code> command with a string based payload that indicates that data channel functions can only be secured when command channel functions are already secured using TLS.</p>
-<p>The <code>SecureDataChannel</code> command should be issued prior to the <code>Subscribe</code> command to ensure data channel functions are secured before transmission of <code>DataPointPacket</code> commands. If a subscriber issues the <code>SecureDataChannel</code> command for a session that already has an active subscription, the publisher shall send a <code>Failed</code> response for the <code>SecureDataChannel</code> command with a string based payload that indicates that data channel functions cannot be secured after a subscription has already been initiated.</p>
-<p>If data channel functions can be secured, the publisher shall send a <code>Succeeded</code> response for the <code>SecureDataChannel</code> command with a payload that shall be an instance of the <code>DataChannelKeys</code> structure, defined as follows, that establishes the symmetric encryption keys and associated initialization vector used to secure the data channel:</p>
-<pre><code class="C language-C">struct {
-  uint16 ivLength;
-  uint8[] iv;
-  uint16 keyLength;
-  uint8[] key;
+<pre><code class="C language-C">enum {
+  Replace,
+  Remove,
+  Append,
 }
-DataChannelKeys;</code></pre>
-<ul>
-<li>The <code>ivLength</code> field defines the length of the <code>iv</code> array in bytes.</li>
-<li>The <code>iv</code> field is a byte array representing the initialization vector.</li>
-<li>The <code>keyLength</code> field defines the length of the <code>key</code> array in bytes.</li>
-<li>The <code>key</code> field is a byte array representing the encryption key.</li>
-</ul>
-<p>Upon the publisher sending the <code>Succeeded</code> response for the <code>SecureDataChannel</code> command, all data function payloads for commands and responses sent by the publisher to the subscriber over the lossy communications protocol must be encrypted using the AES symmetric encryption algorithm with a key size of 256 using the specified subscriber key and initialization vector.</p>
-<p>After sending a <code>SecureDataChannel</code> command to the publisher, the subscriber shall be waiting for either a <code>Succeeded</code> or <code>Failed</code> response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect.</p>
-<p>If the subscriber receives a <code>Failed</code> response for the <code>SecureDataChannel</code> command from the publisher, the subscriber should disconnect.</p>
-<blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> Failure responses from the publisher will either be from a configuration mismatch or an order of operations issue, STTP implementations should make subscribers aware of the possible exception causes so that the issue can be corrected.</p>
-</blockquote>
-<p>Upon reception of a <code>Succeeded</code> response for the <code>SecureDataChannel</code> command from the publisher, the subscriber must take the received key and initialization vector and decrypt each payload received over the lossy communications protocol using the AES symmetric encryption algorithm with a key size of 256.</p>
-<blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> It is presumed that communications over a lossy communications protocol, e.g., UDP, will flow from the publisher to the subscriber. If an implementation of STTP is ever established such traffic would flow from the subscriber to the publisher over a lossy communications channel, then to be secured, this traffic would need to be encrypted by the subscriber and decrypted by the publisher.</p>
-</blockquote>
-<h4 id="data-point-packet-command">Data Point Packet Command</h4>
-<p>Data point packet commands are sent without the expectation of a response, as such data point packet commands can be transmitted over a lossy communications protocol, e.g., UDP, and thus are suitable for data channel functionality.</p>
-<ul>
-<li>Wire Format: Binary<ul>
-<li>Includes a byte flag indicating content, e.g.:</li>
-<li>Data compression mode, if any</li>
-<li>Total data points in packet</li>
-<li>Includes serialized data points</li></ul></li>
-</ul>
-<blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> The data point packet commands are sent continuously after a successful <code>subscribe</code> command and will continue to flow for available measurements until an <code>unsubscribe</code> command is issued.</p>
-</blockquote>
-<h4 id="runtime-id-mapping-command">Runtime ID Mapping Command</h4>
-<ul>
-<li>Wire Format: Binary<ul>
-<li>Includes a mapping of data point Guids to run-time signal IDs</li>
-<li>Includes per data point ownership state, rights and delivery characteristic details</li></ul></li>
-</ul>
+SubscriptionMode;</code></pre>
+<pre><code class="C language-C">struct {
+  SubCommand ConfigureOptions
+  SubscriptionMode mode
+  SttpNamedSet options  //A set of options for the points about to be specified.
+}
+ConfigureOptions;</code></pre>
+<pre><code class="C language-C">struct {
+  SubCommand AllDataPoints
+  SubscriptionMode mode
+}
+AllDataPoints;</code></pre>
+<pre><code class="C language-C">struct {
+  SubCommand DataPointByID
+  SubscriptionMode mode
+  SttpPointID[] points       //An array of points.
+}
+DataPointByID;</code></pre>
+<pre><code class="C language-C">struct {
+  SubCommand ByQuery
+  SubscriptionMode mode
+  SttpQueryExpression query       //A query that specifies the points to use. The columns specified in the query must be SttpPointID
+}
+ByQuery;</code></pre>
+<p>Some examples of what can be exchanged in the ConfigureOptions include these items.</p>
 <p>Signal mapping structures:</p>
 <pre><code class="C language-C">enum {
   Level0 = 0, // User level 0 priority, lowest
@@ -1682,28 +1670,139 @@ enum {
   KeyAction = 1 &lt;&lt; 14,          // When set key is to be added; otherwise, removed
   ReservedFlag = 1 &lt;&lt; 15        // Reserved flag
 }
-StateFlags; // sizeof(uint16), 2-bytes
-
-struct {
-  guid uniqueID;    // Unique data point identifier - maps to metadata DataPoint.UniqueID
-  uint32 runtimeID; // Runtime identifier as referenced by DataPoint
-  ValueType type;   // Value type of DataPoint
-  StateFlags flags; // State flags for DataPoint
+StateFlags; // sizeof(uint16), 2-bytes</code></pre>
+<h4 id="send-data-points-command">Send Data Points Command</h4>
+<p>Data point packet commands are sent without the expectation of a response, as such data point packets can be transmitted over a lossy communications protocol, e.g., UDP, and thus are suitable for data channel functionality.</p>
+<p>Detailed serialization of this packet is described in a different section. However, the general form of the structure looks like the following.</p>
+<pre><code class="C language-C">struct {
+  SttpDataPoint[] points     
 }
-DataPointKey; // 23-bytes
-
-enum {
-  FullSet = 0,    // Data point keys represent a new full set of keys
-  UpdatedSet = 1, // Data point keys represent keys to be added and removed
+SendDataPoints;</code></pre>
+<p>There are other custom encoding methods that can be optionally supported, but this encoding method is designed to catch all encoding cases.</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> The data point packet commands are sent continuously after a successful <code>subscribe</code> command and will continue to flow for available measurements until a <code>subscribe</code> that unsubscribes from all measurements is issued.</p>
+</blockquote>
+<h4 id="send-data-points-custom-command">Send Data Points Custom Command</h4>
+<p>A number of custom encoding methods will be supplied that will optimize encoding for special cases. These are specified in the appendix. These encoding methods are optional and are negotiated during the Negotiate Sesssion stage.</p>
+<pre><code class="C language-C">struct {
+  byte encodingMethod     
+  byte[] data
 }
-SetType; // sizeof(uint8), 1-byte
-
-struct {
-  SetType type;
-  uint32 count;
-  DataPointKey[] keys;
+SendDataPointsCustom;</code></pre>
+<h4 id="runtime-id-mapping-command">Runtime ID Mapping Command</h4>
+<p>Identifies which DataPointIDs are mapped to runtime IDs. Not all DataPointIDs must be mapped to runtimeIDs, however, the exact number that can be mapped are identified during the Negotiate Session phase.</p>
+<pre><code class="C language-C">struct {
+  SttpPointID[] points
 }
-DataPointKeySet;</code></pre>
+RuntimeIDMapping;</code></pre>
+<h4 id="negotiate-session-command">Negotiate Session Command</h4>
+<p>After a successful connection has been established, the publisher and subscriber shall participate in an initial set of negotiations that will determine the STTP protocol version and operational modes of the session. The negotiation happens with the <code>NegotiateSession</code> command code which must be the first command sent after a successful publisher/subscriber connection. The command is sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. Once the session negotiations for the protocol version and operational modes have been established they must not change for the lifetime of the session.</p>
+<p>Session negotiation is a multi-step process with commands and responses being sent by the publisher and subscriber until negotiation terms are either established or the connection is terminated because terms could not be agreed upon.</p>
+<p>This command is broken up into sub commands. The sub commands include:</p>
+<ul>
+<li>Subcommands<ul>
+<li><code>InitiateReverseConnection</code> - The connecting client desires to act as the server.</li>
+<li><code>GetAllInstances</code> - Request all named instances on the server.</li>
+<li><code>ChangeInstance</code> - Requests to change the instance connected to.</li>
+<li><code>SupportedFuncationality</code> - Tell the server what functions/versions are supported by your client.</li>
+<li><code>ChangeUdpCipher</code> - Indicates that the UDP cipher needs to be changed.</li></ul></li>
+</ul>
+<h5 id="protocol-version-negotiation">Protocol Version Negotiation</h5>
+<blockquote>
+  <p>TODO: This has changed, but functionally still exists in the <code>SupportedFunctionalty</code> command.</p>
+</blockquote>
+<p>Future STTP protocol versions can include different session negotiation options, so the first session negotiation step is always to establish the protocol version to use. Immediately after connecting, the publisher must start the protocol version negotiation process by sending the <code>NegotiateSession</code> command to the subscriber that shall contain information on the available protocol versions that the publisher supports. The subscriber shall be waiting for this initial publisher command; if the subscriber does not receive the command in a timely fashion (time interval controlled by configuration), the subscriber should disconnect.</p>
+<p>The payload of the first <code>NegotiateSession</code> command sent by the publisher shall be an instance of the <code>ProtocolVersions</code> structure, defined as follows, that iterates the versions of the STTP protocol that are supported:</p>
+<pre><code class="C language-C">struct {
+  uint8 count;
+  Version[] versions;
+}
+ProtocolVersions;</code></pre>
+<ul>
+<li>The <code>count</code> field defines the total number of elements in the <code>versions</code> field array.</li>
+<li>The <code>versions</code> field is an array of <a href="Definitions.md#version-structure"><code>Version</code></a> structures.</li>
+</ul>
+<p>Since the current version of this specification only defines details for version 1.0 of STTP, the initial <code>NegotiateSession</code> command payload from the publisher shall be an instance of the <code>ProtocolVersions</code> structure with a <code>count</code> value of <code>1</code> and a single element <code>versions</code> array where <code>versions[0].major</code> is <code>1</code> and <code>versions[0].minor</code> is <code>0</code>.</p>
+<p>When the first <code>NegotiateSession</code> command is received from the publisher, the subscriber must send either a <code>Succeeded</code> or <code>Failed</code> response for the <code>NegotiateSession</code> command indicating its ability to support one of the specified protocol versions.</p>
+<p>If the subscriber can support one of the protocols specified by the publisher, the <code>Succeeded</code> response payload shall be an instance of the <code>ProtocolVersions</code> structure with a <code>count</code> of <code>1</code> and a single element <code>versions</code> array that indicates the protocol version to be used.</p>
+<p>If the subscriber cannot support one of the protocols specified by the publisher, the <code>Failed</code> response payload shall be an instance of the <code>ProtocolVersions</code> structure filled out with the supported protocols. In case of failure, both the publisher and subscriber should terminate the connection since no protocol version could be agreed upon.</p>
+<p>When a <code>Succeeded</code> response for the first <code>NegotiateSession</code> command is received from the subscriber, the publisher should validate the subscriber selected protocol version. If the publisher does not agree with the protocol version selected by the subscriber, the publisher shall send a <code>Failed</code> response for the <code>NegotiateSession</code> command with an empty payload and terminate the connection since no protocol version could be agreed upon. If the publisher accepts the subscriber selected protocol version, the negotiation will continue with the selection of operational modes.</p>
+<p>After sending a <code>Succeeded</code> response to the first <code>NegotiateSession</code> command, the subscriber shall be waiting for either a <code>Failed</code> response from the publisher or the second <code>NegotiateSession</code> command; if the subscriber does not receive a command or response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect.</p>
+<h5 id="operational-modes-negotiation">Operational Modes Negotiation</h5>
+<blockquote>
+  <p>TODO: This has changed, but functionally still exists in the <code>SupportedFunctionalty</code> command.</p>
+</blockquote>
+<p>For version <code>1.0</code> of STTP, if the protocol version negotiation step succeeds, the next negotiation will be for the desired operational modes. The payload of the second <code>NegotiateSession</code> command sent by the publisher shall be an instance of the <code>OperationalModes</code> structure, defined as follows, that iterates the supported string encodings, whether UDP broadcasts are allowed and the available stateful and stateless compression algorithms (see <a href="#compression">compression algorithms</a>):</p>
+<pre><code class="C language-C">struct {
+  uint16 udpPort;
+  NamedVersions stateful;
+  NamedVersions stateless;
+}
+OperationalModes;</code></pre>
+<ul>
+<li>The <code>udpPort</code> field meaning depends on the usage context:<ul>
+<li>When sent with the publisher command payload, field is used to indicate publisher support of UDP. A value of zero indicates that UDP broadcasts are not supported and any non-zero value indicates that UDP broadcasts are supported.</li>
+<li>When sent with the subscriber response payload, field is used to indicate the desired subscriber UDP port for data channel functionality. A value of zero indicates that a UDP connection should not be established for subscriber data channel functionality.</li></ul></li>
+<li>The <code>stateful</code> field defines the <a href="Defintions.md#namedversions-structure"><code>NamedVersions</code></a> representing the algorithms to use for stateful compression operations.</li>
+<li>The <code>stateless</code> field defines the <a href="Defintions.md#namedversions-structure"><code>NamedVersions</code></a> representing the algorithms to use for stateless compression operations.</li>
+</ul>
+<p>When the second <code>NegotiateSession</code> command is received from the publisher, the subscriber shall send either a <code>Succeeded</code> or <code>Failed</code> response for the <code>NegotiateSession</code> command indicating its ability to support a subset of the specified operational modes.</p>
+<p>If the subscriber can support a subset of the operational modes allowed by the publisher, the <code>Succeeded</code> response payload shall be an instance of the <code>OperationalModes</code> structure with the specific values for the <code>encodings</code>, <code>udpPort</code>, <code>stateful</code> and <code>stateless</code> fields. The <code>encodings</code> field should specify a single flag designating the string encoding to use and both the <code>stateful</code> and <code>stateless</code> fields should define a <code>count</code> of <code>1</code> and a single element array that indicates the <a href="#compression">compression algorithm</a> to be used where a named value of <code>NONE</code> with a version of <code>0.0</code> indicates that no compression should be used.</p>
+<p>If the subscriber cannot support a subset of the operational modes allowed by the publisher, the <code>Failed</code> response payload shall be an instance of the <code>OperationalModes</code> structure filled out with the supported operational modes. In case of failure, both the publisher and subscriber should terminate the connection since no protocol version could be agreed upon.</p>
+<p>When a <code>Succeeded</code> response for the second <code>NegotiateSession</code> command is received from the subscriber, the publisher should validate the subscriber selected operational modes. If the publisher does not agree with the operational modes selected by the subscriber, the publisher shall send a <code>Failed</code> response for the <code>NegotiateSession</code> command with an empty payload and terminate the connection since no operational modes could be agreed upon. If the publisher accepts the subscriber selected operational modes, then the publisher shall send a <code>Succeeded</code> response for the <code>NegotiateSession</code> command with an empty payload and the publisher will consider the session negotiations to be completed successfully.</p>
+<p>After sending a <code>Succeeded</code> response to the second <code>NegotiateSession</code> command, the subscriber shall be waiting for either a <code>Succeeded</code> or <code>Failed</code> response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect.</p>
+<p>If the subscriber receives a <code>Succeeded</code> response for the <code>NegotiateSession</code> command from the publisher, the subscriber will consider the session negotiations to be completed successfully.</p>
+<p>Once operational modes have been established for a session, the publisher and subscriber must exchange any string based payloads using the negotiated string encoding as specified by the subscriber.</p>
+<h5 id="secure-data-channel">Secure Data Channel</h5>
+<p>When data channel functions that are operating over a lossy communications protocol, e.g., UDP, and command channel functions are operating over a reliable communications protocol, e.g., TCP, that has been secured with TLS, then the subscriber can request that data channel functions can be secured by issuing a <code>SecureDataChannel</code> command.</p>
+<p>The <code>SecureDataChannel</code> command should only be issued when a lossy communications protocol, e.g., UDP, has been defined for data channel functions. If a subscriber issues the <code>SecureDataChannel</code> command for a session that has not defined a lossy communications protocol for data channel functions, the publisher shall send a <code>Failed</code> response for the <code>SecureDataChannel</code> command with a string based payload that indicates that data channel functions can only be secured when a lossy communications protocol has been established. This error condition should equally apply when UDP broadcasts are not supported by the publisher.</p>
+<p>The <code>SecureDataChannel</code> command should only be issued when command channel functions are already secured using TLS. If a subscriber issues the <code>SecureDataChannel</code> command for a session with a command channel connection that has not been secured using TLS, the publisher shall send a <code>Failed</code> response for the <code>SecureDataChannel</code> command with a string based payload that indicates that data channel functions can only be secured when command channel functions are already secured using TLS.</p>
+<p>The <code>SecureDataChannel</code> command should be issued prior to the <code>Subscribe</code> command to ensure data channel functions are secured before transmission of <code>DataPointPacket</code> commands. If a subscriber issues the <code>SecureDataChannel</code> command for a session that already has an active subscription, the publisher shall send a <code>Failed</code> response for the <code>SecureDataChannel</code> command with a string based payload that indicates that data channel functions cannot be secured after a subscription has already been initiated.</p>
+<p>If data channel functions can be secured, the publisher shall send a <code>Succeeded</code> response for the <code>SecureDataChannel</code> command with a payload that shall be an instance of the <code>DataChannelKeys</code> structure, defined as follows, that establishes the symmetric encryption keys and associated initialization vector used to secure the data channel:</p>
+<pre><code class="C language-C">struct {
+  uint16 nonceLength;
+  uint8[] nonce;
+}
+ChangeUdpCipher;</code></pre>
+<blockquote>
+  <p>ToDO: We also need a way to send the encryption key if UDP only.</p>
+</blockquote>
+<ul>
+<li>Both the server and the client specify a random number to prevent the key from being repeated or set to 000's</li>
+<li>The <code>key</code> field is a byte array computed from SHA256(ServerNonce || ClientNonce).</li>
+<li>The <code>iv</code> field is the first 16 bytes of the byte array computed from SHA256(ClientNonce || ServerNonce).</li>
+</ul>
+<p>Upon the publisher sending the <code>Succeeded</code> response for the <code>SecureDataChannel</code> command, all data function payloads for commands and responses sent by the publisher to the subscriber over the lossy communications protocol must be encrypted using the AES symmetric encryption algorithm with a key size of 256 using the specified subscriber key and initialization vector.</p>
+<p>After sending a <code>SecureDataChannel</code> command to the publisher, the subscriber shall be waiting for either a <code>Succeeded</code> or <code>Failed</code> response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect.</p>
+<p>If the subscriber receives a <code>Failed</code> response for the <code>SecureDataChannel</code> command from the publisher, the subscriber should disconnect.</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> Failure responses from the publisher will either be from a configuration mismatch or an order of operations issue, STTP implementations should make subscribers aware of the possible exception causes so that the issue can be corrected.</p>
+</blockquote>
+<p>Upon reception of a <code>Succeeded</code> response for the <code>SecureDataChannel</code> command from the publisher, the subscriber must take the received key and initialization vector and decrypt each payload received over the lossy communications protocol using the AES symmetric encryption algorithm with a key size of 256.</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> It is presumed that communications over a lossy communications protocol, e.g., UDP, will flow from the publisher to the subscriber. If an implementation of STTP is ever established such traffic would flow from the subscriber to the publisher over a lossy communications channel, then to be secured, this traffic would need to be encrypted by the subscriber and decrypted by the publisher.</p>
+</blockquote>
+<h4 id="unsubscribe-command">Unsubscribe Command</h4>
+<blockquote>
+  <p>TODO: This command has been replaced with a Subscripe, Remove, All command.</p>
+</blockquote>
+<p>The subscriber shall issue an <code>Unsubscribe</code> with an empty payload to stop any existing data subscription.</p>
+<p>Upon reception of the <code>Unsubscribe</code> command from a subscriber, the publisher must immediately cease publication of <code>DataPointPacket</code> commands to the specific subscriber that issued the command; also, the publisher shall send a <code>Succeeded</code> response for the <code>Unsubscribe</code> command with an empty payload. If for any reason the publisher cannot terminate the subscription, the publisher shall send a <code>Failed</code> response for the <code>Unsubscribe</code> command with a string based payload that describes the reason the subscription cannot be terminated.</p>
+<p>After sending an <code>Unsubscribe</code> command to the publisher, the subscriber shall be waiting for either a <code>Succeeded</code> or <code>Failed</code> response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect and not attempt to send further commands to stop the data subscription.</p>
+<p>If the subscriber receives a <code>Failed</code> response for the <code>Unsubscribe</code> command from the publisher, the subscriber should disconnect and not attempt to send further commands to stop the data subscription.</p>
+<p>Upon reception of a <code>Succeeded</code> response for the <code>Unsubscribe</code> command from the publisher, the subscriber should consider any cached signal mapping previously received from the publisher to now be invalid - accordingly any allocated memory for the cache should now be released.</p>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> With reception of the <code>Succeeded</code> response for the <code>Unsubscribe</code> command the subscriber can be assured that the publisher has stopped sending further <code>DataPointPacket</code> commands, however, STTP implementations should anticipate that some data packets could still arrive depending on how much data was already queued for transmission. This may be more evident when a lossy communications protocol, e.g., UDP, is being used for data channel functionality and the <code>Succeeded</code> response for the <code>Unsubscribe</code> command is received on a reliable communications protocol, e.g., TCP.</p>
+</blockquote>
+<h4 id="bulk-transport-command">Bulk Transport Command</h4>
+<p>This command has the ability of sending large blocks of data over STTP.</p>
+<p>This command is broken up into sub commands. The sub commands include:</p>
+<ul>
+<li>Subcommands<ul>
+<li><code>BeginSend</code> - Indicates a new large block of data is on its way.</li>
+<li><code>SendFragment</code> - Indicates that a new fragment of data is being sent.</li>
+<li><code>CancelSend</code> - Indicates that a send operation is being canceled.</li></ul></li>
+</ul>
 <h4 id="noop-command">NoOp Command</h4>
 <p>When data channel functions are operating over a lossy communications protocol, e.g., UDP, and command channel functions are operating over a reliable communications protocol, e.g., TCP, then command channel activity may remain quiet for some time. To make sure the connection for the command channel is still established the <code>NoOp</code> command allows for a periodic test of connectivity.</p>
 <p>The <code>NoOp</code> command shall be initiated by either the publisher or subscriber. For this functional description the initiator of the command will be called the <em>sender</em>, whereby the other party will be the <em>receiver</em>. The <code>NoOp</code> command is always sent with an empty payload and is designed to be sent over a reliable communications channel, e.g., TCP, on a configurable schedule.</p>
@@ -1714,7 +1813,7 @@ DataPointKeySet;</code></pre>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/wrench.png?v5" alt=":wrench:" title=":wrench:" class="emoji-img emoji"> For implementations of STTP the <code>NoOp</code> command will be used to test that the reliable communications channel is still available. Implementations will check for exceptions that occur during transmission of the command as well as timeouts due to lack of responses, in either case the communications channel can be considered failed and placed back into a connection cycle state.</p>
 </blockquote>
 <h3 id="responses">Responses</h3>
-<p>The following table defines the responses to commands that can be sent by STTP. Currently the only defined responses are <code>Succeeded</code> or <code>Failed</code>. The payload of the response message depends on the command code the message is in response to.</p>
+<p>The following table defines the responses to commands that can be sent by STTP. </p>
 <table>
 <thead>
 <tr>
@@ -1727,28 +1826,88 @@ DataPointKeySet;</code></pre>
 <tbody>
 <tr>
 <td style="text-align:center;">0x80</td>
-<td><a href="#succeeded-response">Succeeded</a></td>
-<td style="text-align:center;">Any</td>
-<td>Command request succeeded. Response success payload, if any, included.</td>
+<td><a href="#get-metadata-schema-response">GetMetadataSchemaResponse</a></td>
+<td style="text-align:center;">Publisher</td>
+<td>Sends the schema for the metadata to the Subscriber</td>
 </tr>
 <tr>
 <td style="text-align:center;">0x81</td>
-<td><a href="#failed-response">Failed</a></td>
+<td><a href="#get-metadata-response">GetMetadataResponse</a></td>
+<td style="text-align:center;">Publisher</td>
+<td>Sends metadata results to the Subscriber.</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x82</td>
+<td><a href="#negotiate-session-response">NegotiateSessionResponse</a></td>
+<td style="text-align:center;">Publisher</td>
+<td>Responds to negotiate session commands.</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x83</td>
+<td><a href="#request-succeeded">RequestSucceeded</a></td>
+<td style="text-align:center;">Any</td>
+<td>Command request succeeded.</td>
+</tr>
+<tr>
+<td style="text-align:center;">0x84</td>
+<td><a href="#request-failed">RequestFailed</a></td>
 <td style="text-align:center;">Any</td>
 <td>Command request failed. Response error payload, if any, included.</td>
 </tr>
 </tbody>
 </table>
-<h4 id="succeeded-response">Succeeded Response</h4>
-<p>A response with a type <code>Succeeded</code> is intended to represent a successful reply for a command function. See associated <a href="#commands">command code</a> for proper response payload.</p>
-<h4 id="failed-response">Failed Response</h4>
-<p>A response with a type <code>Failed</code> is intended to represent a failure reply for a command function. See associated <a href="#commands">command code</a> for proper response payload.</p>
+<h4 id="get-metadata-schema-response">Get Metadata Schema Response</h4>
+<p>Responds with the schema for the metadata</p>
+<pre><code class="C language-C">struct {
+  MetadataSchema schema;   //The command code that succeeded.
+}
+GetMetadataSchema;</code></pre>
+<h4 id="get-metadata-response">Get Metadata Response</h4>
+<p>Responds with the metadata.</p>
+<ul>
+<li>Subcommands<ul>
+<li><code>VersionNotCompatible</code> - If SchemaVersion does not match the current one, or if revision is too old to do an update query on.</li>
+<li><code>DefineTable</code> - Defines the response Table.</li>
+<li><code>DefineRow</code> - Defines a row of the data.</li>
+<li><code>UndefineRow</code> - For update queries, indicates this row should be removed if it exists.</li>
+<li><code>Finished</code> - Indicates that the streaming of the table has completed.</li></ul></li>
+</ul>
+<h4 id="negotiate-session-response">Negotiate Session Response</h4>
+<p>Responds to the NegotiateSession command.</p>
+<ul>
+<li>Subcommands<ul>
+<li><code>ChangeInstanceSuccess</code> - Changes the active instance of the connection.</li>
+<li><code>ChangeUdpCipherResponse</code> - Returns data and agrees to change the UDP cipher.</li>
+<li><code>DesiredOperation</code> - Reply to SupportedFunctionality, indicates the selected mode of operation.</li>
+<li><code>InstanceList</code> - The list of all instances this server has.</li>
+<li><code>ReverseConnectionSuccess</code> - Transfers the role of server to the client.</li></ul></li>
+</ul>
+<h4 id="request-succeeded">Request Succeeded</h4>
+<p>A response with a type <code>Succeeded</code> is intended to represent a successful reply for a command function. See associated <a href="#commands">command code</a> for proper response.</p>
+<pre><code class="C language-C">struct {
+  CommandCode command;     //The command code that succeeded.
+  string Reason;           //A user friendly message for the success, can be null.
+  string Details;          //A not so friendly message more helpful for troubleshooters.
+}
+RequestSucceeded;</code></pre>
+<h4 id="request-failed">Request Failed</h4>
+<p>A response with a type <code>Failed</code> is intended to represent a failure reply for a command function. See associated <a href="#commands">command code</a> for proper response.</p>
+<pre><code class="C language-C">struct {
+  CommandCode command;       //The command code that failed.
+  bool TerminateConnection;  //Indicates that the connection should be terminated for a failure.
+  string Reason;             //A user friendly message for the failure, can be null.
+  string Details;            //A not so friendly message more helpful for troubleshooters.
+}
+RequestSucceeded;</code></pre>
 <h2 id="data-point-structure">Data Point Structure</h2>
 <p>When a subscriber has issued a <a href="#subscribe-command">subscribe command</a> to its publisher for select set of data points, the publisher will start sending <a href="#data-point-packet-commands">data point packet commands</a> each with a payload of several data point values serialized using the <code>DataPoint</code> structure, defined as follows:</p>
 <pre><code class="C language-C">struct {
-  uint32 id;
-  uint8[] value;    // Size based on type, up to 64-bytes
-  uint8[] state;    // Size based on flags, up to 26-bytes
+  DataPointIdentifier id;
+  SttpTimestamp timestamp;
+  SttpValue value; 
+  TimeQualityFlags timeQuality;
+  ValueQualityFlags valueQuality;
+  SttpValue[] ExtraFields;        //A set of extra fields that are reserved for future need.
 }
 DataPoint;</code></pre>
 <p>The actual number of <code>DataPoint</code> structures contained in the data point packet command depends the configured maximum payload size and the serialized size of the data point structures, see <a href="#figure6">Figure 6</a>.</p>
@@ -1759,28 +1918,59 @@ DataPoint;</code></pre>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> The maximum size of a <code>DataPoint</code> structure instance is 94-bytes, however, with simple encoding techniques this size can be reduced down to a few bytes for most value types.</p>
 </blockquote>
-<h3 id="data-point-value-types">Data Point Value Types</h3>
-<p>The data types available to a <code>DataPoint</code> are described in the <code>ValueType</code> enumeration, defined below, along with any needed associated structures:</p>
+<h3 id="data-point-identifier">Data Point Identifier</h3>
+<p>When identifying a Data Point, one of 4 mechanics can be used to identify the source of the time series data.</p>
+<ul>
+<li>[Guid] An integer identifier - This does not have to be a true GUID, but can be any integer that can fit in a 128 bit integer.</li>
+<li>[String] A string identifier - This is commonly referred to as a tag in a time series databases.</li>
+<li>[SttpNamedSet] A Connection String - A set of [string Name, SttpValue value] that uniquely identify the source of a point ID.</li>
+<li>[Int32] Runtime ID - Runtime ID's are negotiated with the connection and are the default value type in the Data Point Structure.</li>
+</ul>
 <pre><code class="C language-C">enum {
-  Null = 0,     // 0-bytes
-  SByte = 1,    // 1-byte
-  Int16 = 2,    // 2-bytes
-  Int32 = 3,    // 4-bytes
-  Int64 = 4,    // 8-bytes
-  Byte = 5,     // 1-byte
-  UInt16 = 6,   // 2-bytes
-  UInt32 = 7,   // 4-bytes
-  UInt64 = 8,   // 8-bytes
-  Decimal = 9,  // 16-bytes
-  Double = 10,  // 8-bytes
-  Single = 11,  // 4-bytes
-  Ticks = 12,   // 8-bytes
-  Bool = 13,    // 1-byte
-  Guid = 14,    // 16-bytes
-  String = 15,  // 64-bytes, max
-  Buffer = 16   // 64-bytes, max
+  RuntimeID = 0,   // 4-bytes
+  Guid = 1,        // 16-bytes
+  String = 2,      // variable
+  NamedSet = 3,    // variable
 }
-ValueType; // sizeof(uint8), 1-byte</code></pre>
+DataPointIdentifierTypeCode; // 2 bits
+
+struct {
+  DataPointIdentifierTypeCode identifierType;
+  uint8[] identifer;    
+}
+DataPointIdentifier;</code></pre>
+<p>While the normal use case is to use RuntimeIDs, for systems that have an indefinite number of IDs, it's not practical to map every <br />
+point to a Runtime ID. In this case, it's allowed to send the identifier with the measurement.</p>
+<h3 id="sttp-value-types">Sttp Value Types</h3>
+<p>The data types available to a <code>DataPoint</code> are described in the <code>ValueType</code> enumeration, defined below:</p>
+<pre><code class="C language-C">enum {
+  Null = 0,              // 0-bytes
+  SByte = 1,             // 1-byte
+  Int16 = 2,             // 2-bytes
+  Int32 = 3,             // 4-bytes
+  Int64 = 4,             // 8-bytes
+  Byte = 5,              // 1-byte
+  UInt16 = 6,            // 2-bytes
+  UInt32 = 7,            // 4-bytes
+  UInt64 = 8,            // 8-bytes
+  Single = 9,            // 4-bytes
+  Double = 10,           // 8-bytes
+  Decimal = 11,          // 16-bytes
+  DateTime = 12,         // Local/Universal/Unspecified/Unambiguous Date Time
+  DateTimeOffset = 13,   // Local/Universal/Unspecified/Unambiguous Date Time with an offset.
+  SttpTime = 14,         // Local/Universal Time with Leap Seconds
+  SttpTimeOffset = 15,   // Local/Universal Time with Leap Seconds and timezone offset.
+  TimeSpan = 16,         // 8 bytes  
+  Bool = 17,             // 1-byte
+  Char = 18,             // 2-bytes
+  Guid = 19,             // 16-bytes
+  String = 20,           // Limit defined in NegotiateSession
+  Buffer = 21,           // Limit defined in NegotiateSession
+  ValueSet = 22,         // An array of SttpValue. Up to 255 elements.
+  NamedSet = 23,         // An array of [string,SttpValue]. Up to 255 elements. Like a connection string.
+  BulkTransportGuid = 24 // A special type of GUID that indicates it is transmitted out of band.
+}
+ValueTypeCode; // sizeof(uint8), 1-byte</code></pre>
 <ul>
 <li><code>Null</code>: No space occupied</li>
 <li><code>SByte</code>: <a href="https://en.wikipedia.org/wiki/Byte">8-bit Signed Byte</a> (1-byte, big-endian)</li>
@@ -1797,50 +1987,11 @@ ValueType; // sizeof(uint8), 1-byte</code></pre>
 <li><code>Bool</code>: <a href="https://en.wikipedia.org/wiki/Boolean_data_type">Boolean as 8-bit Unsigned Integer</a> (1-byte, big-endian, zero is <code>false</code>, non-zero value is <code>true</code>)</li>
 <li><code>Guid</code>: <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">Globally Unique Identifer</a> (16-bytes, big-endian for all components)</li>
 <li><code>Time</code>: <a href="https://en.wikipedia.org/wiki/System_time">Time as <code>Timestamp</code></a> (16-bytes, see <a href="#data-point-timestamp">data point timestamp</a>)</li>
-<li><code>String</code> <a href="https://en.wikipedia.org/wiki/String_%28computer_science%29">Character String as <code>StringValue</code></a> (Maximum of 64-bytes - 1-byte header with 63-bytes of character data, encoding is UTF8)</li>
-<li><code>Buffer</code> <a href="https://en.wikipedia.org/wiki/Data_buffer">Untyped Data Buffer as <code>BufferValue</code></a> (Maximum of 64-bytes - 1-byte header with 63-bytes of data)</li>
+<li><code>String</code> <a href="https://en.wikipedia.org/wiki/String_%28computer_science%29">Character String as <code>StringValue</code></a> (encoding is UTF8)</li>
+<li><code>Buffer</code> <a href="https://en.wikipedia.org/wiki/Data_buffer">Untyped Data Buffer as <code>BufferValue</code></a> </li>
 </ul>
-<p>Both the <code>String</code> and <code>Buffer</code> represent variable length data types. Each variable length data point will have a fixed maximum number of bytes that can be transmitted per instance of the <code>DataPoint</code> structure. For data sets larger then the specified maximum size, data will need to be fragmented, marked with a <a href="#data-point-sequence-number">sequence number</a> and transmitted in small chunks, i.e., 63-byte segments. For this large data set collation scenario, it is expected that the data packets will be transmitted over a reliable transport protocol, e.g., TCP, otherwise the subscriber should expect the possibility of missing fragments. Details for the content of the <code>String</code> type which is the <code>StringValue</code> structure and the <code>Buffer</code> type which is the <code>BufferValue</code> structure are defined as follows:</p>
-<pre><code class="C language-C">struct {
-  uint8 length;
-  uint8[] data; // Maximum size of 63
-}
-StringValue;
-
-struct {
-  uint8 length;
-  uint8[] data; // Maximum size of 63
-}
-BufferValue;</code></pre>
-<blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Some tests need to be run to determine if 64-bytes of variable string / buffer data is an effective use of space and provides optimal performance in data point packets. This target size may need to be an adjustable parameter in initial STTP implementations.</p>
-</blockquote>
 <h3 id="data-point-timestamp">Data Point Timestamp</h3>
-<p>The timestamp format for STTP is defined to accommodate foreseeable use cases and requirements for representations of time and elapsed time spans. The following defines the binary format of a <code>Timestamp</code> structure which consists of epoch based whole seconds and any fraction of a second. The timestamp fraction also includes a bit for indication of a leap-second in progress.</p>
-<pre><code class="C language-C">enum {
-  MillisecondMask = 0x0FFC000000000000, // (fraction &gt;&gt; 50) &amp; 1023
-  MicrosecondMask = 0x0003FF0000000000, // (fraction &gt;&gt; 40) &amp; 1023
-  NanosecondMask  = 0x000000FFC0000000, // (fraction &gt;&gt; 30) &amp; 1023
-  PicosecondMask  = 0x000000003FF00000, // (fraction &gt;&gt; 20) &amp; 1023
-  FemtosecondMask = 0x00000000000FFC00, // (fraction &gt;&gt; 10) &amp; 1023
-  AttosecondMask  = 0x00000000000003FF, // fraction &amp; 1023
-  Leapsecond      = 0x1000000000000000, // Set if leap-second is in progress
-  ReservedBits    = 0xE000000000000000
-}
-FractionFlags; // sizeof(uint64), 8-bytes
-
-struct {
-  int64 seconds;          // Seconds since 1/1/0001
-  FractionFlags fraction; // Fractional seconds
-}
-Timestamp; // 16-bytes</code></pre>
-<ul>
-<li>The <code>seconds</code> field defines the whole seconds since 1/1/0001 with a range of 584 billion years, i.e., +/-292 billion years.</li>
-<li>The <code>fraction</code> field is an instance of the <code>FractionFlags</code> enumeration that defines the fractional seconds for the timestamp with a resolution down to attoseconds. More specifically, the <code>fraction</code> field is broken up into 10-bit segments where each segment represents 1,000 units, 0 to 999, of fractional time - similar to a binary coded decimal. There are 10-bits for milliseconds, 10-bits for microseconds, 10-bits for nanoseconds, 10-bits for picoseconds, 10-bits for femtoseconds, and 10-bits for attoseconds. Bit 60 is used to indicate a leap-second is in progress; the remaining 3-bits, 61-63, are reserved.</li>
-</ul>
-<blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> The size of a <code>Timestamp</code> structure instance is 16-bytes, however, simple encoding techniques make it so that unused and repeating sections of time can be compressed out of the data point <code>state</code> so that it consumes much less space.</p>
-</blockquote>
+<p>The default timestamp that is used for Sttp has a bit reserved for LeapSecondInProgress. It takes the same structure as DateTime except, DateTimeKind.Ambiguious and DateTimeKind.Unspecified have been sacrificed for a leap second pending bit. </p>
 <h3 id="data-point-time-quality-flags">Data Point Time Quality Flags</h3>
 <p>Data points can also include a <code>TimeQualityFlags</code> structure in the serialized state data, defined below, that describes both the timestamp quality, defined with the <code>TimeQuality</code> enumeration value, as well as an indication of if a timestamp was not measured with an accurate time source.</p>
 <p>The time quality detail is included for devices that have access to a GPS or UTC time synchronization source, e.g., from an IRIG timecode signal. For timestamps that are acquired without an accurate time source, e.g., using the local system clock, the <code>TimeQuality</code> value should be set to <code>Locked</code> and the <code>TimeQualityFlags.NoAccurateTimeSource</code> should be set.</p>
@@ -1890,12 +2041,6 @@ DataQualityFlags; // sizeof(uint8), 1-byte</code></pre>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> These quality flags are intentionally simple to accommodate a very wide set of use cases and still provide some indication of data point value quality. More complex data qualities can exist as new data points.</p>
 </blockquote>
-<h3 id="data-point-sequence-identifier">Data Point Sequence Identifier</h3>
-<p>For large buffers or strings being sent that span multiple data points, a new session based identifier needs to be established that represents the sequence. This is needed since different values for the same <code>DataPointKey.uniqueID</code> could overlap during interleave processing.</p>
-<p>For data that needs to be transmitted with a defined sequence identifier, the <code>DataPoint.flags</code> must include the <code>StateFlags.Sequence</code> flag.</p>
-<h3 id="data-point-fragment-number">Data Point Fragment Number</h3>
-<p>For large buffers or strings being sent that span multiple data points, a fragment number defines the buffer index of a given sequence that can be used reassemble the sequence.</p>
-<p>For data that needs to be transmitted with a defined fragment number, the <code>DataPoint.flags</code> must include the <code>StateFlags.Fragment</code> flag.</p>
 <h2 id="data-point-encoding-types">Data Point Encoding Types</h2>
 <p>STTP supports various options for encoding data points within data packet commands. Different levels of encoding functionality allows data to be sent more efficiently and consume less space.</p>
 <blockquote>
@@ -2053,33 +2198,75 @@ FixedSizeDataPoint;</code></pre>
   </ul>
 </blockquote>
 <h2 id="metadata">Metadata</h2>
-<p>Metadata is exchanged in STTP as a table of records with attributes. When requesting all of the tables, a structure is returned as follows:</p>
+<p>Metadata is exchanged in STTP as a table of records with attributes. The complete list of tables available from an STTP publisher may be requested over the command channel. When requesting all of the tables, a structure is returned as follows:</p>
+<h3 id="table-types">Table Types</h3>
+<p>Three types of tables are defined in STTP.</p>
 <ul>
-<li>(Guid) Base Version ID - Identifies a major change that requires a resync of all metadata. This is also used for devices that don't support metadata revision. This value can then be changed with each revision to the metadata.</li>
-<li>(Int32) Latest Version Number - A incrementing change counter when metadata is modified.</li>
-<li>(Int32) Table Count<ul>
-<li>(Byte) Length of Table Name</li>
-<li>(String) Table Name</li>
-<li>(Int32) Last Modified Version Number</li></ul></li>
+<li>DataPoint Table - The DataPoint Table conveys metadata related to an STTP data point. Each publisher shall maintain zero or one DataPoint Table. The name of the table shall be 'DataPoint'. The publisher shall maintain one unique record with the DataPoint Table for each data point defined.</li>
 </ul>
-<p>When requesting data from a Table, the following structure will be returned:</p>
+<blockquote>
+  <p>TO DO: Define complex data structure and complex data structure mapping in definitions section. A CDSM may be either 'built-in' or 'user-defined'. 'Built-in' CDSMs may differ by industry. In the electric power industry, an example of a 'built-in' CDSM is a phasor.</p>
+  <ul>
+  <li>CDSM Table - A CDSM Table conveys metadata about a complex data structure. A publisher may maintain zero or more CDSM tables. A CDSM table shall only describe a CDSM defined at the publisher, and each record within the CDSM Table shall uniquely describe a corresponding mapping. An example of a CDSM in the transportation industry may be 'location', which is defined with two floating point values named 'latitude' and 'longitude'. Carrying forward this example, the desription attribute for a record within the Position Table might be, 'Location of Truck #42'.</li>
+  </ul>
+</blockquote>
 <ul>
-<li>(Byte) Length of Table Name</li>
-<li>(String) Table Name - Limited to 100 ASCII characters.</li>
-<li>(Int32) Record Count<ul>
-<li>(Guid) Record Identifier </li>
-<li>(Int32) Last Modified Version Number</li>
-<li>(Int32) Attribute Count </li>
-<li>(byte) Attribute Name Length.</li>
-<li>(String) Attribute Name - Limited to 100 ASCII characters.</li>
-<li>(Int32) Array Index - Defaults to 0. For attributes that support multiple values, these are indexed here.</li>
-<li>(Byte) The attribute value code. </li>
-<li>(Int16) The size of the Attribute Value.</li>
-<li>(byte[]) Attribute Value</li></ul></li>
+<li>Resource Table - A Resource Table conveys metadata related to a resource available in the publisher's asset base. A publisher may maintain zero or more resource tables to describe the desired asset hierarchy. A resource is any asset, whether hardware, software or physical, that relates to a data point transmitted over the wire. The simplest example of a resource is a sensor, or the transducer used to digitize a measured value.</li>
+</ul>
+<p>A maximum of 2^16 tables in any combination of the allowable types are permitted.</p>
+<h3 id="commands-1">Commands</h3>
+<p>Metadata commands are encapsulated into a Refresh Metadata packet. These commands are as follows.</p>
+<blockquote>
+  <p>Note: these commands describe<br />
+  what is required to make the server side metadata look like the client side metadata. Additional synchronization needs to occur<br />
+  at the client side API when synchronizing with it's main repository.</p>
+</blockquote>
+<ul>
+<li>Response Publisher to Subscriber<ul>
+<li>UseTable - Changes the active table</li>
+<li>int tableIndex</li>
+<li>AddTable - Adds or Replaces a table if it already exists.</li>
+<li>Guid majorVersion,</li>
+<li>long minorVersion,</li>
+<li>string tableName,</li>
+<li>TableFlags flags</li>
+<li>AddColumn - Adds a column.</li>
+<li>int columnIndex,</li>
+<li>string columnName,</li>
+<li>ValueType columnType</li>
+<li>AddValue - Adds or updates a value. Deleting a value would be to assign it with null.</li>
+<li>int columnIndex,</li>
+<li>int rowIndex,</li>
+<li>byte[] value</li>
+<li>DeleteRow - Removes an entire row of data.</li>
+<li>int rowIndex,</li>
+<li>TableVersion - Indicates what the current version of a table is.</li>
+<li>int tableIndex</li>
+<li>Guid majorVersion,</li>
+<li>long minorVersion,</li>
+<li>AddRelationship - Adds a table relationship. Sometimes known as a foreign key relationship.</li>
+<li>int tableIndex</li>
+<li>int columnIndex,</li>
+<li>int foreignTableIndex</li></ul></li>
+<li>Request Subscriber to Publisher<ul>
+<li>GetTable - Requests metadata from the specified table.</li>
+<li>int tableIndex</li>
+<li>int columnListCount</li>
+<li>int[] columnIndexes</li>
+<li>int filterExpressions</li>
+<li>string[] filterExpressionStrings</li>
+<li>SyncTable - Requests that the specified table is synchronized with the local copy. MajorVersion == Guid.Empty if the local table is blank.</li>
+<li>int tableIndex</li>
+<li>Guid majorVersion</li>
+<li>long minorVersion</li>
+<li>int columnListCount</li>
+<li>int[] columnList</li>
+<li>SelectAllTablesWithSchema - Gets all of the tables with their columns</li>
+<li>GetAllTableVersions - Gets the version information for every table the user has access to.</li></ul></li>
 </ul>
 <h3 id="attribute-value-types">Attribute Value Types</h3>
-<p>When defining each attribute, it's important to identify the type of data that is expected in that field. The wireline<br />
-protocol itself will not enforce these requirements, but rather provides encoding mechanisms for transporting the data <br />
+<p>When defining each attribute, it is important to identify the type of data that is expected in that field. The wireline<br />
+protocol itself will not enforce these requirements, but rather provides encoding mechanisms for transporting the data<br />
 and rules for how items can be converted to the desired type.  </p>
 <h4 id="encoding">Encoding</h4>
 <p>When attributes are serialized, the value field must be encoded using one of the following encoding types:</p>
@@ -2099,101 +2286,51 @@ and rules for how items can be converted to the desired type.  </p>
 </tr>
 <tr>
 <td style="text-align:center;">0x01</td>
-<td style="text-align:center;">XML Decimal</td>
-<td>Corresponds to xs:decimal</td>
-</tr>
-<tr>
-<td style="text-align:center;">0x02</td>
-<td style="text-align:center;">XML Integer</td>
-<td>Corresponds to xs:integer</td>
-</tr>
-<tr>
-<td style="text-align:center;">0x03</td>
-<td style="text-align:center;">XML Date</td>
-<td>Corresponds to xs:date</td>
-</tr>
-<tr>
-<td style="text-align:center;">0x04</td>
-<td style="text-align:center;">XML Time</td>
-<td>Corresponds to xs:time</td>
-</tr>
-<tr>
-<td style="text-align:center;">0x05</td>
-<td style="text-align:center;">XML DateTime</td>
-<td>Corresponds to xs:dateTime</td>
-</tr>
-<tr>
-<td style="text-align:center;">0x06</td>
-<td style="text-align:center;">XML Duration</td>
-<td>Corresponds to xs:duration</td>
-</tr>
-<tr>
-<td style="text-align:center;">0x07</td>
-<td style="text-align:center;">XML Boolean</td>
-<td>Corresponds to xs:boolean</td>
-</tr>
-<tr>
-<td style="text-align:center;">0x08</td>
-<td style="text-align:center;">XML Binary</td>
-<td>Corresponds to xs:hexBinary</td>
-</tr>
-<tr>
-<td style="text-align:center;">0x09</td>
-<td style="text-align:center;">XML URI</td>
-<td>Corresponds to xs:anyURI</td>
-</tr>
-<tr>
-<td style="text-align:center;">0x0A</td>
-<td style="text-align:center;">XML Base64</td>
-<td>Corresponds to xs:base64Binary</td>
-</tr>
-<tr>
-<td style="text-align:center;">0x0B</td>
 <td style="text-align:center;">String</td>
 <td>A UTF8 encoded string</td>
 </tr>
 <tr>
-<td style="text-align:center;">0x0C</td>
+<td style="text-align:center;">0x02</td>
 <td style="text-align:center;">Single</td>
 <td>A 32-bit floating point number encoded Big Endian</td>
 </tr>
 <tr>
-<td style="text-align:center;">0x0D</td>
+<td style="text-align:center;">0x03</td>
 <td style="text-align:center;">Double</td>
 <td>A 64-bit floating point number encoded Big Endian</td>
 </tr>
 <tr>
-<td style="text-align:center;">0x0E</td>
+<td style="text-align:center;">0x04</td>
 <td style="text-align:center;">Decimal</td>
 <td>A 128-bit floating point number encoded Big Endian</td>
 </tr>
 <tr>
-<td style="text-align:center;">0x0F</td>
+<td style="text-align:center;">0x05</td>
 <td style="text-align:center;">Int32</td>
 <td>A 32-bit integer number encoded Big Endian</td>
 </tr>
 <tr>
-<td style="text-align:center;">0x10</td>
+<td style="text-align:center;">0x06</td>
 <td style="text-align:center;">Int64</td>
 <td>A 64-bit integer number encoded Big Endian</td>
 </tr>
 <tr>
-<td style="text-align:center;">0X11</td>
+<td style="text-align:center;">0X07</td>
 <td style="text-align:center;">Guid</td>
 <td>A 128-bit GUID encoded Big Endian</td>
 </tr>
 <tr>
-<td style="text-align:center;">0x12</td>
+<td style="text-align:center;">0x08</td>
 <td style="text-align:center;">Ticks</td>
 <td>A 64-bit date/time value encoded Big Endian</td>
 </tr>
 <tr>
-<td style="text-align:center;">0x13</td>
+<td style="text-align:center;">0x09</td>
 <td style="text-align:center;">Binary</td>
 <td>An array binary values</td>
 </tr>
 <tr>
-<td style="text-align:center;">0x14</td>
+<td style="text-align:center;">0x0A</td>
 <td style="text-align:center;">Boolean</td>
 <td>A boolean value</td>
 </tr>
@@ -2203,264 +2340,82 @@ and rules for how items can be converted to the desired type.  </p>
 <p>The list below defines how the measurement fields can be restricted and what types are permitted under each restriction.</p>
 <ul>
 <li>Integer<ul>
-<li>Supported Types: Null | XML Decimal | XML Integer | Single | Double | Decimal | Int32 | Int64</li></ul></li>
+<li>Supported Types: Null | Single | Double | Decimal | Int32 | Int64</li></ul></li>
 <li>Float<ul>
-<li>Supported Types: Null | XML Decimal | XML Integer | Single | Double | Decimal | Int32 | Int64</li></ul></li>
+<li>Supported Types: Null | Single | Double | Decimal | Int32 | Int64</li></ul></li>
 <li>Date<ul>
-<li>Supported Types: Null | XML Date | XML Time | XML DateTime | Ticks</li></ul></li>
+<li>Supported Types: Null | Ticks</li></ul></li>
 <li>Time<ul>
-<li>Supported Types: Null | XML Date | XML Time | XML DateTime | Ticks</li></ul></li>
+<li>Supported Types: Null | Ticks</li></ul></li>
 <li>Date Time<ul>
-<li>Supported Types: Null | XML Date | XML Time | XML DateTime | Ticks</li></ul></li>
+<li>Supported Types: Null | Ticks</li></ul></li>
 <li>Duration<ul>
-<li>Supported Types: Null | XML Duration | Ticks</li></ul></li>
+<li>Supported Types: Null | Ticks</li></ul></li>
 <li>Boolean<ul>
-<li>Supported Types: Null | XML Boolean | Boolean</li></ul></li>
+<li>Supported Types: Null | Boolean</li></ul></li>
 <li>Binary<ul>
-<li>Supported Types: Null | XML Binary | XML Base64 | Binary</li></ul></li>
+<li>Supported Types: Null | Binary</li></ul></li>
 <li>String<ul>
 <li>Supported Types: All since all types can be represented as a string.</li></ul></li>
 <li>Guid<ul>
-<li>Supported Types: Null | String | Guid</li></ul></li>
+<li>Supported Types: Null | Guid</li></ul></li>
 </ul>
-<h3 id="measurement-table">Measurement Table</h3>
-<p>For the measurement table, the record identifier will correspond to the Measurement's ID. The following table is a list of all of the optional attributes that can be associated with a measurement.</p>
+<h3 id="datapoint-table-structure">DataPoint Table Structure</h3>
+<p>For the DataPoint Table, the record identifier will correspond to the ID of the respective data point. The following table defines a minimal list of attributes associated with a data point.</p>
 <table>
 <thead>
 <tr>
 <th style="text-align:center;">Attribute Name</th>
-<th style="text-align:center;">Supports Arrays</th>
 <th style="text-align:center;">Attribute Value Type</th>
 <th style="text-align:center;">Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center;">DeviceID</td>
-<td style="text-align:center;">N</td>
+<td style="text-align:center;">PointID</td>
 <td style="text-align:center;">Guid</td>
-<td style="text-align:center;">The GUID associated with the device record stored in the Device Table</td>
-</tr>
-<tr>
-<td style="text-align:center;">PointTag</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">A string based unique identifier</td>
-</tr>
-<tr>
-<td style="text-align:center;">SignalReference</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">A string based unique identifier</td>
-</tr>
-<tr>
-<td style="text-align:center;">SignalTypeID</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">Integer</td>
-<td style="text-align:center;">A code describing the signal type</td>
-</tr>
-<tr>
-<td style="text-align:center;">Adder</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">Float</td>
-<td style="text-align:center;">An adjustment factor</td>
-</tr>
-<tr>
-<td style="text-align:center;">Multiplier</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">Float</td>
-<td style="text-align:center;">An adjustment factor</td>
-</tr>
-<tr>
-<td style="text-align:center;">Description</td>
-<td style="text-align:center;">Y</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">A description for this measurement</td>
-</tr>
-<tr>
-<td style="text-align:center;">Channel Name</td>
-<td style="text-align:center;">Y</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">C37.118 Channel Name. For Digital types, an array of 16 elements are permitted.</td>
-</tr>
-<tr>
-<td style="text-align:center;">Signal Type</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">C37.118 related signal type. Ex: (STAT|FREQ|DFREQ|PM|PA|PR|PI|ANALOG|DIGITAL)</td>
-</tr>
-<tr>
-<td style="text-align:center;">PositionIndex</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">Integer</td>
-<td style="text-align:center;">C37.118 position index in a PMU frame</td>
-</tr>
-<tr>
-<td style="text-align:center;">Phase Designation</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The phase this field is computed from. Ex: A,B,C,0,+,-</td>
-</tr>
-<tr>
-<td style="text-align:center;">Engineering Units</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The base units of this field. (Ex: Volts, Amps, Watts)</td>
-</tr>
-<tr>
-<td style="text-align:center;">Engineering Scale</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">Float</td>
-<td style="text-align:center;">The scaling factor of these units (Ex: 1, 1000, 1000,000)</td>
+<td style="text-align:center;">The GUID associated with the data point.</td>
 </tr>
 </tbody>
 </table>
-<h3 id="device-table">Device Table</h3>
-<p>For the device table, the record identifier is the DeviceID. The following table is a list of all of the optional attributes that can be associated with a device.</p>
+<h3 id="cdsm-table-structure">CDSM Table Structure</h3>
+<p>It is not mandatory for the publisher to maintain a CDSM Table for every CDSM defined by the publisher. When the publisher optionally defines metadata for a CDSM, the table must contain the following minimal set of attributes.</p>
 <table>
 <thead>
 <tr>
 <th style="text-align:center;">Attribute Name</th>
-<th style="text-align:center;">Supports Arrays</th>
 <th style="text-align:center;">Attribute Value Type</th>
 <th style="text-align:center;">Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td style="text-align:center;">Acronym</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">A name of the device.</td>
-</tr>
-<tr>
-<td style="text-align:center;">Name</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">A friendly name of the device</td>
-</tr>
-<tr>
-<td style="text-align:center;">Company</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The company who owns the device</td>
-</tr>
-<tr>
-<td style="text-align:center;">Protocol</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The protocol the device is communicating with</td>
-</tr>
-<tr>
-<td style="text-align:center;">Latitude</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">Float</td>
-<td style="text-align:center;">The latitude of the device</td>
-</tr>
-<tr>
-<td style="text-align:center;">Longitude</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">Float</td>
-<td style="text-align:center;">The location of the device</td>
-</tr>
-<tr>
-<td style="text-align:center;">TimeZone</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The time zone for the data</td>
-</tr>
-<tr>
-<td style="text-align:center;">FrameRate</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The sample rate</td>
-</tr>
-<tr>
-<td style="text-align:center;">FNOM</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">C37.118 Nominal Frequency</td>
-</tr>
-<tr>
-<td style="text-align:center;">IDCODE</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">C37.118 ID Code</td>
-</tr>
-<tr>
-<td style="text-align:center;">STN</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">C37.118 Station Name</td>
-</tr>
-<tr>
-<td style="text-align:center;">Nominal Voltage</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">Float</td>
-<td style="text-align:center;">The factor required to convert this voltage to a per unit base.</td>
-</tr>
-<tr>
-<td style="text-align:center;">CT Ratio</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">Float</td>
-<td style="text-align:center;">The ratio of a connected CT</td>
-</tr>
-<tr>
-<td style="text-align:center;">Rated MVA</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">Float</td>
-<td style="text-align:center;">The nominal rating of this device</td>
-</tr>
-<tr>
-<td style="text-align:center;">Vendor</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The vendor of this device</td>
-</tr>
-<tr>
-<td style="text-align:center;">Model</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The model number of this device</td>
-</tr>
-<tr>
-<td style="text-align:center;">Equipment Type</td>
-<td style="text-align:center;">Y</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The type of equipment this device is monitoring (Ex: Line, Transformer)</td>
-</tr>
-<tr>
-<td style="text-align:center;">Substation</td>
-<td style="text-align:center;">N</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The substation this device is from</td>
-</tr>
-<tr>
-<td style="text-align:center;">Serial Number</td>
-<td style="text-align:center;">Y</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">Serial numbers or other identifying information about this equipment)</td>
-</tr>
-<tr>
-<td style="text-align:center;">In Service Date</td>
-<td style="text-align:center;">Y</td>
-<td style="text-align:center;">Date</td>
-<td style="text-align:center;">The date this device was put in service</td>
-</tr>
-<tr>
-<td style="text-align:center;">Out Service Date</td>
-<td style="text-align:center;">Y</td>
-<td style="text-align:center;">Date</td>
-<td style="text-align:center;">The date this device was removed from service</td>
+<td style="text-align:center;">CDSMID</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The GUID associated with the CDSM.</td>
 </tr>
 </tbody>
 </table>
-<h3 id="dataset-contents">Dataset Contents</h3>
-<ul>
-<li>Minimum required dataset for STTP operation</li>
-<li>Industry specific dataset extensions (outside scope of this doc)</li>
-</ul>
+<h3 id="resource-table">Resource Table</h3>
+<p>It is not mandatory for the publisher to maintain Resource Tables. When the publisher optionally defines metadata for resources, the table must contain the following minimal set of attributes.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">Attribute Name</th>
+<th style="text-align:center;">Attribute Value Type</th>
+<th style="text-align:center;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">ResourceID</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The GUID associated with the resource.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="dataset-filtering">Dataset Filtering</h3>
+<p>Note: These may end up being client side filters to simplify the wireline protocol and the burden on the server side API.</p>
 <ul>
 <li>Format of expressions that work against metadata<ul>
 <li>SQL style expressions</li>
@@ -2477,7 +2432,6 @@ and rules for how items can be converted to the desired type.  </p>
 <h3 id="dataset-serialization">Dataset Serialization</h3>
 <ul>
 <li>Serialization for transport<ul>
-<li>Packet based publication using temporal data point</li>
 <li>Publisher reduction by access rights and diff-version</li>
 <li>Subscriber reduction by filter expression</li></ul></li>
 <li>Serialization to local repository<ul>
@@ -2485,6 +2439,331 @@ and rules for how items can be converted to the desired type.  </p>
 <li>Conflict resolution</li>
 <li>Ownership control</li></ul></li>
 </ul>
+<h2 id="appendix-z---power-industry-examples-to-be-moved-later">Appendix Z - Power Industry Examples (To be moved later)</h2>
+<p>Here are some examples of metadata suitable for the electric power industry.</p>
+<h3 id="datapoint-table">DataPoint Table</h3>
+<p>A publisher might try the following DataPoint Table for the power industry.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">Attribute Name</th>
+<th style="text-align:center;">Attribute Value Type</th>
+<th style="text-align:center;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">PointID</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The GUID associated with the data point.</td>
+</tr>
+<tr>
+<td style="text-align:center;">PointTag</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A string based unique identifier.</td>
+</tr>
+<tr>
+<td style="text-align:center;">Description</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A description for this measurement</td>
+</tr>
+<tr>
+<td style="text-align:center;">ProducerTableName</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The name of the table within which the record for the resource that produced this data point resides.</td>
+</tr>
+<tr>
+<td style="text-align:center;">ProducerTableID</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The primary key for the record within the Producer Table.</td>
+</tr>
+<tr>
+<td style="text-align:center;">SignalReference</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A string based unique identifier</td>
+</tr>
+<tr>
+<td style="text-align:center;">SignalTypeID</td>
+<td style="text-align:center;">Integer</td>
+<td style="text-align:center;">A code describing the signal type</td>
+</tr>
+<tr>
+<td style="text-align:center;">Adder</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">An adjustment factor</td>
+</tr>
+<tr>
+<td style="text-align:center;">Multiplier</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">An adjustment factor</td>
+</tr>
+<tr>
+<td style="text-align:center;">Signal Type</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">Fixed set of signal types. I.E.: (STAT|FREQ|DFREQ|PM|PA|PR|PI|ANALOG|DIGITAL|CALC)</td>
+</tr>
+<tr>
+<td style="text-align:center;">Phase Designation</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The phase this field is computed from. Ex: A,B,C,0,+,-</td>
+</tr>
+<tr>
+<td style="text-align:center;">Engineering Units</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The base units of this field. (Ex: Volts, Amps, Watts)</td>
+</tr>
+<tr>
+<td style="text-align:center;">Engineering Scale</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">The scaling factor of these units (Ex: 1, 1000, 1000,000)</td>
+</tr>
+<tr>
+<td style="text-align:center;">Channel Name</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">C37.118 Channel Name. For Digital types, an array of 16 elements are permitted. Array length shall be zero if this is not a C37.118 - derived data point.</td>
+</tr>
+<tr>
+<td style="text-align:center;">PositionIndex</td>
+<td style="text-align:center;">Integer</td>
+<td style="text-align:center;">C37.118 position index in a PMU frame. Zero for non-C37.118 data points.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pmu-table-a-resource-table-example">PMU Table (a Resource Table example)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">Attribute Name</th>
+<th style="text-align:center;">Attribute Value Type</th>
+<th style="text-align:center;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">ResourceID</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The GUID associated with the resource.</td>
+</tr>
+<tr>
+<td style="text-align:center;">Acronym</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A name of the device.</td>
+</tr>
+<tr>
+<td style="text-align:center;">Name</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A friendly name of the device</td>
+</tr>
+<tr>
+<td style="text-align:center;">SubstationTableName</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The name of the table within which the record for the substation where this PMU resides.</td>
+</tr>
+<tr>
+<td style="text-align:center;">SubstationTableID</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The primary key for the record within the substation table.</td>
+</tr>
+<tr>
+<td style="text-align:center;">CompanyTableName</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The name of the table within which the record for the company that owns this PMU.</td>
+</tr>
+<tr>
+<td style="text-align:center;">CompanyTableID</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The primary key for the record within the company table.</td>
+</tr>
+<tr>
+<td style="text-align:center;">Protocol</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The protocol the device is communicating with</td>
+</tr>
+<tr>
+<td style="text-align:center;">FrameRate</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The sample rate</td>
+</tr>
+<tr>
+<td style="text-align:center;">FNOM</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">C37.118 Nominal Frequency</td>
+</tr>
+<tr>
+<td style="text-align:center;">IDCODE</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">C37.118 ID Code</td>
+</tr>
+<tr>
+<td style="text-align:center;">STN</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">C37.118 Station Name</td>
+</tr>
+<tr>
+<td style="text-align:center;">Nominal Voltage</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">The factor required to convert this voltage to a per unit base.</td>
+</tr>
+<tr>
+<td style="text-align:center;">CT Ratio</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">The ratio of a connected CT</td>
+</tr>
+<tr>
+<td style="text-align:center;">Rated MVA</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">The nominal rating of this device</td>
+</tr>
+<tr>
+<td style="text-align:center;">Vendor</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The vendor of this device</td>
+</tr>
+<tr>
+<td style="text-align:center;">Model</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The model number of this device</td>
+</tr>
+<tr>
+<td style="text-align:center;">Equipment Type</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The type of equipment this device is monitoring (Ex: Line, Transformer)</td>
+</tr>
+<tr>
+<td style="text-align:center;">Serial Number</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">Serial numbers or other identifying information about this equipment)</td>
+</tr>
+<tr>
+<td style="text-align:center;">In Service Date</td>
+<td style="text-align:center;">Date</td>
+<td style="text-align:center;">The date this device was put in service</td>
+</tr>
+<tr>
+<td style="text-align:center;">Out Service Date</td>
+<td style="text-align:center;">Date</td>
+<td style="text-align:center;">The date this device was removed from service</td>
+</tr>
+</tbody>
+</table>
+<h3 id="substation-table-a-resource-table-example">Substation Table (a Resource Table example)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">Attribute Name</th>
+<th style="text-align:center;">Attribute Value Type</th>
+<th style="text-align:center;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">ResourceID</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The GUID associated with the resource.</td>
+</tr>
+<tr>
+<td style="text-align:center;">Name</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A friendly name of the substation.</td>
+</tr>
+<tr>
+<td style="text-align:center;">Latitude</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">The latitude of the substation.</td>
+</tr>
+<tr>
+<td style="text-align:center;">Longitude</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">The location of the substation.</td>
+</tr>
+<tr>
+<td style="text-align:center;">TimeZone</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The time zone for the substation.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phasor-table-a-cdsm-table-example">Phasor Table (a CDSM Table example)</h3>
+<p>The existence of this CDSM Table presumes the existence of a 'built-in' CDSM called 'Phasor'. For this example, assume that the Phasor CDSM is comprised of two fields: Magnitude (float) and Angle (float).</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">Attribute Name</th>
+<th style="text-align:center;">Attribute Value Type</th>
+<th style="text-align:center;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">CDSMID</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The GUID associated with an entry in the Phasor CDSM.</td>
+</tr>
+<tr>
+<td style="text-align:center;">CDSMTag</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A string based unique identifier for the Phasor.</td>
+</tr>
+<tr>
+<td style="text-align:center;">Description</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A description for this phasor, e.g. 'Smith Substation North Bus Voltage'.</td>
+</tr>
+<tr>
+<td style="text-align:center;">IsCurrent</td>
+<td style="text-align:center;">Bit</td>
+<td style="text-align:center;">Set if this is a current phasor.</td>
+</tr>
+<tr>
+<td style="text-align:center;">VoltAssociation</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The ID of the voltage phasor used to compute power. Ignore if IsCurrent is reset.</td>
+</tr>
+<tr>
+<td style="text-align:center;">AlternateVolt</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">An alternate voltage phasor, used when the primary voltage is unavailable. Ignore if IsCurrent is reset.</td>
+</tr>
+<tr>
+<td style="text-align:center;">LineTableName</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The name of the table within which the record for the line associated with this current phasor resides. Ignore if IsCurrent is reset.</td>
+</tr>
+<tr>
+<td style="text-align:center;">LineTableID</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The primary key for the record within the line table. Ignore if IsCurrent is reset.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="vipair-table-a-cdsm-example">VIPair Table (a CDSM example)</h3>
+<p>The existence of this CDSM Table presumes the existence of a CDSM, 'built-in' or 'user-defined', called 'VIPair'. For this example, assume that the VIPair CDSM is comprised of two fields: Voltage (Phasor CDSM) and Current (Phasor CDSM).</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">Attribute Name</th>
+<th style="text-align:center;">Attribute Value Type</th>
+<th style="text-align:center;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">CDSMID</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The GUID associated with an entry in the VIPair CDSM.</td>
+</tr>
+<tr>
+<td style="text-align:center;">CDSMTag</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A string based unique identifier for the VIPair.</td>
+</tr>
+<tr>
+<td style="text-align:center;">Description</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A description for this VIPair, e.g. 'Smith-Jones Line'.</td>
+</tr>
+</tbody>
+</table>
 <h2 id="compression">Compression</h2>
 <p>Compression algorithms used with STTP can be either stateful, i.e., the compressor maintains its state through all compressed records, or stateless, i.e., the compressor compresses each data packet independently.</p>
 <p>Stateful compression algorithms provide the best possible compression for STTP data transmission but require use of a reliable transport protocol, e.g., TCP. Stateless compression methods are required when a lossy transport protocol is being used for data transmission, e.g., UDP.</p>
@@ -2789,35 +3068,132 @@ Publisher will likely want to validate size of historical requests, or least thr
 <p>Send historical values - subject to availability of local archive / buffer with start and stop time- it has been requested many times that single value data recovery option will be available to accommodate for simple UDP loss, however this should be carefully considered since this basically makes UDP and TCP style protocol - if implemented, restored point should likely flow over TCP channel to reduce repeat recovery requests. Also, this should include detail in response message that recovery either succeeded or failed, where failure mode could include "data not available". To reduce noise, at connection time publisher should always let know subscriber its capabilities which might include “I Support Historical Data Buffer” and perhaps depth of available data. That said there is true value in recovery of data gaps that occur due to loss of connectivity.</p>
 <h2 id="appendix-b---sttp-api-reference">Appendix B - STTP API Reference</h2>
 <p>The STTP API describes a set of properties and methods for accessing an STTP server. Elements marked with the tag [Required] are required to be provided by all STTP server implementations.</p>
+<p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> <a href="https://github.com/StevenChisholm">@StevenChisholm</a> - please validate the accuracy / implementability of the following as compared to <code>TestImplementation</code>...</p>
 <h3 id="core">Core</h3>
 <p>The Core class contains the basic elements of the API.</p>
 <ul>
-<li><code>ConnectionString : string</code><br />
-&gt; [Required] returns the connection string of the current connection, or an empty string if no connection is established.</li>
-<li><code>Connect(connectionString:string) : void</code><br />
-&gt; [Required] establishes a connection to the STTP server. The method will throw an exception if the connection cannot be established.</li>
-</ul>
+<li><p><code>ConnectionString (handle : *handle): string</code></p>
 <blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/tomato.png?v5" alt=":tomato:" title=":tomato:" class="emoji-img emoji"><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> mkd: Should this return an object, an interface or a handle like, for example, the Perl DBI API (ref: <a href="https://metacpan.org/pod/DBI#Architecture-of-a-DBI-Application)">https://metacpan.org/pod/DBI#Architecture-of-a-DBI-Application)</a>?  With this architecture the handle could be used for all other methods, and multiple handles could be kept which represent connections to various STTP servers.</p>
-</blockquote>
-<ul>
-<li><code>Disconnect() : void</code><br />
-&gt; [Required] terminates a connection.</li>
-<li><code>ValidateConnection() : string</code><br />
-&gt; [Required] validates whether a connection has been successfully established. Returns the connection string, or an empty string if no connection is established.</li>
+  <p>[Required] returns the connection string of the current connection, or an empty string if no connection is established.</p>
+</blockquote></li>
+<li><p><code>Connect(connectionString:string : String, SLL : Boolean, Certificate : X509CertificateClass ) : *handle</code></p>
+<blockquote>
+  <p>[Required] establishes a connection to the STTP server.     SLL is True or false, if SLL is marked as TRUE then certificate must be provided.  Upon successful connection it will provide a a pointer to the handle used to describe this connection.  The method will throw an exception if the connection cannot be established.</p>
+</blockquote></li>
+<li><p><code>Disconnect(handle : *handle) : void</code></p>
+<blockquote>
+  <p>[Required] terminates a connection.  The communication path will be tore down and no traffic is guaranteed to be sent after a disconnect from either the server or the client.</p>
+</blockquote></li>
+<li><p><code>ValidateConnection() : string</code><br />
+&gt; [Required] validates whether a connection has been successfully established. Returns the connection string, or an empty string if no connection is established.</p></li>
 </ul>
 <h3 id="data">Data</h3>
-<p>The Data class contains elements for querying and manipulating data points (or measurements, if "measurements" is the right term to describe something that has a PointTag on an STTP server).</p>
+<p>The Data class contains elements for querying and manipulating data points or the associated metadata.</p>
+<h4 id="metadata-definition">Metadata Definition</h4>
+<p>Metadata is information that describes the measurements or the relationship between measurements. The party who is sending the data is allowed to modify the metadata. The ability to write data to the metadata repository is controlled by the security access. Any connection that does not have an SSL security certificate will default to sending party can modify and receiving party is read only.  The methods defined in this section are only available if rights are granted to modify metadata repository.</p>
 <ul>
-<li><p><code>GetMetaData() : MetaData[0 .. *]</code><br />
-&gt; [Required] gets MetaData for the current set of measurements.</p></li>
-<li><p><code>GetMetaData(id:Guid) : MetaData</code><br />
-&gt; [Required] gets MetaData for the measurement specified by id.</p></li>
-<li><p><code>Subscribe(id:Guid) : bool</code><br />
-&gt; [Required] initiates a subscription to the measurement specified by id at the native rate.</p></li>
+<li><p><code>AddTable (TableName : String) : Void</code></p>
+<blockquote>
+  <p>[Required] allows for a new metadata definition table to be created. This method will raise an error if table is not created.     (illegal tablename, name already exists, permissions do not allow modification)</p>
+</blockquote></li>
+<li><p><code>RemoveTable (TableName : String) : Void</code></p>
+<blockquote>
+  <p>[Required] removes a table from the metadata repository This method will raise an error if table is not created.     ( table name does not exists or permissions do not allow modification)</p>
+</blockquote></li>
+<li><p><code>AddField (TableName : String, FieldName : String, DataType ) : Void</code></p>
+<blockquote>
+  <p>[Required] allows for a new metadata definition field to be added to an existing table . This method will raise an error if table is not created.     (table does not exist, illegal fieldname, name already exists, permissions do not allow modification)</p>
+</blockquote></li>
+<li><p><code>RemoveField (TableName : String)</code></p>
+<blockquote>
+  <p>[Required]  removes a field  from the metadata repository This method will raise an error if table is not created.     ( Fieldname does not exist, table name does not exists or permissions do not allow modification)</p>
+</blockquote></li>
+<li><p><code>AddRelationship (Table1, Table2, Field1, Field2, Relationship Type): Void</code></p>
+<blockquote>
+  <p>[Required]  Used to define relationships between fields in different tables.   Currently supports Foreign Key. Field 1 is a foreign key that is looked up in Field2.  This method will raise an error is relationship is not able to be created</p>
+</blockquote></li>
+<li><p><code>AddIndex (TableName : String, FieldName(s) : String, IndexType)</code></p>
+<blockquote>
+  <p>[Optional] removes a table from the metadata repository This method will raise an error if table is not created.     ( table name does not</p>
+</blockquote></li>
+<li><p><code>SetVersion (Version : String)</code><br />
+&gt; [Required]  The provider of the metadata is expected to update the version number every time a change is made to metadata.    This is not done automatically as the server side of the connection may be rebuilt due to a server issue and no metadata has changed.</p></li>
+</ul>
+<h4 id="metadata-sharing">Metadata Sharing</h4>
+<p>Once the Metadata is defined client can then request access to the information.  The methods below describe how metadata is shared</p>
+<ul>
+<li><p><code>GetMetaFormat(handle : *handle) : Integer</code></p>
+<blockquote>
+  <p>STTP supports multiple ways to store its metadata.   Format is the format of the Metadata repository.  This method is used for the client to request the format of the repository from the server.  It can be one of the following integer values</p>
+</blockquote>
+<ol>
+<li>Table Structure</li>
+<li>XML Structure (future)</li>
+<li>Object Model (future)</li>
+<li>No Metadata Structure Defined</li></ol>
+<p>The underlying structure of the wire protocol metadata is Table Structure so in most cases table Structure will provide the best performance.</p></li>
+<li><p><code>GetMetaVersion(handle : *handle) : Long Integer</code></p>
+<blockquote>
+  <p>Each time a change is made to the metadata the version is incremented.  This method returns the ...</p>
+</blockquote>
+<ul>
+<li><code>GetMetaDataTableList(handle : *handle, Filter : String) : String[0...*]</code></li></ul>
+<blockquote>
+  <p>Gets a list of the tables available for Metadata (tables may not have any rows, this method will return tables with zero rows) This method will return all tables plus the special table "Table_Relations. Filter syntax: FILTER TableName WHERE Expression [ORDER BY SortField]</p>
+</blockquote>
+<ul>
+<li><code>GetMetaDataFieldList(handle : *handle, TableName : String) : String[0...*]</code></li></ul>
+<blockquote>
+  <p>Gets a list of the fields available for a table in the metadata repository.  This method will return an array of strings that is a JSON formated serialization of FieldName, DataType.  </p>
+</blockquote></li>
+<li><p><code>GetMetaData(handle : *handle, filter : String) : MetaData[0 .. *]</code></p>
+<blockquote>
+  <p>[Required] gets MetaData for the current set of measurements.    The metadata can be returned in a number of formats.</p>
+</blockquote></li>
+<li><p><code>GetMetaDataDelta(handle : *handle, version : String) : MetaData[0 .. *]</code></p>
+<blockquote>
+  <p>[Required] gets MetaData for the current set of measurements as a delta from the version that is provided.  This method will raise an error if it is not able to fulfull the request.</p>
+</blockquote></li>
+<li><p><code>GetMetaDataById(id:Guid) : MetaData</code></p>
+<blockquote>
+  <p>[Required] gets MetaData for the measurement specified by id.</p>
+</blockquote></li>
+<li><p><code>CacheMetaData(Status : Boolean, TTL : Int) : Status : Boolean</code></p>
+<blockquote>
+  <p>[optional] [Required] Defines if the Metadata is to be cached or looked up on the server each time. If status = True then TTL is the Time to Live in seconds. It will check if cache is dirty at lease ever TTL seconds. If dirty it will repopulate (which may take longer than the TTL time in very large data sets with small TTLs.  Status by default will be False meaning there is no cache.</p>
+</blockquote></li>
+<li><p><code>IsCacheDirty() : Status : Boolean</code></p></li>
+</ul>
+<blockquote>
+  <p>[optional]</p>
+</blockquote>
+<ul>
+<li><code>RefreshCache() : Status : Boolean</code></li>
+</ul>
+<blockquote>
+  <p>[optional] forces the cache to be updated.  Used to update in-between TTLs as defined in CacheMetaData TTL or if CacheMetaData is set to false.</p>
+</blockquote>
+<ul>
+<li><p><code>GetIDFromMetaData(MetaFilter : string) : MetaData[0 .. *]</code></p>
+<blockquote>
+  <p>[optional] gets collection of data IDs that match the filter criteria.  </p>
+  <blockquote>
+    <p>** need to define what the nature of the filter is (SQL like?)</p>
+  </blockquote>
+</blockquote></li>
+<li><p><code>GetIdsWithUnprocessedData (handle : *handle, MetaFilter : string ) : IDArray id:Guid[0 .. *]</code></p></li>
+<li><p><code>GetData (handle : *handle, Id : Guid)</code></p></li>
+<li><p><code>Subscribe(id:Guid) : Void</code></p>
+<blockquote>
+  <p>[Required] initiates a subscription to the measurement specified by id at the native rate.  Returns True if subscription is successful False otherwise.</p>
+</blockquote></li>
 <li><p><code>Subscribe(id:Guid, rate:double, method:ResampleMethod) : Boolean</code></p>
 <blockquote>
-  <p>[Required] initiates a subscription to the measurement specified by id at the delivery rate specified by rate. The underlying measurement shall be resampled using the method prescribed by method, which is a member of the ResampleMethod enumeration.</p>
+  <p>[Required] initiates a subscription to the measurement specified by id at the delivery rate specified by rate. The underlying measurement shall be resampled using the method prescribed by method, which is a member of the ResampleMethod enumeration.  This method will raise an error if it is unable to subscribe to the provided ID.</p>
+</blockquote></li>
+<li><p><code>GetAvailableResampleMethodologies(handle : *handle, id:Guid[0 .. *]) : MetaData[0 .. *]</code></p>
+<blockquote>
+  <p>[Required] gets the resampling rates available for each measurement.</p>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> Basic resample methods must be mathematically defined in the standard and enumerated. If none of the available resample methods satisfy the subscriber's requirements, then the measurement should be subscribed at the native rate and resampled in the client application.</p>
 </blockquote></li>
 </ul>
@@ -2827,14 +3203,47 @@ Publisher will likely want to validate size of historical requests, or least thr
 <li>Normal Priority</li>
 <li>As Able But Within a Timespan</li>
 <li>As Able And Do Not Send After a TimeSpan</li>
-<li>Throttled (Maximimum of x-Bytes/Second) typically for historical data</li>
+<li>Throttled (Maximum of x-Bytes/Second) typically for historical data</li>
 </ol>
-<h3 id="transactional-data-exchange">Transactional Data Exchange</h3>
-<p>How will this work?</p>
+<p>Priority is set per measurements. By default a measurement is assigned Normal Priority (2). To change the priority use one of the following methods:</p>
+<ul>
+<li><p><code>SetPublicationPrioirty(handle : *handle, id : Guid, Priority : Integer) : Void</code></p>
+<blockquote>
+  <p>[Required] Sets the priority of the defined measurement to Priority</p>
+</blockquote></li>
+<li><p><code>SetPublicationPrioirtyBulk(handle : *handle, filter, Priority : Integer) : Void</code></p>
+<blockquote>
+  <p>[Optional] Sets the pririty of the defined measuremnts for all measurments that are defined by the filter to Priority.</p>
+</blockquote></li>
+</ul>
 <h3 id="security-1">Security</h3>
-<p>The Security class contains elements for querying and manipulating the security features of a connection.</p>
+<p>The Security class contains elements for querying and manipulating the security features of a connection.  All Roles and authentication is done through the use of a X509 certificate.   If the sertivicate is not used, then there are no controls on what data is accessible or what metadata is able to be modified.</p>
+<ul>
+<li><p><code>X509LatestAcceptedVersions (handle : *handle) : Version : String</code></p>
+<blockquote>
+  <p>[Required] sends back a String with latest of the released X509 versions that are supported.  Is it expected to utilize the latest version accepted by both the client and server.</p>
+</blockquote></li>
+<li><p><code>X509AcceptedVersions (handle : *handle) : Versions_accepted : Tuple</code></p>
+<blockquote>
+  <p>[Required] sends back a tuple with all versions of the 509 certificate standard that are accepted by the host</p>
+</blockquote></li>
+<li><p><code>SecureConnection (handle : *handle, X509Certificate: X509CertificateClass )</code></p>
+<blockquote>
+  <p>[Required] attempts to secure the communication of all future traffic on utilizing the handle.    The certificate will be used to secure both data and command channels where they are separate sockets.  The method will throw an exception if the connection cannot be established.</p>
+</blockquote></li>
+<li><p><code>ModifyMetaDataTableSecurity (handle : *handle, TableName : String, GroupName : String,  Role : String) : Void</code><br />
+&gt; [Required] sets access for a defined group of users on a particular table.  Users group is defined in X509 certificate.   By default there all tables in the metadata repository are readable and editable by all users.  If the group name had previously been assigned a role then the curent call of this method will override previous settting assuming it completes successfully.    Security is maintained at a table level.  If some fields in a table need a differnt level of access then a second table should be created to hold the additional dields.  Role can be ReadOnly, ReadWrite, NotVisible. The method will throw an exception if the permission cannot be set.</p></li>
+</ul>
 <h3 id="utility">Utility</h3>
 <p>The Utility class contains utility methods.</p>
+<ul>
+<li><p><code>GetMaxFragmentSize() : Integer</code></p>
+<blockquote>
+  <p>Returns the current may size of any message before it is fragmented (defaults to 1500 bytes)</p>
+</blockquote></li>
+<li><p><code>SetMaxFragmentSize (MessageSize : Integer) : Void</code><br />
+&gt; Allows for setting of the message size.   Should be equal to or smaller the largest size allowed by underlying network for a packet size.  The method will throw an exception if the set is not applied.</p></li>
+</ul>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/bulb.png?v5" alt=":bulb:" title=":bulb:" class="emoji-img emoji"> Links to language specific auto-generated XML code comment based API documentation would be useful.</p>
 </blockquote>

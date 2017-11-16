@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.1.47 - October 4, 2017
+**Version:** 0.1.48 - November 16, 2017
 
 **Status:** Initial Development
 
@@ -595,14 +595,13 @@ Commands and responses are defined as simple binary message structures that incl
 
 #### Message Payloads
 
-Payloads in STTP are defined as a byte arrays prefixed by an unsigned 16-bit integer representing the array length. Implementations of STTP should make target payload sizes configurable, but all payloads delivered by STTP must have a fixed maximum upper length of `2^14`, i.e., `16,384`, bytes.
+Payloads in STTP are defined as a byte arrays prefixed by an unsigned 16-bit integer representing the array length. Implementations of STTP should make target payload sizes configurable, but all payloads delivered by STTP must have a fixed maximum upper length of `2^16`, i.e., `65,535`, less 3 bytes for the packet overhead.
 
 ```C
-  uint16 length;
   uint8[] payload;
 ```
 
-Empty payloads have a `length` value of `0` and a `payload` value of `null`. When serialized, an empty payload would be represented by only a `0x0000` value for the length.
+It is permitted to send an empty payload if the [command code](#commands) does not require a payload.
 
 #### Command Structure
 
@@ -617,7 +616,7 @@ struct {
 Command;
 ```
 - The `commandCode` field defines the command code value for the command message, see defined [command codes](#commands).
-- The `length` field defines the length of the `payload` in bytes.
+- The `length` field defines the length of the entire packet in bytes.
 - The `payload` field is a byte array representing the serialized payload associated with the `commandCode`.
 
 <p class="insert-page-break-after"></p>
@@ -633,20 +632,18 @@ Command;
 
 #### Response Structure
 
-Responses for most commands will be either `Succeeded` to `Failed`. The following structure defines the binary format of a `Response`:
+Some form of response exists for every command. Responses take the same format as commands but are distinguished with a different command code. Sometimes, successful responses are implied and not expressly stated. However, in these cases, it's still permitted to send a successful response in addition to the command. Responses for most commands will be either `Succeeded` or `Failed`. The following structure defines the binary format of a `Response`:
 
 ```C
 struct {
-  uint8 responsecode;
-  uint8 commandCode;
+  uint8 responseCode;
   uint16 length;
   uint8[] payload;
 }
 Response;
 ```
 - The `responseCode` field defines the response code value for the response message, see defined [response codes](#responses).
-- The `commandCode` field defines the command code value that this message is in response to, see defined [command codes](#commands).
-- The `length` field defines the length of the `payload` in bytes.
+- The `length` field defines the length of the entire packet in bytes.
 - The `payload` field is a byte array representing the serialized payload associated with the `responseCode`.
 
 ### Commands
@@ -655,161 +652,140 @@ The following table defines the commands available to STTP. Commands that expect
 
 | Code | Command | Source | Response | Description |
 |:----:|---------|:------:|:--------:|-------------|
-| 0x00 | [NegotiateSession](#negotiate-session-command) | Publisher | Yes | Starts session negotiation for a new connection. |
-| 0x01 | [MetadataRefresh](#metadata-refresh-command) | Subscriber | Yes  | Requests publisher send updated metadata. |
-| 0x02 | [Subscribe](#subscribe-command) | Subscriber | Yes | Defines desired set of data points to begin receiving. |
-| 0x03 | [Unsubscribe](#unsubscribe-command) | Subscriber | Yes | Requests publisher terminate current subscription. |
-| 0x04 | [SecureDataChannel](#secure-data-channel-command)  | Subscriber | Yes | Requests publisher secure the data channel.  |
-| 0x05 | [RuntimeIDMapping](#runtime-id-mapping-command) | Publisher | Yes | Defines data point Guid to runtime ID mappings. |
-| 0x06 | [DataPointPacket](#data-point-packet-command) | Publisher | No | Payload contains data points. |
+| 0x01 | [BeginFragment](#begin-fragment-command) | Both | No | Indicates a large packet is being sent. |
+| 0x02 | [NextFragment](#next-fragment-command) | Both | No | The next fragment of a large packet. Follows `BeginFragment`. |
+| 0x03 | [GetMetadataSchema](#get-metadata-schema-command) | Subscriber | Yes | Requests the database schema and version of the metadata. |
+| 0x04 | [GetMetadata](#get-metadata-command) | Subscriber | Yes | Requests specific records of the metadata based on the schema. |
+| 0x05 | [Subscribe](#subscribe-command) | Subscriber | Yes | Adds/Removes a desired set of data points that will be received. |
+| 0x06 | [SendDataPoints](#send-data-points-command) | Publisher | No | A packet that contains normally encoded data points. |
+| 0x07 | [SendDataPointsCustom](#send-data-points-custom-command) | Publisher | No | A packet that contains specially encoded data points. |
+| 0x08 | [RuntimeIDMapping](#runtime-id-mapping-command) | Publisher | Yes | Defines runtimeIDs for DataPointIDs. |
+| 0x09 | [NegotiateSession](#negotiate-session-command) | Publisher | Yes | Establishes session roles and supported features for a connection. |
+| 0x0A | [BulkTransport](#bulk-transport-command) | Publisher | No | For sending large buffers, like files. |
 | 0xFF | [NoOp](#noop-command) | Both | Yes | Periodic message to allow validation of connectivity. |
 
-#### Negotiate Session Command
 
-After a successful connection has been established, the publisher and subscriber shall participate in an initial set of negotiations that will determine the STTP protocol version and operational modes of the session. The negotiation happens with the `NegotiateSession` command code which must be the first command sent after a successful publisher/subscriber connection. The command is sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. Once the session negotiations for the protocol version and operational modes have been established they must not change for the lifetime of the session.
+#### Begin Fragment Command
 
-Session negotiation is a multi-step process with commands and responses being sent by the publisher and subscriber until negotiation terms are either established or the connection is terminated because terms could not be agreed upon.
+If sending a packet that is larger than the negotiated maximum packet size, it must be fragmented. This command is the first in a series of fragment commands that define the entire fragment. 
 
-##### Protocol Version Negotiation
+If the session supports it, fragmented data is commonly compress. It's possible that a compressed data fits into a single fragment, therefore this command will not be followed by subsequent `NextFragment` commands. 
 
-Future STTP protocol versions can include different session negotiation options, so the first session negotiation step is always to establish the protocol version to use. Immediately after connecting, the publisher must start the protocol version negotiation process by sending the `NegotiateSession` command to the subscriber that shall contain information on the available protocol versions that the publisher supports. The subscriber shall be waiting for this initial publisher command; if the subscriber does not receive the command in a timely fashion (time interval controlled by configuration), the subscriber should disconnect.
-
-The payload of the first `NegotiateSession` command sent by the publisher shall be an instance of the `ProtocolVersions` structure, defined as follows, that iterates the versions of the STTP protocol that are supported:
+Fragmented packets must be sent one at a time in sequence and cannot be interwoven with any other kind of command.
 
 ```C
 struct {
-  uint8 count;
-  Version[] versions;
+  int32 totalFragmentSize;          //The size of all fragments of the fragmented packet
+  int32 totalRawSize;               //The uncompressed size of all of the compressed segments
+  int8 commandCode;                 //The CommandCode of the data that is fragmented
+  int8 compressionMode;             //The compression algorithm that compressed this packet. Can be None.
+  //(uint16) lengthOfFirstFragment  //This field is not specified and is implied from the packet header. Packet Length - 13
+  uint8[] firstFragment             //This is the first fragment of the data.
 }
-ProtocolVersions;
-
+BeginFragmentCommand;
 ```
-- The `count` field defines the total number of elements in the `versions` field array.
-- The `versions` field is an array of [`Version`](Definitions.md#version-structure) structures.
 
-Since the current version of this specification only defines details for version 1.0 of STTP, the initial `NegotiateSession` command payload from the publisher shall be an instance of the `ProtocolVersions` structure with a `count` value of `1` and a single element `versions` array where `versions[0].major` is `1` and `versions[0].minor` is `0`.
+#### Next Fragment Command
 
-When the first `NegotiateSession` command is received from the publisher, the subscriber must send either a `Succeeded` or `Failed` response for the `NegotiateSession` command indicating its ability to support one of the specified protocol versions.
+This packet always follows `BeginFragment` and will be repeated in order until all of the data has been transmitted. 
 
-If the subscriber can support one of the protocols specified by the publisher, the `Succeeded` response payload shall be an instance of the `ProtocolVersions` structure with a `count` of `1` and a single element `versions` array that indicates the protocol version to be used.
-
-If the subscriber cannot support one of the protocols specified by the publisher, the `Failed` response payload shall be an instance of the `ProtocolVersions` structure filled out with the supported protocols. In case of failure, both the publisher and subscriber should terminate the connection since no protocol version could be agreed upon.
-
-When a `Succeeded` response for the first `NegotiateSession` command is received from the subscriber, the publisher should validate the subscriber selected protocol version. If the publisher does not agree with the protocol version selected by the subscriber, the publisher shall send a `Failed` response for the `NegotiateSession` command with an empty payload and terminate the connection since no protocol version could be agreed upon. If the publisher accepts the subscriber selected protocol version, the negotiation will continue with the selection of operational modes.
-
-After sending a `Succeeded` response to the first `NegotiateSession` command, the subscriber shall be waiting for either a `Failed` response from the publisher or the second `NegotiateSession` command; if the subscriber does not receive a command or response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect.
-
-##### Operational Modes Negotiation
-
-For version `1.0` of STTP, if the protocol version negotiation step succeeds, the next negotiation will be for the desired operational modes. The payload of the second `NegotiateSession` command sent by the publisher shall be an instance of the `OperationalModes` structure, defined as follows, that iterates the supported string encodings, whether UDP broadcasts are allowed and the available stateful and stateless compression algorithms (see [compression algorithms](#compression)):
+There is not a Finished command, therefore, once the total number of bytes have been transmitted as defined in `BeginFragment`. The command has completed. 
 
 ```C
 struct {
-  uint16 udpPort;
-  NamedVersions stateful;
-  NamedVersions stateless;
+  //(int32) offset            //This is implied. It's the total number of bytes that have been received thus far.
+  //(int32) lengthOfFragment  //This field is implied. Packet Length - 3.
+  uint8[] fragment            //The next fragment of the sequence.
 }
-OperationalModes;
+NextFragmentCommand;
 ```
-- The `udpPort` field meaning depends on the usage context:
-  - When sent with the publisher command payload, field is used to indicate publisher support of UDP. A value of zero indicates that UDP broadcasts are not supported and any non-zero value indicates that UDP broadcasts are supported.
-  - When sent with the subscriber response payload, field is used to indicate the desired subscriber UDP port for data channel functionality. A value of zero indicates that a UDP connection should not be established for subscriber data channel functionality.
-- The `stateful` field defines the [`NamedVersions`](Defintions.md#namedversions-structure) representing the algorithms to use for stateful compression operations.
-- The `stateless` field defines the [`NamedVersions`](Defintions.md#namedversions-structure) representing the algorithms to use for stateless compression operations.
 
-When the second `NegotiateSession` command is received from the publisher, the subscriber shall send either a `Succeeded` or `Failed` response for the `NegotiateSession` command indicating its ability to support a subset of the specified operational modes.
+#### Get Metadata Schema Command
 
-If the subscriber can support a subset of the operational modes allowed by the publisher, the `Succeeded` response payload shall be an instance of the `OperationalModes` structure with the specific values for the `encodings`, `udpPort`, `stateful` and `stateless` fields. The `encodings` field should specify a single flag designating the string encoding to use and both the `stateful` and `stateless` fields should define a `count` of `1` and a single element array that indicates the [compression algorithm](#compression) to be used where a named value of `NONE` with a version of `0.0` indicates that no compression should be used.
+Requests that the current version of the metadata database be sent, along with the schema. While this information is not required, 
+it's important to know this when checking if one's metadata is out of synchronization or if additional user defined metadata tables exist.
 
-If the subscriber cannot support a subset of the operational modes allowed by the publisher, the `Failed` response payload shall be an instance of the `OperationalModes` structure filled out with the supported operational modes. In case of failure, both the publisher and subscriber should terminate the connection since no protocol version could be agreed upon.
+```C
+struct {
+  bool includeSchema   //Without this set, the response will only include the database version and not the schema.
+}
+GetMetadataSchemaCommand;
+```
 
-When a `Succeeded` response for the second `NegotiateSession` command is received from the subscriber, the publisher should validate the subscriber selected operational modes. If the publisher does not agree with the operational modes selected by the subscriber, the publisher shall send a `Failed` response for the `NegotiateSession` command with an empty payload and terminate the connection since no operational modes could be agreed upon. If the publisher accepts the subscriber selected operational modes, then the publisher shall send a `Succeeded` response for the `NegotiateSession` command with an empty payload and the publisher will consider the session negotiations to be completed successfully.
+#### Get Metadata Command
 
-After sending a `Succeeded` response to the second `NegotiateSession` command, the subscriber shall be waiting for either a `Succeeded` or `Failed` response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect.
+Requests specific tables of metadata. If supported by the connection, custom queries and filters can be also be specified as part of the metadata request. There is only permitted one table per request.
 
-If the subscriber receives a `Succeeded` response for the `NegotiateSession` command from the publisher, the subscriber will consider the session negotiations to be completed successfully.
+```C
+struct {
+  guid schemaVersion          //If not Guid.Empty, is used to verify that the current schema has not changed.
+  int64 revision              //If isUpdateQuery=true, the query returns all changes since the specified revision
+  bool isUpdateQuery          //specifies if this query should only return the deltas, of the entire metadata result
+  SttpQueryExpresssion query  //The query itself. EX: SELECT * FROM Table where Column = 1234
+}
+GetMetadataCommand;
+```
 
-Once operational modes have been established for a session, the publisher and subscriber must exchange any string based payloads using the negotiated string encoding as specified by the subscriber.
+The results for this command are streamed and can be broken into multiple packets if needed.
 
-#### Metadata Refresh Command
-
-* Wire Format: Binary
-  * Includes current metadata version number
 
 #### Subscribe Command
 
-* Wire Format: Binary
-  * Includes metadata expression and/or individual Guids for desired data points
+Updates the subscription for new measurements. This update can be to add, remove, or replace an existing subscription.
 
-#### Unsubscribe Command
+This command is broken up into sub commands that can be combined into a single packet. The sub commands include:
 
-The subscriber shall issue an `Unsubscribe` with an empty payload to stop any existing data subscription.
+* Subcommands
+  * `ConfigureOptions` - Defines options for the measurements about to be selected. Such as priority; dead-banding; start/stop times; sample resolution.
+  * `AllDataPoints` - Subscribes to everything
+  * `DataPointByID` - Specifies individual data points
+  * `ByQuery` - Specifies some kind of query to use to select the measurements.
 
-Upon reception of the `Unsubscribe` command from a subscriber, the publisher must immediately cease publication of `DataPointPacket` commands to the specific subscriber that issued the command; also, the publisher shall send a `Succeeded` response for the `Unsubscribe` command with an empty payload. If for any reason the publisher cannot terminate the subscription, the publisher shall send a `Failed` response for the `Unsubscribe` command with a string based payload that describes the reason the subscription cannot be terminated.
-
-After sending an `Unsubscribe` command to the publisher, the subscriber shall be waiting for either a `Succeeded` or `Failed` response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect and not attempt to send further commands to stop the data subscription.
-
-If the subscriber receives a `Failed` response for the `Unsubscribe` command from the publisher, the subscriber should disconnect and not attempt to send further commands to stop the data subscription.
-
-Upon reception of a `Succeeded` response for the `Unsubscribe` command from the publisher, the subscriber should consider any cached signal mapping previously received from the publisher to now be invalid - accordingly any allocated memory for the cache should now be released.
-
-> :wrench: With reception of the `Succeeded` response for the `Unsubscribe` command the subscriber can be assured that the publisher has stopped sending further `DataPointPacket` commands, however, STTP implementations should anticipate that some data packets could still arrive depending on how much data was already queued for transmission. This may be more evident when a lossy communications protocol, e.g., UDP, is being used for data channel functionality and the `Succeeded` response for the `Unsubscribe` command is received on a reliable communications protocol, e.g., TCP.
-
-#### Secure Data Channel Command
-
-When data channel functions that are operating over a lossy communications protocol, e.g., UDP, and command channel functions are operating over a reliable communications protocol, e.g., TCP, that has been secured with TLS, then the subscriber can request that data channel functions can be secured by issuing a `SecureDataChannel` command.
-
-The `SecureDataChannel` command should only be issued when a lossy communications protocol, e.g., UDP, has been defined for data channel functions. If a subscriber issues the `SecureDataChannel` command for a session that has not defined a lossy communications protocol for data channel functions, the publisher shall send a `Failed` response for the `SecureDataChannel` command with a string based payload that indicates that data channel functions can only be secured when a lossy communications protocol has been established. This error condition should equally apply when UDP broadcasts are not supported by the publisher.
-
-The `SecureDataChannel` command should only be issued when command channel functions are already secured using TLS. If a subscriber issues the `SecureDataChannel` command for a session with a command channel connection that has not been secured using TLS, the publisher shall send a `Failed` response for the `SecureDataChannel` command with a string based payload that indicates that data channel functions can only be secured when command channel functions are already secured using TLS.
-
-The `SecureDataChannel` command should be issued prior to the `Subscribe` command to ensure data channel functions are secured before transmission of `DataPointPacket` commands. If a subscriber issues the `SecureDataChannel` command for a session that already has an active subscription, the publisher shall send a `Failed` response for the `SecureDataChannel` command with a string based payload that indicates that data channel functions cannot be secured after a subscription has already been initiated.
-
-If data channel functions can be secured, the publisher shall send a `Succeeded` response for the `SecureDataChannel` command with a payload that shall be an instance of the `DataChannelKeys` structure, defined as follows, that establishes the symmetric encryption keys and associated initialization vector used to secure the data channel:
+```C
+enum {
+  Replace,
+  Remove,
+  Append,
+}
+SubscriptionMode;
+```
 
 ```C
 struct {
-  uint16 ivLength;
-  uint8[] iv;
-  uint16 keyLength;
-  uint8[] key;
+  SubCommand ConfigureOptions
+  SubscriptionMode mode
+  SttpNamedSet options  //A set of options for the points about to be specified.
 }
-DataChannelKeys;
+ConfigureOptions;
 ```
-- The `ivLength` field defines the length of the `iv` array in bytes.
-- The `iv` field is a byte array representing the initialization vector.
-- The `keyLength` field defines the length of the `key` array in bytes.
-- The `key` field is a byte array representing the encryption key.
 
-Upon the publisher sending the `Succeeded` response for the `SecureDataChannel` command, all data function payloads for commands and responses sent by the publisher to the subscriber over the lossy communications protocol must be encrypted using the AES symmetric encryption algorithm with a key size of 256 using the specified subscriber key and initialization vector.
+```C
+struct {
+  SubCommand AllDataPoints
+  SubscriptionMode mode
+}
+AllDataPoints;
+```
 
-After sending a `SecureDataChannel` command to the publisher, the subscriber shall be waiting for either a `Succeeded` or `Failed` response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect.
+```C
+struct {
+  SubCommand DataPointByID
+  SubscriptionMode mode
+  SttpPointID[] points       //An array of points.
+}
+DataPointByID;
+```
 
-If the subscriber receives a `Failed` response for the `SecureDataChannel` command from the publisher, the subscriber should disconnect.
+```C
+struct {
+  SubCommand ByQuery
+  SubscriptionMode mode
+  SttpQueryExpression query       //A query that specifies the points to use. The columns specified in the query must be SttpPointID
+}
+ByQuery;
+```
 
-> :wrench: Failure responses from the publisher will either be from a configuration mismatch or an order of operations issue, STTP implementations should make subscribers aware of the possible exception causes so that the issue can be corrected.
-
-Upon reception of a `Succeeded` response for the `SecureDataChannel` command from the publisher, the subscriber must take the received key and initialization vector and decrypt each payload received over the lossy communications protocol using the AES symmetric encryption algorithm with a key size of 256.
-
-> :wrench: It is presumed that communications over a lossy communications protocol, e.g., UDP, will flow from the publisher to the subscriber. If an implementation of STTP is ever established such traffic would flow from the subscriber to the publisher over a lossy communications channel, then to be secured, this traffic would need to be encrypted by the subscriber and decrypted by the publisher.
-
-#### Data Point Packet Command
-
-Data point packet commands are sent without the expectation of a response, as such data point packet commands can be transmitted over a lossy communications protocol, e.g., UDP, and thus are suitable for data channel functionality.
-
-* Wire Format: Binary
-  * Includes a byte flag indicating content, e.g.:
-    * Data compression mode, if any
-    * Total data points in packet
-  * Includes serialized data points
-
-> :information_source: The data point packet commands are sent continuously after a successful `subscribe` command and will continue to flow for available measurements until an `unsubscribe` command is issued.
-
-#### Runtime ID Mapping Command
-
-* Wire Format: Binary
-  * Includes a mapping of data point Guids to run-time signal IDs
-  * Includes per data point ownership state, rights and delivery characteristic details
+Some examples of what can be exchanged in the ConfigureOptions include these items.
 
 Signal mapping structures:
 
@@ -850,28 +826,199 @@ enum {
   ReservedFlag = 1 << 15        // Reserved flag
 }
 StateFlags; // sizeof(uint16), 2-bytes
-
-struct {
-  guid uniqueID;    // Unique data point identifier - maps to metadata DataPoint.UniqueID
-  uint32 runtimeID; // Runtime identifier as referenced by DataPoint
-  ValueType type;   // Value type of DataPoint
-  StateFlags flags; // State flags for DataPoint
-}
-DataPointKey; // 23-bytes
-
-enum {
-  FullSet = 0,    // Data point keys represent a new full set of keys
-  UpdatedSet = 1, // Data point keys represent keys to be added and removed
-}
-SetType; // sizeof(uint8), 1-byte
-
-struct {
-  SetType type;
-  uint32 count;
-  DataPointKey[] keys;
-}
-DataPointKeySet;
 ```
+
+#### Send Data Points Command
+
+Data point packet commands are sent without the expectation of a response, as such data point packets can be transmitted over a lossy communications protocol, e.g., UDP, and thus are suitable for data channel functionality.
+
+Detailed serialization of this packet is described in a different section. However, the general form of the structure looks like the following.
+
+```C
+struct {
+  SttpDataPoint[] points     
+}
+SendDataPoints;
+```
+
+There are other custom encoding methods that can be optionally supported, but this encoding method is designed to catch all encoding cases.
+
+
+> :information_source: The data point packet commands are sent continuously after a successful `subscribe` command and will continue to flow for available measurements until a `subscribe` that unsubscribes from all measurements is issued.
+
+#### Send Data Points Custom Command
+
+A number of custom encoding methods will be supplied that will optimize encoding for special cases. These are specified in the appendix. These encoding methods are optional and are negotiated during the Negotiate Sesssion stage.
+
+```C
+struct {
+  byte encodingMethod     
+  byte[] data
+}
+SendDataPointsCustom;
+```
+
+
+#### Runtime ID Mapping Command
+
+Identifies which DataPointIDs are mapped to runtime IDs. Not all DataPointIDs must be mapped to runtimeIDs, however, the exact number that can be mapped are identified during the Negotiate Session phase.
+
+```C
+struct {
+  SttpPointID[] points
+}
+RuntimeIDMapping;
+```
+
+#### Negotiate Session Command
+
+After a successful connection has been established, the publisher and subscriber shall participate in an initial set of negotiations that will determine the STTP protocol version and operational modes of the session. The negotiation happens with the `NegotiateSession` command code which must be the first command sent after a successful publisher/subscriber connection. The command is sent before any other commands or responses are exchanged so that the "ground-rules" for the communications session can be established. Once the session negotiations for the protocol version and operational modes have been established they must not change for the lifetime of the session.
+
+Session negotiation is a multi-step process with commands and responses being sent by the publisher and subscriber until negotiation terms are either established or the connection is terminated because terms could not be agreed upon.
+
+This command is broken up into sub commands. The sub commands include:
+
+* Subcommands
+  * `InitiateReverseConnection` - The connecting client desires to act as the server.
+  * `GetAllInstances` - Request all named instances on the server.
+  * `ChangeInstance` - Requests to change the instance connected to.
+  * `SupportedFuncationality` - Tell the server what functions/versions are supported by your client.
+  * `ChangeUdpCipher` - Indicates that the UDP cipher needs to be changed.
+
+
+##### Protocol Version Negotiation
+
+>TODO: This has changed, but functionally still exists in the `SupportedFunctionalty` command.
+
+Future STTP protocol versions can include different session negotiation options, so the first session negotiation step is always to establish the protocol version to use. Immediately after connecting, the publisher must start the protocol version negotiation process by sending the `NegotiateSession` command to the subscriber that shall contain information on the available protocol versions that the publisher supports. The subscriber shall be waiting for this initial publisher command; if the subscriber does not receive the command in a timely fashion (time interval controlled by configuration), the subscriber should disconnect.
+
+The payload of the first `NegotiateSession` command sent by the publisher shall be an instance of the `ProtocolVersions` structure, defined as follows, that iterates the versions of the STTP protocol that are supported:
+
+```C
+struct {
+  uint8 count;
+  Version[] versions;
+}
+ProtocolVersions;
+
+```
+- The `count` field defines the total number of elements in the `versions` field array.
+- The `versions` field is an array of [`Version`](Definitions.md#version-structure) structures.
+
+Since the current version of this specification only defines details for version 1.0 of STTP, the initial `NegotiateSession` command payload from the publisher shall be an instance of the `ProtocolVersions` structure with a `count` value of `1` and a single element `versions` array where `versions[0].major` is `1` and `versions[0].minor` is `0`.
+
+When the first `NegotiateSession` command is received from the publisher, the subscriber must send either a `Succeeded` or `Failed` response for the `NegotiateSession` command indicating its ability to support one of the specified protocol versions.
+
+If the subscriber can support one of the protocols specified by the publisher, the `Succeeded` response payload shall be an instance of the `ProtocolVersions` structure with a `count` of `1` and a single element `versions` array that indicates the protocol version to be used.
+
+If the subscriber cannot support one of the protocols specified by the publisher, the `Failed` response payload shall be an instance of the `ProtocolVersions` structure filled out with the supported protocols. In case of failure, both the publisher and subscriber should terminate the connection since no protocol version could be agreed upon.
+
+When a `Succeeded` response for the first `NegotiateSession` command is received from the subscriber, the publisher should validate the subscriber selected protocol version. If the publisher does not agree with the protocol version selected by the subscriber, the publisher shall send a `Failed` response for the `NegotiateSession` command with an empty payload and terminate the connection since no protocol version could be agreed upon. If the publisher accepts the subscriber selected protocol version, the negotiation will continue with the selection of operational modes.
+
+After sending a `Succeeded` response to the first `NegotiateSession` command, the subscriber shall be waiting for either a `Failed` response from the publisher or the second `NegotiateSession` command; if the subscriber does not receive a command or response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect.
+
+##### Operational Modes Negotiation
+
+>TODO: This has changed, but functionally still exists in the `SupportedFunctionalty` command.
+
+For version `1.0` of STTP, if the protocol version negotiation step succeeds, the next negotiation will be for the desired operational modes. The payload of the second `NegotiateSession` command sent by the publisher shall be an instance of the `OperationalModes` structure, defined as follows, that iterates the supported string encodings, whether UDP broadcasts are allowed and the available stateful and stateless compression algorithms (see [compression algorithms](#compression)):
+
+```C
+struct {
+  uint16 udpPort;
+  NamedVersions stateful;
+  NamedVersions stateless;
+}
+OperationalModes;
+```
+- The `udpPort` field meaning depends on the usage context:
+  - When sent with the publisher command payload, field is used to indicate publisher support of UDP. A value of zero indicates that UDP broadcasts are not supported and any non-zero value indicates that UDP broadcasts are supported.
+  - When sent with the subscriber response payload, field is used to indicate the desired subscriber UDP port for data channel functionality. A value of zero indicates that a UDP connection should not be established for subscriber data channel functionality.
+- The `stateful` field defines the [`NamedVersions`](Defintions.md#namedversions-structure) representing the algorithms to use for stateful compression operations.
+- The `stateless` field defines the [`NamedVersions`](Defintions.md#namedversions-structure) representing the algorithms to use for stateless compression operations.
+
+When the second `NegotiateSession` command is received from the publisher, the subscriber shall send either a `Succeeded` or `Failed` response for the `NegotiateSession` command indicating its ability to support a subset of the specified operational modes.
+
+If the subscriber can support a subset of the operational modes allowed by the publisher, the `Succeeded` response payload shall be an instance of the `OperationalModes` structure with the specific values for the `encodings`, `udpPort`, `stateful` and `stateless` fields. The `encodings` field should specify a single flag designating the string encoding to use and both the `stateful` and `stateless` fields should define a `count` of `1` and a single element array that indicates the [compression algorithm](#compression) to be used where a named value of `NONE` with a version of `0.0` indicates that no compression should be used.
+
+If the subscriber cannot support a subset of the operational modes allowed by the publisher, the `Failed` response payload shall be an instance of the `OperationalModes` structure filled out with the supported operational modes. In case of failure, both the publisher and subscriber should terminate the connection since no protocol version could be agreed upon.
+
+When a `Succeeded` response for the second `NegotiateSession` command is received from the subscriber, the publisher should validate the subscriber selected operational modes. If the publisher does not agree with the operational modes selected by the subscriber, the publisher shall send a `Failed` response for the `NegotiateSession` command with an empty payload and terminate the connection since no operational modes could be agreed upon. If the publisher accepts the subscriber selected operational modes, then the publisher shall send a `Succeeded` response for the `NegotiateSession` command with an empty payload and the publisher will consider the session negotiations to be completed successfully.
+
+After sending a `Succeeded` response to the second `NegotiateSession` command, the subscriber shall be waiting for either a `Succeeded` or `Failed` response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect.
+
+If the subscriber receives a `Succeeded` response for the `NegotiateSession` command from the publisher, the subscriber will consider the session negotiations to be completed successfully.
+
+Once operational modes have been established for a session, the publisher and subscriber must exchange any string based payloads using the negotiated string encoding as specified by the subscriber.
+
+##### Secure Data Channel
+
+When data channel functions that are operating over a lossy communications protocol, e.g., UDP, and command channel functions are operating over a reliable communications protocol, e.g., TCP, that has been secured with TLS, then the subscriber can request that data channel functions can be secured by issuing a `SecureDataChannel` command.
+
+The `SecureDataChannel` command should only be issued when a lossy communications protocol, e.g., UDP, has been defined for data channel functions. If a subscriber issues the `SecureDataChannel` command for a session that has not defined a lossy communications protocol for data channel functions, the publisher shall send a `Failed` response for the `SecureDataChannel` command with a string based payload that indicates that data channel functions can only be secured when a lossy communications protocol has been established. This error condition should equally apply when UDP broadcasts are not supported by the publisher.
+
+The `SecureDataChannel` command should only be issued when command channel functions are already secured using TLS. If a subscriber issues the `SecureDataChannel` command for a session with a command channel connection that has not been secured using TLS, the publisher shall send a `Failed` response for the `SecureDataChannel` command with a string based payload that indicates that data channel functions can only be secured when command channel functions are already secured using TLS.
+
+The `SecureDataChannel` command should be issued prior to the `Subscribe` command to ensure data channel functions are secured before transmission of `DataPointPacket` commands. If a subscriber issues the `SecureDataChannel` command for a session that already has an active subscription, the publisher shall send a `Failed` response for the `SecureDataChannel` command with a string based payload that indicates that data channel functions cannot be secured after a subscription has already been initiated.
+
+If data channel functions can be secured, the publisher shall send a `Succeeded` response for the `SecureDataChannel` command with a payload that shall be an instance of the `DataChannelKeys` structure, defined as follows, that establishes the symmetric encryption keys and associated initialization vector used to secure the data channel:
+
+```C
+struct {
+  uint16 nonceLength;
+  uint8[] nonce;
+}
+ChangeUdpCipher;
+```
+
+> ToDO: We also need a way to send the encryption key if UDP only.
+
+- Both the server and the client specify a random number to prevent the key from being repeated or set to 000's
+- The `key` field is a byte array computed from SHA256(ServerNonce || ClientNonce).
+- The `iv` field is the first 16 bytes of the byte array computed from SHA256(ClientNonce || ServerNonce).
+
+Upon the publisher sending the `Succeeded` response for the `SecureDataChannel` command, all data function payloads for commands and responses sent by the publisher to the subscriber over the lossy communications protocol must be encrypted using the AES symmetric encryption algorithm with a key size of 256 using the specified subscriber key and initialization vector.
+
+After sending a `SecureDataChannel` command to the publisher, the subscriber shall be waiting for either a `Succeeded` or `Failed` response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect.
+
+If the subscriber receives a `Failed` response for the `SecureDataChannel` command from the publisher, the subscriber should disconnect.
+
+> :wrench: Failure responses from the publisher will either be from a configuration mismatch or an order of operations issue, STTP implementations should make subscribers aware of the possible exception causes so that the issue can be corrected.
+
+Upon reception of a `Succeeded` response for the `SecureDataChannel` command from the publisher, the subscriber must take the received key and initialization vector and decrypt each payload received over the lossy communications protocol using the AES symmetric encryption algorithm with a key size of 256.
+
+> :wrench: It is presumed that communications over a lossy communications protocol, e.g., UDP, will flow from the publisher to the subscriber. If an implementation of STTP is ever established such traffic would flow from the subscriber to the publisher over a lossy communications channel, then to be secured, this traffic would need to be encrypted by the subscriber and decrypted by the publisher.
+
+
+
+#### Unsubscribe Command
+
+>TODO: This command has been replaced with a Subscripe, Remove, All command.
+
+The subscriber shall issue an `Unsubscribe` with an empty payload to stop any existing data subscription.
+
+Upon reception of the `Unsubscribe` command from a subscriber, the publisher must immediately cease publication of `DataPointPacket` commands to the specific subscriber that issued the command; also, the publisher shall send a `Succeeded` response for the `Unsubscribe` command with an empty payload. If for any reason the publisher cannot terminate the subscription, the publisher shall send a `Failed` response for the `Unsubscribe` command with a string based payload that describes the reason the subscription cannot be terminated.
+
+After sending an `Unsubscribe` command to the publisher, the subscriber shall be waiting for either a `Succeeded` or `Failed` response from the publisher; if the subscriber does not receive a response in a timely fashion (time interval controlled by configuration), the subscriber should disconnect and not attempt to send further commands to stop the data subscription.
+
+If the subscriber receives a `Failed` response for the `Unsubscribe` command from the publisher, the subscriber should disconnect and not attempt to send further commands to stop the data subscription.
+
+Upon reception of a `Succeeded` response for the `Unsubscribe` command from the publisher, the subscriber should consider any cached signal mapping previously received from the publisher to now be invalid - accordingly any allocated memory for the cache should now be released.
+
+> :wrench: With reception of the `Succeeded` response for the `Unsubscribe` command the subscriber can be assured that the publisher has stopped sending further `DataPointPacket` commands, however, STTP implementations should anticipate that some data packets could still arrive depending on how much data was already queued for transmission. This may be more evident when a lossy communications protocol, e.g., UDP, is being used for data channel functionality and the `Succeeded` response for the `Unsubscribe` command is received on a reliable communications protocol, e.g., TCP.
+
+
+#### Bulk Transport Command
+
+This command has the ability of sending large blocks of data over STTP.
+
+This command is broken up into sub commands. The sub commands include:
+
+* Subcommands
+  * `BeginSend` - Indicates a new large block of data is on its way.
+  * `SendFragment` - Indicates that a new fragment of data is being sent.
+  * `CancelSend` - Indicates that a send operation is being canceled.
+
 
 #### NoOp Command
 
@@ -889,30 +1036,87 @@ Upon reception of a `Succeeded` response for the `NoOp` command from the receive
 
 ### Responses
 
-The following table defines the responses to commands that can be sent by STTP. Currently the only defined responses are `Succeeded` or `Failed`. The payload of the response message depends on the command code the message is in response to.
+The following table defines the responses to commands that can be sent by STTP. 
 
 | Code | Type | Source | Description |
 |:----:|------|:------:|-------------|
-| 0x80 | [Succeeded](#succeeded-response) | Any | Command request succeeded. Response success payload, if any, included. |
-| 0x81 | [Failed](#failed-response) | Any | Command request failed. Response error payload, if any, included. |
+| 0x80 | [GetMetadataSchemaResponse](#get-metadata-schema-response) | Publisher | Sends the schema for the metadata to the Subscriber |
+| 0x81 | [GetMetadataResponse](#get-metadata-response) | Publisher | Sends metadata results to the Subscriber. |
+| 0x82 | [NegotiateSessionResponse](#negotiate-session-response) | Publisher | Responds to negotiate session commands. |
+| 0x83 | [RequestSucceeded](#request-succeeded) | Any | Command request succeeded. |
+| 0x84 | [RequestFailed](#request-failed) | Any | Command request failed. Response error payload, if any, included. |
 
-#### Succeeded Response
+#### Get Metadata Schema Response
 
-A response with a type `Succeeded` is intended to represent a successful reply for a command function. See associated [command code](#commands) for proper response payload.
+Responds with the schema for the metadata
 
-#### Failed Response
+```C
+struct {
+  MetadataSchema schema;   //The command code that succeeded.
+}
+GetMetadataSchema;
+```
 
-A response with a type `Failed` is intended to represent a failure reply for a command function. See associated [command code](#commands) for proper response payload.
+#### Get Metadata Response
 
+Responds with the metadata.
+
+* Subcommands
+  * `VersionNotCompatible` - If SchemaVersion does not match the current one, or if revision is too old to do an update query on.
+  * `DefineTable` - Defines the response Table.
+  * `DefineRow` - Defines a row of the data.
+  * `UndefineRow` - For update queries, indicates this row should be removed if it exists.
+  * `Finished` - Indicates that the streaming of the table has completed.
+
+#### Negotiate Session Response
+
+Responds to the NegotiateSession command.
+
+* Subcommands
+  * `ChangeInstanceSuccess` - Changes the active instance of the connection.
+  * `ChangeUdpCipherResponse` - Returns data and agrees to change the UDP cipher.
+  * `DesiredOperation` - Reply to SupportedFunctionality, indicates the selected mode of operation.
+  * `InstanceList` - The list of all instances this server has.
+  * `ReverseConnectionSuccess` - Transfers the role of server to the client.
+
+#### Request Succeeded
+
+A response with a type `Succeeded` is intended to represent a successful reply for a command function. See associated [command code](#commands) for proper response.
+
+```C
+struct {
+  CommandCode command;     //The command code that succeeded.
+  string Reason;           //A user friendly message for the success, can be null.
+  string Details;          //A not so friendly message more helpful for troubleshooters.
+}
+RequestSucceeded;
+```
+
+#### Request Failed
+
+A response with a type `Failed` is intended to represent a failure reply for a command function. See associated [command code](#commands) for proper response.
+
+```C
+struct {
+  CommandCode command;       //The command code that failed.
+  bool TerminateConnection;  //Indicates that the connection should be terminated for a failure.
+  string Reason;             //A user friendly message for the failure, can be null.
+  string Details;            //A not so friendly message more helpful for troubleshooters.
+}
+RequestSucceeded;
+```
 ## Data Point Structure
 
 When a subscriber has issued a [subscribe command](#subscribe-command) to its publisher for select set of data points, the publisher will start sending [data point packet commands](#data-point-packet-commands) each with a payload of several data point values serialized using the `DataPoint` structure, defined as follows:
 
 ```C
 struct {
-  uint32 id;
-  uint8[] value;    // Size based on type, up to 64-bytes
-  uint8[] state;    // Size based on flags, up to 26-bytes
+  DataPointIdentifier id;
+  SttpTimestamp timestamp;
+  SttpValue value; 
+  TimeQualityFlags timeQuality;
+  ValueQualityFlags valueQuality;
+  SttpValue[] ExtraFields;        //A set of extra fields that are reserved for future need.
 }
 DataPoint;
 ```
@@ -928,31 +1132,67 @@ The actual number of `DataPoint` structures contained in the data point packet c
 
 > :information_source: The maximum size of a `DataPoint` structure instance is 94-bytes, however, with simple encoding techniques this size can be reduced down to a few bytes for most value types.
 
-### Data Point Value Types
+### Data Point Identifier
 
-The data types available to a `DataPoint` are described in the `ValueType` enumeration, defined below, along with any needed associated structures:
+When identifying a Data Point, one of 4 mechanics can be used to identify the source of the time series data.
+
+* [Guid] An integer identifier - This does not have to be a true GUID, but can be any integer that can fit in a 128 bit integer.
+* [String] A string identifier - This is commonly referred to as a tag in a time series databases.
+* [SttpNamedSet] A Connection String - A set of [string Name, SttpValue value] that uniquely identify the source of a point ID.
+* [Int32] Runtime ID - Runtime ID's are negotiated with the connection and are the default value type in the Data Point Structure.
 
 ```C
 enum {
-  Null = 0,     // 0-bytes
-  SByte = 1,    // 1-byte
-  Int16 = 2,    // 2-bytes
-  Int32 = 3,    // 4-bytes
-  Int64 = 4,    // 8-bytes
-  Byte = 5,     // 1-byte
-  UInt16 = 6,   // 2-bytes
-  UInt32 = 7,   // 4-bytes
-  UInt64 = 8,   // 8-bytes
-  Decimal = 9,  // 16-bytes
-  Double = 10,  // 8-bytes
-  Single = 11,  // 4-bytes
-  Ticks = 12,   // 8-bytes
-  Bool = 13,    // 1-byte
-  Guid = 14,    // 16-bytes
-  String = 15,  // 64-bytes, max
-  Buffer = 16   // 64-bytes, max
+  RuntimeID = 0,   // 4-bytes
+  Guid = 1,        // 16-bytes
+  String = 2,      // variable
+  NamedSet = 3,    // variable
 }
-ValueType; // sizeof(uint8), 1-byte
+DataPointIdentifierTypeCode; // 2 bits
+
+struct {
+  DataPointIdentifierTypeCode identifierType;
+  uint8[] identifer;    
+}
+DataPointIdentifier;
+```
+
+While the normal use case is to use RuntimeIDs, for systems that have an indefinite number of IDs, it's not practical to map every 
+point to a Runtime ID. In this case, it's allowed to send the identifier with the measurement.
+
+### Sttp Value Types
+
+The data types available to a `DataPoint` are described in the `ValueType` enumeration, defined below:
+
+```C
+enum {
+  Null = 0,              // 0-bytes
+  SByte = 1,             // 1-byte
+  Int16 = 2,             // 2-bytes
+  Int32 = 3,             // 4-bytes
+  Int64 = 4,             // 8-bytes
+  Byte = 5,              // 1-byte
+  UInt16 = 6,            // 2-bytes
+  UInt32 = 7,            // 4-bytes
+  UInt64 = 8,            // 8-bytes
+  Single = 9,            // 4-bytes
+  Double = 10,           // 8-bytes
+  Decimal = 11,          // 16-bytes
+  DateTime = 12,         // Local/Universal/Unspecified/Unambiguous Date Time
+  DateTimeOffset = 13,   // Local/Universal/Unspecified/Unambiguous Date Time with an offset.
+  SttpTime = 14,         // Local/Universal Time with Leap Seconds
+  SttpTimeOffset = 15,   // Local/Universal Time with Leap Seconds and timezone offset.
+  TimeSpan = 16,         // 8 bytes  
+  Bool = 17,             // 1-byte
+  Char = 18,             // 2-bytes
+  Guid = 19,             // 16-bytes
+  String = 20,           // Limit defined in NegotiateSession
+  Buffer = 21,           // Limit defined in NegotiateSession
+  ValueSet = 22,         // An array of SttpValue. Up to 255 elements.
+  NamedSet = 23,         // An array of [string,SttpValue]. Up to 255 elements. Like a connection string.
+  BulkTransportGuid = 24 // A special type of GUID that indicates it is transmitted out of band.
+}
+ValueTypeCode; // sizeof(uint8), 1-byte
 ```
 
 - `Null`: No space occupied
@@ -970,63 +1210,19 @@ ValueType; // sizeof(uint8), 1-byte
 - `Bool`: [Boolean as 8-bit Unsigned Integer](https://en.wikipedia.org/wiki/Boolean_data_type) (1-byte, big-endian, zero is `false`, non-zero value is `true`)
 - `Guid`: [Globally Unique Identifer](https://en.wikipedia.org/wiki/Universally_unique_identifier) (16-bytes, big-endian for all components)
 - `Time`: [Time as `Timestamp`](https://en.wikipedia.org/wiki/System_time) (16-bytes, see [data point timestamp](#data-point-timestamp))
-- `String` [Character String as `StringValue`](https://en.wikipedia.org/wiki/String_%28computer_science%29) (Maximum of 64-bytes - 1-byte header with 63-bytes of character data, encoding is UTF8)
-- `Buffer` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) (Maximum of 64-bytes - 1-byte header with 63-bytes of data)
+- `String` [Character String as `StringValue`](https://en.wikipedia.org/wiki/String_%28computer_science%29) (encoding is UTF8)
+- `Buffer` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) 
 
-Both the `String` and `Buffer` represent variable length data types. Each variable length data point will have a fixed maximum number of bytes that can be transmitted per instance of the `DataPoint` structure. For data sets larger then the specified maximum size, data will need to be fragmented, marked with a [sequence number](#data-point-sequence-number) and transmitted in small chunks, i.e., 63-byte segments. For this large data set collation scenario, it is expected that the data packets will be transmitted over a reliable transport protocol, e.g., TCP, otherwise the subscriber should expect the possibility of missing fragments. Details for the content of the `String` type which is the `StringValue` structure and the `Buffer` type which is the `BufferValue` structure are defined as follows:
-
-```C
-struct {
-  uint8 length;
-  uint8[] data; // Maximum size of 63
-}
-StringValue;
-
-struct {
-  uint8 length;
-  uint8[] data; // Maximum size of 63
-}
-BufferValue;
-```
-
-> :construction: Some tests need to be run to determine if 64-bytes of variable string / buffer data is an effective use of space and provides optimal performance in data point packets. This target size may need to be an adjustable parameter in initial STTP implementations.
 
 ### Data Point Timestamp
 
-The timestamp format for STTP is defined to accommodate foreseeable use cases and requirements for representations of time and elapsed time spans. The following defines the binary format of a `Timestamp` structure which consists of epoch based whole seconds and any fraction of a second. The timestamp fraction also includes a bit for indication of a leap-second in progress.
-
-```C
-enum {
-  MillisecondMask = 0x0FFC000000000000, // (fraction >> 50) & 1023
-  MicrosecondMask = 0x0003FF0000000000, // (fraction >> 40) & 1023
-  NanosecondMask  = 0x000000FFC0000000, // (fraction >> 30) & 1023
-  PicosecondMask  = 0x000000003FF00000, // (fraction >> 20) & 1023
-  FemtosecondMask = 0x00000000000FFC00, // (fraction >> 10) & 1023
-  AttosecondMask  = 0x00000000000003FF, // fraction & 1023
-  Leapsecond      = 0x1000000000000000, // Set if leap-second is in progress
-  ReservedBits    = 0xE000000000000000
-}
-FractionFlags; // sizeof(uint64), 8-bytes
-
-struct {
-  int64 seconds;          // Seconds since 1/1/0001
-  FractionFlags fraction; // Fractional seconds
-}
-Timestamp; // 16-bytes
-```
-
-- The `seconds` field defines the whole seconds since 1/1/0001 with a range of 584 billion years, i.e., +/-292 billion years.
-- The `fraction` field is an instance of the `FractionFlags` enumeration that defines the fractional seconds for the timestamp with a resolution down to attoseconds. More specifically, the `fraction` field is broken up into 10-bit segments where each segment represents 1,000 units, 0 to 999, of fractional time - similar to a binary coded decimal. There are 10-bits for milliseconds, 10-bits for microseconds, 10-bits for nanoseconds, 10-bits for picoseconds, 10-bits for femtoseconds, and 10-bits for attoseconds. Bit 60 is used to indicate a leap-second is in progress; the remaining 3-bits, 61-63, are reserved.
-
-> :information_source: The size of a `Timestamp` structure instance is 16-bytes, however, simple encoding techniques make it so that unused and repeating sections of time can be compressed out of the data point `state` so that it consumes much less space.
+The default timestamp that is used for Sttp has a bit reserved for LeapSecondInProgress. It takes the same structure as DateTime except, DateTimeKind.Ambiguious and DateTimeKind.Unspecified have been sacrificed for a leap second pending bit. 
 
 ### Data Point Time Quality Flags
 
 Data points can also include a `TimeQualityFlags` structure in the serialized state data, defined below, that describes both the timestamp quality, defined with the `TimeQuality` enumeration value, as well as an indication of if a timestamp was not measured with an accurate time source.
 
 The time quality detail is included for devices that have access to a GPS or UTC time synchronization source, e.g., from an IRIG timecode signal. For timestamps that are acquired without an accurate time source, e.g., using the local system clock, the `TimeQuality` value should be set to `Locked` and the `TimeQualityFlags.NoAccurateTimeSource` should be set.
-
-
 
 ```C
 enum {
@@ -1083,17 +1279,7 @@ DataQualityFlags; // sizeof(uint8), 1-byte
 
 > :information_source: These quality flags are intentionally simple to accommodate a very wide set of use cases and still provide some indication of data point value quality. More complex data qualities can exist as new data points.
 
-### Data Point Sequence Identifier
 
-For large buffers or strings being sent that span multiple data points, a new session based identifier needs to be established that represents the sequence. This is needed since different values for the same `DataPointKey.uniqueID` could overlap during interleave processing.
-
-For data that needs to be transmitted with a defined sequence identifier, the `DataPoint.flags` must include the `StateFlags.Sequence` flag.
-
-### Data Point Fragment Number
-
-For large buffers or strings being sent that span multiple data points, a fragment number defines the buffer index of a given sequence that can be used reassemble the sequence.
-
-For data that needs to be transmitted with a defined fragment number, the `DataPoint.flags` must include the `StateFlags.Fragment` flag.
 
 ## Data Point Encoding Types
 
@@ -1294,34 +1480,73 @@ Subscriber can request desired data point resolution characteristics to reduce d
 
 ## Metadata
 
-Metadata is exchanged in STTP as a table of records with attributes. When requesting all of the tables, a structure is returned as follows:
+Metadata is exchanged in STTP as a table of records with attributes. The complete list of tables available from an STTP publisher may be requested over the command channel. When requesting all of the tables, a structure is returned as follows:
 
-* (Guid) Base Version ID - Identifies a major change that requires a resync of all metadata. This is also used for devices that don't support metadata revision. This value can then be changed with each revision to the metadata.
-* (Int32) Latest Version Number - A incrementing change counter when metadata is modified.
-* (Int32) Table Count
-  * (Byte) Length of Table Name
-  * (String) Table Name
-  * (Int32) Last Modified Version Number
+### Table Types
+Three types of tables are defined in STTP.
 
-When requesting data from a Table, the following structure will be returned:
+* DataPoint Table - The DataPoint Table conveys metadata related to an STTP data point. Each publisher shall maintain zero or one DataPoint Table. The name of the table shall be 'DataPoint'. The publisher shall maintain one unique record with the DataPoint Table for each data point defined.
 
-* (Byte) Length of Table Name
-* (String) Table Name - Limited to 100 ASCII characters.
-* (Int32) Record Count
-  * (Guid) Record Identifier 
-  * (Int32) Last Modified Version Number
-  * (Int32) Attribute Count 
-    * (byte) Attribute Name Length.
-    * (String) Attribute Name - Limited to 100 ASCII characters.
-    * (Int32) Array Index - Defaults to 0. For attributes that support multiple values, these are indexed here.
-    * (Byte) The attribute value code. 
-    * (Int16) The size of the Attribute Value.
-    * (byte[]) Attribute Value
+> TO DO: Define complex data structure and complex data structure mapping in definitions section. A CDSM may be either 'built-in' or 'user-defined'. 'Built-in' CDSMs may differ by industry. In the electric power industry, an example of a 'built-in' CDSM is a phasor.
+* CDSM Table - A CDSM Table conveys metadata about a complex data structure. A publisher may maintain zero or more CDSM tables. A CDSM table shall only describe a CDSM defined at the publisher, and each record within the CDSM Table shall uniquely describe a corresponding mapping. An example of a CDSM in the transportation industry may be 'location', which is defined with two floating point values named 'latitude' and 'longitude'. Carrying forward this example, the desription attribute for a record within the Position Table might be, 'Location of Truck #42'.
+
+* Resource Table - A Resource Table conveys metadata related to a resource available in the publisher's asset base. A publisher may maintain zero or more resource tables to describe the desired asset hierarchy. A resource is any asset, whether hardware, software or physical, that relates to a data point transmitted over the wire. The simplest example of a resource is a sensor, or the transducer used to digitize a measured value.
+
+A maximum of 2^16 tables in any combination of the allowable types are permitted.
+
+### Commands
+
+Metadata commands are encapsulated into a Refresh Metadata packet. These commands are as follows.
+> Note: these commands describe
+what is required to make the server side metadata look like the client side metadata. Additional synchronization needs to occur
+at the client side API when synchronizing with it's main repository.
+
+* Response Publisher to Subscriber
+  * UseTable - Changes the active table
+    * int tableIndex
+  * AddTable - Adds or Replaces a table if it already exists.
+    * Guid majorVersion,
+    * long minorVersion,
+    * string tableName,
+    * TableFlags flags
+  * AddColumn - Adds a column.
+    * int columnIndex,
+    * string columnName,
+    * ValueType columnType
+  * AddValue - Adds or updates a value. Deleting a value would be to assign it with null.
+    * int columnIndex,
+    * int rowIndex,
+    * byte[] value
+  * DeleteRow - Removes an entire row of data.
+    * int rowIndex,
+  * TableVersion - Indicates what the current version of a table is.
+    * int tableIndex
+    * Guid majorVersion,
+    * long minorVersion,
+  * AddRelationship - Adds a table relationship. Sometimes known as a foreign key relationship.
+    * int tableIndex
+    * int columnIndex,
+    * int foreignTableIndex
+* Request Subscriber to Publisher
+  * GetTable - Requests metadata from the specified table.
+    * int tableIndex
+    * int columnListCount
+    * int[] columnIndexes
+    * int filterExpressions
+    * string[] filterExpressionStrings
+  * SyncTable - Requests that the specified table is synchronized with the local copy. MajorVersion == Guid.Empty if the local table is blank.
+    * int tableIndex
+    * Guid majorVersion
+    * long minorVersion
+    * int columnListCount
+    * int[] columnList
+  * SelectAllTablesWithSchema - Gets all of the tables with their columns
+  * GetAllTableVersions - Gets the version information for every table the user has access to.
 
 ### Attribute Value Types
 
-When defining each attribute, it's important to identify the type of data that is expected in that field. The wireline
-protocol itself will not enforce these requirements, but rather provides encoding mechanisms for transporting the data 
+When defining each attribute, it is important to identify the type of data that is expected in that field. The wireline
+protocol itself will not enforce these requirements, but rather provides encoding mechanisms for transporting the data
 and rules for how items can be converted to the desired type.  
 
 #### Encoding
@@ -1331,107 +1556,69 @@ When attributes are serialized, the value field must be encoded using one of the
 | Code | Type | Description |
 |:----:|:---------:|------|
 | 0x00 | Null | A null value. |
-| 0x01 | XML Decimal | Corresponds to xs:decimal |
-| 0x02 | XML Integer | Corresponds to xs:integer |
-| 0x03 | XML Date | Corresponds to xs:date |
-| 0x04 | XML Time | Corresponds to xs:time |
-| 0x05 | XML DateTime | Corresponds to xs:dateTime |
-| 0x06 | XML Duration | Corresponds to xs:duration |
-| 0x07 | XML Boolean | Corresponds to xs:boolean |
-| 0x08 | XML Binary | Corresponds to xs:hexBinary |
-| 0x09 | XML URI | Corresponds to xs:anyURI |
-| 0x0A | XML Base64 | Corresponds to xs:base64Binary |
-| 0x0B | String | A UTF8 encoded string |
-| 0x0C | Single | A 32-bit floating point number encoded Big Endian |
-| 0x0D | Double | A 64-bit floating point number encoded Big Endian |
-| 0x0E | Decimal | A 128-bit floating point number encoded Big Endian |
-| 0x0F | Int32 | A 32-bit integer number encoded Big Endian |
-| 0x10 | Int64 | A 64-bit integer number encoded Big Endian |
-| 0X11 | Guid | A 128-bit GUID encoded Big Endian |
-| 0x12 | Ticks | A 64-bit date/time value encoded Big Endian |
-| 0x13 | Binary | An array binary values |
-| 0x14 | Boolean | A boolean value |
+| 0x01 | String | A UTF8 encoded string |
+| 0x02 | Single | A 32-bit floating point number encoded Big Endian |
+| 0x03 | Double | A 64-bit floating point number encoded Big Endian |
+| 0x04 | Decimal | A 128-bit floating point number encoded Big Endian |
+| 0x05 | Int32 | A 32-bit integer number encoded Big Endian |
+| 0x06 | Int64 | A 64-bit integer number encoded Big Endian |
+| 0X07 | Guid | A 128-bit GUID encoded Big Endian |
+| 0x08 | Ticks | A 64-bit date/time value encoded Big Endian |
+| 0x09 | Binary | An array binary values |
+| 0x0A | Boolean | A boolean value |
 
 #### Defining
 
 The list below defines how the measurement fields can be restricted and what types are permitted under each restriction.
 
 * Integer
-  * Supported Types: Null | XML Decimal | XML Integer | Single | Double | Decimal | Int32 | Int64
+  * Supported Types: Null | Single | Double | Decimal | Int32 | Int64
 * Float
-  * Supported Types: Null | XML Decimal | XML Integer | Single | Double | Decimal | Int32 | Int64
+  * Supported Types: Null | Single | Double | Decimal | Int32 | Int64
 * Date
-  * Supported Types: Null | XML Date | XML Time | XML DateTime | Ticks
+  * Supported Types: Null | Ticks
 * Time
-  * Supported Types: Null | XML Date | XML Time | XML DateTime | Ticks
+  * Supported Types: Null | Ticks
 * Date Time
-  * Supported Types: Null | XML Date | XML Time | XML DateTime | Ticks
+  * Supported Types: Null | Ticks
 * Duration
-  * Supported Types: Null | XML Duration | Ticks
+  * Supported Types: Null | Ticks
 * Boolean
-  * Supported Types: Null | XML Boolean | Boolean
+  * Supported Types: Null | Boolean
 * Binary
-  * Supported Types: Null | XML Binary | XML Base64 | Binary
+  * Supported Types: Null | Binary
 * String
   * Supported Types: All since all types can be represented as a string.
 * Guid
-  * Supported Types: Null | String | Guid
+  * Supported Types: Null | Guid
 
+### DataPoint Table Structure
 
-### Measurement Table
+For the DataPoint Table, the record identifier will correspond to the ID of the respective data point. The following table defines a minimal list of attributes associated with a data point.
 
-For the measurement table, the record identifier will correspond to the Measurement's ID. The following table is a list of all of the optional attributes that can be associated with a measurement.
+| Attribute Name   | Attribute Value Type | Description |
+|:----------------:|:--------------------:|:-----------:|
+| PointID          | Guid    | The GUID associated with the data point. |
 
-| Attribute Name   | Supports Arrays | Attribute Value Type | Description |
-|:----------------:|:---------------:|:--------------------:|:-----------:|
-| DeviceID         | N | Guid    | The GUID associated with the device record stored in the Device Table |
-| PointTag         | N | String  | A string based unique identifier |
-| SignalReference  | N | String  | A string based unique identifier |
-| SignalTypeID     | N | Integer | A code describing the signal type |
-| Adder            | N | Float   | An adjustment factor |
-| Multiplier       | N | Float   | An adjustment factor |
-| Description      | Y | String  | A description for this measurement |
-| Channel Name     | Y | String  | C37.118 Channel Name. For Digital types, an array of 16 elements are permitted. |
-| Signal Type      | N | String  | C37.118 related signal type. Ex: (STAT\|FREQ\|DFREQ\|PM\|PA\|PR\|PI\|ANALOG\|DIGITAL) |
-| PositionIndex    | N | Integer | C37.118 position index in a PMU frame |
-| Phase Designation| N | String  | The phase this field is computed from. Ex: A,B,C,0,+,-
-| Engineering Units| N | String  | The base units of this field. (Ex: Volts, Amps, Watts)
-| Engineering Scale| N | Float   | The scaling factor of these units (Ex: 1, 1000, 1000,000)
+### CDSM Table Structure
 
-### Device Table
+It is not mandatory for the publisher to maintain a CDSM Table for every CDSM defined by the publisher. When the publisher optionally defines metadata for a CDSM, the table must contain the following minimal set of attributes.
 
-For the device table, the record identifier is the DeviceID. The following table is a list of all of the optional attributes that can be associated with a device.
+| Attribute Name   | Attribute Value Type | Description |
+|:----------------:|:--------------------:|:-----------:|
+| CDSMID           | Guid    | The GUID associated with the CDSM. |
 
-| Attribute Name  | Supports Arrays | Attribute Value Type | Description |
-|:--------------: |:---------------:|:--------------------:|:-----------:|
-| Acronym         | N | String | A name of the device. |
-| Name            | N | String | A friendly name of the device |
-| Company         | N | String | The company who owns the device |
-| Protocol        | N | String | The protocol the device is communicating with |
-| Latitude        | N | Float  | The latitude of the device |
-| Longitude       | N | Float  | The location of the device |
-| TimeZone        | N | String | The time zone for the data |
-| FrameRate       | N | String | The sample rate |
-| FNOM            | N | String | C37.118 Nominal Frequency |
-| IDCODE          | N | String | C37.118 ID Code |
-| STN             | N | String | C37.118 Station Name |
-| Nominal Voltage | N | Float  | The factor required to convert this voltage to a per unit base. |
-| CT Ratio        | N | Float  | The ratio of a connected CT |
-| Rated MVA       | N | Float  | The nominal rating of this device |
-| Vendor          | N | String | The vendor of this device |
-| Model           | N | String | The model number of this device |
-| Equipment Type  | Y | String | The type of equipment this device is monitoring (Ex: Line, Transformer) |
-| Substation      | N | String | The substation this device is from |
-| Serial Number   | Y | String | Serial numbers or other identifying information about this equipment) |
-| In Service Date | Y | Date   | The date this device was put in service |
-| Out Service Date| Y | Date  | The date this device was removed from service |
+### Resource Table
 
-### Dataset Contents
+It is not mandatory for the publisher to maintain Resource Tables. When the publisher optionally defines metadata for resources, the table must contain the following minimal set of attributes.
 
-* Minimum required dataset for STTP operation
-* Industry specific dataset extensions (outside scope of this doc)
+| Attribute Name  | Attribute Value Type | Description |
+|:--------------: |:--------------------:|:-----------:|
+| ResourceID      | Guid    | The GUID associated with the resource. |
 
 ### Dataset Filtering
+
+Note: These may end up being client side filters to simplify the wireline protocol and the burden on the server side API.
 
 * Format of expressions that work against metadata
   * SQL style expressions
@@ -1448,7 +1635,6 @@ For the device table, the record identifier is the DeviceID. The following table
 ### Dataset Serialization
 
 * Serialization for transport
-  * Packet based publication using temporal data point
   * Publisher reduction by access rights and diff-version
   * Subscriber reduction by filter expression
 * Serialization to local repository
@@ -1456,6 +1642,92 @@ For the device table, the record identifier is the DeviceID. The following table
   * Conflict resolution
   * Ownership control
 
+## Appendix Z - Power Industry Examples (To be moved later)
+
+Here are some examples of metadata suitable for the electric power industry.
+
+### DataPoint Table
+
+A publisher might try the following DataPoint Table for the power industry.
+
+| Attribute Name   | Attribute Value Type | Description |
+|:----------------:|:--------------------:|:-----------:|
+| PointID          | Guid    | The GUID associated with the data point. |
+| PointTag         | String  | A string based unique identifier. |
+| Description      | String  | A description for this measurement |
+| ProducerTableName| String  | The name of the table within which the record for the resource that produced this data point resides. |
+| ProducerTableID  | Guid    | The primary key for the record within the Producer Table. |
+| SignalReference  | String  | A string based unique identifier |
+| SignalTypeID     | Integer | A code describing the signal type |
+| Adder            | Float   | An adjustment factor |
+| Multiplier       | Float   | An adjustment factor |
+| Signal Type      | String  | Fixed set of signal types. I.E.: (STAT\|FREQ\|DFREQ\|PM\|PA\|PR\|PI\|ANALOG\|DIGITAL\|CALC) |
+| Phase Designation| String  | The phase this field is computed from. Ex: A,B,C,0,+,-
+| Engineering Units| String  | The base units of this field. (Ex: Volts, Amps, Watts)
+| Engineering Scale| Float   | The scaling factor of these units (Ex: 1, 1000, 1000,000)
+| Channel Name     | String  | C37.118 Channel Name. For Digital types, an array of 16 elements are permitted. Array length shall be zero if this is not a C37.118 - derived data point.|
+| PositionIndex    | Integer | C37.118 position index in a PMU frame. Zero for non-C37.118 data points. |
+
+### PMU Table (a Resource Table example)
+
+| Attribute Name  | Attribute Value Type | Description |
+|:--------------: |:--------------------:|:-----------:|
+| ResourceID      | Guid   | The GUID associated with the resource. |
+| Acronym         | String | A name of the device. |
+| Name            | String | A friendly name of the device |
+| SubstationTableName| String | The name of the table within which the record for the substation where this PMU resides. |
+| SubstationTableID  | Guid    | The primary key for the record within the substation table. |
+| CompanyTableName| String | The name of the table within which the record for the company that owns this PMU. |
+| CompanyTableID  | Guid   | The primary key for the record within the company table. |
+| Protocol        | String | The protocol the device is communicating with |
+| FrameRate       | String | The sample rate |
+| FNOM            | String | C37.118 Nominal Frequency |
+| IDCODE          | String | C37.118 ID Code |
+| STN             | String | C37.118 Station Name |
+| Nominal Voltage | Float  | The factor required to convert this voltage to a per unit base. |
+| CT Ratio        | Float  | The ratio of a connected CT |
+| Rated MVA       | Float  | The nominal rating of this device |
+| Vendor          | String | The vendor of this device |
+| Model           | String | The model number of this device |
+| Equipment Type  | String | The type of equipment this device is monitoring (Ex: Line, Transformer) |
+| Serial Number   | String | Serial numbers or other identifying information about this equipment) |
+| In Service Date | Date   | The date this device was put in service |
+| Out Service Date| Date   | The date this device was removed from service |
+
+### Substation Table (a Resource Table example)
+
+| Attribute Name  | Attribute Value Type | Description |
+|:--------------: |:--------------------:|:-----------:|
+| ResourceID      | Guid   | The GUID associated with the resource. |
+| Name            | String | A friendly name of the substation. |
+| Latitude        | Float  | The latitude of the substation. |
+| Longitude       | Float  | The location of the substation. |
+| TimeZone        | String | The time zone for the substation. |
+
+### Phasor Table (a CDSM Table example)
+
+The existence of this CDSM Table presumes the existence of a 'built-in' CDSM called 'Phasor'. For this example, assume that the Phasor CDSM is comprised of two fields: Magnitude (float) and Angle (float).
+
+| Attribute Name   | Attribute Value Type | Description |
+|:----------------:|:--------------------:|:-----------:|
+| CDSMID           | Guid   | The GUID associated with an entry in the Phasor CDSM. |
+| CDSMTag          | String | A string based unique identifier for the Phasor. |
+| Description      | String | A description for this phasor, e.g. 'Smith Substation North Bus Voltage'. |
+| IsCurrent        | Bit    | Set if this is a current phasor. |
+| VoltAssociation  | Guid   | The ID of the voltage phasor used to compute power. Ignore if IsCurrent is reset. |
+| AlternateVolt    | Guid   | An alternate voltage phasor, used when the primary voltage is unavailable. Ignore if IsCurrent is reset. |
+| LineTableName    | String | The name of the table within which the record for the line associated with this current phasor resides. Ignore if IsCurrent is reset. |
+| LineTableID      | Guid    | The primary key for the record within the line table. Ignore if IsCurrent is reset. |
+
+### VIPair Table (a CDSM example)
+
+The existence of this CDSM Table presumes the existence of a CDSM, 'built-in' or 'user-defined', called 'VIPair'. For this example, assume that the VIPair CDSM is comprised of two fields: Voltage (Phasor CDSM) and Current (Phasor CDSM).
+
+| Attribute Name   | Attribute Value Type | Description |
+|:----------------:|:--------------------:|:-----------:|
+| CDSMID           | Guid   | The GUID associated with an entry in the VIPair CDSM. |
+| CDSMTag          | String | A string based unique identifier for the VIPair. |
+| Description      | String | A description for this VIPair, e.g. 'Smith-Jones Line'. |
 
 ## Compression
 
@@ -1801,52 +2073,167 @@ Send latest value - command allows for non-steaming request/reply, such as, tran
 Send historical values - subject to availability of local archive / buffer with start and stop time- it has been requested many times that single value data recovery option will be available to accommodate for simple UDP loss, however this should be carefully considered since this basically makes UDP and TCP style protocol - if implemented, restored point should likely flow over TCP channel to reduce repeat recovery requests. Also, this should include detail in response message that recovery either succeeded or failed, where failure mode could include "data not available". To reduce noise, at connection time publisher should always let know subscriber its capabilities which might include “I Support Historical Data Buffer” and perhaps depth of available data. That said there is true value in recovery of data gaps that occur due to loss of connectivity.
 
 ## Appendix B - STTP API Reference
+
 The STTP API describes a set of properties and methods for accessing an STTP server. Elements marked with the tag [Required] are required to be provided by all STTP server implementations.
+
+:question: @StevenChisholm - please validate the accuracy / implementability of the following as compared to `TestImplementation`...
+
 ### Core
+
 The Core class contains the basic elements of the API.
 
-* `ConnectionString : string`
+* `ConnectionString (handle : *handle): string`
     > [Required] returns the connection string of the current connection, or an empty string if no connection is established.
-* `Connect(connectionString:string) : void`
-    > [Required] establishes a connection to the STTP server. The method will throw an exception if the connection cannot be established.
-> :tomato::question: mkd: Should this return an object, an interface or a handle like, for example, the Perl DBI API (ref: https://metacpan.org/pod/DBI#Architecture-of-a-DBI-Application)?  With this architecture the handle could be used for all other methods, and multiple handles could be kept which represent connections to various STTP servers.
 
-* `Disconnect() : void`
-    > [Required] terminates a connection.
+* `Connect(connectionString:string : String, SLL : Boolean, Certificate : X509CertificateClass ) : *handle`
+    > [Required] establishes a connection to the STTP server.     SLL is True or false, if SLL is marked as TRUE then certificate must be provided.  Upon successful connection it will provide a a pointer to the handle used to describe this connection.  The method will throw an exception if the connection cannot be established.
+
+
+* `Disconnect(handle : *handle) : void`
+    > [Required] terminates a connection.  The communication path will be tore down and no traffic is guaranteed to be sent after a disconnect from either the server or the client.
+
 * `ValidateConnection() : string`
     > [Required] validates whether a connection has been successfully established. Returns the connection string, or an empty string if no connection is established.
 
 ### Data
-The Data class contains elements for querying and manipulating data points (or measurements, if "measurements" is the right term to describe something that has a PointTag on an STTP server).
 
-* `GetMetaData() : MetaData[0 .. *]`
-    > [Required] gets MetaData for the current set of measurements.
-* `GetMetaData(id:Guid) : MetaData`
+The Data class contains elements for querying and manipulating data points or the associated metadata.
+
+
+#### Metadata Definition
+
+Metadata is information that describes the measurements or the relationship between measurements. The party who is sending the data is allowed to modify the metadata. The ability to write data to the metadata repository is controlled by the security access. Any connection that does not have an SSL security certificate will default to sending party can modify and receiving party is read only.  The methods defined in this section are only available if rights are granted to modify metadata repository.
+
+* `AddTable (TableName : String) : Void`
+    > [Required] allows for a new metadata definition table to be created. This method will raise an error if table is not created.     (illegal tablename, name already exists, permissions do not allow modification)
+
+*  `RemoveTable (TableName : String) : Void`
+    > [Required] removes a table from the metadata repository This method will raise an error if table is not created.     ( table name does not exists or permissions do not allow modification)
+
+
+* `AddField (TableName : String, FieldName : String, DataType ) : Void`
+    > [Required] allows for a new metadata definition field to be added to an existing table . This method will raise an error if table is not created.     (table does not exist, illegal fieldname, name already exists, permissions do not allow modification)
+
+*  `RemoveField (TableName : String)`
+    > [Required]  removes a field  from the metadata repository This method will raise an error if table is not created.     ( Fieldname does not exist, table name does not exists or permissions do not allow modification)
+
+*  `AddRelationship (Table1, Table2, Field1, Field2, Relationship Type): Void`
+    > [Required]  Used to define relationships between fields in different tables.   Currently supports Foreign Key. Field 1 is a foreign key that is looked up in Field2.  This method will raise an error is relationship is not able to be created
+
+*  `AddIndex (TableName : String, FieldName(s) : String, IndexType)`
+    > [Optional] removes a table from the metadata repository This method will raise an error if table is not created.     ( table name does not
+
+*  `SetVersion (Version : String)`
+    > [Required]  The provider of the metadata is expected to update the version number every time a change is made to metadata.    This is not done automatically as the server side of the connection may be rebuilt due to a server issue and no metadata has changed.
+
+#### Metadata Sharing
+
+Once the Metadata is defined client can then request access to the information.  The methods below describe how metadata is shared
+
+
+* `GetMetaFormat(handle : *handle) : Integer `
+    >STTP supports multiple ways to store its metadata.   Format is the format of the Metadata repository.  This method is used for the client to request the format of the repository from the server.  It can be one of the following integer values
+
+    1. Table Structure
+    2. XML Structure (future)
+    3. Object Model (future)
+    4. No Metadata Structure Defined
+
+    The underlying structure of the wire protocol metadata is Table Structure so in most cases table Structure will provide the best performance.
+
+* `GetMetaVersion(handle : *handle) : Long Integer `
+    >Each time a change is made to the metadata the version is incremented.  This method returns the ...
+
+ * `GetMetaDataTableList(handle : *handle, Filter : String) : String[0...*]`
+    > Gets a list of the tables available for Metadata (tables may not have any rows, this method will return tables with zero rows) This method will return all tables plus the special table "Table_Relations. Filter syntax: FILTER TableName WHERE Expression [ORDER BY SortField]
+
+
+ * `GetMetaDataFieldList(handle : *handle, TableName : String) : String[0...*]`
+    > Gets a list of the fields available for a table in the metadata repository.  This method will return an array of strings that is a JSON formated serialization of FieldName, DataType.  
+
+* `GetMetaData(handle : *handle, filter : String) : MetaData[0 .. *]`
+    > [Required] gets MetaData for the current set of measurements.    The metadata can be returned in a number of formats.
+
+* `GetMetaDataDelta(handle : *handle, version : String) : MetaData[0 .. *]`
+    > [Required] gets MetaData for the current set of measurements as a delta from the version that is provided.  This method will raise an error if it is not able to fulfull the request.
+
+
+* `GetMetaDataById(id:Guid) : MetaData`
     > [Required] gets MetaData for the measurement specified by id.
-* `Subscribe(id:Guid) : bool`
-    > [Required] initiates a subscription to the measurement specified by id at the native rate.
+
+* `CacheMetaData(Status : Boolean, TTL : Int) : Status : Boolean`
+    > [optional] [Required] Defines if the Metadata is to be cached or looked up on the server each time. If status = True then TTL is the Time to Live in seconds. It will check if cache is dirty at lease ever TTL seconds. If dirty it will repopulate (which may take longer than the TTL time in very large data sets with small TTLs.  Status by default will be False meaning there is no cache.
+
+* `IsCacheDirty() : Status : Boolean`
+
+> [optional]
+
+* `RefreshCache() : Status : Boolean`
+
+> [optional] forces the cache to be updated.  Used to update in-between TTLs as defined in CacheMetaData TTL or if CacheMetaData is set to false.
+
+* `GetIDFromMetaData(MetaFilter : string) : MetaData[0 .. *]`
+    > [optional] gets collection of data IDs that match the filter criteria.  
+    >> ** need to define what the nature of the filter is (SQL like?)
+
+* `GetIdsWithUnprocessedData (handle : *handle, MetaFilter : string ) : IDArray id:Guid[0 .. *]`
+
+* `GetData (handle : *handle, Id : Guid)`
+
+
+* `Subscribe(id:Guid) : Void`
+    > [Required] initiates a subscription to the measurement specified by id at the native rate.  Returns True if subscription is successful False otherwise.
+    >
 * `Subscribe(id:Guid, rate:double, method:ResampleMethod) : Boolean`
-    > [Required] initiates a subscription to the measurement specified by id at the delivery rate specified by rate. The underlying measurement shall be resampled using the method prescribed by method, which is a member of the ResampleMethod enumeration.
+    > [Required] initiates a subscription to the measurement specified by id at the delivery rate specified by rate. The underlying measurement shall be resampled using the method prescribed by method, which is a member of the ResampleMethod enumeration.  This method will raise an error if it is unable to subscribe to the provided ID.
+
+* `GetAvailableResampleMethodologies(handle : *handle, id:Guid[0 .. *]) : MetaData[0 .. *]`
+    > [Required] gets the resampling rates available for each measurement.
 
     > :bulb: Basic resample methods must be mathematically defined in the standard and enumerated. If none of the available resample methods satisfy the subscriber's requirements, then the measurement should be subscribed at the native rate and resampled in the client application.
-    
+
 ### Publication Priority
 
 1. As Soon as Possible
 2. Normal Priority
 3. As Able But Within a Timespan
 4. As Able And Do Not Send After a TimeSpan
-5. Throttled (Maximimum of x-Bytes/Second) typically for historical data
+5. Throttled (Maximum of x-Bytes/Second) typically for historical data
 
-### Transactional Data Exchange
+Priority is set per measurements. By default a measurement is assigned Normal Priority (2). To change the priority use one of the following methods:
 
-How will this work?
+* `SetPublicationPrioirty(handle : *handle, id : Guid, Priority : Integer) : Void`
+    > [Required] Sets the priority of the defined measurement to Priority
+
+
+* `SetPublicationPrioirtyBulk(handle : *handle, filter, Priority : Integer) : Void`
+    > [Optional] Sets the pririty of the defined measuremnts for all measurments that are defined by the filter to Priority.
 
 ### Security
-The Security class contains elements for querying and manipulating the security features of a connection.
+The Security class contains elements for querying and manipulating the security features of a connection.  All Roles and authentication is done through the use of a X509 certificate.   If the sertivicate is not used, then there are no controls on what data is accessible or what metadata is able to be modified.
+
+* `X509LatestAcceptedVersions (handle : *handle) : Version : String`
+    > [Required] sends back a String with latest of the released X509 versions that are supported.  Is it expected to utilize the latest version accepted by both the client and server.
+
+* `X509AcceptedVersions (handle : *handle) : Versions_accepted : Tuple`
+    > [Required] sends back a tuple with all versions of the 509 certificate standard that are accepted by the host
+
+* ` SecureConnection (handle : *handle, X509Certificate: X509CertificateClass )`
+    > [Required] attempts to secure the communication of all future traffic on utilizing the handle.    The certificate will be used to secure both data and command channels where they are separate sockets.  The method will throw an exception if the connection cannot be established.
+
+* `ModifyMetaDataTableSecurity (handle : *handle, TableName : String, GroupName : String,  Role : String) : Void`
+    > [Required] sets access for a defined group of users on a particular table.  Users group is defined in X509 certificate.   By default there all tables in the metadata repository are readable and editable by all users.  If the group name had previously been assigned a role then the curent call of this method will override previous settting assuming it completes successfully.    Security is maintained at a table level.  If some fields in a table need a differnt level of access then a second table should be created to hold the additional dields.  Role can be ReadOnly, ReadWrite, NotVisible. The method will throw an exception if the permission cannot be set.
 
 ### Utility
 The Utility class contains utility methods.
+
+
+* `GetMaxFragmentSize() : Integer`
+    >Returns the current may size of any message before it is fragmented (defaults to 1500 bytes)
+
+* `SetMaxFragmentSize (MessageSize : Integer) : Void`
+    > Allows for setting of the message size.   Should be equal to or smaller the largest size allowed by underlying network for a packet size.  The method will throw an exception if the set is not applied.
+
 
 > :bulb: Links to language specific auto-generated XML code comment based API documentation would be useful.
 
