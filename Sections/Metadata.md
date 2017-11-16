@@ -7,7 +7,7 @@ Three types of tables are defined in STTP.
 
 * DataPoint Table - The DataPoint Table conveys metadata related to an STTP data point. Each publisher shall maintain zero or one DataPoint Table. The name of the table shall be 'DataPoint'. The publisher shall maintain one unique record with the DataPoint Table for each data point defined.
 
-> :todo: Define complex data structure and complex data structure mapping in definitions section. A CDSM may be either 'built-in' or 'user-defined'. 'Built-in' CDSMs may differ by industry. In the electric power industry, an example of a 'built-in' CDSM is a phasor.
+> TO DO: Define complex data structure and complex data structure mapping in definitions section. A CDSM may be either 'built-in' or 'user-defined'. 'Built-in' CDSMs may differ by industry. In the electric power industry, an example of a 'built-in' CDSM is a phasor.
 * CDSM Table - A CDSM Table conveys metadata about a complex data structure. A publisher may maintain zero or more CDSM tables. A CDSM table shall only describe a CDSM defined at the publisher, and each record within the CDSM Table shall uniquely describe a corresponding mapping. An example of a CDSM in the transportation industry may be 'location', which is defined with two floating point values named 'latitude' and 'longitude'. Carrying forward this example, the desription attribute for a record within the Position Table might be, 'Location of Truck #42'.
 
 * Resource Table - A Resource Table conveys metadata related to a resource available in the publisher's asset base. A publisher may maintain zero or more resource tables to describe the desired asset hierarchy. A resource is any asset, whether hardware, software or physical, that relates to a data point transmitted over the wire. The simplest example of a resource is a sensor, or the transducer used to digitize a measured value.
@@ -16,38 +16,38 @@ A maximum of 2^16 tables in any combination of the allowable types are permitted
 
 ### Commands
 
-Metadata commands are encapsulated into a Refresh Metadata packet. These commands are as follows. 
+Metadata commands are encapsulated into a Refresh Metadata packet. These commands are as follows.
 > Note: these commands describe
 what is required to make the server side metadata look like the client side metadata. Additional synchronization needs to occur
-at the client side API when synchronizing with it's main repository. 
+at the client side API when synchronizing with it's main repository.
 
-* Response Publisher to Subscriber 
+* Response Publisher to Subscriber
   * UseTable - Changes the active table
     * int tableIndex
   * AddTable - Adds or Replaces a table if it already exists.
-    * Guid majorVersion, 
-    * long minorVersion, 
-    * string tableName, 
+    * Guid majorVersion,
+    * long minorVersion,
+    * string tableName,
     * TableFlags flags
   * AddColumn - Adds a column.
-    * int columnIndex, 
-    * string columnName, 
+    * int columnIndex,
+    * string columnName,
     * ValueType columnType
   * AddValue - Adds or updates a value. Deleting a value would be to assign it with null.
-    * int columnIndex, 
-    * int rowIndex, 
+    * int columnIndex,
+    * int rowIndex,
     * byte[] value
   * DeleteRow - Removes an entire row of data.
     * int rowIndex,
   * TableVersion - Indicates what the current version of a table is.
     * int tableIndex
-    * Guid majorVersion, 
-    * long minorVersion, 
+    * Guid majorVersion,
+    * long minorVersion,
   * AddRelationship - Adds a table relationship. Sometimes known as a foreign key relationship.
     * int tableIndex
     * int columnIndex,
     * int foreignTableIndex
-* Request Subscriber to Publisher 
+* Request Subscriber to Publisher
   * GetTable - Requests metadata from the specified table.
     * int tableIndex
     * int columnListCount
@@ -66,7 +66,7 @@ at the client side API when synchronizing with it's main repository.
 ### Attribute Value Types
 
 When defining each attribute, it is important to identify the type of data that is expected in that field. The wireline
-protocol itself will not enforce these requirements, but rather provides encoding mechanisms for transporting the data 
+protocol itself will not enforce these requirements, but rather provides encoding mechanisms for transporting the data
 and rules for how items can be converted to the desired type.  
 
 #### Encoding
@@ -122,7 +122,7 @@ For the DataPoint Table, the record identifier will correspond to the ID of the 
 
 ### CDSM Table Structure
 
-It is not mandatory for the publisher to maintain a CDSM Table for every CDSM defined by the publisher. When the publisher optionally defines metadata for a CDSM, the table must contain the following minimal set of attributes. 
+It is not mandatory for the publisher to maintain a CDSM Table for every CDSM defined by the publisher. When the publisher optionally defines metadata for a CDSM, the table must contain the following minimal set of attributes.
 
 | Attribute Name   | Attribute Value Type | Description |
 |:----------------:|:--------------------:|:-----------:|
@@ -248,4 +248,3 @@ The existence of this CDSM Table presumes the existence of a CDSM, 'built-in' or
 | CDSMID           | Guid   | The GUID associated with an entry in the VIPair CDSM. |
 | CDSMTag          | String | A string based unique identifier for the VIPair. |
 | Description      | String | A description for this VIPair, e.g. 'Smith-Jones Line'. |
-
