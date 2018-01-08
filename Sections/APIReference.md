@@ -1,4 +1,4 @@
-test if Scott Stapels has write access
+
 
 ## Appendix B - STTP API Reference
 
