@@ -5,7 +5,7 @@ The STTP API describes a set of properties and methods for accessing an STTP ser
 :question: @StevenChisholm - please validate the accuracy / implementability of the following as compared to `TestImplementation`...
 
 ### Core
-test if sstapels can post to repository ---
+
 
 The Core class contains the basic elements of the API.
 
