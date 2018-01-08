@@ -1,3 +1,5 @@
+test if Scott Stapels has write access
+
 ## Appendix B - STTP API Reference
 
 The STTP API describes a set of properties and methods for accessing an STTP server. Elements marked with the tag [Required] are required to be provided by all STTP server implementations.
