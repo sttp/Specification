@@ -6,7 +6,7 @@ The STTP API describes a set of properties and methods for accessing an STTP ser
 
 ### Core
 
-The Core class contains the basic elements of the API.
+The Core class contains the basic elements of the API stuff .
 
 * `ConnectionString (handle : *handle): string`
     > [Required] returns the connection string of the current connection, or an empty string if no connection is established.
