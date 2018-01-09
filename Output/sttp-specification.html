@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.8.1 - November 17, 2017</p>
+<p><strong>Version:</strong> 0.8.2 - January 9, 2018</p>
 <p><strong>Status:</strong> First Draft Release</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -3067,7 +3067,8 @@ Publisher will likely want to validate size of historical requests, or least thr
 <p>Send latest value - command allows for non-steaming request/reply, such as, translation to DNP3</p>
 <p>Send historical values - subject to availability of local archive / buffer with start and stop time- it has been requested many times that single value data recovery option will be available to accommodate for simple UDP loss, however this should be carefully considered since this basically makes UDP and TCP style protocol - if implemented, restored point should likely flow over TCP channel to reduce repeat recovery requests. Also, this should include detail in response message that recovery either succeeded or failed, where failure mode could include "data not available". To reduce noise, at connection time publisher should always let know subscriber its capabilities which might include “I Support Historical Data Buffer” and perhaps depth of available data. That said there is true value in recovery of data gaps that occur due to loss of connectivity.</p>
 <h2 id="appendix-b---sttp-api-reference">Appendix B - STTP API Reference</h2>
-<p>The STTP API describes a set of properties and methods for accessing an STTP server. Elements marked with the tag [Required] are required to be provided by all STTP server implementations.</p>
+<p>test II - from Atom editor</p>
+<p>The STTP API describes a set of properties and methods for accessing an STTP server. Elements marked with the tag [Required] are required to be provided by all STTP server implementations.  </p>
 <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> <a href="https://github.com/StevenChisholm">@StevenChisholm</a> - please validate the accuracy / implementability of the following as compared to <code>TestImplementation</code>...</p>
 <h3 id="core">Core</h3>
 <p>The Core class contains the basic elements of the API.</p>

@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.8.1 - November 17, 2017
+**Version:** 0.8.2 - January 9, 2018
 
 **Status:** First Draft Release
 
@@ -2072,13 +2072,19 @@ Send latest value - command allows for non-steaming request/reply, such as, tran
 
 Send historical values - subject to availability of local archive / buffer with start and stop time- it has been requested many times that single value data recovery option will be available to accommodate for simple UDP loss, however this should be carefully considered since this basically makes UDP and TCP style protocol - if implemented, restored point should likely flow over TCP channel to reduce repeat recovery requests. Also, this should include detail in response message that recovery either succeeded or failed, where failure mode could include "data not available". To reduce noise, at connection time publisher should always let know subscriber its capabilities which might include “I Support Historical Data Buffer” and perhaps depth of available data. That said there is true value in recovery of data gaps that occur due to loss of connectivity.
 
+
+
 ## Appendix B - STTP API Reference
 
-The STTP API describes a set of properties and methods for accessing an STTP server. Elements marked with the tag [Required] are required to be provided by all STTP server implementations.
+test II - from Atom editor
+
+
+The STTP API describes a set of properties and methods for accessing an STTP server. Elements marked with the tag [Required] are required to be provided by all STTP server implementations.  
 
 :question: @StevenChisholm - please validate the accuracy / implementability of the following as compared to `TestImplementation`...
 
 ### Core
+
 
 The Core class contains the basic elements of the API.
 
