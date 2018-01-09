@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.8.3 - January 9, 2018</p>
+<p><strong>Version:</strong> 0.8.4 - January 9, 2018</p>
 <p><strong>Status:</strong> First Draft Release</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -2909,26 +2909,34 @@ AlgorithmEncodings;</code></pre>
 </tbody>
 </table>
 <h2 id="appendix-a---functional-requirements">Appendix A - Functional Requirements</h2>
-<blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> Candidate topics (for now, these are a mix of functional and non-functional requirements)</p>
-</blockquote>
+<p>###Overview:<br />
+Before setting out to create a definition of a new protocol, participation was solicited. Grid Protection Alliance (GPA) worked to assemble a group of users, implementors, vendors and academics in order to vet the notion that a new protocol was actually needed.   Once the group convinced themselves that none of the existing standards had a protocol that would solve the problems being encountered with very large, high speed data sets, they worked together to document what this new protocol required.   This appendix has been retained in the specification so that future users evaluating the use of the ASP protocol can see what drove the initial team in its endeavor.</p>
+<p>####Functional Requirements<br />
+Functional requirements are the subset of total requirements that explains how a it or one of its substations will work.    Functional requirements are the needs that drive the business utility of the final solution, in this case protocol.   Each functional requirement was defined to address a need that was not solved by existing solutions.</p>
+<p><strong>The ASP solution will:</strong></p>
 <ul>
-<li>Performance and throughput(latency &amp; bandwidth)</li>
-<li>Scalability</li>
-<li>Pub/Sub configurability</li>
-<li>Metadata management</li>
-<li>Quality of Service</li>
-<li>Extensibility</li>
-<li>Confidentiality / Key management</li>
-<li>Access Control</li>
-<li>Integrity</li>
-<li>Alarming and notifications</li>
-<li>Enable best-practice security</li>
-<li>Reduced Risk of Non-Compliance</li>
-<li>Deployment for high-availability</li>
-<li>Disaster recovery considerations</li>
-<li>System Integration</li>
-<li>Installation and deployment</li>
+<li><p>Allow for dynamically requesting data or metadata.   It will not send all data all the time.  Most often this requirement is met with the use of a publish-subscribe implementation where the receiver can request data elements and they are delivered by the source on event such as value change.  <strong>(Pub/Sub configurability)</strong></p></li>
+<li><p>Support the collection, maintenance and communication of data attributes or metadata. <strong>(Metadata management)</strong></p></li>
+<li><p>Allow for the prioritization of data feeds.  In addition to streaming data should take precedence over metadata, the streaming data should allow for the designation of a priority.    Higher priority data flows should be given consideration in times of network congestion.    <strong>(Quality of Service)</strong></p></li>
+<li><p>be capable of managing and streaming a very large sets.   At time of authoring a very large set would be 1000 Phasor Measurement Units sending 10 streaming data points at a refresh rate of thirty times per second (.033ms per data for the same element) on a standard network (i.e 100mbps ethernet)</p></li>
+<li><p>Allow for the data to be requested (and sent) to multiple clients what may request the data elements in the same or different combinations.</p></li>
+<li><p>support measures to keep data from being viewed by non-authorized systems or staff.    This will include the ability to implement standard, [not propitiatory to this protocol] encryption techniques.  It will further provide the functions for management of the securing mechanisms. (Confidentiality / Key management)</p></li>
+<li><p>Access Control</p></li>
+<li><p>Integrity</p></li>
+<li><p>Alarming and notifications</p></li>
+<li><p>Enable best-practice security</p></li>
+<li><p>Deployment for high-availability</p></li>
+<li><p>Disaster recovery considerations</p></li>
+<li><p>System Integration</p></li>
+<li><p>Installation and deployment</p></li>
+</ul>
+<p>####Non-Functional Requirements<br />
+In software requirements documentation, a non-functional requirement is a requirement that specifies criteria that specifies the operation of a system, rather than behaviors. Many often call non-functional requirements "quality attributes"</p>
+<ul>
+<li><p>Performance and throughput(latency &amp; bandwidth)</p></li>
+<li><p>Scalability</p></li>
+<li><p>Reduced Risk of Non-Compliance</p></li>
+<li><p>Allow for future uses and data elements / attributes with minimal impact to the base protocol in order to allow for future improvements <strong>(Extensibility)</strong></p></li>
 </ul>
 <h3 id="feature-list">Feature List</h3>
 <ul>
@@ -3067,7 +3075,6 @@ Publisher will likely want to validate size of historical requests, or least thr
 <p>Send latest value - command allows for non-steaming request/reply, such as, translation to DNP3</p>
 <p>Send historical values - subject to availability of local archive / buffer with start and stop time- it has been requested many times that single value data recovery option will be available to accommodate for simple UDP loss, however this should be carefully considered since this basically makes UDP and TCP style protocol - if implemented, restored point should likely flow over TCP channel to reduce repeat recovery requests. Also, this should include detail in response message that recovery either succeeded or failed, where failure mode could include "data not available". To reduce noise, at connection time publisher should always let know subscriber its capabilities which might include “I Support Historical Data Buffer” and perhaps depth of available data. That said there is true value in recovery of data gaps that occur due to loss of connectivity.</p>
 <h2 id="appendix-b---sttp-api-reference">Appendix B - STTP API Reference</h2>
-<p>test II - from Atom editor</p>
 <p>The STTP API describes a set of properties and methods for accessing an STTP server. Elements marked with the tag [Required] are required to be provided by all STTP server implementations.  </p>
 <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/question.png?v5" alt=":question:" title=":question:" class="emoji-img emoji"> <a href="https://github.com/StevenChisholm">@StevenChisholm</a> - please validate the accuracy / implementability of the following as compared to <code>TestImplementation</code>...</p>
 <h3 id="core">Core</h3>
