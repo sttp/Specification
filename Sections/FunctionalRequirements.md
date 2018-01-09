@@ -1,23 +1,43 @@
 ## Appendix A - Functional Requirements
 
-> :construction: Candidate topics (for now, these are a mix of functional and non-functional requirements)
+###Overview:
+Before setting out to create a definition of a new protocol, participation was solicited. Grid Protection Alliance (GPA) worked to assemble a group of users, implementors, vendors and academics in order to vet the notion that a new protocol was actually needed.   Once the group convinced themselves that none of the existing standards had a protocol that would solve the problems being encountered with very large, high speed data sets, they worked together to document what this new protocol required.   This appendix has been retained in the specification so that future users evaluating the use of the ASP protocol can see what drove the initial team in its endeavor.
 
-* Performance and throughput(latency & bandwidth)
-* Scalability
-* Pub/Sub configurability
-* Metadata management
-* Quality of Service
-* Extensibility
-* Confidentiality / Key management
+
+####Functional Requirements
+Functional requirements are the subset of total requirements that explains how a it or one of its substations will work.    Functional requirements are the needs that drive the business utility of the final solution, in this case protocol.   Each functional requirement was defined to address a need that was not solved by existing solutions.
+
+**The ASP solution will:**
+* Allow for dynamically requesting data or metadata.   It will not send all data all the time.  Most often this requirement is met with the use of a publish-subscribe implementation where the receiver can request data elements and they are delivered by the source on event such as value change.  **(Pub/Sub configurability)**
+
+* Support the collection, maintenance and communication of data attributes or metadata. **(Metadata management)**
+
+* Allow for the prioritization of data feeds.  In addition to streaming data should take precedence over metadata, the streaming data should allow for the designation of a priority.    Higher priority data flows should be given consideration in times of network congestion.    **(Quality of Service)**
+
+* be capable of managing and streaming a very large sets.   At time of authoring a very large set would be 1000 Phasor Measurement Units sending 10 streaming data points at a refresh rate of thirty times per second (.033ms per data for the same element) on a standard network (i.e 100mbps ethernet)
+
+* Allow for the data to be requested (and sent) to multiple clients what may request the data elements in the same or different combinations.
+
+
+* support measures to keep data from being viewed by non-authorized systems or staff.    This will include the ability to implement standard, [not propitiatory to this protocol] encryption techniques.  It will further provide the functions for management of the securing mechanisms. (Confidentiality / Key management)
 * Access Control
 * Integrity
 * Alarming and notifications
 * Enable best-practice security
-* Reduced Risk of Non-Compliance
 * Deployment for high-availability
 * Disaster recovery considerations
 * System Integration
 * Installation and deployment
+
+####Non-Functional Requirements
+In software requirements documentation, a non-functional requirement is a requirement that specifies criteria that specifies the operation of a system, rather than behaviors. Many often call non-functional requirements "quality attributes"
+
+* Performance and throughput(latency & bandwidth)
+* Scalability
+* Reduced Risk of Non-Compliance
+
+* Allow for future uses and data elements / attributes with minimal impact to the base protocol in order to allow for future improvements **(Extensibility)**
+
 
 ### Feature List
  * Full Data Stream - Capable of sending all of the data points to any connecting stream.
