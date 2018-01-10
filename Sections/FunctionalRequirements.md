@@ -5,55 +5,51 @@
 
 
 ###Overview:
-Before setting out to create a definition of a new protocol, participation was solicited from a diverse set of stakeholders. Grid Protection Alliance (GPA) worked to assemble a group of users, implementors, vendors and academics in order to vet the notion that a new protocol was actually needed and would provide value to our industries.   Once the group convinced themselves that none of the known existing standards was a protocol that would solve the problems being encountered, with very large, high speed data sets, they worked together to document what this new protocol required.   This appendix has been retained in the specification so that future users evaluating the use of the STTP protocol can see what drove the initial team in its creation of the protocol and associated APIs .
+Before setting out to create a definition of a new protocol, participation was solicited from a diverse set of stakeholders. Grid Protection Alliance (GPA) worked to assemble a group of users, implementors, vendors and academics in order to vet the notion that a new protocol was actually needed and would provide value to our industries.   Once the group convinced themselves that none of the known existing standards was a protocol that would solve the problems being encountered, with very large, high speed data sets, they worked together to document what this new protocol required.   This appendix has been retained in the specification so that future users evaluating the use of the STTP protocol can see what drove the initial team in its creation of the protocol and associated APIs.
 
 
 
 ### Use Case Examples
 
-First, an initial set of [use cases](https://en.wikipedia.org/wiki/Use_case) was defined in order to document how stakeholders envisioned using this new STTP protocol. This is not meant to be an exhaustive list of  all possible uses, but rather a sampling of the driving needs that led to the need to create a new protocol.
+First, an initial set of [use cases] (https://en.wikipedia.org/wiki/Use_case) were defined in order to document how stakeholders envisioned using this new STTP protocol. This is not meant to be an exhaustive list of  all possible uses, but rather a sampling of the driving needs that led to the need to create a new protocol. These use cases were collected and organized by how the team envisioned them to be deployed in real world applications.    This is not to limit implementation to one of these types, a system may implement a hybrid of two or more of these.   However, each system will advertise the functions that it provides or services so that neighbor connections can know what is available.
 
 
 
 \*optional features
 
-**PMU Device**
+**measurement (PMU) Device**
 
 As a system with a Network Interface (PDC, application, historian ) I would like to communicate with a Phasor Measurement Device using STTP. so that I may request data or reply to data requests.
 
 Features:
- * Full Data Stream
- * Basic Metadata
- * Subscribed Data Stream*
- * Data Backfilling*
+ * Send Full Data Stream
+ * Send Basic Metadata
+ * Send Extended Metadata*
+ * Fulfill Data Data Stream Subscription Request*
+ * Fulfill Data Backfilling Request*
  * Encryption*
-
-![pmu UMLImage](https://raw.githubusercontent.com/sttp/Specification/master/Sections/Images/Use%20Case%20UML%20from%20PMU.jpg)
-
-
-
-
-**B. PDC**
-
-Features:
- * Full Data Stream
- * Basic Metadata
- * Subscribed Data Stream
- * Data Backfilling*
- * Encryption
  * Data Compression*
 
-**C. Gateway**
+![pmu UML Image](https://raw.githubusercontent.com/sttp/Specification/master/Sections/Images/Use%20Case%20UML%20from%20PMU.jpg)
+
+
+**Gateway**
 
 Features:
-* Full Data Stream
-* Basic Metadata
-* Subscribed Data Stream
-* Data Backfilling*
-* Encryption
-* Data Compression
+* Send Full Data Stream
+* Send Basic Metadata
+* Send Extended Metadata*
+* Fulfill Data Data Stream Subscription Request*
+* Fulfill Data Backfilling Request*
+* Request Full Data Stream
+* Request Basic Metadata
+* Request Extended Metadata*
+* Request Data Data Stream Subscription*
+* Request Data Backfilling*
+* Encryption*
+* Data Compression*
 
-**D. Historian**
+**Historian**
 
 Features:
 * Basic Metadata
@@ -61,7 +57,7 @@ Features:
 * Data Compression
 * Advance Queries
 
-**E. Data Diode**
+**Data Diode**
 
 To facilitate moving data from a more secure environment to a less secure one (eg. Prod to Dev) a
 separate service will be created that can connect to (or accept connections from) a publisher. This
