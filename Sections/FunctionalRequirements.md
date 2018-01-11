@@ -39,17 +39,17 @@ Features:
 * Send Full Data Stream
 * Send Basic Metadata
 * Send Extended Metadata*
-* Fulfill Data Data Stream Subscription Request*
+* Fulfill Data Stream Subscription Request*
 * Fulfill Data Backfilling Request*
 * Request Full Data Stream
 * Request Basic Metadata
 * Request Extended Metadata*
-* Request Data Data Stream Subscription*
+* Request Data Stream Subscription*
 * Request Data Backfilling*
 * Encryption*
 * Data Compression*
 
-![Gateway UML Image] (https://raw.githubusercontent.com/sttp/Specification/master/Sections/Images/Use%20Case%20UML%20-%20Gateway.jpg)
+![Gateway UML Image](https://raw.githubusercontent.com/sttp/Specification/master/Sections/Images/Use%20Case%20UML%20-%20Gateway.jpg)
 
 
 **Historian**
@@ -79,34 +79,19 @@ Features:
 * Encryption
 * Data Compression
 
--------------------------
-(Old use case examples)
 
-**A.  High-volume, real-time phasor data exchange** (e.g., ISO/RTO -to- ISO/RTO)
-
-Use case text
-
-**B. Medium volume, real-time data exchange with name translation**  (e.g., Transmission Owner -to- ISO/RTO)
-
-Use case text
-
-**C.  Medium-volume historical phasor data exchange** (e.g., ISO/RTO -to- Transmission Owner)
-
-Use case text
-
-**D. Within an Entity**
-
-Use case text
-
-**D. Low-volume real-time phasor data exchange with automated gap filling** (e.g., Substation PDC -to- Control Center)
-
-Use case text
+**Consumer Application**
 
 
 
+**Data Creating Application**
+As we described above a measurement device will likely be the initial data set for STTP data.   However it is expected that in addition to raw measurement devices there will be applications that create their own measurements.   An example could be a state estimator that takes raw measurements and refines the data to give a cleaner picture.   
 
-####Functional Requirements
-Functional requirements are the subset of total requirements that explains how a it or one of its substations will work.    Functional requirements are the needs that drive the business utility of the final solution, in this case protocol.   Each functional requirement was defined to address a need that was not solved by existing solutions.
+For Purpose of use case, we can use the device documentation as they will provide essentially the same use cases.    Just like regular devices they may also include gateway or historian functionality as well as the measurement action.
+
+
+#### Foundational Functional Requirements
+Functional requirements are the subset of total requirements that explains how an it system  or one of its substations will work.    Functional requirements represent the needs that drive the business utility of the any final solution, in this case the STTP protocol.   Each functional requirement was defined to address a need that was not solved by existing.  These functional requirements were defined by the initial stakeholders and drove the protocol design and creation.
 
 **The ASP solution will:**
 * allow for dynamically requesting data or metadata.   It will not send all data all the time.  Most often this requirement is met with the use of a publish-subscribe implementation where the receiver can request data elements and they are delivered by the source on event such as value change.  **(Pub/Sub configurability)**
