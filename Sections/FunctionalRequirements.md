@@ -30,7 +30,7 @@ Features:
  * Encryption*
  * Data Compression*
 
-![pmu UML Image](https://raw.githubusercontent.com/sttp/Specification/master/Sections/Images/Use%20Case%20UML%20from%20PMU.jpg)
+![Device UML Image](https://raw.githubusercontent.com/sttp/Specification/master/Sections/Images/Use%20Case%20UML%20-%20device.jpg)
 
 
 **Gateway**
@@ -48,6 +48,9 @@ Features:
 * Request Data Backfilling*
 * Encryption*
 * Data Compression*
+
+![Gateway UML Image] (https://raw.githubusercontent.com/sttp/Specification/master/Sections/Images/Use%20Case%20UML%20-%20Gateway.jpg)
+
 
 **Historian**
 
