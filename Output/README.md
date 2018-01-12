@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.8.5 - January 11, 2018
+**Version:** 0.8.6 - January 12, 2018
 
 **Status:** First Draft Release
 
@@ -1889,114 +1889,61 @@ The following individuals actively participated in the development of this stand
 | 0.1 | July 7, 2017 | Initial draft for validation of use of markdown |
 | 0.0 | June 15, 2017 | Specification template |
 
-## Appendix A - Functional Requirements
+## Appendix A - Initial Team Requirements
+
+
+![Image of Collorbation ](https://github.com/sttp/Specification/blob/master/Sections/Images/CollorbationStockImage.jpg?raw=true)
+
 
 ###Overview:
-Before setting out to create a definition of a new protocol, participation was solicited. Grid Protection Alliance (GPA) worked to assemble a group of users, implementors, vendors and academics in order to vet the notion that a new protocol was actually needed.   Once the group convinced themselves that none of the existing standards had a protocol that would solve the problems being encountered with very large, high speed data sets, they worked together to document what this new protocol required.   This appendix has been retained in the specification so that future users evaluating the use of the ASP protocol can see what drove the initial team in its endeavor.
+Before setting out to create a definition of a new protocol, participation was solicited from a diverse set of stakeholders. Grid Protection Alliance (GPA) worked to assemble a group of users, implementors, vendors and academics in order to vet the notion that a new protocol was actually needed and would provide value to our industries.   Once the group convinced themselves that none of the known existing standards was a protocol that would solve the problems being encountered, with very large, high speed data sets, they worked together to document what this new protocol required.   This appendix has been retained in the specification so that future users evaluating the use of the STTP protocol can see what drove the initial team in its creation of the protocol and associated APIs.
 
-
-####Functional Requirements
-Functional requirements are the subset of total requirements that explains how a it or one of its substations will work.    Functional requirements are the needs that drive the business utility of the final solution, in this case protocol.   Each functional requirement was defined to address a need that was not solved by existing solutions.
-
-**The ASP solution will:**
-* Allow for dynamically requesting data or metadata.   It will not send all data all the time.  Most often this requirement is met with the use of a publish-subscribe implementation where the receiver can request data elements and they are delivered by the source on event such as value change.  **(Pub/Sub configurability)**
-
-* Support the collection, maintenance and communication of data attributes or metadata. **(Metadata management)**
-
-* Allow for the prioritization of data feeds.  In addition to streaming data should take precedence over metadata, the streaming data should allow for the designation of a priority.    Higher priority data flows should be given consideration in times of network congestion.    **(Quality of Service)**
-
-* be capable of managing and streaming a very large sets.   At time of authoring a very large set would be 1000 Phasor Measurement Units sending 10 streaming data points at a refresh rate of thirty times per second (.033ms per data for the same element) on a standard network (i.e 100mbps ethernet)
-
-* Allow for the data to be requested (and sent) to multiple clients what may request the data elements in the same or different combinations.
-
-
-* support measures to keep data from being viewed by non-authorized systems or staff.    This will include the ability to implement standard, [not propitiatory to this protocol] encryption techniques.  It will further provide the functions for management of the securing mechanisms. (Confidentiality / Key management)
-* Access Control
-* Integrity
-* Alarming and notifications
-* Enable best-practice security
-* Deployment for high-availability
-* Disaster recovery considerations
-* System Integration
-* Installation and deployment
-
-####Non-Functional Requirements
-In software requirements documentation, a non-functional requirement is a requirement that specifies criteria that specifies the operation of a system, rather than behaviors. Many often call non-functional requirements "quality attributes"
-
-* Performance and throughput(latency & bandwidth)
-* Scalability
-* Reduced Risk of Non-Compliance
-
-* Allow for future uses and data elements / attributes with minimal impact to the base protocol in order to allow for future improvements **(Extensibility)**
-
-
-### Feature List
- * Full Data Stream - Capable of sending all of the data points to any connecting stream.
- * Basic Metadata - Defines each data point with only a short descriptor.
- * Subscribed Data Stream - Allows the incoming connection to define the measurements that will be selectively streamed.
- * Access Control - Permissions controls on a point by point basis.
- * Data Backfilling - Allows backfilling missing data in the event of a communications outage.
- * Encryption - Data channels are encryption and the connection is authenticated.
- * Data Stream Compression - The data stream will support advance compression methods.
- * Advance Queries - Must be able to handle more advance request/reply queries.
- * Data Pushing - Capable of initializing a connection and writing data out.
-
-
- > :construction: This list was moved from Overview - needs to merged with list above...
-
- * Perform at high volume / large scale
- * Minimize data losses (e.g., over UDP)
- * Lower bandwidth requirements (e.g., over TCP)
- * Optimized for the performant delivery of individual data points
- * Automated exchange of metadata (no centralized registry required)
- * Detect and expose communication issues
- * Security and availability features that enable use on critical systems to support critical operations
- * Publish/subscribe at data point level
- * API implemented in multiple languages on multiple platforms
- * Metadata will be versioned and tabular in nature
- * Sets of metadata from multiple parties will be easy to merge
- * Points defined in metadata will have a clear ownership path
- * A minimal set of metadata will exist to support any STTP deployments
- * Industry specific metadata extensions will exist to support specific industry deployments
- * Ability to support broadcast messaging and distribution of critical system alarms
 
 
 ### Use Case Examples
 
-This is a list of all use cases along with the predefined set of features that must be supported by this use case.
+First, an initial set of [use cases] (https://en.wikipedia.org/wiki/Use_case) were defined in order to document how stakeholders envisioned using this new STTP protocol. This is not meant to be an exhaustive list of  all possible uses, but rather a sampling of the driving needs that led to the need to create a new protocol. These use cases were collected and organized by how the team envisioned them to be deployed in real world applications.    This is not to limit implementation to one of these types, a system may implement a hybrid of two or more of these.   However, each system will advertise the functions that it provides or services so that neighbor connections can know what is available.
+
+
 
 \*optional features
 
-**A. PMU**
+**measurement (PMU) Device**
+
+As a system with a Network Interface (PDC, application, historian ) I would like to communicate with a Phasor Measurement Device using STTP. so that I may request data or reply to data requests.
 
 Features:
- * Full Data Stream
- * Basic Metadata
- * Subscribed Data Stream*
- * Data Backfilling*
+ * Send Full Data Stream
+ * Send Basic Metadata
+ * Send Extended Metadata*
+ * Fulfill Data Data Stream Subscription Request*
+ * Fulfill Data Backfilling Request*
  * Encryption*
-
-**B. PDC**
-
-Features:
- * Full Data Stream
- * Basic Metadata
- * Subscribed Data Stream
- * Data Backfilling*
- * Encryption
  * Data Compression*
 
-**C. Gateway**
+![Device UML Image](https://raw.githubusercontent.com/sttp/Specification/master/Sections/Images/Use%20Case%20UML%20-%20device.jpg)
+
+
+**Gateway**
 
 Features:
-* Full Data Stream
-* Basic Metadata
-* Subscribed Data Stream
-* Data Backfilling*
-* Encryption
-* Data Compression
+* Send Full Data Stream
+* Send Basic Metadata
+* Send Extended Metadata*
+* Fulfill Data Stream Subscription Request*
+* Fulfill Data Backfilling Request*
+* Request Full Data Stream
+* Request Basic Metadata
+* Request Extended Metadata*
+* Request Data Stream Subscription*
+* Request Data Backfilling*
+* Encryption*
+* Data Compression*
 
-**D. Historian**
+![Gateway UML Image](https://raw.githubusercontent.com/sttp/Specification/master/Sections/Images/Use%20Case%20UML%20-%20Gateway.jpg)
+
+
+**Historian**
 
 Features:
 * Basic Metadata
@@ -2004,7 +1951,7 @@ Features:
 * Data Compression
 * Advance Queries
 
-**E. Data Diode**
+**Data Diode**
 
 To facilitate moving data from a more secure environment to a less secure one (eg. Prod to Dev) a
 separate service will be created that can connect to (or accept connections from) a publisher. This
@@ -2023,28 +1970,98 @@ Features:
 * Encryption
 * Data Compression
 
--------------------------
-(Old use case examples)
 
-**A.  High-volume, real-time phasor data exchange** (e.g., ISO/RTO -to- ISO/RTO)
+**Consumer Application**
 
-Use case text
 
-**B. Medium volume, real-time data exchange with name translation**  (e.g., Transmission Owner -to- ISO/RTO)
 
-Use case text
+**Data Creating Application**
+As we described above a measurement device will likely be the initial data set for STTP data.   However it is expected that in addition to raw measurement devices there will be applications that create their own measurements.   An example could be a state estimator that takes raw measurements and refines the data to give a cleaner picture.   
 
-**C.  Medium-volume historical phasor data exchange** (e.g., ISO/RTO -to- Transmission Owner)
+For Purpose of use case, we can use the device documentation as they will provide essentially the same use cases.    Just like regular devices they may also include gateway or historian functionality as well as the measurement action.
 
-Use case text
 
-**D. Within an Entity**
+#### Foundational Functional Requirements
+Functional requirements are the subset of total requirements that explains how an it system  or one of its substations will work.    Functional requirements represent the needs that drive the business utility of the any final solution, in this case the STTP protocol.   Each functional requirement was defined to address a need that was not solved by existing.  These functional requirements were defined by the initial stakeholders and drove the protocol design and creation.
 
-Use case text
+**The ASP solution will:**
+* allow for dynamically requesting data or metadata.   It will not send all data all the time.  Most often this requirement is met with the use of a publish-subscribe implementation where the receiver can request data elements and they are delivered by the source on event such as value change.  **(Pub/Sub configurability)**
 
-**D. Low-volume real-time phasor data exchange with automated gap filling** (e.g., Substation PDC -to- Control Center)
+* support the collection, maintenance and communication of data attributes or metadata. **(Metadata management)**
 
-Use case text
+* allow for the prioritization of data feeds.  In addition to streaming data should take precedence over metadata, the streaming data should allow for the designation of a priority.    Higher priority data flows should be given consideration in times of network congestion.    **(Quality of Service)**
+
+* be capable of managing and streaming a very large sets.   At time of authoring a very large set would be 1000 Phasor Measurement Units sending 10 streaming data points at a refresh rate of thirty times per second (.033ms per data for the same element) on a standard network (i.e 100mbps ethernet)
+
+* allow for the data to be requested (and sent) to multiple clients what may request the data elements in the same or different combinations.
+
+* support measures to keep data from being viewed by non-authorized systems or staff.    This will include the ability to implement standard, [not propitiatory to this protocol] encryption techniques.  It will further provide the functions for management of the securing mechanisms. **(Confidentiality / Key management)** **(Enable best-practice security)** **(Reduced Risk of Non-Compliance)**
+
+* Incorporate access control for both data and metadata so that only authorized users are able to successfully receive information after a request.   This security will be able to be set on a point by point basis (or element by element basis for metadata) **(Access Control)**
+
+* be easily deployed in configurations that allow for very high fault tolerance.  This should include both network and client or server resiliency options. **(Deployment for high-availability)**  **(Support Disaster recovery considerations)**
+
+* support short descriptor for each data point.   
+
+* allow the incoming connection to define the measurements that will be selectively streamed. **(Subscribed Data Stream)**
+
+* allow backfilling missing data in the event of a communications outage.  Receiving party would request and sending would respond with a data stream to fill in the missing data as defined by the receiver. **(Data Backfilling)**
+
+*  provide data channels encryption by default as well as require and the connection be authenticated. **(Encryption)**
+
+* support advance compression methods. **(Data Stream Compression)**
+
+* be capable of allowing the party that initiates  a connection to be the sender, or publisher of data . **(Data Pushing)**
+
+ * minimize data losses over network connections that do not guarantee delivery (e.g. UDP)
+
+
+####Non-Functional Requirements
+In software requirements documentation, a non-functional requirement is a requirement that specifies criteria that specifies the operation of a system, rather than behaviors. Many often call non-functional requirements "quality attributes"
+
+**The ASP solution will:**
+
+* Support the transfer of very large number of streaming (1,000s to 10s of 1,000s simultaneously) data points streaming at high update rates (30-60 times per second **(Scalability)**
+
+* ensure data integrity end to end of any communication stream, for both streaming data and metadata **(Integrity)**
+
+* Allow for future uses and data elements / attributes with minimal impact to the base protocol in order to allow for future improvements **(Extensibility)**
+
+
+#### To talk to Ritchie about(may not be true requirements or may just need additional clarification)  <todo>
+
+* include APIs that support condition based Alarming and notifications based on defined events  *(Alarming and notifications)*
+* strive to be able to send as many data elements in a given time with the lowest latency possible for any given network configuration **(Performance and throughput [latency & bandwidth])**
+
+* System Integration
+* Installation and deployment
+* Full Data Stream - Capable of sending all of the data points to any connecting stream.
+* Advance Queries - Must be able to handle more advance request/reply queries.
+
+
+
+
+
+
+
+ > :construction: This list was moved from Overview - needs to merged with list above...
+
+
+
+ * Lower bandwidth requirements (e.g., over TCP)
+ * Optimized for the performant delivery of individual data points
+ * Automated exchange of metadata (no centralized registry required)
+ * Detect and expose communication issues
+ * Security and availability features that enable use on critical systems to support critical operations
+ * Publish/subscribe at data point level
+ * API implemented in multiple languages on multiple platforms
+ * Metadata will be versioned and tabular in nature
+ * Sets of metadata from multiple parties will be easy to merge
+ * Points defined in metadata will have a clear ownership path
+ * A minimal set of metadata will exist to support any STTP deployments
+ * Industry specific metadata extensions will exist to support specific industry deployments
+ * Ability to support broadcast messaging and distribution of critical system alarms
+
 
 > :construction: The following are _proposed_ ideas that may need a home -- purposely written in future tense
 
