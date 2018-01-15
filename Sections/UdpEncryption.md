@@ -212,10 +212,10 @@ To properly implement the wire-level UDP channel, the following recommendation e
 1. When starting a new connection, create a `Key Exchange Packet` with a freshly generated Key, IV, and HMACKEY; and SET KeyID = 0, Sequence = 0, Expire Time = 5 minutes.
 2. Every 15 seconds, create a `Key Exchange Packet` using the same information except update Sequence to the most recent Sequence that was used. 
 3. After half of the sequence numbers have been consumed, or a considerable amount of time has elapsed using the same key (i.e. Sequence > 10,000,000 OR Key Lifetime > 24 hours) begin sending 2 `Key Exchange Packets`. One with the old key, and a second with a freshly generated key and KeyID = PrevKeyID + 1, Sequence = 0, Expire Time = 5 minutes. 
-    i. Continue sending both `key exchange packets` every 15 seconds. Decrementing the Expire Time of the old packet. 
-    ii. After a few minute to ensure the client has received the new key, change the `DataPacket` over to the new key.
-    iii. Send the old `Key Exchange Packet` with a Expire Time = 0 minutes a few more times.
-    iv. The key has been exchanged, continue with Step 2. 
+    1. Continue sending both `key exchange packets` every 15 seconds. Decrementing the Expire Time of the old packet. 
+    2. After a few minute to ensure the client has received the new key, change the `DataPacket` over to the new key.
+    3. Send the old `Key Exchange Packet` with a Expire Time = 0 minutes a few more times.
+    4. The key has been exchanged, continue with Step 2. 
 
 After a KeyID has been sufficiently expired, it may be safely reused. This scheme will permit a few hundred thousand packets per second to be transmitted over UDP. This should be well above the typical use case. In addition, the sender must implement its own flow control algorithm since UDP will not be throttled by the socket layer. For streaming data, this isn't a big concern, but for metadata exchanges, it would easily overwhelm a connection and drop packets.
 
