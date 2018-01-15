@@ -64,7 +64,7 @@ Features:
 
 **Use Case #3 - Historian**
 
-The Historian supports many of the same features of a Dat Gateway.   However its primary function is to store a historical record of both measurements as well as the associated metadata.  The other major difference for a Historian compared to a gateway is that a historian may provide advanced filtering, summation, averaging or other advanced query mechanisms in addition to raw measurements.
+The Historian supports many of the same features of a Dat Gateway.   However its primary function is to store a historical record of both measurements as well as the associated metadata.  The other major difference for a Historian compared to a gateway is that a historian may provide advanced filtering, summation, averaging or other advanced query mechanisms in addition to raw measurements.  
 
 _Use case definition statement:_  
 
@@ -86,7 +86,11 @@ Features:
 * Request Data Backfilling*
 * Encryption*
 * Data Compression*
-* Advance Queries
+* Advanced Queries
+
+
+![Historian UML Image](https://raw.githubusercontent.com/sttp/Specification/master/Sections/Images/Use%20Case%20UML%20-%20Historian.jpg)
+
 
 **Use Case #4 - Combination Gateway / Historian**
 as noted before the use cases are suggested implementations.   It is expected that some systems will implement both the gateway as well as historian functions in a single system.
