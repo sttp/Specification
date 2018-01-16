@@ -11,8 +11,8 @@ This protocol does not allow for anonymous connections to exist. Each connection
 ### Features
 
 This protocol will provide the following:
-* Establish a secure one-way encrypted path (Using RSA-2048 bit keys to encrypt and sign the key data).
-* Encrypted of user traffic (AES-CTR or CBC Mode. 128, 192, 256 bit encryption).
+* Establish a secure one-way encrypted path (Using a RSA-2048 bit keys or greater to encrypt and sign the key data).
+* Encrypted of user traffic (AES-CTR Mode. 128, 192, 256 bit encryption).
 * Authenticated user traffic (Using a Keyed HMACs up to 512-bits long. With varieties of SHA256, SHA384, SHA512).
 * Data Integrity Checks (Provided by the HMAC)
 * Prevents packet duplication and replay attacks of expired data. 
@@ -36,49 +36,28 @@ Before a `Key Packet` can be created, the sender and the receiver must exchange 
 
 ### Data Packet
 
-A data packet will take one of the following formats depending on the cipher mode. This is because CBC requires padding, and CTR does not.
+A `Data Packet` will take the following format:
 
-If encryption is with AES using CBC mode:
 ```C
 struct {
-  byte[] UserData           //The sttp command
-  byte[N] HMAC.             //The authenication MAC. 
-  int8 HMACLen              //The length of the HMAC.
+  byte[] UserData        //The sttp command
+  byte[N] HMAC.          //The authenication MAC. 
 }
-CipherTextCBC;
+CipherText;
 
 struct {
   int8 KeyID;            //Corresponds to a `Key Packet`.
   uint24 Sequence        //A number that increments with each `Data Packet`.
   CipherText CipherText  //The encrypted user data and HMAC
 }
-DataPacketCBC;
-```
-
-If the encryption is with AES using CTR mode:
-```C
-struct {
-  byte[] UserData           //The sttp command
-  byte[N] HMAC.             //The authenication MAC. 
-}
-CipherTextCTR;
-
-struct {
-  int8 KeyID;            //Corresponds to a `Key Packet`.
-  uint24 Sequence        //A number that increments with each `Data Packet`.
-  CipherText CipherText  //The encrypted user data and HMAC
-}
-DataPacketCTR;
+DataPacket;
 ```
 
 Notes about the `Data Packet` fields
 * `KeyID` - This number identifies what `Key Packet` must be used to decrypt the CipherText and validate the HMAC. This field doubles as the packet type code. Any value < 250 are packet types `Data Packet`. 250 identifies a `Key Packet`. And 251 to 255 is reserved.
 * `Sequence` - A non-repeating unsigned sequence number that is used to deduplicate packets and change the encryption inputs. 24 million values are reserved for this function. This value MUST NOT be rolled over, rather a new `KeyID` must be provided by the sender before the 24 million values are consumed.
 * `CipherText` - The encrypted content. Note, the length of this field is calculated since the total packet length is provided by the UDP protocol header. 
-* `HMAC` - HMAC of the entire packet before encryption. The length of this field is defined in the `Key Packet`, but will be extended if using a AES-CBC cipher to ensure that CipherText is a multiple of 16 bytes. If this value exceeds the length of the HMAC, only the left most bytes will contain the HMAC bytes, the right most will repeat the value in `HMACLen`.
-* `HMACLen` - In AES-CBC mode, packets must be padded to a 16 byte boundary. Rather than pad with with 0's, the HMAC field will be extended a certain number of bytes. In AES-CTR Mode, this field will not exist because CTR data is not padded.
-
-> :information_source: It is critical that `HMACLen` meets or exceeds the length specified in the `Key Packet`. If it does not, the packet must be discarded.
+* `HMAC` - HMAC of the entire packet before encryption. The length of this field is defined in the `Key Packet`. Note: this value is also part of the Cipher Text.
 
 ### Key Packet
 
@@ -131,7 +110,7 @@ This information is encrypted using the receiver's public key.
 struct {
   byte[32] Nonce;         //A random number.
   int8 KeyID;             //Identifies this cipher.
-  int8 ExpireMinutes;     //The number of minutes this cipher is valid.
+  int8 ExpireSeconds;     //The number of seconds this cipher is valid.
   int ValidSequence       //The lower bounds of the vaild sequence numbers.
   CipherMode CipherMode;  //Indicate the cipher that will be used.
   HMACMode HMACMode       //Indicates the MAC that will be used.
@@ -145,7 +124,7 @@ SecretData;
 Notes about the `Secret Data` fields
 * `Nonce` - Ensures that the encrypted data is not deterministic. (This is the only field required to change when generating this packet).
 * `KeyID` - This field is combined with Source IP/Port to uniquely identify a sender and which active cipher is used to decrypt a `Data Packet`. Valid ranges for this field are 0-249 inclusive. 250-255 MUST NOT be used since they are used to identify packet types that are not `Data Packets`. 
-* `ExpireMinutes` - The number of minutes this key is to remain valid after receiving it. This should be added to the time the packet was received rather than the time provided in `Key Packets` otherwise clock drifting could make it impossible to use small values like 1 minute. A value of 0 means the key is expired and should not be used.
+* `ExpireSeconds` - The number of seconds this key is to remain valid after receiving it. This should be added to the time the packet was received rather than the time provided in `Key Packets` otherwise clock drifting could make it impossible to use small values like 1 seconds. A value of 0 means the key is expired and should not be used.
 * `ValidSequences` - This is the lower bounds of the sequence number of `Data Packets` that may be accepted for this `KeyID`. This field limits the impact of replay attacks with a newly established connection. For new connections, sequence numbers before this value must be discarded. For existing connections, a grace period of a few seconds should be given in case packets are legitimately reordered during transport. 
 * `CipherMode` - The cipher that will be used for encrypting the `Data Packet`. See section below for details.
 * `HMACMode` - The HMAC that will be used to authenticate a `Data Packet`. See section below for details.
@@ -153,20 +132,17 @@ Notes about the `Secret Data` fields
 * `KEY` - The encryption key. For Version 1, it is always 32 bytes regardless of the cipher chosen.
 * `HMACKEY` - The key that will be used for the HMAC. For Version 1, it is always 128 bytes regardless of the HMAC chosen.
 
-> :information_source: The cipher information (`CipherMode`, `HMACMode`, `IV`, `Key`, `HMACKEY`) MUST remain the same so long as the `KeyID` remains the same (`ExpireMinutes` and `ValidSequence` may change). Once the sender decides to change the cipher information, the `KeyID` must be incremented and a complete set of cipher information must be regenerated (`IV`, `KEY`, `HMACKey`). If the receivers receives that same `KeyID`ke with a different cipher state (and the old one has not yet expired), the receiver will assume the old connection has been closed an a new connection is being established. 
+> :information_source: The cipher information (`CipherMode`, `HMACMode`, `IV`, `Key`, `HMACKEY`) MUST remain the same so long as the `KeyID` remains the same (`ExpireSeconds` and `ValidSequence` may change). Once the sender decides to change the cipher information, the `KeyID` must be incremented and a complete set of cipher information must be regenerated (`IV`, `KEY`, `HMACKey`). If the receivers receives that same `KeyID`ke with a different cipher state (and the old one has not yet expired), the receiver will assume the old connection has been closed an a new connection is being established. 
 
 ### Cipher Mode
 
-Encrypting the `Data Packet` can take one of the following methods. At the present time, all of these methods are considered secure. Providing 6 options helps future proof the specification if any number of these options are considered broken in the future. All unused values are reserved for future versions of the protocol. 
+Encrypting the `Data Packet` can take one of the following methods. At the present time, all of these methods are considered secure. All unused values are reserved for future versions of the protocol. 
 
 ```C
 enum {
   AES-128-CTR = 0,
   AES-192-CTR = 1,
   AES-256-CTR = 2,
-  AES-128-CBC = 3,
-  AES-192-CBC = 4,
-  AES-256-CBC = 5
 }
 CipherMode; //8-bits
 ```
@@ -184,16 +160,6 @@ The CTR value that will be used to encrypt this data will equal:
 Where `Position Index` is the 0-based index of the first byte in an encryption block. Ex: For AES 128-bit block sizes, values would always be 0, 16, 32, 48, ...
 
 The CTR will be right padded with 0's up to the block size.
-
-
-#### CBC Mode
-
-In CBC mode, packets will be padded by lengthening the HMAC field of the `Data Packet`. This could add anywhere from 1 to 16 bytes of extra overhead. 
-
-Since chaining between packets cannot be accomplished with UDP, the IV must be changed at the start of every sequence. The IV will be XOR'd with the following data:
-
-`IV-Packet = IV XOR (Pad right with 0's){(int8)EpicID || (int24)Sequence Number }`
-
 
 ### HMAC Mode
 
@@ -214,23 +180,21 @@ HMACMode; //8-bits
 
 HMAC-SHA256-32Bit truncates a HMAC-SHA256 hash to a 32-bit value, providing 16-bits of security. The left most bytes are kept, the remaining bytes are discarded. The same is true for other modes.
 
-> :information_source: In AES-CBC mode, the HMAC length will be increased on a packet by packet basis so the data to be encrypted is a multiple of 16 bytes. 
-
 HMAC-SHA256 will use the left 64 bytes of the `HMACKEY`. HMAC-SHA384 and HMAC-SHA512 will use all 128 bytes of the `HMACKEY`. This is the recommended key length for these HMACs.
 
 #### Sender Example
 
 To properly implement the wire-level UDP channel, the following recommendation exists:
 
-1. When starting a new connection, create a `Key Packet` with a freshly generated `Key`, `IV`, and `HMACKEY`; and SET `KeyID` = 0, Sequence = 0, Expire Minutes = 5.
+1. When starting a new connection, create a `Key Packet` with a freshly generated `Key`, `IV`, and `HMACKEY`; and SET `KeyID` = 0, Sequence = 0, Expire Seconds = 300.
 2. Every 15 seconds, create a `Key Packet` using the same information except update Sequence to the most recent Sequence that was used. 
-3. After half of the sequence numbers have been consumed, or a considerable amount of time has elapsed using the same key (i.e. `Sequence` > 10,000,000 OR Key Lifetime > 24 hours) begin sending two different `Key Packets`. One with the old key, and a second with a freshly generated key and `KeyID` = PrevKeyID + 1, `Sequence` = 0, `Expire Minutes` = 5. 
-    1. Continue sending both `Key Packets` every 15 seconds. Decrementing the `Expire Minutes` of the old packet. 
+3. After half of the sequence numbers have been consumed, or a considerable amount of time has elapsed using the same key (i.e. `Sequence` > 10,000,000 OR Key Lifetime > 24 hours) begin sending two different `Key Packets`. One with the old key, and a second with a freshly generated key and `KeyID` = PrevKeyID + 1, `Sequence` = 0, `Expire Seconds` = 300. 
+    1. Continue sending both `Key Packets` every 15 seconds. Decrementing the `Expire Seconds` of the old packet. 
     2. After a few minute to ensure the client has received the new key, change the `Data Packet` over to the new key.
-    3. Send the old `Key Packet` with a `Expire Minutes` = 0 a few more times.
+    3. Send the old `Key Packet` with a `Expire Seconds` = 0 a few more times.
     4. The key has been exchanged, continue with Step 2. 
 
-After a `KeyID` has been sufficiently expired, it may be safely reused. This scheme will permit a few hundred thousand packets per second to be transmitted over UDP. This should be well above the typical use case. If this is not the case, the timing of these packets should be shortened. The fundamental limit supported by this protocol would be on the order of 30 million packets per second. That exhausts all 4 billion sequence numbers in 2 minutes.
+After a `KeyID` has been sufficiently expired, it may be safely reused. This scheme will permit a few hundred thousand packets per second to be transmitted over UDP. This should be well above the typical use case. If this is not the case, the timing of these packets should be shortened. The fundamental limit supported by this protocol would be on the order of 1 billion packets per second. That exhausts all 4 billion sequence numbers in 4 seconds.
 
 #### Receiver Example
 
@@ -249,17 +213,19 @@ For `Data Packets`, the receiver must track a bitmask window at least 32 bits lo
   * Elliptical curve signature validation is on the order of 30 times slower than RSA validation and the strongest Denial of Service attack for this protocol is at the point of signature validation.
   * The main concern with RSA is factoring using a quantum computer, however, the protocol does not expose the public key or the exponent as part of the handshake. 
 
-* Security experts are also moving to Authenticated Encryption and away from CBC and CTR. This is primarily due to the speed at which AES-GCM executes, and the fact that CBC is very difficult to properly implement. However, AES-GCM is not supported by Microsoft's .NET platform and the speed improvements are note likely to be significant. This may be added at a future date, but will not exists for Version 1 of the protocol.
+* Security experts are also moving to Authenticated Encryption and away from CTR. This is primarily due to the speed at which AES-GCM executes. However, AES-GCM is not supported by Microsoft's .NET platform and the speed improvements are note likely to be significant. This may be added at a future date, but will not exists for Version 1 of the protocol.
 
 * For multicast streams, all receivers must be provided with the same cipher information. Since data packets are authenticated using an HMAC, this means that anyone with the cipher information can impersonate the sender. Therefore all receivers of a multicast stream should be trusted entities with similar security levels.
 
-* When using a CTR based cipher, the contents can easily be forged, therefore a strong HMAC is desired for untrusted environments. If using CBC, a successful forgery will likely result in a parsing error that will terminate the connection. Therefore a secure HMAC is more critical for CTR.
+* When using a CTR based cipher, the contents can easily be forged, therefore a strong HMAC is desired for untrusted environments.
 
-* Since CTR packets don't incorporate padding, the length of the encrypted data will be leaked. This may or may not pose a creditable threat. With CBC, padding results will add anywhere from 1 to 16 bytes, keeping the packet length somewhat obscure. 
+* Since CTR packets don't incorporate padding, the length of the encrypted data will be leaked. This may or may not pose a creditable threat.
 
 * The safest way to protect the sender against a DoS Attack is by using UDP, however, this opens up additional DoS attack risks for the receiver of this data.
 
 * From a denial of service perspective, since UPD packets are extremely easy to forge, care should be taken when sending this information through an untrusted environment such as the Internet. A hardware assisted DoS solutions can provide a more targeted protection when using TCP and thus using TCP might be preferred. 
+
+* This algorithm uses MAC-then-Encrypt rather than the more secure Encrypt-then-MAC. The primary driver is to provide a checksum on the clear text of the user. Since padding is not incorporated in this protocol and feedback loops don't exist, the attacks against MAC-then-Encrypt don't exist.
 
 ### Other Considerations
 
