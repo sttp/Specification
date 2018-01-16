@@ -1,17 +1,17 @@
-## UDP Encrypted Transport Protocol
+## UDP Transport Layer Security Version 1.0
 
-Transporting Sttp over TCP can take advantage of the widely trusted TLS encryption protocol. On the other hand when transporting over UDP, there is not a clear winner. DTLS (Datagram-TLS) is not widely used and requires a bi-directional communications channel to exists. Sttp's primary need for UDP is to provide a true fire-and-forget means of sending data from a secure/trusted environment to an insecure one. This section will detail how this will be accomplished while maintaining high levels of security.
+This document describes a protocol that can be transported over UDP that is a true Fire-And-Forget means of securely sending data from one entity to another. This allows for communications paths that are one-to-one, one-to-many, or even one-to-none. This document will detail how this will be accomplished while maintaining high levels of security. 
 
-This protocol intentionally has fewer supported cryptographic functions than TLS, but the ones selected are widely supported in various programming languages and have a strong history in the industry. 
+While other means of transporting encrypted content over UDP exists. These use bi-directional communications. The purpose of this protocol is to avoid the need to have a data diode in place when transporting data from a secured environment to an unsecured one.
 
->  :information_source: Sttp over UDP is a 1-way communications channel. This allows for communications paths that are one-to-one, one-to-many, or one-to-none. If a 2-way communications channel is desired, some kind of hybrid connection can accommodate this need, but it will not be discussed in this section.
+This protocol intentionally has fewer supported cryptographic functions than TCP/TLS, but the ones selected are widely supported in various programming languages and have a strong history in the industry. 
 
-Not all sttp commands can be transported using UDP, and some commands will have additional values that must be present to communicate over a UDP channel. 
+This protocol does not allow for anonymous connections to exist. Each connection must be manually configured by providing the necessary encryption keys for both the sender and the receiver of the data. This manual key exchange is required, otherwise the protocol could not be considered a true Fire-And-Forget protocol. 
 
 ### Features
 
 This protocol will provide the following:
-* A Secure Key Exchange (Using RSA-2048 bit keys to encrypt and sign the data)
+* Establish a secure one-way encrypted path (Using RSA-2048 bit keys to encrypt and sign the key data).
 * Encrypted of user traffic (AES-CTR or CBC Mode. 128, 192, 256 bit encryption).
 * Authenticated user traffic (Using a Keyed HMACs up to 512-bits long. With varieties of SHA256, SHA384, SHA512).
 * Data Integrity Checks (Provided by the HMAC)
@@ -28,42 +28,59 @@ This protocol does not provide:
 
 ### Design Overview
 
-There are two packet types that are required for this UDP transport. `Data Packet,` and `Key Exchange Packet.` The `Data Packet` contains encrypted and authenticated user data. The `Key Exchange Packet` contains the current cipher keys and mode of operation.
+There are two packet types that are required for UTLS. `Data Packet,` and `Key Packet.` The `Data Packet` contains encrypted and authenticated user data. The `Key Packet` contains the current cipher keys and mode of operation.
 
-The `Key Exchange Packet` uses public key encryption technology to securely send this cipher information to the receiver. This information is sent to the receiver on a periodic basis to ensure that this critical piece of information is not missing or outdated. 
+The `Key Packet` uses public key encryption technology to securely send this cipher information to the receiver. This information is sent to the receiver on a periodic basis to ensure that this critical piece of information is not missing or outdated. 
 
-Before a `key exchange packet` can be created, the sender and the receiver must exchange public keys. This will usually occur manually unless an existing secure TCP connection supports this exchange. These keys must be RSA keys of length 2048-bit or greater. The receivers's public key will be used to encrypt the `Key Exchange Packet` and the senders's private key will be used to sign the same packet.
+Before a `Key Packet` can be created, the sender and the receiver must exchange public keys. This will usually occur manually. These keys must be RSA keys of length 2048-bit or greater. The receivers's public key will be used to encrypt the `Key Packet` and the senders's private key will be used to sign the same packet. This will securely provide the encryption key to the receiver and authenticate that the cipher came from the server.
 
 ### Data Packet
 
-A data packet will take the following format:
+A data packet will take one of the following formats depending on the cipher mode. This is because CBC requires padding, and CTR does not.
 
+If encryption is with AES using CBC mode:
 ```C
 struct {
   byte[] UserData           //The sttp command
   byte[N] HMAC.             //The authenication MAC. 
-  (optional)int8 HMACLen    //The length of the HMAC (Required if using AES-CBC Mode). 
+  int8 HMACLen              //The length of the HMAC.
 }
-CipherText;
+CipherTextCBC;
 
 struct {
   int8 KeyID;            //Corresponds to a Key Exchange Packet.
   uint24 Sequence        //A number that increments with each Data Packet.
   CipherText CipherText  //The encrypted user data and HMAC
 }
-DataPacket;
+DataPacketCBC;
+```
+
+If the encryption is with AES using CTR mode:
+```C
+struct {
+  byte[] UserData           //The sttp command
+  byte[N] HMAC.             //The authenication MAC. 
+}
+CipherTextCTR;
+
+struct {
+  int8 KeyID;            //Corresponds to a Key Exchange Packet.
+  uint24 Sequence        //A number that increments with each Data Packet.
+  CipherText CipherText  //The encrypted user data and HMAC
+}
+DataPacketCTR;
 ```
 
 Notes about the `DataPacket` fields
-* `KeyID` - This number identifies what KeyExchangePacket must be used to decrypt the CipherText and validate the HMAC. This field doubles as the packet type code. Any value < 250 are packet types `Data Packet.` 250 identifies a `Key Exchange Packet.` And 251 to 255 is reserved.
-* `Sequence` - A non-repeating sequence number that is used to deduplicate packets and change the encryption inputs. 24 million values are reserved for this function. This value MUST NOT be rolled over, rather a new KeyID must be provided by the sender before the 24 million values are consumed.
-* `CipherText` - The encrypted content. Note, the length of this field is calculated since the total packet length is provided by the UDP protocol. Combining data packets is not supported at this level, but can occur at a higher level.
-* `HMAC` - HMAC of the entire packet before encryption. The length of this field is defined in the `Key Exchange Packet,` but will be extended for a CBC cipher to ensure that CipherText is a multiple of 16. If this exceeds the size of the HMAC, only the left most bytes will contain the HMAC bits, the right most will repeat the value in `HMACLen`.
-* `HMACLen` - In CBC mode, packets must be padded on a 16 byte boundary. Rather than pad with with 0's, the HMAC field will be extended a certain number of bytes. In CTR Mode, this field will not exist because CTR data is not padded.
+* `KeyID` - This number identifies what `Key Packet` must be used to decrypt the CipherText and validate the HMAC. This field doubles as the packet type code. Any value < 250 are packet types `Data Packet.` 250 identifies a `Key Packet.` And 251 to 255 is reserved.
+* `Sequence` - A non-repeating unsigned sequence number that is used to deduplicate packets and change the encryption inputs. 24 million values are reserved for this function. This value MUST NOT be rolled over, rather a new KeyID must be provided by the sender before the 24 million values are consumed.
+* `CipherText` - The encrypted content. Note, the length of this field is calculated since the total packet length is provided by the UDP protocol header. 
+* `HMAC` - HMAC of the entire packet before encryption. The length of this field is defined in the `Key Packet,` but will be extended if using a AES-CBC cipher to ensure that CipherText is a multiple of 16 bytes. If this value exceeds the length of the HMAC, only the left most bytes will contain the HMAC bytes, the right most will repeat the value in `HMACLen`.
+* `HMACLen` - In AES-CBC mode, packets must be padded to a 16 byte boundary. Rather than pad with with 0's, the HMAC field will be extended a certain number of bytes. In AES-CTR Mode, this field will not exist because CTR data is not padded.
 
-> :information_source: It is critical that `HMACLen` meets or exceeds the length specified in the `Key Exchange Packet.` If it does not, the packet must be discarded.
+> :information_source: It is critical that `HMACLen` meets or exceeds the length specified in the `Key Packet.` If it does not, the packet must be discarded.
 
-### Key Exchange Packet
+### Key Packet
 
 The sender will provide the following information to the receiver so it can decrypt the `Data Packet.`
 
@@ -80,11 +97,11 @@ struct {
   int16 SignatureLength   //The length of the signature.
   byte[N] Signature       //The digital signature.
 }
-KeyExchangePacket;
+KeyPacket;
 ```
 
-Notes about the `KeyExchangePacket` fields:
-* `PacketType` - Identifies that this is a `Key Exchange Packet`
+Notes about the `KeyPacket` fields:
+* `PacketType` - Identifies that this is a `Key Packet`
 * `Version` - The version number of the protocol. The current version is Version 1.
 * `InstanceID` - This is a randomly generated ID for every packet. This field is used by the receiver to ignore a duplicate packet if one occurs.
 * `CreationTime` - Provides the time this packet was created. The receiver will use this number to prevent replay attacks by only accepting packets that arrive within some defined window. Depending on how tightly the systems are synchronized, this could be anywhere from seconds to minutes. The receiver must determines this value.
@@ -96,7 +113,7 @@ Notes about the `KeyExchangePacket` fields:
 
 > :information_source: Since the SignatureLength is not signed, it is important to validate all bytes of the Signature. Signatures are not truncated. 
 
-The following steps must be taken in sequential order when a receiver validates a `Key Exchange Packet`:
+The following steps must be taken in sequential order when a receiver validates a `Key Packet.` The order has been selected to minimize the impact of a denial of service attack by flooding this kind of packet:
 1. Ensure that `Version` is supported.
 2. Ensure that `InstanceID` was not recently received.
 3. Ensure that `CreationTime` represents a valid UTC timestamp. (Throwing exceptions here could allow for an easy denial of service attack since exception processing is slow for most languages.) 
@@ -114,7 +131,7 @@ This information is encrypted using the receiver's public key.
 struct {
   byte[32] Nonce;         //A random number.
   int8 KeyID;             //Identifies this cipher.
-  int8 ValidMinutes;      //The number of minutes this cipher is valid.
+  int8 ExpireMinutes;     //The number of minutes this cipher is valid.
   int ValidSequence       //The lower bounds of the vaild sequence numbers.
   CipherMode CipherMode;  //Indicate the cipher that will be used.
   HMACMode HMACMode       //Indicates the MAC that will be used.
@@ -128,7 +145,7 @@ SecretData;
 Notes about the `SecretData` fields
 * `Nonce` - Ensures that the encrypted data is not deterministic. (This is the only field required to change when generating this packet).
 * `KeyID` - This field is combined with Source IP/Port to uniquely identify a sender and which active cipher is used to decrypt a `Data Packet`. Valid ranges for this field are 0-249 inclusive. 250-255 MUST NOT be used since they are used to identify packet types that are not `Data Packets`. 
-* `ValidMinutes` - The number of minutes this key is to remain valid after receiving it. This should be added to the time the packet was received rather than the time provided in `KeyExchangePackets` otherwise clock drifting could make it impossible to use small values like 1 minute. A value of 0 means the key is expired and should not be used.
+* `ExpireMinutes` - The number of minutes this key is to remain valid after receiving it. This should be added to the time the packet was received rather than the time provided in `KeyExchangePackets` otherwise clock drifting could make it impossible to use small values like 1 minute. A value of 0 means the key is expired and should not be used.
 * `ValidSequences` - This is the lower bounds of the sequence number of `Data Packets` that may be accepted for this `KeyID`. This field limits the impact of replay attacks with a newly established connection. For new connections, sequence numbers before this value must be discarded. For existing connections, a grace period of a few seconds should be given in case packets are legitimately reordered during transport. 
 * `CipherMode` - The cipher that will be used for encrypting the `DataPacket`. See section below for details.
 * `HMACMode` - The HMAC that will be used to authenticate a `DataPacket`. See section below for details.
@@ -180,7 +197,7 @@ Since chaining between packets cannot be accomplished with UDP, the IV must be c
 
 ### HMAC Mode
 
-Authenticating a packet will be accomplished using a key'd HMAC. Authentication is required and serves as a checksum on the data to ensure that the client is using the proper cipher to decode the data. A 32-bit HMAC should be considered as weak as a good checksum and only used in trusted environments.
+Authenticating a packet will be accomplished using a keyed HMAC. Authentication is required and serves as a checksum on the data to ensure that the client is using the proper cipher to decode the data. A 32-bit HMAC should be considered as weak as a good checksum and only used in trusted environments.
 
 ```C
 enum {
@@ -201,31 +218,27 @@ HMAC-SHA256-32Bit truncates a HMAC-SHA256 hash to a 32-bit value, providing 16-b
 
 HMAC-SHA256 will use the left 64 bytes of the `HMACKEY`. HMAC-SHA384 and HMAC-SHA512 will use all 128 bytes of the `HMACKEY`. This is the recommended key length for these HMACs.
 
-### Implementation Examples
-
-Since there will not be a feedback loop, the sender will have to make the determination on how sttp commands are sent to the receiver. One example could be: The entire metadata set is sent once per hour, a metadata delta is sent once per minute, and the real-time stream is sent as it comes in. Specifics how this can be done are outlined in another section (This section hasn't been written.)
-
 #### Sender Example
 
 To properly implement the wire-level UDP channel, the following recommendation exists:
 
-1. When starting a new connection, create a `Key Exchange Packet` with a freshly generated Key, IV, and HMACKEY; and SET KeyID = 0, Sequence = 0, Expire Time = 5 minutes.
-2. Every 15 seconds, create a `Key Exchange Packet` using the same information except update Sequence to the most recent Sequence that was used. 
-3. After half of the sequence numbers have been consumed, or a considerable amount of time has elapsed using the same key (i.e. Sequence > 10,000,000 OR Key Lifetime > 24 hours) begin sending two different `Key Exchange Packets`. One with the old key, and a second with a freshly generated key and KeyID = PrevKeyID + 1, Sequence = 0, Expire Time = 5 minutes. 
-    1. Continue sending both `key exchange packets` every 15 seconds. Decrementing the Expire Time of the old packet. 
-    2. After a few minute to ensure the client has received the new key, change the `DataPacket` over to the new key.
-    3. Send the old `Key Exchange Packet` with a Expire Time = 0 minutes a few more times.
+1. When starting a new connection, create a `Key Packet` with a freshly generated Key, IV, and HMACKEY; and SET KeyID = 0, Sequence = 0, Expire Minutes = 5.
+2. Every 15 seconds, create a `Key Packet` using the same information except update Sequence to the most recent Sequence that was used. 
+3. After half of the sequence numbers have been consumed, or a considerable amount of time has elapsed using the same key (i.e. Sequence > 10,000,000 OR Key Lifetime > 24 hours) begin sending two different `Key Packets`. One with the old key, and a second with a freshly generated key and KeyID = PrevKeyID + 1, Sequence = 0, Expire Minutes = 5. 
+    1. Continue sending both `Key Packets` every 15 seconds. Decrementing the Expire Minutes of the old packet. 
+    2. After a few minute to ensure the client has received the new key, change the `Data Packet` over to the new key.
+    3. Send the old `Key Packet` with a Expire Minutes = 0 a few more times.
     4. The key has been exchanged, continue with Step 2. 
 
-After a KeyID has been sufficiently expired, it may be safely reused. This scheme will permit a few hundred thousand packets per second to be transmitted over UDP. This should be well above the typical use case. In addition, the sender must implement its own flow control algorithm since UDP will not be throttled by the socket layer. For streaming data, this isn't a big concern, but for metadata exchanges, it would easily overwhelm the connection and drop packets.
+After a KeyID has been sufficiently expired, it may be safely reused. This scheme will permit a few hundred thousand packets per second to be transmitted over UDP. This should be well above the typical use case. If this is not the case, the timing of these packets should be shortened. The fundamental limit supported by this protocol would be on the order of 30 million packets per second. That exhausts all 4 billion sequence numbers in 2 minutes.
 
 #### Receiver Example
 
 In addition to properly following the sequence in the Sender Example, the receiver must be able to ignore duplicate packets when it receives them. 
 
-For `Key Exchange Packets`, the steps taken to validate the key exchange packet is sufficient to eliminate the impact with duplicates.
+For `Key Packets,` the steps taken to validate the `Key Packet` is sufficient to eliminate the impact with duplicates.
 
-For `Data Packets`, the receiver must track a bitmask window at least 32 bits long to track what sequence numbers it has recently received for every valid KeyID. If the sequence number is older than the oldest one being tracked, it must be discarded. If newer, then the packet must be validated first using the HMAC before the tracked sequence window will be advanced. The tracked sequence window must also be advanced when it receives an update ValidSequences number in a `Key Exchange Packet`. It can be discarded once a KeyID is valid.
+For `Data Packets,` the receiver must track a bitmask window at least 32 bits long to track what sequence numbers it has recently received for every valid KeyID. If the sequence number is older than the oldest one being tracked, it must be discarded. If newer, then the packet must be validated first using the HMAC before the tracked sequence window will be advanced. The tracked sequence window must also be advanced when it receives an update ValidSequences number in a `Key Packet.` It can be discarded once a KeyID is valid. 
 
 ### Security Considerations
 
@@ -236,7 +249,7 @@ For `Data Packets`, the receiver must track a bitmask window at least 32 bits lo
   * Elliptical curve signature validation is on the order of 30 times slower than RSA validation and the strongest Denial of Service attack for this protocol is at the point of signature validation.
   * The main concern with RSA is factoring using a quantum computer, however, the protocol does not expose the public key or the exponent as part of the handshake. 
 
-* Security experts are also moving to Authenticated Encryption and away from CBC and CTR. This is primarily due to the speed at which AES-GCM executes, and the fact that CBC is very difficult to properly implement. However, AES-GCM is not supported by Microsoft's .NET platform and the speed improvements won't significantly benefit a UDP implementation of sttp. This may be added at a future date, but will not exists for Version 1 of the protocol.
+* Security experts are also moving to Authenticated Encryption and away from CBC and CTR. This is primarily due to the speed at which AES-GCM executes, and the fact that CBC is very difficult to properly implement. However, AES-GCM is not supported by Microsoft's .NET platform and the speed improvements are note likely to be significant. This may be added at a future date, but will not exists for Version 1 of the protocol.
 
 * For multicast streams, all receivers must be provided with the same cipher information. Since data packets are authenticated using an HMAC, this means that anyone with the cipher information can impersonate the sender. Therefore all receivers of a multicast stream should be trusted entities with similar security levels.
 
