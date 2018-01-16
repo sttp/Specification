@@ -70,9 +70,8 @@
 | [Specification Copyright Statement (3)](Contributors.md#specification-copyright-statement) | [Contributors.md](Contributors.md) |
 | [Major Version History (2)](History.md#major-version-history) | [History.md](History.md) |
 | [Appendix A - Initial Team Requirements (2)](FunctionalRequirements.md#appendix-a---initial-team-requirements) | [FunctionalRequirements.md](FunctionalRequirements.md) |
-| [verview: (3)](FunctionalRequirements.md#verview) | [FunctionalRequirements.md](FunctionalRequirements.md) |
+| [Overview: (3)](FunctionalRequirements.md#overview) | [FunctionalRequirements.md](FunctionalRequirements.md) |
 | [Use Case Examples (3)](FunctionalRequirements.md#use-case-examples) | [FunctionalRequirements.md](FunctionalRequirements.md) |
-| [Operational Requirements (3)](FunctionalRequirements.md#operational-requirements) | [FunctionalRequirements.md](FunctionalRequirements.md) |
 | [Appendix B - STTP API Reference (2)](APIReference.md#appendix-b---sttp-api-reference) | [APIReference.md](APIReference.md) |
 | [Core (3)](APIReference.md#core) | [APIReference.md](APIReference.md) |
 | [Data (3)](APIReference.md#data) | [APIReference.md](APIReference.md) |
