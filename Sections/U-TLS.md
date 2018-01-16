@@ -28,7 +28,7 @@ This protocol does not provide:
 
 ### Design Overview
 
-There are two packet types that are required for UTLS. `Data Packet,` and `Key Packet.` The `Data Packet` contains encrypted and authenticated user data. The `Key Packet` contains the current cipher keys and mode of operation.
+There are two packet types that are required for UTLS. `Data Packet`, and `Key Packet`. The `Data Packet` contains encrypted and authenticated user data. The `Key Packet` contains the current cipher keys and mode of operation.
 
 The `Key Packet` uses public key encryption technology to securely send this cipher information to the receiver. This information is sent to the receiver on a periodic basis to ensure that this critical piece of information is not missing or outdated. 
 
@@ -48,8 +48,8 @@ struct {
 CipherTextCBC;
 
 struct {
-  int8 KeyID;            //Corresponds to a Key Exchange Packet.
-  uint24 Sequence        //A number that increments with each Data Packet.
+  int8 KeyID;            //Corresponds to a `Key Packet`.
+  uint24 Sequence        //A number that increments with each `Data Packet`.
   CipherText CipherText  //The encrypted user data and HMAC
 }
 DataPacketCBC;
@@ -64,25 +64,25 @@ struct {
 CipherTextCTR;
 
 struct {
-  int8 KeyID;            //Corresponds to a Key Exchange Packet.
-  uint24 Sequence        //A number that increments with each Data Packet.
+  int8 KeyID;            //Corresponds to a `Key Packet`.
+  uint24 Sequence        //A number that increments with each `Data Packet`.
   CipherText CipherText  //The encrypted user data and HMAC
 }
 DataPacketCTR;
 ```
 
-Notes about the `DataPacket` fields
-* `KeyID` - This number identifies what `Key Packet` must be used to decrypt the CipherText and validate the HMAC. This field doubles as the packet type code. Any value < 250 are packet types `Data Packet.` 250 identifies a `Key Packet.` And 251 to 255 is reserved.
-* `Sequence` - A non-repeating unsigned sequence number that is used to deduplicate packets and change the encryption inputs. 24 million values are reserved for this function. This value MUST NOT be rolled over, rather a new KeyID must be provided by the sender before the 24 million values are consumed.
+Notes about the `Data Packet` fields
+* `KeyID` - This number identifies what `Key Packet` must be used to decrypt the CipherText and validate the HMAC. This field doubles as the packet type code. Any value < 250 are packet types `Data Packet`. 250 identifies a `Key Packet`. And 251 to 255 is reserved.
+* `Sequence` - A non-repeating unsigned sequence number that is used to deduplicate packets and change the encryption inputs. 24 million values are reserved for this function. This value MUST NOT be rolled over, rather a new `KeyID` must be provided by the sender before the 24 million values are consumed.
 * `CipherText` - The encrypted content. Note, the length of this field is calculated since the total packet length is provided by the UDP protocol header. 
-* `HMAC` - HMAC of the entire packet before encryption. The length of this field is defined in the `Key Packet,` but will be extended if using a AES-CBC cipher to ensure that CipherText is a multiple of 16 bytes. If this value exceeds the length of the HMAC, only the left most bytes will contain the HMAC bytes, the right most will repeat the value in `HMACLen`.
+* `HMAC` - HMAC of the entire packet before encryption. The length of this field is defined in the `Key Packet`, but will be extended if using a AES-CBC cipher to ensure that CipherText is a multiple of 16 bytes. If this value exceeds the length of the HMAC, only the left most bytes will contain the HMAC bytes, the right most will repeat the value in `HMACLen`.
 * `HMACLen` - In AES-CBC mode, packets must be padded to a 16 byte boundary. Rather than pad with with 0's, the HMAC field will be extended a certain number of bytes. In AES-CTR Mode, this field will not exist because CTR data is not padded.
 
-> :information_source: It is critical that `HMACLen` meets or exceeds the length specified in the `Key Packet.` If it does not, the packet must be discarded.
+> :information_source: It is critical that `HMACLen` meets or exceeds the length specified in the `Key Packet`. If it does not, the packet must be discarded.
 
 ### Key Packet
 
-The sender will provide the following information to the receiver so it can decrypt the `Data Packet.`
+The sender will provide the following information to the receiver so it can decrypt the `Data Packet`.
 
 ```C
 struct {
@@ -100,7 +100,7 @@ struct {
 KeyPacket;
 ```
 
-Notes about the `KeyPacket` fields:
+Notes about the `Key Packet` fields:
 * `PacketType` - Identifies that this is a `Key Packet`
 * `Version` - The version number of the protocol. The current version is Version 1.
 * `InstanceID` - This is a randomly generated ID for every packet. This field is used by the receiver to ignore a duplicate packet if one occurs.
@@ -108,12 +108,12 @@ Notes about the `KeyPacket` fields:
   * Encoded UTC Time: 2 byte Year, 1 byte Month, 1 byte Day, 1 byte Hour, 1 byte Minute, 1 byte Second
 * `EncryptKeyHash` - A SHA-256 hash of the public key that was used to encrypt `Secret`. Since decrypting an RSA is expensive, it's important to know if the public keys match before attempting the decryption. It also allows the receiver to search for the valid key if multiple keys are active. 
 * `SignKeyHash` - A SHA-256 hash of the public key that can be used to verify the signature. When looking up this public key, it is important to verify the source information of this key because it alone identifies who generated these encryption credentials.
-* `Secret` - RSA with OAEP-SHA1 padding encrypted `SecretData` using the receiver's public key. See section below for details about `SecretData`. 
+* `Secret` - RSA with OAEP-SHA1 padding encrypted `Secret Data` using the receiver's public key. See section below for details about `Secret Data`. 
 * `Signature` - SHA512-RSA-PPS digital signature of entire packet minus the signature length. (Using the senders's private key). 
 
 > :information_source: Since the SignatureLength is not signed, it is important to validate all bytes of the Signature. Signatures are not truncated. 
 
-The following steps must be taken in sequential order when a receiver validates a `Key Packet.` The order has been selected to minimize the impact of a denial of service attack by flooding this kind of packet:
+The following steps must be taken in sequential order when a receiver validates a `Key Packet`. The order has been selected to minimize the impact of a denial of service attack by flooding this kind of packet:
 1. Ensure that `Version` is supported.
 2. Ensure that `InstanceID` was not recently received.
 3. Ensure that `CreationTime` represents a valid UTC timestamp. (Throwing exceptions here could allow for an easy denial of service attack since exception processing is slow for most languages.) 
@@ -142,22 +142,22 @@ struct {
 SecretData;
 ```
 
-Notes about the `SecretData` fields
+Notes about the `Secret Data` fields
 * `Nonce` - Ensures that the encrypted data is not deterministic. (This is the only field required to change when generating this packet).
 * `KeyID` - This field is combined with Source IP/Port to uniquely identify a sender and which active cipher is used to decrypt a `Data Packet`. Valid ranges for this field are 0-249 inclusive. 250-255 MUST NOT be used since they are used to identify packet types that are not `Data Packets`. 
-* `ExpireMinutes` - The number of minutes this key is to remain valid after receiving it. This should be added to the time the packet was received rather than the time provided in `KeyExchangePackets` otherwise clock drifting could make it impossible to use small values like 1 minute. A value of 0 means the key is expired and should not be used.
+* `ExpireMinutes` - The number of minutes this key is to remain valid after receiving it. This should be added to the time the packet was received rather than the time provided in `Key Packets` otherwise clock drifting could make it impossible to use small values like 1 minute. A value of 0 means the key is expired and should not be used.
 * `ValidSequences` - This is the lower bounds of the sequence number of `Data Packets` that may be accepted for this `KeyID`. This field limits the impact of replay attacks with a newly established connection. For new connections, sequence numbers before this value must be discarded. For existing connections, a grace period of a few seconds should be given in case packets are legitimately reordered during transport. 
-* `CipherMode` - The cipher that will be used for encrypting the `DataPacket`. See section below for details.
-* `HMACMode` - The HMAC that will be used to authenticate a `DataPacket`. See section below for details.
+* `CipherMode` - The cipher that will be used for encrypting the `Data Packet`. See section below for details.
+* `HMACMode` - The HMAC that will be used to authenticate a `Data Packet`. See section below for details.
 * `IV` - The initialization vector to use for the cipher. For Version 1, it will always be 16 bytes long.
 * `KEY` - The encryption key. For Version 1, it is always 32 bytes regardless of the cipher chosen.
 * `HMACKEY` - The key that will be used for the HMAC. For Version 1, it is always 128 bytes regardless of the HMAC chosen.
 
-> :information_source: The cipher information (CipherMode, HMACMode, IV, Key, HMACKEY) MUST remain the same so long as the KeyID remains the same (ValidMinutes and ValidSequence may change). Once the sender decides to change the cipher information, the KeyID must be incremented and a complete set of cipher information must be regenerated (IV, KEY, HMACKey). If the receivers receives that same KeyID with a different cipher state (and the old one has not yet expired), the receiver will assume the old connection has been closed an a new connection is being established. 
+> :information_source: The cipher information (`CipherMode`, `HMACMode`, `IV`, `Key`, `HMACKEY`) MUST remain the same so long as the `KeyID` remains the same (`ExpireMinutes` and `ValidSequence` may change). Once the sender decides to change the cipher information, the `KeyID` must be incremented and a complete set of cipher information must be regenerated (`IV`, `KEY`, `HMACKey`). If the receivers receives that same `KeyID`ke with a different cipher state (and the old one has not yet expired), the receiver will assume the old connection has been closed an a new connection is being established. 
 
 ### Cipher Mode
 
-Encrypting the `data packet` can take one of the following methods. At the present time, all of these methods are considered secure. Providing 6 options helps future proof the specification if any number of these options are considered broken in the future. All unused values are reserved for future versions of the protocol. 
+Encrypting the `Data Packet` can take one of the following methods. At the present time, all of these methods are considered secure. Providing 6 options helps future proof the specification if any number of these options are considered broken in the future. All unused values are reserved for future versions of the protocol. 
 
 ```C
 enum {
@@ -188,11 +188,11 @@ The CTR will be right padded with 0's up to the block size.
 
 #### CBC Mode
 
-In CBC mode, packets will be padded by lengthening the HMAC field of the `DataPacket`. This could add anywhere from 1 to 16 bytes of extra overhead. 
+In CBC mode, packets will be padded by lengthening the HMAC field of the `Data Packet`. This could add anywhere from 1 to 16 bytes of extra overhead. 
 
 Since chaining between packets cannot be accomplished with UDP, the IV must be changed at the start of every sequence. The IV will be XOR'd with the following data:
 
-`IV-Packet = IV XOR (Pad right with 0`s){(int8)EpicID || (int24)Sequence Number }`
+`IV-Packet = IV XOR (Pad right with 0's){(int8)EpicID || (int24)Sequence Number }`
 
 
 ### HMAC Mode
@@ -222,23 +222,23 @@ HMAC-SHA256 will use the left 64 bytes of the `HMACKEY`. HMAC-SHA384 and HMAC-SH
 
 To properly implement the wire-level UDP channel, the following recommendation exists:
 
-1. When starting a new connection, create a `Key Packet` with a freshly generated Key, IV, and HMACKEY; and SET KeyID = 0, Sequence = 0, Expire Minutes = 5.
+1. When starting a new connection, create a `Key Packet` with a freshly generated `Key`, `IV`, and `HMACKEY`; and SET `KeyID` = 0, Sequence = 0, Expire Minutes = 5.
 2. Every 15 seconds, create a `Key Packet` using the same information except update Sequence to the most recent Sequence that was used. 
-3. After half of the sequence numbers have been consumed, or a considerable amount of time has elapsed using the same key (i.e. Sequence > 10,000,000 OR Key Lifetime > 24 hours) begin sending two different `Key Packets`. One with the old key, and a second with a freshly generated key and KeyID = PrevKeyID + 1, Sequence = 0, Expire Minutes = 5. 
-    1. Continue sending both `Key Packets` every 15 seconds. Decrementing the Expire Minutes of the old packet. 
+3. After half of the sequence numbers have been consumed, or a considerable amount of time has elapsed using the same key (i.e. `Sequence` > 10,000,000 OR Key Lifetime > 24 hours) begin sending two different `Key Packets`. One with the old key, and a second with a freshly generated key and `KeyID` = PrevKeyID + 1, `Sequence` = 0, `Expire Minutes` = 5. 
+    1. Continue sending both `Key Packets` every 15 seconds. Decrementing the `Expire Minutes` of the old packet. 
     2. After a few minute to ensure the client has received the new key, change the `Data Packet` over to the new key.
-    3. Send the old `Key Packet` with a Expire Minutes = 0 a few more times.
+    3. Send the old `Key Packet` with a `Expire Minutes` = 0 a few more times.
     4. The key has been exchanged, continue with Step 2. 
 
-After a KeyID has been sufficiently expired, it may be safely reused. This scheme will permit a few hundred thousand packets per second to be transmitted over UDP. This should be well above the typical use case. If this is not the case, the timing of these packets should be shortened. The fundamental limit supported by this protocol would be on the order of 30 million packets per second. That exhausts all 4 billion sequence numbers in 2 minutes.
+After a `KeyID` has been sufficiently expired, it may be safely reused. This scheme will permit a few hundred thousand packets per second to be transmitted over UDP. This should be well above the typical use case. If this is not the case, the timing of these packets should be shortened. The fundamental limit supported by this protocol would be on the order of 30 million packets per second. That exhausts all 4 billion sequence numbers in 2 minutes.
 
 #### Receiver Example
 
 In addition to properly following the sequence in the Sender Example, the receiver must be able to ignore duplicate packets when it receives them. 
 
-For `Key Packets,` the steps taken to validate the `Key Packet` is sufficient to eliminate the impact with duplicates.
+For `Key Packets`, the steps taken to validate the `Key Packet` is sufficient to eliminate the impact with duplicates.
 
-For `Data Packets,` the receiver must track a bitmask window at least 32 bits long to track what sequence numbers it has recently received for every valid KeyID. If the sequence number is older than the oldest one being tracked, it must be discarded. If newer, then the packet must be validated first using the HMAC before the tracked sequence window will be advanced. The tracked sequence window must also be advanced when it receives an update ValidSequences number in a `Key Packet.` It can be discarded once a KeyID is valid. 
+For `Data Packets`, the receiver must track a bitmask window at least 32 bits long to track what sequence numbers it has recently received for every valid `KeyID`. If the sequence number is older than the oldest one being tracked, it must be discarded. If newer, then the packet must be validated first using the HMAC before the tracked sequence window will be advanced. The tracked sequence window must also be advanced when it receives an update ValidSequences number in a `Key Packet`. It can be discarded once a `KeyID` is valid. 
 
 ### Security Considerations
 
