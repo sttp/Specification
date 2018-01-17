@@ -14,17 +14,17 @@ This protocol will provide the following:
 * Establish a secure one-way encrypted path (Using a RSA-2048 bit keys or greater to encrypt and sign the key data).
 * Encrypted of user traffic (AES-CTR Mode. 128, 192, 256 bit encryption).
 * Authenticated user traffic (Using a Keyed HMACs up to 512-bits long. With varieties of SHA256, SHA384, SHA512).
-* Data Integrity Checks (Provided by the HMAC)
+* Data Integrity Checks (Provided by the HMAC).
 * Prevents packet duplication and replay attacks of expired data. 
 * Protects against Man-in-the-Middle attacks.
 * Resistant to Denial-of-Service attacks (Sender Risk: None; Receiver Risk: Low). 
 
 This protocol does not provide:
-* Guaranteed Delivery
-* Flow Control
-* Congestion Notification
+* Guaranteed Delivery.
+* Flow Control.
+* Congestion Notification.
 * Packets Sequencing.
-* Acknowledgments
+* Acknowledgments.
 
 ### Design Overview
 
@@ -92,6 +92,8 @@ Notes about the `Key Packet` fields:
 
 > :information_source: Since the SignatureLength is not signed, it is important to validate all bytes of the Signature. Signatures are not truncated. 
 
+> :information_source: Note: Sending a `Key Packet` is optional. However, other means outside of this protocol defintion must exist to provide this data to receivers, otherwise no one will be able to decrypt the stream. One example could be: a key management server exists on the outside, and only it receives a unicast message of the cipher key, then recievers will connect to it to get the curent cipher information, while the `Data Packet` is broadcast to the entire network.
+
 The following steps must be taken in sequential order when a receiver validates a `Key Packet`. The order has been selected to minimize the impact of a denial of service attack by flooding this kind of packet:
 1. Ensure that `Version` is supported.
 2. Ensure that `InstanceID` was not recently received.
@@ -125,7 +127,7 @@ Notes about the `Secret Data` fields
 * `Nonce` - Ensures that the encrypted data is not deterministic. (This is the only field required to change when generating this packet).
 * `KeyID` - This field is combined with Source IP/Port to uniquely identify a sender and which active cipher is used to decrypt a `Data Packet`. Valid ranges for this field are 0-249 inclusive. 250-255 MUST NOT be used since they are used to identify packet types that are not `Data Packets`. 
 * `ExpireSeconds` - The number of seconds this key is to remain valid after receiving it. This should be added to the time the packet was received rather than the time provided in `Key Packets` otherwise clock drifting could make it impossible to use small values like 1 seconds. A value of 0 means the key is expired and should not be used.
-* `ValidSequences` - This is the lower bounds of the sequence number of `Data Packets` that may be accepted for this `KeyID`. This field limits the impact of replay attacks with a newly established connection. For new connections, sequence numbers before this value must be discarded. For existing connections, a grace period of a few seconds should be given in case packets are legitimately reordered during transport. 
+* `ValidSequences` - This is the lower bounds of the sequence number of `Data Packets` that may be accepted for this `KeyID`. This field limits the impact of replay attacks with a newly established connection. For new connections, sequence numbers before this value must be discarded. For existing connections, a grace period of a few seconds should be given in case packets are legitimately reordered during transport. If `ExpireSeconds` is zero, this value will equal 1 + the sent `Sequence` number created. Providing the receiver with this information will let it keep track of how many packets have been dropped.
 * `CipherMode` - The cipher that will be used for encrypting the `Data Packet`. See section below for details.
 * `HMACMode` - The HMAC that will be used to authenticate a `Data Packet`. See section below for details.
 * `IV` - The initialization vector to use for the cipher. For Version 1, it will always be 16 bytes long.
@@ -155,11 +157,9 @@ In CTR mode, the cipher will not pad the input data.
 
 The CTR value that will be used to encrypt this data will equal:
 
-`CTR = {(int8)EpicID || (int24)Sequence Number || (int32)Position Index}`
+`CTR = {(int64)(Left 80 bits of the IV) || (int8)EpicID || (int24)Sequence Number || (in16)Block Index}`
 
-Where `Position Index` is the 0-based index of the first byte in an encryption block. Ex: For AES 128-bit block sizes, values would always be 0, 16, 32, 48, ...
-
-The CTR will be right padded with 0's up to the block size.
+Where `Block Index` is the 0-based index that increases by 1 for every block that is encrypted in a single packet. For AES, this starts a 0 and increases by 1 every 16 bytes encrypted. It starts over with every packet.
 
 ### HMAC Mode
 
@@ -211,9 +211,11 @@ For `Data Packets`, the receiver must track a bitmask window at least 32 bits lo
   * The industry hasn't reached a consensus on the best elliptical curves to use. 
   * Elliptical curve cartography is not as widely supported as RSA on software platforms.
   * Elliptical curve signature validation is on the order of 30 times slower than RSA validation and the strongest Denial of Service attack for this protocol is at the point of signature validation.
-  * The main concern with RSA is factoring using a quantum computer, however, the protocol does not expose the public key or the exponent as part of the handshake. 
+  * ECDH and DH with the receiver's key being static and the sender's key being empirical is possible, but has little advantage over the supplied RSA solution. If additional security is desired. A bi-directional key exchange should be used so perfect forward secrecy can be achieved.
 
 * Security experts are also moving to Authenticated Encryption and away from CTR. This is primarily due to the speed at which AES-GCM executes. However, AES-GCM is not supported by Microsoft's .NET platform and the speed improvements are note likely to be significant. This may be added at a future date, but will not exists for Version 1 of the protocol.
+
+* This method provides partial Forward Secrecy. Meaning it is only as strong as confidentially of the receiver's private key. If the server's private key is compromised, this will not result in leaked data from previous sessions, but if the receiver's private key is leaked, all previous sessions can be decoded.
 
 * For multicast streams, all receivers must be provided with the same cipher information. Since data packets are authenticated using an HMAC, this means that anyone with the cipher information can impersonate the sender. Therefore all receivers of a multicast stream should be trusted entities with similar security levels.
 
