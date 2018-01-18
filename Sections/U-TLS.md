@@ -73,7 +73,6 @@ struct {
   byte[32] SignKeyHash    //A hash of the public key that can verify the `Signature`
   int16 SecretLength      //The length of the encrypted block
   SecretData Secret       //A field contains the encrypted `Secret`.
-  int16 SignatureLength   //The length of the signature.
   byte[N] Signature       //The digital signature.
 }
 KeyPacket;
@@ -88,9 +87,9 @@ Notes about the `Key Packet` fields:
 * `EncryptKeyHash` - A SHA-256 hash of the public key that was used to encrypt `Secret`. Since decrypting an RSA is expensive, it's important to know if the public keys match before attempting the decryption. It also allows the receiver to search for the valid key if multiple keys are active. 
 * `SignKeyHash` - A SHA-256 hash of the public key that can be used to verify the signature. When looking up this public key, it is important to verify the source information of this key because it alone identifies who generated these encryption credentials.
 * `Secret` - RSA with OAEP-SHA1 padding encrypted `Secret Data` using the receiver's public key. See section below for details about `Secret Data`. 
-* `Signature` - SHA512-RSA-PPS digital signature of entire packet minus the signature length. (Using the senders's private key). 
+* `Signature` - SHA512-RSA-PPS digital signature of entire packet minus the signature length. (Using the senders's private key). Note, the length of the signature is implied using the UDP packet size in the UDP header.
 
-> :information_source: Since the SignatureLength is not signed, it is important to validate all bytes of the Signature. Signatures are not truncated. 
+> :information_source: It is important to validate all bytes of the Signature. Signatures are not truncated. 
 
 > :information_source: Note: Sending a `Key Packet` is optional. However, other means outside of this protocol defintion must exist to provide this data to receivers, otherwise no one will be able to decrypt the stream. One example could be: a key management server exists on the outside, and only it receives a unicast message of the cipher key, then recievers will connect to it to get the curent cipher information, while the `Data Packet` is broadcast to the entire network.
 
@@ -112,7 +111,7 @@ This information is encrypted using the receiver's public key.
 struct {
   byte[32] Nonce;         //A random number.
   int8 KeyID;             //Identifies this cipher.
-  int8 ExpireSeconds;     //The number of seconds this cipher is valid.
+  int16 ExpireSeconds;     //The number of seconds this cipher is valid.
   int ValidSequence       //The lower bounds of the vaild sequence numbers.
   CipherMode CipherMode;  //Indicate the cipher that will be used.
   HMACMode HMACMode       //Indicates the MAC that will be used.
@@ -157,7 +156,7 @@ In CTR mode, the cipher will not pad the input data.
 
 The CTR value that will be used to encrypt this data will equal:
 
-`CTR = {(int64)(Left 80 bits of the IV) || (int8)EpicID || (int24)Sequence Number || (in16)Block Index}`
+`CTR = {(int80)(Left 80 bits of the IV) || (int8)KeyID || (int24)Sequence || (in16)Block Index}`
 
 Where `Block Index` is the 0-based index that increases by 1 for every block that is encrypted in a single packet. For AES, this starts a 0 and increases by 1 every 16 bytes encrypted. It starts over with every packet.
 
