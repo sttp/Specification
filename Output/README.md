@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.8.11 - January 18, 2018
+**Version:** 0.8.12 - January 19, 2018
 
 **Status:** First Draft Release
 
@@ -1111,12 +1111,12 @@ When a subscriber has issued a [subscribe command](#subscribe-command) to its pu
 
 ```C
 struct {
-  DataPointIdentifier id;
-  SttpTimestamp timestamp;
-  SttpValue value; 
-  TimeQualityFlags timeQuality;
-  ValueQualityFlags valueQuality;
-  SttpValue[] ExtraFields;        //A set of extra fields that are reserved for future need.
+  int32 runtimeID;         // -1 if not specified, can optionally be sent instead of `id`. 
+  SttpValue id;            // A point Identifier.
+  SttpValue timestamp;     // A timestamp, SttpTimestamp is highly recommended for this field but not required.
+  SttpValue value;         // The single value that represents this Data Point.
+  uint64 quality;          // Unstructured quality bits. See another section for details on the acutal bits used.
+  SttpValue ExtendedData;  // Additional data that can be sent if `value` is insufficient.
 }
 DataPoint;
 ```
@@ -1130,35 +1130,19 @@ The actual number of `DataPoint` structures contained in the data point packet c
 <sup>Figure 6</sup>
 </center>
 
-> :information_source: The maximum size of a `DataPoint` structure instance is 94-bytes, however, with simple encoding techniques this size can be reduced down to a few bytes for most value types.
+> :information_source: The maximum size of a `DataPoint` structure instance is unspecified, but controlled indirectly at the wire level protocol. With simple encoding techniques this size can be reduced down to a few bytes for most value types.
 
 ### Data Point Identifier
 
-When identifying a Data Point, one of 4 mechanics can be used to identify the source of the time series data.
+When identifying a Data Point, one of 4 mechanics are encouraged to identify the source of the time series data.
 
-* [Guid] An integer identifier - This does not have to be a true GUID, but can be any integer that can fit in a 128 bit integer.
-* [String] A string identifier - This is commonly referred to as a tag in a time series databases.
-* [SttpNamedSet] A Connection String - A set of [string Name, SttpValue value] that uniquely identify the source of a point ID.
-* [Int32] Runtime ID - Runtime ID's are negotiated with the connection and are the default value type in the Data Point Structure.
+* [Guid] - Some kind of integer based identifier.
+* [String] - This is commonly referred to as a tag in a time series databases.
+* [SttpMarkup] - Essentially this is a connection string that combines a set of unique identifiers.
 
-```C
-enum {
-  RuntimeID = 0,   // 4-bytes
-  Guid = 1,        // 16-bytes
-  String = 2,      // variable
-  NamedSet = 3,    // variable
-}
-DataPointIdentifierTypeCode; // 2 bits
+Runtime ID's are negotiated with the connection and are the default value type in the Data Point Structure.
 
-struct {
-  DataPointIdentifierTypeCode identifierType;
-  uint8[] identifer;    
-}
-DataPointIdentifier;
-```
-
-While the normal use case is to use RuntimeIDs, for systems that have an indefinite number of IDs, it's not practical to map every 
-point to a Runtime ID. In this case, it's allowed to send the identifier with the measurement.
+While the normal use case is to use RuntimeIDs, for systems that have an indefinite number of IDs, it's not practical to map every point to a Runtime ID. In this case, it's allowed to send the identifier with the measurement.
 
 ### Sttp Value Types
 
@@ -1167,58 +1151,101 @@ The data types available to a `DataPoint` are described in the `ValueType` enume
 ```C
 enum {
   Null = 0,              // 0-bytes
-  SByte = 1,             // 1-byte
-  Int16 = 2,             // 2-bytes
-  Int32 = 3,             // 4-bytes
-  Int64 = 4,             // 8-bytes
-  Byte = 5,              // 1-byte
-  UInt16 = 6,            // 2-bytes
-  UInt32 = 7,            // 4-bytes
-  UInt64 = 8,            // 8-bytes
-  Single = 9,            // 4-bytes
-  Double = 10,           // 8-bytes
-  Decimal = 11,          // 16-bytes
-  DateTime = 12,         // Local/Universal/Unspecified/Unambiguous Date Time
-  DateTimeOffset = 13,   // Local/Universal/Unspecified/Unambiguous Date Time with an offset.
-  SttpTime = 14,         // Local/Universal Time with Leap Seconds
-  SttpTimeOffset = 15,   // Local/Universal Time with Leap Seconds and timezone offset.
-  TimeSpan = 16,         // 8 bytes  
-  Bool = 17,             // 1-byte
-  Char = 18,             // 2-bytes
-  Guid = 19,             // 16-bytes
-  String = 20,           // Limit defined in NegotiateSession
-  Buffer = 21,           // Limit defined in NegotiateSession
-  ValueSet = 22,         // An array of SttpValue. Up to 255 elements.
-  NamedSet = 23,         // An array of [string,SttpValue]. Up to 255 elements. Like a connection string.
-  BulkTransportGuid = 24 // A special type of GUID that indicates it is transmitted out of band.
+  Int64 = 1,             // 8-bytes
+  Single = 2,            // 4-bytes
+  Double = 3,            // 8-bytes
+  SttpTime = 4,          // Universal Time with Leap Seconds
+  Bool = 5,              // 1-byte
+  Guid = 6,              // 16-bytes
+  String = 7,            // Limit defined in NegotiateSession
+  SttpBuffer = 8,        // Limit defined in NegotiateSession
+  SttpMarkup = 9,        // An array of SttpValue. Up to 255 elements.
+  SttpBulkTransport = 10 // A pointer to a large object. Data must be requested as a seperate command.
 }
-ValueTypeCode; // sizeof(uint8), 1-byte
+ValueTypeCode; // sizeof(uint4), 1-nibble
 ```
 
 - `Null`: No space occupied
-- `SByte`: [8-bit Signed Byte](https://en.wikipedia.org/wiki/Byte) (1-byte, big-endian)
-- `Int16`: [16-bit Signed Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (2-bytes, big-endian)
-- `Int32`: [32-bit Signed Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (4-bytes, big-endian)
 - `Int64`: [64-bit Signed Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (8-bytes, big-endian)
-- `Byte`: [8-bit Unsigned Byte](https://en.wikipedia.org/wiki/Byte) (1-byte, big-endian)
-- `UInt16`: [16-bit Unsigned Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (2-bytes, big-endian)
-- `UInt32`: [32-bit Unsigned Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (4-bytes, big-endian)
-- `UInt64`: [64-bit Unsigned Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (8-bytes, big-endian)
-- `Decimal`: [128-bit Decimal Floating Point](https://en.wikipedia.org/wiki/Decimal128_floating-point_format) (16-bytes, per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
-- `Double`: [64-bit Double Precision Floating Point](https://en.wikipedia.org/wiki/Double-precision_floating-point_format) (8-bytes, per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
 - `Single`: [32-bit Single Precision Floating Point](https://en.wikipedia.org/wiki/Single-precision_floating-point_format) (4-bytes, per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
-- `Bool`: [Boolean as 8-bit Unsigned Integer](https://en.wikipedia.org/wiki/Boolean_data_type) (1-byte, big-endian, zero is `false`, non-zero value is `true`)
+- `Double`: [64-bit Double Precision Floating Point](https://en.wikipedia.org/wiki/Double-precision_floating-point_format) (8-bytes, per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
+- `SttpTime`: [Time as `Timestamp`](https://en.wikipedia.org/wiki/System_time) (8-bytes, see [data point timestamp](#data-point-timestamp))
+- `Bool`: [Boolean as 1-bit](https://en.wikipedia.org/wiki/Boolean_data_type) (1-bit, zero is `false`, 1 is `true`)
 - `Guid`: [Globally Unique Identifer](https://en.wikipedia.org/wiki/Universally_unique_identifier) (16-bytes, big-endian for all components)
-- `Time`: [Time as `Timestamp`](https://en.wikipedia.org/wiki/System_time) (16-bytes, see [data point timestamp](#data-point-timestamp))
 - `String` [Character String as `StringValue`](https://en.wikipedia.org/wiki/String_%28computer_science%29) (encoding is UTF8)
-- `Buffer` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) 
+- `SttpBuffer` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) 
+- `SttpMarkup` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) 
+- `SttpBulkTransport` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) 
+
+### Encoding Methods
+
+When encoding each of these values, a 4-bit ValueTypeCode will be written first, then the value itself will be written. The 4-bit prefix can be optimally eliminated, but a separate encoding algorithm must make that determination.
+
+All serialization will occur through the Bit-Byte-Block. So reference that section for additional serialization details.
+
+Unless specifically called out below, the types are serialized using the BitByteBlock corresponding type.
+
+#### Int64
+
+These values are variable length encoded where leading 0's are not stored. In order to prevent a value of -1 from consuming a full 8 bytes, this value will undergo a lossless transformation of its bits so it has leading 0's. The transformation is described in the following code:
+
+Encoding: rotate left 1, then inverts bits 1-63 if bit 0 is 1.
+Decode: invert bits 1-63 if bit0 is 1, then rotate right 1.
+
+``` C
+long PackSign(long value)
+{
+    if (value >= 0)
+        return value << 1;
+    return (~value << 1) + 1;
+}
+
+long UnPackSign(long value)
+{
+    if ((value & 1) == 0) 
+        return (value >> 1) & long.MaxValue; 
+    return (~value >> 1) | long.MinValue;
+}
+```
+
+After Packing the value, it is serialized using Write8BitSegments.
+
+#### SttpTime
+
+SttpTime is a specially encoded timestamp based on Microsoft's .NET DateTime field, however, a leap second can be added at the end of every minute. There are approximately 145 billion seconds of space unused in the first 62-bits of the DateTime field. However, there are only 5 billion distinct minutes between year 1 and 9999. The space above DateTime.MaxValue has been allocated to a 61st second. 
+
+SttpTime is encoded/decoded as a typical int64 consuming 8 bytes (as opposed to a variable length SttpValueTypeCode.Int64)
+
+#### SttpBuffer
+
+This value contains only a byte buffer, and is serialized using `BitByteBlock.Write(byte[] data);`
+
+#### SttpMarkup
+
+At it's core, a SttpMarkup is only a byte buffer, and is serialized using `BitByteBlock.Write(byte[] data);`
+
+See SttpMarkup section for more details on how the internals of this object are serialized.
+
+#### SttpBulkTransport
+
+This value is a pointer type, and contains the following fields.
+
+```C
+struct {
+  SttpValueTypeCode fundamentalType;  // The type of the underlying data. 
+  Guid bulkTransportID                // The ID that can be used to request this data.
+  long length;                        // The length of the data.
+}
+SttpBulkTransport;
+```
+
+And is serialized as:
+- Bits4(fundamentalType);
+- Guid(bulkTransportID);
+- Int64(length);
 
 
-### Data Point Timestamp
-
-The default timestamp that is used for Sttp has a bit reserved for LeapSecondInProgress. It takes the same structure as DateTime except, DateTimeKind.Ambiguious and DateTimeKind.Unspecified have been sacrificed for a leap second pending bit. 
-
-### Data Point Time Quality Flags
+### Data Point Time Quality Flags - Move to appendix
 
 Data points can also include a `TimeQualityFlags` structure in the serialized state data, defined below, that describes both the timestamp quality, defined with the `TimeQuality` enumeration value, as well as an indication of if a timestamp was not measured with an accurate time source.
 
@@ -1258,7 +1285,7 @@ LeapsecondOccurred = 1 << 5,  // Set in the first second after the leap second o
 LeapsecondDirection = 1 << 6, // Clear for add, set for delete
 ```
 
-### Data Point Data Quality Flags
+### Data Point Data Quality Flags - Move to appendix
 
 A set of data quality flags are defined for STTP data point values in the `DataQualityFlags` enumeration, defined as follows:
 
