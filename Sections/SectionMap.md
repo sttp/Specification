@@ -28,9 +28,9 @@
 | [Data Point Structure (2)](DataPointStructure.md#data-point-structure) | [DataPointStructure.md](DataPointStructure.md) |
 | [Data Point Identifier (3)](DataPointStructure.md#data-point-identifier) | [DataPointStructure.md](DataPointStructure.md) |
 | [Sttp Value Types (3)](DataPointStructure.md#sttp-value-types) | [DataPointStructure.md](DataPointStructure.md) |
-| [Data Point Timestamp (3)](DataPointStructure.md#data-point-timestamp) | [DataPointStructure.md](DataPointStructure.md) |
-| [Data Point Time Quality Flags (3)](DataPointStructure.md#data-point-time-quality-flags) | [DataPointStructure.md](DataPointStructure.md) |
-| [Data Point Data Quality Flags (3)](DataPointStructure.md#data-point-data-quality-flags) | [DataPointStructure.md](DataPointStructure.md) |
+| [Encoding Methods (3)](DataPointStructure.md#encoding-methods) | [DataPointStructure.md](DataPointStructure.md) |
+| [Data Point Time Quality Flags - Move to appendix (3)](DataPointStructure.md#data-point-time-quality-flags---move-to-appendix) | [DataPointStructure.md](DataPointStructure.md) |
+| [Data Point Data Quality Flags - Move to appendix (3)](DataPointStructure.md#data-point-data-quality-flags---move-to-appendix) | [DataPointStructure.md](DataPointStructure.md) |
 | [Data Point Encoding Types (2)](DataPointEncodingTypes.md#data-point-encoding-types) | [DataPointEncodingTypes.md](DataPointEncodingTypes.md) |
 | [Basic Encoding (3)](DataPointEncodingTypes.md#basic-encoding) | [DataPointEncodingTypes.md](DataPointEncodingTypes.md) |
 | [Compact Encoding (3)](DataPointEncodingTypes.md#compact-encoding) | [DataPointEncodingTypes.md](DataPointEncodingTypes.md) |
@@ -69,11 +69,9 @@
 | [ASP Project Participants (3)](Contributors.md#asp-project-participants) | [Contributors.md](Contributors.md) |
 | [Specification Copyright Statement (3)](Contributors.md#specification-copyright-statement) | [Contributors.md](Contributors.md) |
 | [Major Version History (2)](History.md#major-version-history) | [History.md](History.md) |
-| [Appendix A - Functional Requirements (2)](FunctionalRequirements.md#appendix-a---functional-requirements) | [FunctionalRequirements.md](FunctionalRequirements.md) |
-| [verview: (3)](FunctionalRequirements.md#verview) | [FunctionalRequirements.md](FunctionalRequirements.md) |
-| [Feature List (3)](FunctionalRequirements.md#feature-list) | [FunctionalRequirements.md](FunctionalRequirements.md) |
+| [Appendix A - Initial Team Requirements (2)](FunctionalRequirements.md#appendix-a---initial-team-requirements) | [FunctionalRequirements.md](FunctionalRequirements.md) |
+| [Overview: (3)](FunctionalRequirements.md#overview) | [FunctionalRequirements.md](FunctionalRequirements.md) |
 | [Use Case Examples (3)](FunctionalRequirements.md#use-case-examples) | [FunctionalRequirements.md](FunctionalRequirements.md) |
-| [Operational Requirements (3)](FunctionalRequirements.md#operational-requirements) | [FunctionalRequirements.md](FunctionalRequirements.md) |
 | [Appendix B - STTP API Reference (2)](APIReference.md#appendix-b---sttp-api-reference) | [APIReference.md](APIReference.md) |
 | [Core (3)](APIReference.md#core) | [APIReference.md](APIReference.md) |
 | [Data (3)](APIReference.md#data) | [APIReference.md](APIReference.md) |

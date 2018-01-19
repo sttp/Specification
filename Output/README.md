@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.8.5 - January 11, 2018
+**Version:** 0.8.12 - January 19, 2018
 
 **Status:** First Draft Release
 
@@ -40,7 +40,7 @@ This specification is free software and it can be redistributed and/or modified 
 | 12 | [References and Notes](#references-and-notes) |
 | 13 | [Contributors and Reviewers](#contributors) |
 | 14 | [Revision History](#major-version-history) |
-| A | [Appendix A - Functional Requirements](#appendix-a---functional-requirements) |
+| A | [Appendix A - Functional Requirements](#appendix-a---initial-team-requirements) |
 | B | [Appendix B - STTP API Reference](#appendix-b---sttp-api-reference) |
 | C | [Appendix C - IEEE C37.118 Mapping](#appendix-c---ieee-c37118-mapping) |
 | D | [Appendix D - Other Protocol Evaluations](#appendix-d---other-protocol-evaluations) |
@@ -50,7 +50,7 @@ This specification is free software and it can be redistributed and/or modified 
 
 Use of synchrophasors by U.S. utilities continues to grow following the jump start provided by the Smart Grid Investment Grants (2010-2014). Several utilities now have PMU installation counts of 500 phasor measurement units (PMUs) or more and other utilities anticipate being at this level within the next few years. The dominant method to exchange synchrophasor data remains the IEEE C37.118 <sup>[[1](#user-content-ref1)]</sup> protocol that was designed for and continues to be the preferred solution for substation-to-control room communications.  It achieves its advantages through use of an ordered set (a frame) of information that is associated with a specific measurement time.  When IEEE C37.118 is used for PDC-to-PDC communication or for PDC-to-Application communication, large data frames are typically distributed to multiple systems.
 
-To address the challenges presented by these large IEEE C37.118 frame sizes, many utilities have implemented purpose-built networks for synchrophasor data only.  Even with these purpose-built networks, large frame sizes result in an increased probability of UDP frame loss, or in the case of TCP, increased communication latency.  In addition, IEEE C37.118 has only prescriptive methods for the management of measurement metadata which is well-suited for substation-to-control-center use but which becomes difficult to manage as this metadata spans analytic solutions and is used by multiple configuration owners in a wide-area context.
+To address the challenges presented by these large IEEE C37.118 frame sizes, many utilities have implemented purpose-built networks for synchrophasor data only.  Even with these purpose-built networks, large frame sizes result in an increased probability of UDP frame loss, or in the case of TCP, increased communication latency due to the higher than normal resend rates.  In addition, IEEE C37.118 has only prescriptive methods for the management of measurement metadata.  While this prescriptive method can be well-suited for substation-to-control-center use, it becomes difficult to manage as measurement metadata spans multiple analytic solutions.  It is also difficult to describe data when measurements are used by different or shared configuration owners or in a wide-area context.
 
 The Advanced Synchrophasor Protocol (ASP) Project was proposed to DOE in response to FOA-1492. In this proposal, the argument was made for a new protocol that overcomes the limitations of IEEE C37.118 for large-scale synchrophasor data system deployments.  The new publish-subscribe protocol to be developed under the ASP Project is called the Streaming Telemetry Transport Protocol (STTP).  STTP leverages the successful design elements of the secure Gateway Exchange Protocol (GEP) that was originally developed by the Grid Protection Alliance (GPA) as part of the SIEGate project (DE-OE-536).
 
@@ -58,11 +58,11 @@ On May 1, 2017, a DOE grant (DE-OE-859) was awarded to GPA and the other 25 coll
 
 ### Scope of this Document
 
-The purpose of this document is to define STTP and to include, as appendices, descriptions as to how to use its supporting software tools.  This STTP specification is focused on effective "streaming data" delivery of which synchrophasor data is a very important use case.
+The purpose of this document is to define STTP and to include, as appendices, descriptions as to how to use it, along with its supporting software tools.  This STTP specification is focused on effective "streaming data" delivery of which synchrophasor data is a very important use case.
 
 In the [Protocol Overview](#protocol-overview) section of this specification, high-level features and the business value of STTP are presented. The balance of the sections of the specification provide the details of protocol design.
 
-[Appendix A - Functional Requirements](#appendix-a---functional-requirements) provides the set of functional requirements and use cases needed for successful STTP deployment.
+[Appendix A - Initial Team Requirements](#appendix-a---initial-team-requirements) provides and overview, use cases and both a set of functional and non-functional requirements needed for successful STTP deployment.
 
 [Appendix B - STTP API Reference](#appendix-b---sttp-api-reference) provides instructions to enable software developers to integrate and use of STTP within other software systems.
 
@@ -1111,12 +1111,12 @@ When a subscriber has issued a [subscribe command](#subscribe-command) to its pu
 
 ```C
 struct {
-  DataPointIdentifier id;
-  SttpTimestamp timestamp;
-  SttpValue value; 
-  TimeQualityFlags timeQuality;
-  ValueQualityFlags valueQuality;
-  SttpValue[] ExtraFields;        //A set of extra fields that are reserved for future need.
+  int32 runtimeID;         // -1 if not specified, can optionally be sent instead of `id`. 
+  SttpValue id;            // A point Identifier.
+  SttpValue timestamp;     // A timestamp, SttpTimestamp is highly recommended for this field but not required.
+  SttpValue value;         // The single value that represents this Data Point.
+  uint64 quality;          // Unstructured quality bits. See another section for details on the acutal bits used.
+  SttpValue ExtendedData;  // Additional data that can be sent if `value` is insufficient.
 }
 DataPoint;
 ```
@@ -1130,35 +1130,19 @@ The actual number of `DataPoint` structures contained in the data point packet c
 <sup>Figure 6</sup>
 </center>
 
-> :information_source: The maximum size of a `DataPoint` structure instance is 94-bytes, however, with simple encoding techniques this size can be reduced down to a few bytes for most value types.
+> :information_source: The maximum size of a `DataPoint` structure instance is unspecified, but controlled indirectly at the wire level protocol. With simple encoding techniques this size can be reduced down to a few bytes for most value types.
 
 ### Data Point Identifier
 
-When identifying a Data Point, one of 4 mechanics can be used to identify the source of the time series data.
+When identifying a Data Point, one of 4 mechanics are encouraged to identify the source of the time series data.
 
-* [Guid] An integer identifier - This does not have to be a true GUID, but can be any integer that can fit in a 128 bit integer.
-* [String] A string identifier - This is commonly referred to as a tag in a time series databases.
-* [SttpNamedSet] A Connection String - A set of [string Name, SttpValue value] that uniquely identify the source of a point ID.
-* [Int32] Runtime ID - Runtime ID's are negotiated with the connection and are the default value type in the Data Point Structure.
+* [Guid] - Some kind of integer based identifier.
+* [String] - This is commonly referred to as a tag in a time series databases.
+* [SttpMarkup] - Essentially this is a connection string that combines a set of unique identifiers.
 
-```C
-enum {
-  RuntimeID = 0,   // 4-bytes
-  Guid = 1,        // 16-bytes
-  String = 2,      // variable
-  NamedSet = 3,    // variable
-}
-DataPointIdentifierTypeCode; // 2 bits
+Runtime ID's are negotiated with the connection and are the default value type in the Data Point Structure.
 
-struct {
-  DataPointIdentifierTypeCode identifierType;
-  uint8[] identifer;    
-}
-DataPointIdentifier;
-```
-
-While the normal use case is to use RuntimeIDs, for systems that have an indefinite number of IDs, it's not practical to map every 
-point to a Runtime ID. In this case, it's allowed to send the identifier with the measurement.
+While the normal use case is to use RuntimeIDs, for systems that have an indefinite number of IDs, it's not practical to map every point to a Runtime ID. In this case, it's allowed to send the identifier with the measurement.
 
 ### Sttp Value Types
 
@@ -1167,58 +1151,101 @@ The data types available to a `DataPoint` are described in the `ValueType` enume
 ```C
 enum {
   Null = 0,              // 0-bytes
-  SByte = 1,             // 1-byte
-  Int16 = 2,             // 2-bytes
-  Int32 = 3,             // 4-bytes
-  Int64 = 4,             // 8-bytes
-  Byte = 5,              // 1-byte
-  UInt16 = 6,            // 2-bytes
-  UInt32 = 7,            // 4-bytes
-  UInt64 = 8,            // 8-bytes
-  Single = 9,            // 4-bytes
-  Double = 10,           // 8-bytes
-  Decimal = 11,          // 16-bytes
-  DateTime = 12,         // Local/Universal/Unspecified/Unambiguous Date Time
-  DateTimeOffset = 13,   // Local/Universal/Unspecified/Unambiguous Date Time with an offset.
-  SttpTime = 14,         // Local/Universal Time with Leap Seconds
-  SttpTimeOffset = 15,   // Local/Universal Time with Leap Seconds and timezone offset.
-  TimeSpan = 16,         // 8 bytes  
-  Bool = 17,             // 1-byte
-  Char = 18,             // 2-bytes
-  Guid = 19,             // 16-bytes
-  String = 20,           // Limit defined in NegotiateSession
-  Buffer = 21,           // Limit defined in NegotiateSession
-  ValueSet = 22,         // An array of SttpValue. Up to 255 elements.
-  NamedSet = 23,         // An array of [string,SttpValue]. Up to 255 elements. Like a connection string.
-  BulkTransportGuid = 24 // A special type of GUID that indicates it is transmitted out of band.
+  Int64 = 1,             // 8-bytes
+  Single = 2,            // 4-bytes
+  Double = 3,            // 8-bytes
+  SttpTime = 4,          // Universal Time with Leap Seconds
+  Bool = 5,              // 1-byte
+  Guid = 6,              // 16-bytes
+  String = 7,            // Limit defined in NegotiateSession
+  SttpBuffer = 8,        // Limit defined in NegotiateSession
+  SttpMarkup = 9,        // An array of SttpValue. Up to 255 elements.
+  SttpBulkTransport = 10 // A pointer to a large object. Data must be requested as a seperate command.
 }
-ValueTypeCode; // sizeof(uint8), 1-byte
+ValueTypeCode; // sizeof(uint4), 1-nibble
 ```
 
 - `Null`: No space occupied
-- `SByte`: [8-bit Signed Byte](https://en.wikipedia.org/wiki/Byte) (1-byte, big-endian)
-- `Int16`: [16-bit Signed Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (2-bytes, big-endian)
-- `Int32`: [32-bit Signed Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (4-bytes, big-endian)
 - `Int64`: [64-bit Signed Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (8-bytes, big-endian)
-- `Byte`: [8-bit Unsigned Byte](https://en.wikipedia.org/wiki/Byte) (1-byte, big-endian)
-- `UInt16`: [16-bit Unsigned Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (2-bytes, big-endian)
-- `UInt32`: [32-bit Unsigned Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (4-bytes, big-endian)
-- `UInt64`: [64-bit Unsigned Integer](https://en.wikipedia.org/wiki/Integer_%28computer_science%29#Value_and_representation) (8-bytes, big-endian)
-- `Decimal`: [128-bit Decimal Floating Point](https://en.wikipedia.org/wiki/Decimal128_floating-point_format) (16-bytes, per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
-- `Double`: [64-bit Double Precision Floating Point](https://en.wikipedia.org/wiki/Double-precision_floating-point_format) (8-bytes, per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
 - `Single`: [32-bit Single Precision Floating Point](https://en.wikipedia.org/wiki/Single-precision_floating-point_format) (4-bytes, per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
-- `Bool`: [Boolean as 8-bit Unsigned Integer](https://en.wikipedia.org/wiki/Boolean_data_type) (1-byte, big-endian, zero is `false`, non-zero value is `true`)
+- `Double`: [64-bit Double Precision Floating Point](https://en.wikipedia.org/wiki/Double-precision_floating-point_format) (8-bytes, per [IEEE 754-2008](https://en.wikipedia.org/wiki/IEEE_754))
+- `SttpTime`: [Time as `Timestamp`](https://en.wikipedia.org/wiki/System_time) (8-bytes, see [data point timestamp](#data-point-timestamp))
+- `Bool`: [Boolean as 1-bit](https://en.wikipedia.org/wiki/Boolean_data_type) (1-bit, zero is `false`, 1 is `true`)
 - `Guid`: [Globally Unique Identifer](https://en.wikipedia.org/wiki/Universally_unique_identifier) (16-bytes, big-endian for all components)
-- `Time`: [Time as `Timestamp`](https://en.wikipedia.org/wiki/System_time) (16-bytes, see [data point timestamp](#data-point-timestamp))
 - `String` [Character String as `StringValue`](https://en.wikipedia.org/wiki/String_%28computer_science%29) (encoding is UTF8)
-- `Buffer` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) 
+- `SttpBuffer` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) 
+- `SttpMarkup` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) 
+- `SttpBulkTransport` [Untyped Data Buffer as `BufferValue`](https://en.wikipedia.org/wiki/Data_buffer) 
+
+### Encoding Methods
+
+When encoding each of these values, a 4-bit ValueTypeCode will be written first, then the value itself will be written. The 4-bit prefix can be optimally eliminated, but a separate encoding algorithm must make that determination.
+
+All serialization will occur through the Bit-Byte-Block. So reference that section for additional serialization details.
+
+Unless specifically called out below, the types are serialized using the BitByteBlock corresponding type.
+
+#### Int64
+
+These values are variable length encoded where leading 0's are not stored. In order to prevent a value of -1 from consuming a full 8 bytes, this value will undergo a lossless transformation of its bits so it has leading 0's. The transformation is described in the following code:
+
+Encoding: rotate left 1, then inverts bits 1-63 if bit 0 is 1.
+Decode: invert bits 1-63 if bit0 is 1, then rotate right 1.
+
+``` C
+long PackSign(long value)
+{
+    if (value >= 0)
+        return value << 1;
+    return (~value << 1) + 1;
+}
+
+long UnPackSign(long value)
+{
+    if ((value & 1) == 0) 
+        return (value >> 1) & long.MaxValue; 
+    return (~value >> 1) | long.MinValue;
+}
+```
+
+After Packing the value, it is serialized using Write8BitSegments.
+
+#### SttpTime
+
+SttpTime is a specially encoded timestamp based on Microsoft's .NET DateTime field, however, a leap second can be added at the end of every minute. There are approximately 145 billion seconds of space unused in the first 62-bits of the DateTime field. However, there are only 5 billion distinct minutes between year 1 and 9999. The space above DateTime.MaxValue has been allocated to a 61st second. 
+
+SttpTime is encoded/decoded as a typical int64 consuming 8 bytes (as opposed to a variable length SttpValueTypeCode.Int64)
+
+#### SttpBuffer
+
+This value contains only a byte buffer, and is serialized using `BitByteBlock.Write(byte[] data);`
+
+#### SttpMarkup
+
+At it's core, a SttpMarkup is only a byte buffer, and is serialized using `BitByteBlock.Write(byte[] data);`
+
+See SttpMarkup section for more details on how the internals of this object are serialized.
+
+#### SttpBulkTransport
+
+This value is a pointer type, and contains the following fields.
+
+```C
+struct {
+  SttpValueTypeCode fundamentalType;  // The type of the underlying data. 
+  Guid bulkTransportID                // The ID that can be used to request this data.
+  long length;                        // The length of the data.
+}
+SttpBulkTransport;
+```
+
+And is serialized as:
+- Bits4(fundamentalType);
+- Guid(bulkTransportID);
+- Int64(length);
 
 
-### Data Point Timestamp
-
-The default timestamp that is used for Sttp has a bit reserved for LeapSecondInProgress. It takes the same structure as DateTime except, DateTimeKind.Ambiguious and DateTimeKind.Unspecified have been sacrificed for a leap second pending bit. 
-
-### Data Point Time Quality Flags
+### Data Point Time Quality Flags - Move to appendix
 
 Data points can also include a `TimeQualityFlags` structure in the serialized state data, defined below, that describes both the timestamp quality, defined with the `TimeQuality` enumeration value, as well as an indication of if a timestamp was not measured with an accurate time source.
 
@@ -1258,7 +1285,7 @@ LeapsecondOccurred = 1 << 5,  // Set in the first second after the leap second o
 LeapsecondDirection = 1 << 6, // Clear for add, set for delete
 ```
 
-### Data Point Data Quality Flags
+### Data Point Data Quality Flags - Move to appendix
 
 A set of data quality flags are defined for STTP data point values in the `DataQualityFlags` enumeration, defined as follows:
 
@@ -1889,208 +1916,238 @@ The following individuals actively participated in the development of this stand
 | 0.1 | July 7, 2017 | Initial draft for validation of use of markdown |
 | 0.0 | June 15, 2017 | Specification template |
 
-## Appendix A - Functional Requirements
-
-###Overview:
-Before setting out to create a definition of a new protocol, participation was solicited. Grid Protection Alliance (GPA) worked to assemble a group of users, implementors, vendors and academics in order to vet the notion that a new protocol was actually needed.   Once the group convinced themselves that none of the existing standards had a protocol that would solve the problems being encountered with very large, high speed data sets, they worked together to document what this new protocol required.   This appendix has been retained in the specification so that future users evaluating the use of the ASP protocol can see what drove the initial team in its endeavor.
+## Appendix A - Initial Team Requirements
 
 
-####Functional Requirements
-Functional requirements are the subset of total requirements that explains how a it or one of its substations will work.    Functional requirements are the needs that drive the business utility of the final solution, in this case protocol.   Each functional requirement was defined to address a need that was not solved by existing solutions.
-
-**The ASP solution will:**
-* Allow for dynamically requesting data or metadata.   It will not send all data all the time.  Most often this requirement is met with the use of a publish-subscribe implementation where the receiver can request data elements and they are delivered by the source on event such as value change.  **(Pub/Sub configurability)**
-
-* Support the collection, maintenance and communication of data attributes or metadata. **(Metadata management)**
-
-* Allow for the prioritization of data feeds.  In addition to streaming data should take precedence over metadata, the streaming data should allow for the designation of a priority.    Higher priority data flows should be given consideration in times of network congestion.    **(Quality of Service)**
-
-* be capable of managing and streaming a very large sets.   At time of authoring a very large set would be 1000 Phasor Measurement Units sending 10 streaming data points at a refresh rate of thirty times per second (.033ms per data for the same element) on a standard network (i.e 100mbps ethernet)
-
-* Allow for the data to be requested (and sent) to multiple clients what may request the data elements in the same or different combinations.
+![Image of Collorbation ](https://github.com/sttp/Specification/blob/master/Sections/Images/CollorbationStockImage.jpg?raw=true)
 
 
-* support measures to keep data from being viewed by non-authorized systems or staff.    This will include the ability to implement standard, [not propitiatory to this protocol] encryption techniques.  It will further provide the functions for management of the securing mechanisms. (Confidentiality / Key management)
-* Access Control
-* Integrity
-* Alarming and notifications
-* Enable best-practice security
-* Deployment for high-availability
-* Disaster recovery considerations
-* System Integration
-* Installation and deployment
+### Overview:
+Before setting out to create a definition of a new protocol, participation was solicited from a diverse set of stakeholders. Grid Protection Alliance (GPA) worked to assemble a group of users, implementors, vendors and academics in order to vet the notion that a new protocol was actually needed and would provide value to our industries.   Once the group convinced themselves that none of the known existing standards was a protocol that would solve the problems being encountered, with very large, high speed data sets, they worked together to document what this new protocol required.   This appendix has been retained in the specification so that future users evaluating the use of the STTP protocol can see what drove the initial team in its creation of the protocol and associated APIs.
 
-####Non-Functional Requirements
-In software requirements documentation, a non-functional requirement is a requirement that specifies criteria that specifies the operation of a system, rather than behaviors. Many often call non-functional requirements "quality attributes"
+STTP defines a measurement as an ID, Timestamp and values
 
-* Performance and throughput(latency & bandwidth)
-* Scalability
-* Reduced Risk of Non-Compliance
-
-* Allow for future uses and data elements / attributes with minimal impact to the base protocol in order to allow for future improvements **(Extensibility)**
+At the highest level, STTP is expected to be used to manage data sourced from a measurement device through a data gateway/historian onto the using application.  The following document is meant to show the likely interaction between the actors in this workflow:
 
 
-### Feature List
- * Full Data Stream - Capable of sending all of the data points to any connecting stream.
- * Basic Metadata - Defines each data point with only a short descriptor.
- * Subscribed Data Stream - Allows the incoming connection to define the measurements that will be selectively streamed.
- * Access Control - Permissions controls on a point by point basis.
- * Data Backfilling - Allows backfilling missing data in the event of a communications outage.
- * Encryption - Data channels are encryption and the connection is authenticated.
- * Data Stream Compression - The data stream will support advance compression methods.
- * Advance Queries - Must be able to handle more advance request/reply queries.
- * Data Pushing - Capable of initializing a connection and writing data out.
-
-
- > :construction: This list was moved from Overview - needs to merged with list above...
-
- * Perform at high volume / large scale
- * Minimize data losses (e.g., over UDP)
- * Lower bandwidth requirements (e.g., over TCP)
- * Optimized for the performant delivery of individual data points
- * Automated exchange of metadata (no centralized registry required)
- * Detect and expose communication issues
- * Security and availability features that enable use on critical systems to support critical operations
- * Publish/subscribe at data point level
- * API implemented in multiple languages on multiple platforms
- * Metadata will be versioned and tabular in nature
- * Sets of metadata from multiple parties will be easy to merge
- * Points defined in metadata will have a clear ownership path
- * A minimal set of metadata will exist to support any STTP deployments
- * Industry specific metadata extensions will exist to support specific industry deployments
- * Ability to support broadcast messaging and distribution of critical system alarms
+![Actor UML Image](https://raw.githubusercontent.com/sttp/Specification/master/Sections/Images/Use%20Case%20UML%20-%20Actors.jpg)
 
 
 ### Use Case Examples
 
-This is a list of all use cases along with the predefined set of features that must be supported by this use case.
+First, an initial set of [use cases](https://en.wikipedia.org/wiki/Use_case) were defined in order to document how stakeholders envisioned using this new STTP protocol. This is not meant to be an exhaustive list of  all possible uses, but rather a sampling of the driving needs that led to the need to create a new protocol. These use cases were collected and organized by how the team envisioned them to be deployed in real world applications.    This is not to limit implementation to one of these types, a system may implement a hybrid of two or more of these.   However, each system will advertise the functions that it provides or services so that neighbor connections can know what is available.
 
-\*optional features
 
-**A. PMU**
+While the protocol is meant to be flexible, there are a minimum set of features that must be provided for each use case implementation.   In the below examples we will use an asterisk to designate those features that are desirable, but not required as part of the minimal implementation --- \*optional features
+
+**Use Case #1 - Measurement Device**
+
+The most basic implementation of STTP will be in a measurement device.    This could be a PMU, RTU or other device that is built to measure one or more values or conditions.    
+
+_Use case definition statement:_  
+
+As a measurement device with a Network Interface (NIC) connected to an IP based network,  I would like to communicate with a Measurement Device using STTP, so that I may request data and metadata in a secured and efficient manner.
 
 Features:
- * Full Data Stream
- * Basic Metadata
- * Subscribed Data Stream*
- * Data Backfilling*
+ * Send Full Data Stream
+ * Send Basic Metadata
+ * Send Extended Metadata*
+ * Fulfill Data Data Stream Subscription Request*
+ * Fulfill Data Backfilling Request*
  * Encryption*
-
-**B. PDC**
-
-Features:
- * Full Data Stream
- * Basic Metadata
- * Subscribed Data Stream
- * Data Backfilling*
- * Encryption
  * Data Compression*
 
-**C. Gateway**
+
+
+![Device UML Image](https://raw.githubusercontent.com/sttp/Specification/master/Sections/Images/Use%20Case%20UML%20-%20device.jpg)
+
+
+**Use Case #2 - Data Gateway**
+
+The next most likely implementation of STTP after measurement device is likely to be a computer to collect data from multiple measurement devices.  With respect to STTP protocol these collection devices will be called Data Gateways.    A data gateway allows downstream systems to request measurement streams from a number of different devices without having direct network access to the device themselves.  The Data Gateway will forward a real time data stream for the requested measurements to authenticated and authorized requestors.      In addition to real time data a Data Gateway will provide related metadata once requestors have been properly authenticated and authorized.  
+
+_Use case definition statement:_  
+
+As a data gateway with a Network Interface (NIC) connected to an IP based network,  I would like collect as well as repackage measurements received to those systems that are requesting real time feeds. using STTP, so that I may request data and metadata in a secured and efficient manner.
+
 
 Features:
-* Full Data Stream
-* Basic Metadata
-* Subscribed Data Stream
-* Data Backfilling*
-* Encryption
-* Data Compression
+* Send Full Data Stream
+* Send Basic Metadata
+* Send Extended Metadata*
+* Fulfill Data Stream Subscription Request*
+* Fulfill Data Backfilling Request*
+* Request Full Data Stream
+* Request Basic Metadata
+* Request Extended Metadata*
+* Request Data Stream Subscription*
+* Request Data Backfilling*
+* Encryption*
+* Data Compression*
 
-**D. Historian**
+
+
+
+![Gateway UML Image](https://raw.githubusercontent.com/sttp/Specification/master/Sections/Images/Use%20Case%20UML%20-%20Gateway.jpg)
+
+
+**Use Case #3 - Historian**
+
+The Historian supports many of the same features of a Dat Gateway.   However its primary function is to store a historical record of both measurements as well as the associated metadata.  The other major difference for a Historian compared to a gateway is that a historian may provide advanced filtering, summation, averaging or other advanced query mechanisms in addition to raw measurements.  
+
+_Use case definition statement:_  
+
+As a designer of STTP I would like to be able to have an application that can collect real time data, store it for a long period of time and be able to sever the stored data back to authorized and authenticated users so that I may utilize in part or in full data measurement stream data after the fact.
+
 
 Features:
-* Basic Metadata
-* Encryption
-* Data Compression
-* Advance Queries
-
-**E. Data Diode**
-
-To facilitate moving data from a more secure environment to a less secure one (eg. Prod to Dev) a
-separate service will be created that can connect to (or accept connections from) a publisher. This
-communication can be a fully implemented sttp connection and thus can manage subscriptions that will be
-exported to lower level clients.
-
-This data diode will then establish a connection with a lower security level and forward data to this
-client. The client will only be able to turn on/off the data stream, request metadata, and request a user
-configurable amount of historical data that may be missing during a communications outage. These requests
-must be handled by the data diode with no modifications made to the established connection to the publisher.
-Each connection must operate independently of each other.
-
-Features:
-* Data Pushing
-* Basic Metadata
-* Encryption
-* Data Compression
-
--------------------------
-(Old use case examples)
-
-**A.  High-volume, real-time phasor data exchange** (e.g., ISO/RTO -to- ISO/RTO)
-
-Use case text
-
-**B. Medium volume, real-time data exchange with name translation**  (e.g., Transmission Owner -to- ISO/RTO)
-
-Use case text
-
-**C.  Medium-volume historical phasor data exchange** (e.g., ISO/RTO -to- Transmission Owner)
-
-Use case text
-
-**D. Within an Entity**
-
-Use case text
-
-**D. Low-volume real-time phasor data exchange with automated gap filling** (e.g., Substation PDC -to- Control Center)
-
-Use case text
-
-> :construction: The following are _proposed_ ideas that may need a home -- purposely written in future tense
-
-### Operational Requirements
-
-#### Data Classes
-
-(1) commands  & notifications & transactional data - **The Command Channel**
-
-> :construction: some text from SIEGate doc as a starting point
-
-The command channel will be used to reliably negotiate session-specific communication, state, and protocol parameters.  It will:
-
-* exchange metadata information between gateways in a trusted union, with each publishing gateway only exchanging information that the subscribing gateway is allowed to view.
-* allow the connecting gateway to request points for a streaming data subscription from the publishing gateway. Requests for points that are not in the access control list for the subscribing gateway will be denied with a returned error.
-* minimize the bandwidth required for communicating measurement IDs and time-stamps.
-* allow the subscribing gateway to start and stop the data stream.
-* exchange and optionally synchronize measurement point metadata information received from external trusted gateway unions to the local configuration source so that users can examine points that are available for subscription.
-*  enforce trusted gateway measurement point publication and subscription lists as defined in the configuration database. The system will drop data that it is not configured to receive.
-* provide the necessary mechanisms to negotiate QoS configuration with the receiving entity.
+* Send Full historical data stream
+* Send filtered historical data stream
+* Send Basic Metadata based on version or data
+* Send Extended Metadata based on version or data
+* Fulfill Data Stream Subscription Request for historical data
+* Fulfill Data Backfilling Request*
+* Request Full Data Stream
+* Request filtered historical data stream
+* Request Basic Metadata
+* Request Extended Metadata*
+* Request Data Stream Subscription*
+* Request Data Backfilling*
+* Encryption*
+* Data Compression*
+* Advanced Filters and Queries
 
 
-Provide the necessary communication to establish a trusted connection between a STTP publisher and subscriber by:
-* establishment of a trusted STTP union will be handled through a manual configuration process out-of-band, that is, not over the gateway-to-gateway network over which the gateways communicate.
-* information being used to establish a trusted union between an STTP publisher and subscriber  will be protected on the local system and will be considered information known only to the two gateways participating in the union.
-* the gateways participating in the trusted union will exchange authentication information in an accepted and interoperable manner. For that reason, TLS and identity certificates should be used if possible.
+![Historian UML Image](https://raw.githubusercontent.com/sttp/Specification/master/Sections/Images/Use%20Case%20UML%20-%20Historian.jpg)
 
 
-(2) streaming data - **The Data Channel**
+**Use Case #4 - Combination Gateway / Historian**
+as noted before the use cases are suggested implementations.   It is expected that some systems will implement both the gateway as well as historian functions in a single system.
 
-The data channel will be used to send compact packets of identifiable measured values along with a timestamp with high-fidelity accuracy and flags that can be used to indicate both time and data quality.
 
-#### Data Exchange with Other STTP Systems
+**Use Case #4 - Consumer Application**
+Possibly the easiest to understand use case is the consumer application.   A Consumer Application is any business (or IT) application that wishes to receive measurements via STTP.  Good examples would include EMS or control room visualization system.   In this case an application would request measurement and metadata in order to use it in its own processing.
+
+
+**Use Case #4 - Data Generating Application**
+As we described above a measurement device will likely be the initial data set for STTP data.   However it is expected that in addition to raw measurement devices there will be applications that create their own measurements.   An example could be a state estimator that takes raw measurements and refines the data to give a cleaner picture.   
+
+For Purpose of use case, we can use the device documentation as they will provide essentially the same use cases.    Just like regular devices they may also include gateway or historian functionality as well as the measurement action.
+
+
+#### Functional Requirements
+Functional requirements are the subset of total requirements that explains how an it system  or one of its substations will work.    Functional requirements represent the needs that drive the business utility of the any final solution, in this case the STTP protocol.   Each functional requirement was defined to address a need that was not solved by existing.  These functional requirements were defined by the initial stakeholders and drove the protocol design and creation.
+
+**The ASP solution will:**
+
+* Support a command channel or communications that are not measurements which will:
+
+  * allow the subscribing gateway to start and stop the data stream.
+  * exchange and optionally synchronize measurement point metadata information received from external trusted gateway unions to the local configuration source so that users can examine points that are available for subscription.
+  *  enforce trusted gateway measurement point publication and subscription lists as defined in the configuration database. The system will drop data that it is not configured to receive.
+  * provide the necessary mechanisms to negotiate QoS configuration with the receiving entity.
+
+
+* allow for dynamically requesting data or metadata.   It will not send all data all the time.  Most often this requirement is met with the use of a publish-subscribe implementation where the receiver can request data elements and they are delivered by the source on event such as value change.  **(Pub/Sub configurability)**
+  * allow for the data to be requested (and sent) to multiple clients what may request the data elements in the same or different combinations.
+  * allow the incoming connection to define the measurements that will be selectively streamed. **(Subscribed Data Stream)**
+
+
+* support the collection, maintenance and communication of data attributes or metadata. **(Metadata management)**
+
+  * support tabular collection and sharing of metadata associated with measurements.   
+  * support metadata versioning, allowing a requester to ask for metadata as of a date or version id
+  * support merging and update of metadata sets from multiple parties
+  * support short descriptor for each data point.
+  * the source system sending STTP data will be responsible for collection
+  and sharing of metadata to authorized parties.
+
+
+* allow for the prioritization of data feeds.  In addition to streaming data should take precedence over metadata, the streaming data should allow for the designation of a priority.    Higher priority data flows should be given consideration in times of network congestion.    **(Quality of Service)**
+
+* be capable of managing and streaming of very large sets.   At time of authoring a very large set would be 1000 Phasor Measurement Units sending 10 streaming data points at a refresh rate of thirty times per second (.033ms per data for the same element) on a standard network (i.e 100mbps ethernet)
 
 
 
-#### Subscription Delivery Options
-Per subscription delivery window - this subscription level setting would constrain data delivery to a provided timespan (in terms of UTC based start and stop time). This could either be a maximum (future) time constraint for real-time data or, where supported by publisher, a historical data request.
-Publisher will likely want to validate size of historical requests, or least throttle responses, for very large historical requests.
 
-#### Other Data Point Delivery Options
-Send a sequence of values - with respect to specified per value delivery settings (think buffer blocks)
+* Incorporate access control for both data and metadata so that only authorized users are able to successfully receive information after a request.   This security will be able to be set on a point by point basis (or element by element basis for metadata) **(Access Control)**
 
-Send latest value - command allows for non-steaming request/reply, such as, translation to DNP3
+  * support measures to keep data from being viewed by non-authorized systems or staff.    This will include the ability to implement standard, [not propitiatory to this protocol] encryption techniques.  It will further provide the functions for management of the securing mechanisms. **(Confidentiality / Key management)** **(Enable best-practice security)** **(Reduced Risk of Non-Compliance)**
+  *  provide data channels encryption by default as well as require and the connection be authenticated. **(Encryption)**
+  * Support reverse direction communication where security mechanisms have created a [unidirectional network](https://en.wikipedia.org/wiki/Unidirectional_network).  In this case a physical data diode or software based firewall may prevent a normal connection from the sender to the receiver (publisher to the subscriber)  in this case the protocol will support a connection made from the higher security environment which may be the sender of the data to the receiver (or subscriber of the data).   This effects only the setup of the connection.  Once the connection is made normal functionality of publisher and subscriber are resumed.  This data diode will then establish a connection with a lower security level and forward data to this  client. The client will only be able to turn on/off the data stream, request metadata, and request a user
+  configurable amount of historical data that may be missing during a communications outage. These requests must be handled by the data diode with no modifications made to the established connection to the publisher.
 
-Send historical values - subject to availability of local archive / buffer with start and stop time- it has been requested many times that single value data recovery option will be available to accommodate for simple UDP loss, however this should be carefully considered since this basically makes UDP and TCP style protocol - if implemented, restored point should likely flow over TCP channel to reduce repeat recovery requests. Also, this should include detail in response message that recovery either succeeded or failed, where failure mode could include "data not available". To reduce noise, at connection time publisher should always let know subscriber its capabilities which might include “I Support Historical Data Buffer” and perhaps depth of available data. That said there is true value in recovery of data gaps that occur due to loss of connectivity.
+
+* be easily deployed in configurations that allow for very high fault tolerance.  This should include both network and client or server resiliency options. **(Deployment for high-availability)**  **(Support Disaster recovery considerations)**
+
+
+* allow backfilling missing data in the event of a communications outage.  Receiving party would request and sending would respond with a data stream to fill in the missing data as defined by the receiver. **(Data Backfilling)**
+
+
+
+* support advance compression methods. **(Data Stream Compression)**
+
+* be capable of allowing the party that initiates  a connection to be the sender, or publisher of data . **(Data Pushing)**
+
+* minimize data losses over network connections that do not guarantee delivery (e.g. UDP)
+
+* optimized for the performant delivery of individual data points (in contrast to 37.118 frame based optimization)
+
+* capable of sending a subset or all of the data points to any connecting stream for very large collections of measurements.
+
+* support exchange of metadata as well as the measurement data between any two or more participants in a conversation using the STTP protocol (no centralized registry required)
+
+*  support broadcast messaging and distribution of critical system alarms
+
+* Each connection must operate independently of any other connection and isolate it to the extent possible.
+
+
+* Support the following types of data requests:
+   *  **Subscription Delivery**
+   Per subscription delivery window - this subscription level setting would constrain data delivery to a provided timespan (in terms of UTC based start and stop time). This could either be a maximum (future) time constraint for real-time data or, where supported by publisher, a historical data request.
+   Publisher will likely want to validate size of historical requests, or least throttle responses, for very large historical requests.
+
+    * **sequence of values** - with respect to specified per value delivery settings (think buffer blocks)
+
+   * **latest value** - command allows for non-steaming request/reply, such as, translation to DNP3
+
+   * **historical values** - subject to availability of local archive / buffer with start and stop time- it has been requested many times that single value data recovery option will be available to accommodate for simple UDP loss, however this should be carefully considered since this basically makes UDP and TCP style protocol - if implemented, restored point should likely flow over TCP channel to reduce repeat recovery requests. Also, this should include detail in response message that recovery either succeeded or failed, where failure mode could include "data not available". To reduce noise, at connection time publisher should always let know subscriber its capabilities which might include “I Support Historical Data Buffer” and perhaps depth of available data. That said there is true value in recovery of data gaps that occur due to loss of connectivity.
+
+
+#### Non-Functional Requirements
+In software requirements documentation, a non-functional requirement is a requirement that specifies criteria that specifies the operation of a system, rather than behaviors. Many often call non-functional requirements "quality attributes"
+
+**The ASP solution will:**
+
+* Support the transfer of very large number of streaming (1,000s to 10s of 1,000s simultaneously) data points streaming at high update rates (30-60 times per second **(Scalability)**
+
+* ensure data integrity end to end of any communication stream, for both streaming data and metadata **(Integrity)**
+
+* Allow for future uses and data elements / attributes with minimal impact to the base protocol in order to allow for future improvements **(Extensibility)**
+
+*  be able to send as many data elements in a given time with the lowest latency possible for any given network configuration **(Performance and throughput [latency & bandwidth])**
+
+* minimize bandwidth requirements on real time steaming of data using resend only on update as well as compression to Lower bandwidth requirements (e.g., over TCP)
+
+* support solutions using protocol that are simple to installation and deploy and integrate with existing and new applications
+
+* include APIs that support condition based Alarming and notifications based on defined events  *(Alarming and notifications)*
+
+* provide initial example API implementations in multiple languages, tested on multiple platforms to quickly utilize STTP protocol
+
+* enforce a minimal set of metadata for any measurement type
+
+
+#### To talk to Ritchie about(may not be true requirements or may just need additional clarification)  <todo>
+
+
+* Advance Queries - Must be able to handle more advance request/reply queries.
+
+* Detect and expose communication issues
+
+ * Points defined in metadata will have a clear ownership path
+
+ * Industry specific metadata extensions will exist to support specific industry deployments
 
 
 
