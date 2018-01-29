@@ -1,7 +1,7 @@
 ## Appendix A - Initial Team Requirements
 
 
-![Image of Collorbation ](https://github.com/sttp/Specification/blob/master/Sections/Images/CollorbationStockImage.jpg?raw=true)
+![Image of Collaboration ](https://github.com/sttp/Specification/blob/master/Sections/Images/CollorbationStockImage.jpg?raw=true)
 
 
 ### Overview:
@@ -104,7 +104,7 @@ Features:
 
 
 **Use Case #4 - Combination Gateway / Historian**
-as noted before the use cases are suggested implementations.   It is expected that some systems will implement both the gateway as well as historian functions in a single system.
+as noted before the use cases are suggested implementations.   It is expected that some systems will implement both the gateway as well as historian functions in a single system. 
 
 ![Gateway-Historian UML Image](https://raw.githubusercontent.com/sttp/Specification/master/Sections/Images/Use Case UML - Gateway-Historian.jpg )
 
