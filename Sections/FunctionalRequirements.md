@@ -4,14 +4,9 @@
 ![Image of Collorbation ](https://github.com/sttp/Specification/blob/master/Sections/Images/CollorbationStockImage.jpg?raw=true)
 
 
-<<<<<<< HEAD
-###Overview:
-Before setting out to create a definition of a new protocol, participation was solicited from a diverse set of stakeholders. Grid Protection Alliance (GPA) worked to assemble a group of users, academics, vendors and other stakeholders in order to vet the notion that a new protocol was actually needed and would provide value to our industries.   Once the group convinced themselves that none of the known existing standards was a protocol that would solve the problems being encountered, with very large, high speed data sets, they worked together to document what this new protocol required.   This appendix has been retained in the specification so that future users evaluating the use of the STTP protocol can see what drove the initial team in its creation of the protocol and associated APIs.
-=======
 ### Overview:
-Before setting out to create a definition of a new protocol, participation was solicited from a diverse set of stakeholders. Grid Protection Alliance (GPA) worked to assemble a group of users, implementors, vendors and academics in order to vet the notion that a new protocol was actually needed and would provide value to our industries.   Once the group convinced themselves that none of the known existing standards was a protocol that would solve the problems being encountered, with very large, high speed data sets, they worked together to document what this new protocol required.   This appendix has been retained in the specification so that future users evaluating the use of the STTP protocol can see what drove the initial team in its creation of the protocol and associated APIs.
->>>>>>> e46afbf92f50631334c73eaa6aa6bddcbc670f43
-
+Before setting out to create a definition of a new protocol, participation was solicited from a diverse set of stakeholders. Grid Protection Alliance (GPA) worked to assemble a group of users, academics, vendors and other stakeholders in order to vet the notion that a new protocol was actually needed and would provide value to our industries.   Once the group convinced themselves that none of the known existing standards was a protocol that would solve the problems being encountered, with very large, high speed data sets, they worked together to document what this new protocol required.   This appendix has been retained in the specification so that future users evaluating the use of the STTP protocol can see what drove the initial team in its creation of the protocol and associated APIs.
+exist
 STTP defines a measurement as an ID, Timestamp and values
 
 At the highest level, STTP is expected to be used to manage data sourced from a measurement device through a data gateway/historian onto the using application.  The following document is meant to show the likely interaction between the actors in this workflow:
@@ -111,16 +106,19 @@ Features:
 **Use Case #4 - Combination Gateway / Historian**
 as noted before the use cases are suggested implementations.   It is expected that some systems will implement both the gateway as well as historian functions in a single system.
 
+![Gateway-Historian UML Image](https://raw.githubusercontent.com/sttp/Specification/master/Sections/Images/Use Case UML - Gateway-Historian.jpg )
 
 **Use Case #4 - Consumer Application**
 Possibly the easiest to understand use case is the consumer application.   A Consumer Application is any business (or IT) application that wishes to receive measurements via STTP.  Good examples would include EMS or control room visualization system.   In this case an application would request measurement and metadata in order to use it in its own processing.
 
+![Consumer UML Image](https://raw.githubusercontent.com/sttp/Specification/master/Sections/Images/Use Case UML - Consumer.jpg )
 
 **Use Case #4 - Data Generating Application**
 As we described above a measurement device will likely be the initial data set for STTP data.   However it is expected that in addition to raw measurement devices there will be applications that create their own measurements.   An example could be a state estimator that takes raw measurements and refines the data to give a cleaner picture.   
 
 For Purpose of use case, we can use the device documentation as they will provide essentially the same use cases.    Just like regular devices they may also include gateway or historian functionality as well as the measurement action.
 
+![Device UML Image](https://raw.githubusercontent.com/sttp/Specification/master/Sections/Images/Use%20Case%20UML%20-%20device.jpg)
 
 #### Functional Requirements
 Functional requirements are the subset of total requirements that explains how an it system  or one of its substations will work.    Functional requirements represent the needs that drive the business utility of the any final solution, in this case the STTP protocol.   Each functional requirement was defined to address a need that was not solved by existing.  These functional requirements were defined by the initial stakeholders and drove the protocol design and creation.
