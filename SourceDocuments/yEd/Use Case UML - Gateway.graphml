@@ -15,7 +15,6 @@
   <graph edgedefault="directed" id="G">
     <data key="d0"/>
     <node id="n0">
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="793.375" width="1066.9791666666667" x="297.8888888888889" y="-218.6111111111111"/>
@@ -28,13 +27,12 @@
     </node>
     <node id="n1">
       <data key="d4"/>
-      <data key="d5"/>
       <data key="d6">
         <y:SVGNode>
           <y:Geometry height="100.0" width="60.0" x="140.0" y="45.0"/>
           <y:Fill color="#FFCC00" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="19.310546875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="115.83935546875" x="-27.919677734375" y="104.0">Network Interface<y:LabelModel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="19.310546875" horizontalTextPosition="center" iconTextGap="4" modelName="custom" textColor="#000000" verticalTextPosition="bottom" visible="true" width="134.66650390625" x="-37.333251953125" y="104.0">Measurement Device<y:LabelModel>
               <y:SmartNodeLabelModel distance="4.0"/>
             </y:LabelModel>
             <y:ModelParameter>
@@ -50,7 +48,6 @@
     </node>
     <node id="n2">
       <data key="d4"/>
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="77.0" width="147.0" x="586.8888888888889" y="-192.5"/>
@@ -70,7 +67,6 @@ Request<y:LabelModel>
     </node>
     <node id="n3">
       <data key="d4"/>
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="59.888888888888914" width="110.0" x="842.7777777777778" y="-192.5"/>
@@ -89,7 +85,6 @@ Request<y:LabelModel>
     </node>
     <node id="n4">
       <data key="d4"/>
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="77.0" width="147.0" x="793.8888888888889" y="462.2777777777777"/>
@@ -109,7 +104,6 @@ Communication<y:LabelModel>
     </node>
     <node id="n5">
       <data key="d4"/>
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="59.888888888888914" width="110.0" x="653.8888888888889" y="115.88888888888891"/>
@@ -128,7 +122,6 @@ Communication<y:LabelModel>
     </node>
     <node id="n6">
       <data key="d4"/>
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="77.0" width="147.0" x="415.9375000000002" y="159.88888888888903"/>
@@ -148,7 +141,6 @@ Request<y:LabelModel>
     </node>
     <node id="n7">
       <data key="d4"/>
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="77.0" width="147.0" x="455.8888888888889" y="31.27777777777783"/>
@@ -167,7 +159,6 @@ Request<y:LabelModel>
     </node>
     <node id="n8">
       <data key="d4"/>
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="59.888888888888914" width="110.0" x="653.8888888888889" y="-30.111111111111086"/>
@@ -187,7 +178,6 @@ Metadata<y:LabelModel>
     </node>
     <node id="n9">
       <data key="d4"/>
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="77.0" width="147.0" x="942.9999999999999" y="19.27777777777783"/>
@@ -206,7 +196,6 @@ Metadata<y:LabelModel>
     </node>
     <node id="n10">
       <data key="d4"/>
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="59.888888888888914" width="110.0" x="653.8888888888889" y="42.888888888888914"/>
@@ -226,7 +215,6 @@ Measurement<y:LabelModel>
     </node>
     <node id="n11">
       <data key="d4"/>
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="59.888888888888914" width="110.0" x="1141.0" y="-30.111111111111086"/>
@@ -246,7 +234,6 @@ Metadata<y:LabelModel>
     </node>
     <node id="n12">
       <data key="d4"/>
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="59.888888888888914" width="110.0" x="1141.0" y="59.77777777777783"/>
@@ -266,7 +253,6 @@ Measurement<y:LabelModel>
     </node>
     <node id="n13">
       <data key="d4"/>
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="59.888888888888914" width="110.0" x="842.7777777777778" y="-118.0"/>
@@ -281,7 +267,6 @@ Message
     </node>
     <node id="n14">
       <data key="d4"/>
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="59.888888888888914" width="110.0" x="562.9375000000002" y="266.888888888889"/>
@@ -301,7 +286,6 @@ Self<y:LabelModel>
     </node>
     <node id="n15">
       <data key="d4"/>
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="59.888888888888914" width="110.0" x="793.8888888888889" y="-12.187499999999886"/>
@@ -321,7 +305,6 @@ Measurement<y:LabelModel>
     </node>
     <node id="n16">
       <data key="d4"/>
-      <data key="d5"/>
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="59.888888888888914" width="110.0" x="793.8888888888889" y="59.77777777777783"/>
@@ -340,7 +323,6 @@ Measurement<y:LabelModel>
       </data>
     </node>
     <edge id="e0" source="n1" target="n2">
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -352,7 +334,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e1" source="n3" target="n2">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -364,7 +345,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e2" source="n1" target="n4">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -376,7 +356,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e3" source="n2" target="n7">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="11.611111111111086"/>
@@ -388,7 +367,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e4" source="n5" target="n7">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -400,7 +378,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e5" source="n1" target="n6">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -412,7 +389,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e6" source="n8" target="n7">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -424,7 +400,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e7" source="n10" target="n7">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -436,7 +411,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e8" source="n2" target="n9">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -448,7 +422,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e9" source="n7" target="n4">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -460,7 +433,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e10" source="n9" target="n4">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -472,7 +444,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e11" source="n11" target="n9">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -484,7 +455,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e12" source="n12" target="n9">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -496,7 +466,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e13" source="n13" target="n0">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -508,7 +477,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e14" source="n13" target="n2">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -520,7 +488,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e15" source="n6" target="n0">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -532,7 +499,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e16" source="n14" target="n6">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -544,7 +510,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e17" source="n6" target="n0">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -556,7 +521,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e18" source="n6" target="n7">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -568,7 +532,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e19" source="n4" target="n0">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -580,7 +543,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e20" source="n4" target="n0">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -592,7 +554,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e21" source="n15" target="n10">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
@@ -604,7 +565,6 @@ Measurement<y:LabelModel>
     </edge>
     <edge id="e22" source="n16" target="n10">
       <data key="d8"/>
-      <data key="d9"/>
       <data key="d10">
         <y:PolyLineEdge>
           <y:Path sx="0.0" sy="0.0" tx="0.0" ty="0.0"/>
