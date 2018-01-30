@@ -1,16 +1,18 @@
+  [bf284045]: https://en.wikipedia.org/wiki/X.509 "509 cert"
+
 ## Protocol Overview
 
-STTP is an open, data point centric publish/subscribe transport protocol that can be used to securely exchange time-series style data and automatically synchronize metadata between two applications. The protocol supports sending real-time and historical data at full or down-sampled resolutions. When sending historical data, the replay speed can be controlled dynamically for use in visualizations to enable users to see data faster or slower than recorded in real-time.
+STTP is an open, data measurement centric, publish/subscribe, transport protocol that can be used to securely exchange time-series style data and synchronize metadata between two applications. The protocol supports sending real-time and historical data at full or down-sampled resolutions. When sending historical data, the replay speed can be controlled dynamically for use in visualizations to enable users to see data faster or slower than recorded in real-time.
 
-The wire protocol employed by STTP implements a publish/subscribe data exchange model using simple commands with a compressed binary serialization of data points. The protocol does not require a predefined or fixed configuration - that is, the data points values arriving in one data packet can be different than those arriving in another. Each packet of data consists of a collection of data points where each instance is a compact structure containing an ID, a timestamp or sequence, a value and any associated state, e.g., quality flags.
+The wire protocol defined by STTP implements a publish/subscribe data exchange model using simple commands with a compressed binary serialization of data points. The protocol does not require a predefined or fixed configuration - that is, the data points values arriving in one data packet can be different than those arriving in another. Each packet of measurement data consists of a collection of data points where each point is defined by a compact structure containing an ID, a timestamp (or sequence), a value and any associated state, (e.g., quality flags).
 
-STTP is implemented using functionality called a _command channel_ and a _data channel_. The actual IP transport protocols for these channels varies based on need, but is often either a single TCP/IP transport for both the command and data channel -or- a TCP/IP based command channel with a UDP/IP based data channel.
+STTP is implemented using two different communication paths.  STTP calls the first one _command channel_ and the second  _data channel_. In IP based communication each of these channels represent a socket.   The actual IP transport protocols for these channels varies based on need.  The two most common uses are a single TCP/IP transport for both the command and data channel(UDP or TCP) -or- a TCP based command channel with a UDP based data channel.  The UDP implementation reduces latency but adds a level of packet loss as the UDP transport does not acknowledge receipt or resend if missed..
 
-The command channel is used to reliably negotiate session specific required communication, state and protocol parameters. The command channel is also used to authenticate with other STTP instances, exchange metadata on available data points, and request specific data points for subscription. The data channel is used to send compact, binary encoded packets of data points.
+The **command channel** is used to reliably negotiate session specific required communication, state and protocol parameters. The command channel is also used to manage authentication  with other STTP instances, exchange metadata on available data points, and request specific data points for subscription. The **data channel** is used to send compact, binary encoded packets of data points.
 
-STTP includes strong access control and encryption and is configurable to allow use of private keys in a highly isolated environment. When encryption and strong identity verification is enabled, STTP utilizes standard Transport Layer Security (TLS) with X.509 identity certificates for authentication.
+STTP includes strong access control and encryption and is configurable to allow use of private keys in a highly isolated environment. When encryption and strong identity verification is enabled, STTP utilizes standard Transport Layer Security (TLS) with [X.509][bf284045]  identity certificates for authentication.
 
-In this section of the STTP specification, first data communication fundamentals are presented that set the boundary conditions for protocol design. These are followed by an introduction to the major components of STTP.
+In this overview section of the STTP specification,  data communication fundamentals are presented that set the boundary conditions for the protocol implementation. These boundary cases are followed by an introduction to the remaining major components of STTP.
 
 ### Background
 
