@@ -1,4 +1,4 @@
-### Commands
+### Command Details
 
 The following table defines the commands available to STTP. Commands that expect a response define the command channel functions, those that do not define the data channel functions.
 
@@ -19,9 +19,9 @@ The following table defines the commands available to STTP. Commands that expect
 
 #### Begin Fragment Command
 
-If sending a packet that is larger than the negotiated maximum packet size, it must be fragmented. This command is the first in a series of fragment commands that define the entire fragment. 
+If sending a packet that is larger than the negotiated maximum packet size, it must be fragmented. This command is the first in a series of fragment commands that define the entire fragment.
 
-If the session supports it, fragmented data is commonly compress. It's possible that a compressed data fits into a single fragment, therefore this command will not be followed by subsequent `NextFragment` commands. 
+If the session supports it, fragmented data is commonly compress. It's possible that a compressed data fits into a single fragment, therefore this command will not be followed by subsequent `NextFragment` commands.
 
 Fragmented packets must be sent one at a time in sequence and cannot be interwoven with any other kind of command.
 
@@ -39,9 +39,9 @@ BeginFragmentCommand;
 
 #### Next Fragment Command
 
-This packet always follows `BeginFragment` and will be repeated in order until all of the data has been transmitted. 
+This packet always follows `BeginFragment` and will be repeated in order until all of the data has been transmitted.
 
-There is not a Finished command, therefore, once the total number of bytes have been transmitted as defined in `BeginFragment`. The command has completed. 
+There is not a Finished command, therefore, once the total number of bytes have been transmitted as defined in `BeginFragment`. The command has completed.
 
 ```C
 struct {
@@ -54,7 +54,7 @@ NextFragmentCommand;
 
 #### Get Metadata Schema Command
 
-Requests that the current version of the metadata database be sent, along with the schema. While this information is not required, 
+Requests that the current version of the metadata database be sent, along with the schema. While this information is not required,
 it's important to know this when checking if one's metadata is out of synchronization or if additional user defined metadata tables exist.
 
 ```C
