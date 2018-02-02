@@ -9,15 +9,16 @@
 | 3 | [Definitions and Nomenclature](Definitions.md) |
 | 4 | [Protocol Overview](Overview.md) |
 | 5 | [Establishing Connections](EstablishingConnections.md) |
-| 6 | [Commands and Responses](CommandsAndResponses.md) |
-| 7 | [Data Point Structure](DataPointStructure.md) |
-| 8 | [Data Point Characteristics](DataPointCharacteristics.md) |
-| 9 | [Metadata](Metadata.md) |
-| 10 | [Compression](Compression.md) |
-| 11 | [Security](Security.md) |
-| 12 | [References and Notes](References.md) |
-| 13 | [Contributors and Reviewers](Contributors.md) |
-| 14 | [Revision History](History.md) |
+| 6 | [STTP Command Overview](CommandsAndResponses.md) |
+| 7 | [Commands Details](Commands.md)   |
+| 8 | [Data Point Structure](DataPointStructure.md) |
+| 9 | [Data Point Characteristics](DataPointCharacteristics.md) |
+| 10 | [Metadata](Metadata.md) |
+| 11 | [Compression](Compression.md) |
+| 12 | [Security](Security.md) |
+| 13 | [References and Notes](References.md) |
+| 14 | [Contributors and Reviewers](Contributors.md) |
+| 15 | [Revision History](History.md) |
 | A | [Appendix A - Initial Team Requirements](FunctionalRequirements.md) |
 | B | [Appendix B - STTP API Reference](APIReference.md) |
 | C | [Appendix C - IEEE C37.118 Mapping](IEEE_C37.118Mapping.md) |
