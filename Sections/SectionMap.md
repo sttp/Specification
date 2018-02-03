@@ -21,9 +21,9 @@
 | [Bidirectional Data Exchange (3)](EstablishingConnections.md#bidirectional-data-exchange) | [EstablishingConnections.md](EstablishingConnections.md) |
 | [Using UDP for Data Transmission (3)](EstablishingConnections.md#using-udp-for-data-transmission) | [EstablishingConnections.md](EstablishingConnections.md) |
 | [Secure Connections (3)](EstablishingConnections.md#secure-connections) | [EstablishingConnections.md](EstablishingConnections.md) |
-| [Commands and Responses (2)](CommandsAndResponses.md#commands-and-responses) | [CommandsAndResponses.md](CommandsAndResponses.md) |
+| [Commands and Responses Overview (2)](CommandsAndResponses.md#commands-and-responses-overview) | [CommandsAndResponses.md](CommandsAndResponses.md) |
 | [Message Formats (3)](CommandsAndResponses.md#message-formats) | [CommandsAndResponses.md](CommandsAndResponses.md) |
-| [Commands (3)](Commands.md#commands) | [Commands.md](Commands.md) |
+| [Command Details (3)](Commands.md#command-details) | [Commands.md](Commands.md) |
 | [Responses (3)](Responses.md#responses) | [Responses.md](Responses.md) |
 | [Data Point Structure (2)](DataPointStructure.md#data-point-structure) | [DataPointStructure.md](DataPointStructure.md) |
 | [Data Point Identifier (3)](DataPointStructure.md#data-point-identifier) | [DataPointStructure.md](DataPointStructure.md) |
