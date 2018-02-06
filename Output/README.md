@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.8.13 - January 30, 2018
+**Version:** 0.8.14 - February 3, 2018
 
 **Status:** First Draft Release
 
@@ -364,25 +364,39 @@ uint16 Decode15Bits(uint8[] data) {
 }
 ```
 
+  [bf284045]: https://en.wikipedia.org/wiki/X.509 "509 cert"
+  [e3118f9a]: https://en.wikipedia.org/wiki/Transmission_Control_Protocol "TCP"
+  [7c85431a]: https://en.wikipedia.org/wiki/User_Datagram_Protocol "UDP"
+  [3f03ab65]: https://en.wikipedia.org/wiki/UDP-Lite "UDP-Lite"
+  [5542de09]: https://en.wikipedia.org/wiki/Stream_Control_Transmission_Protocol "SCTP"
+  [05e3d650]: https://en.wikipedia.org/wiki/Datagram_Congestion_Control_Protocol "DCCP"
+  [a387eef1]: https://en.wikipedia.org/wiki/Reliable_User_Datagram_Protocol "RUDP"
+  [cf5b8463]: https://en.wikipedia.org/wiki/Internet_Protocol "IP"
+  [34be026c]: http://www.nerc.com/pa/RAPA/Pages/BES.aspx "BES
+  [1e02e501]: https://en.wikipedia.org/wiki/Wide_area_network "WAN"
+  [20b65317]: https://en.wikipedia.org/wiki/Common_Information_Model_(electricity) "CIM"
+  [864cf384]: https://en.wikipedia.org/wiki/ZeroMQ "ZeroMQ"
+  [2514d076]: https://en.wikipedia.org/wiki/Data_Distribution_Service "DDS"
+
 ## Protocol Overview
 
-STTP is an open, data point centric publish/subscribe transport protocol that can be used to securely exchange time-series style data and automatically synchronize metadata between two applications. The protocol supports sending real-time and historical data at full or down-sampled resolutions. When sending historical data, the replay speed can be controlled dynamically for use in visualizations to enable users to see data faster or slower than recorded in real-time.
+STTP is an open, data measurement centric, publish/subscribe, transport protocol that can be used to securely exchange time-series style data and synchronize metadata between two applications. The protocol supports sending real-time and historical data at full or down-sampled resolutions. When sending historical data, the replay speed can be controlled dynamically for use in visualizations to enable users to see data faster or slower than recorded in real-time.
 
-The wire protocol employed by STTP implements a publish/subscribe data exchange model using simple commands with a compressed binary serialization of data points. The protocol does not require a predefined or fixed configuration - that is, the data points values arriving in one data packet can be different than those arriving in another. Each packet of data consists of a collection of data points where each instance is a compact structure containing an ID, a timestamp or sequence, a value and any associated state, e.g., quality flags.
+The wire protocol defined by STTP implements a publish/subscribe data exchange model using simple commands with a compressed binary serialization of data points. The protocol does not require a predefined or fixed configuration - that is, the data points values arriving in one data packet can be different than those arriving in another. Each packet of measurement data consists of a collection of data points where each point is defined by a compact structure containing an ID, a timestamp (or sequence), a value and any associated state, (e.g., quality flags).
 
-STTP is implemented using functionality called a _command channel_ and a _data channel_. The actual IP transport protocols for these channels varies based on need, but is often either a single TCP/IP transport for both the command and data channel -or- a TCP/IP based command channel with a UDP/IP based data channel.
+STTP is implemented using two different communication paths.  STTP calls the first one _command channel_ and the second  _data channel_. In IP based communication each of these channels represent a socket.   The actual IP transport protocols for these channels varies based on need.  The two most common uses are a single TCP/IP transport for both the command and data channel(UDP or TCP) -or- a TCP based command channel with a UDP based data channel.  The UDP implementation reduces latency but adds a level of packet loss as the UDP transport does not acknowledge receipt or resend if missed..
 
-The command channel is used to reliably negotiate session specific required communication, state and protocol parameters. The command channel is also used to authenticate with other STTP instances, exchange metadata on available data points, and request specific data points for subscription. The data channel is used to send compact, binary encoded packets of data points.
+The **command channel** is used to reliably negotiate session specific required communication, state and protocol parameters. The command channel is also used to manage authentication  with other STTP instances, exchange metadata on available data points, and request specific data points for subscription. The **data channel** is used to send compact, binary encoded packets of data points.
 
-STTP includes strong access control and encryption and is configurable to allow use of private keys in a highly isolated environment. When encryption and strong identity verification is enabled, STTP utilizes standard Transport Layer Security (TLS) with X.509 identity certificates for authentication.
+STTP includes strong access control and encryption and is configurable to allow use of private keys in a highly isolated environment. When encryption and strong identity verification is enabled, STTP utilizes standard Transport Layer Security (TLS) with [X.509][bf284045]  identity certificates for authentication.
 
-In this section of the STTP specification, first data communication fundamentals are presented that set the boundary conditions for protocol design. These are followed by an introduction to the major components of STTP.
+In this overview section of the STTP specification,  data communication fundamentals are presented that set the boundary conditions for the protocol implementation. These boundary cases are followed by an introduction to the remaining major components of STTP.
 
 ### Background
 
 In typical messaging exchange paradigms, a source application hosts a block of structured data, composed in memory, with the intent to transmit the data to one or more receiving applications. The data has _structure_ in the sense that it exists as a collection of simpler primitive data types where each of the data elements is given a name to provide useful context and meaning; most programming languages represent data structures using a primary key word, e.g., `class` or `struct`. Before transmission, the data structure must be serialized - this is necessary because the programming language of the source application which hosts the data structure defines the structure in memory using a format that is optimized for use in the application. The process of serializing the data structure causes each of the data elements to be translated into a format that is easily transmitted over a network and is suitable for deserialization by a receiving application.
 
-The applications that are sending and receiving data structures can be running on the same machine or on different physical hardware with disparate operating systems. As a result, the details of the data structure serialization format can be complex and diverse. Such complexities can include issues with proper handling of the endianness of the primitive data types during serialization which may differ from the system that is deserializing the data, or differences in the interpretation of how character data is encoded <sup>[[6](#user-content-ref6)]</sup>.
+The applications that are sending and receiving data structures can be running on the same machine or on different physical hardware with disparate operating systems. As a result, the details of the data structure serialization format can be complex and diverse. Such complexities can include issues with proper handling of the endianness of the primitive data types during serialization which may differ from the system that is de-serializing the data, or differences in the interpretation of how character data is encoded <sup>[[6](#user-content-ref6)]</sup>.
 
 The subject of serializing data structures in the field of computer science has become very mature; many solutions exist to manage the complexities of serialization. Today most computer programming languages, or their associated frameworks, include various options for serializing data structures in multiple formats. However, these solutions tend to only work within their target ecosystems and are usually not very interoperable with other frameworks or languages.
 
@@ -396,7 +410,7 @@ For smaller sized, discrete data structures, the existing available serializatio
 
 ### Large Frame Network Impact
 
-For the Internet Protocol (IP), all frames of data to be transmitted that exceed the negotiated maximum transmission unit (MTU) size (typically 1,500 bytes for Ethernet networks <sup>[[11](#user-content-ref11)]</sup>) are divided into multiple fragments where each fragment is called a network packet, see [Figure 1](#user-content-figure1).
+For the [Internet Protocol][cf5b8463] (IP), all frames of data to be transmitted that exceed the negotiated maximum transmission unit (MTU) size (typically 1,500 bytes for Ethernet networks <sup>[[11](#user-content-ref11)]</sup>) are divided into multiple fragments where each fragment is called a network packet, see [Figure 1](#user-content-figure1).
 
 <a name="figure1"></a> <center>
 
@@ -409,27 +423,28 @@ Since IP is inherently unreliable, the impact of large frames on an IP network c
 
 Network packets can only be transmitted over a connection one packet at a time; when two or more network packets arrive for transmission at the same time on any physical network media, the result is a collision. When a collision occurs, only one packet gets sent and the others get dropped <sup>[[12](#user-content-ref12)]</sup>.
 
-Collisions, however, are generally a thing of the past as common network infrastructure now uses _switch_ based technology with physical links that are full-duplex with no shared channels making collisions impossible, but heavy network traffic can cause similar issues. When two or more devices are simultaneously transmitting data at high speed to a single device, the switch can find itself in a position where it cannot send all the traffic to the destination port. This is not considered a collision, but the result will often be the same, dropped packets.
+True collisions are generally a thing of the past, as common network infrastructure increasingly use  _switch_ based technology with physical links that are full-duplex with no shared channels making collisions impossible.  However, heavy network traffic can cause very similar issues. As a network is a weakest link problem (can only move data at the rate of the slowest part of the path) When two or more devices are simultaneously transmitting data at high speed to a single device, the switch can find itself in a position where it cannot send all the traffic to the destination port. This is not considered a collision, but the result will be an initial buffering until the small memory on the switch is used up and then it will drop packets.
 
 > :information_source: Switch technology can also allow for a _pause_ frame that is used for flow control at the Ethernet layer. When the connected devices have enabled support for the pause frame, the frame is normally sent when the device is overloaded with data. In this case the data will get buffered by the senders inducing delays, but if send buffers are filled to capacity the result is still the same, dropped packets.
 
-IP defines a variety of different transport protocols for network packet transmission, each of which behave in different manners when dealing with packet loss. Consequently, many of the impacts a large frame has on an IP network is dependent upon the transport protocol used to send the frame.
+IP supports  a variety of different transport protocols for network packet transmission.  The most common are [TCP][e3118f9a], [UDP][7c85431a], [UDP-Lite][3f03ab65], [SCTP][5542de09], [DCCP][05e3d650], and [RUDP][a387eef1].  Each of which behave in different manners when dealing with packet loss. Consequently, many of the impacts a large frame has on an IP network as well as its probability of being delivered without loss is dependent upon the transport protocol used to send the actual frame.
 
-#### Large Frame Impacts on TCP/IP
+#### Large Frame Impacts using TCP over IP (TCP/IP)
 
 The most common Internet protocol, TCP/IP, creates an index for each of the network packets being sent for a frame of data and verifies that each are successfully delivered, retransmitting packets as many times as needed in the case of loss. This functionality is the basis for TCP being considered a _reliable_ data transmission protocol.
 
-Since each packet of data for the transmitted frame is sequentially ordered, TCP is able to fully reconstruct and deliver the original frame once all the packets have arrived. However, for very large frames of data this causes TCP to suffer from the same kinds of impacts on memory allocation and computational burden as the aforementioned serialization technologies, i.e., Protocol Buffers and Thrift. The unique distinction for IP based protocols is that at some level, these issues also affect every element of the interconnected network infrastructure between the source and sync of the data being exchanged.
+Since each packet of data for the transmitted frame is sequentially ordered, TCP is able to fully reconstruct and deliver the original frame once all the packets have arrived. However, for very large frames of data this causes TCP to suffer from the same kinds of impacts on memory allocation and computational burden as the aforementioned serialization technologies, i.e., Protocol Buffers and network slowdown. The unique distinction for IP based protocols is that at some level, these issues also affect every element of the interconnected network infrastructure between the source and sync of the data being exchanged.
 
-Another critical impact that is unique to TCP is that for data that needs to be delivered in a timely fashion, retransmissions of dropped packets can also cause cumulative time delays <sup>[[13](#user-content-ref13)]</sup>, especially as large data frames are published at rapid rates. Time delays are also exacerbated during periods of increased network activity which induces congestion and a higher rate of collisions.
+Another critical impact that is unique to TCP is that for data that needs to be delivered in a timely fashion, retransmissions of dropped packets cause cumulative time delays <sup>[[13](#user-content-ref13)]</sup>, especially as large data frames are published at rapid rates. Time delays are also exacerbated during periods of increased network activity which induces congestion and a higher rate of collisions or buffering.
 
-> :information_source: Synchrophasor data is the source for real-time visualization and analysis tools which are used to operate the bulk electric system (BES). This real-time data is required to be accurate, dependable and timely in order to be useful for grid operators <sup>[[14](#user-content-ref14)]</sup>. Any delays in the delivery of this data could have adverse affects on operational decisions impacting the BES.
+> :information_source: Synchrophasor data is the source for some real-time visualization and analysis tools which are used to operate the [bulk electric system ][34be026c](BES). This real-time data is required to be accurate, dependable and timely in order to be useful for grid operators <sup>[[14](#user-content-ref14)]</sup>. Any delays in the delivery of this data could have adverse affects on operational decisions impacting the BES.
 
-#### Large Frame Impacts on UDP/IP
+
+#### Large Frame Impacts on UDP over IP (UDP/IP)
 
 Another common Internet protocol is UDP/IP. Transmission of data over UDP differs from TCP in the fact that UDP does not attempt to retransmit data nor does it make any attempts to maintain the order of the transmitted packets. This functionality is the basis for UDP being considered a _lossy_ data transmission protocol, but more lightweight than TCP.
 
-Even with the unreliable delivery caveats, UDP still attempts to reconstruct and deliver the originally transmitted frame of data. However, even if a single network packet is dropped, the entire original frame is lost and any packets that were already accumulated get discarded <sup>[[15](#user-content-ref15)]</sup>. In other words, there are no partial frame deliveries - frame reception with UDP is an all or nothing operation.
+Even with the unreliable delivery caveats UDP is still limited to packet sizes of the MTU.   Any frame larger must be split into multiple smaller packets as described above. UDP attempts to reconstruct and deliver the originally transmitted frame of data. However, if even a single network packet is dropped, the entire original frame is lost and any packets that were already accumulated get discarded <sup>[[15](#user-content-ref15)]</sup>. In other words, there are no partial frame deliveries - frame reception with UDP is an all or nothing operation.
 
 Since UDP attempts frame reconstruction with the received packets, the impact of large frames of data with UDP are similar to those with TCP and serialization technologies in that there is increased memory allocation and computational processing throughout the network infrastructure.
 
@@ -437,15 +452,17 @@ The more problematic impact with UDP and large frames of data is that the increa
 
 ##### Impacts of UDP Loss on Synchrophasor Data
 
-For synchrophasor data, UDP is often the protocol of choice. The density of synchrophasor data allows analytical applications to tolerate _some_ loss. The amount of loss that can be tolerated depends on the nature of the analytic because as the loss increases, the confidence in the analytic results decreases <sup>[[citation needed](#references-and-notes)]</sup>. Another reason UDP is used for synchrophasor data is its lightweight nature; use of UDP reduces overall network bandwidth requirements as compared to TCP <sup>[[16](#user-content-ref16)]</sup>. Perhaps the most critical reason for use of UDP for synchrophasor data is that UDP does not suffer from issues with induced time delays caused by retransmission of dropped network packets.
+For synchrophasor measurement data, UDP is often the protocol of choice. The density of synchrophasor data allows analytical applications to tolerate _some_ loss. The amount of loss that can be tolerated depends on the nature of the analytic because as the loss increases, the confidence in the analytic results decreases <sup>[[citation needed](#references-and-notes)]</sup>. Another reason UDP is used for synchrophasor data is its lightweight nature; use of UDP reduces overall network bandwidth requirements as compared to TCP <sup>[[16](#user-content-ref16)]</sup>. Perhaps the most critical reason for use of UDP for synchrophasor data is that UDP does not suffer from issues with induced time delays caused by retransmission of dropped network packets.
 
-For IEEE C37.118 <sup>[[1](#user-content-ref1)]</sup> deployments, large frame sizes can have adverse affects on data completeness; as more and more devices are concentrated into a single frame of data, the larger frame sizes contribute to higher overall data losses. In tests conducted by PeakRC, measured overall data loss for the transmission of all of its synchrophasor data using IEEE C37.118 averaged over 2% <sup>[[5](#user-content-ref5)]</sup> when using a data rate of 30 frames per second and more than 3,100 data values per frame. To help mitigate the data losses when using UDP, some companies have resorted to purpose-built, dedicated synchrophasor networks <sup>[[17](#user-content-ref17)]</sup>. Although a dedicated network is ideal at reducing data loss (minimizing simultaneous network traffic results in fewer collisions), this is not an option for most companies that treat the network as a shared resource.
+For IEEE C37.118 <sup>[[1](#user-content-ref1)]</sup> deployments, large frame sizes can have adverse affects on data completeness; as more and more devices are concentrated into a single frame of data, the larger frame sizes contribute to higher overall data losses. In tests conducted by PeakRC, measured overall data loss for the transmission of all of its synchrophasor data using IEEE C37.118 averaged over 2% <sup>[[5](#user-content-ref5)]</sup> when using a data rate of 30 frames per second and more than 3,100 data values per frame. To help mitigate the data losses when using UDP, some companies have resorted to purpose-built, dedicated synchrophasor networks <sup>[[17](#user-content-ref17)]</sup>. Also companies that have not implemented purpose based networks have used non-critical network infrastructure including the internet to share synchrophasor data due to the fear of over using bandwidth on their respective [Wide Area Networks][1e02e501] (WAN).
+
+Although a dedicated network is ideal at reducing data loss (minimizing simultaneous network traffic results in fewer collisions), this is not an option for most companies that treat the network as a shared resource.  Also having the option of overbuilding a network or having to upgrade with each increase in Synchrophasor traffic.
 
 ### Changing the Paradigm with STTP
 
-Existing serialization technologies are not designed for messaging exchange use cases that demand sending large frames of data at high speeds, often falling short in terms of timely delivery or data loss depending on the IP transport protocol used. The obvious solution is to break large data structures into smaller ones, recombining them as needed in receiving applications <sup>[[9](#user-content-ref9)]</sup>. Although this strategy can work fine for one-off solutions where data structures are manually partitioned into smaller units for transport, this does not lend itself to an abstract, versatile long term solution.
+AS noted above, existing serialization technologies are not designed for messaging exchange use cases that demand sending large or very large frames of data at high speeds.  Existing solutions often fall short in terms of timely delivery or data loss depending on the transport protocol used. The obvious solution is to break large data structures into smaller ones, recombining them as needed in receiving applications <sup>[[9](#user-content-ref9)]</sup>. Although this strategy can work fine for one-off solutions where data structures are manually partitioned into smaller units for transport, this does not lend itself to an abstract, versatile long term solution.
 
-Instead of serializing an entire data structure as a unit, STTP is designed to package each of the distinct elements of the data structure into small groups. Serialization is managed for each data element, typically a primitive type, that gets individually identified along with any associated state, e.g., time and/or quality information, see [Figure 2](#user-content-figure2). Ultimately more information is being sent, but it is being packaged differently.
+Instead of serializing an entire data structure as a unit, STTP is designed to package each of the distinct elements of the data structure into small groups. Serialization is managed for each data element, typically a primitive type, that gets individually identified along with any associated state, e.g., time and/or quality information, see [Figure 2](#user-content-figure2). Ultimately more information is being sent, but it is being packaged differently.  By sending the primitive measurement units directly instead of a full _structure_, many advantages are realized.  Primary of the advantages is only data that is changed need be sent.   
 
 > :information_source: For the purposes of this specification a data element, its identification and any associated state, e.g., time and quality, will be referred to as a _data point_.  
 
@@ -475,7 +492,7 @@ Because each data point is uniquely identified, the elements that appear from on
 
 #### STTP Bandwidth Impact
 
-Since data points include identity and state along with the primitive type value, serializations of STTP data carry extra information; so by its very nature uncompressed STTP often requires more bandwidth as compared to traditional data structure serialization technologies.
+Since data points include identity and state along with the primitive type value, serializations of STTP data carry extra information; so by its very nature uncompressed STTP often requires more bandwidth as compared to traditional data structure serialization technologies when each value is updated at a regular time like with  data.
 
 Although it will be common for use cases that demand a protocol like STTP, e.g., transmission of large data sets with variable availability at high speeds, to be deployed in environments that are not bandwidth constrained - simple testing has shown that deviation based compression techniques that have negligible processing impact can yield overall bandwidth requirements for STTP that are equal to or less than other serialization technologies, even when carrying extra information. For synchrophasor data, tests have shown data point serializations to have less than half the bandwidth requirements of IEEE C37.118 <sup>[[1](#user-content-ref1)]</sup> when used over TCP with simple stateful methods for lossless compression <sup>[[5](#user-content-ref5)]</sup>.
 
@@ -485,23 +502,27 @@ Bandwidth requirements for STTP can often be further lowered by reducing the amo
 
 STTP intrinsically manages data at its most fundamental level, primitive types, see [data point value types](#data-point-value-types). Each uniquely identified primitive type value represents some form of physical measurement. When measured with periodicity and associated with a timestamp at the moment of measurement, the resulting sequence of measured values and associated timestamps are known as _time series_ data. Since data points that are serialized by STTP can include time as part the state information for a value, STTP can be considered a time series data transmission protocol. However, the state information for values being transmitted is flexible - what is _time_ for one data point could simply be a _sequence_ for another. Additionally, the existence of some data points can be temporal, for example, to exchange a set of binary data, a temporary data point ID may be created that only exists until the binary data transfer is complete.
 
-STTP uses a publish / subscribe based model for control of the data to be exchanged. This exchange is managed at the data point level where data sourced at a sending application, i.e., the _publisher_, makes a set of data points available for publication. A receiving application, i.e., the _subscriber_, will select a subset of the available points for subscription. As new data is made available at the publisher, the subset of the data as selected by the subscriber is transmitted.
+STTP uses a publish / subscribe based model for control of the data to be exchanged. This exchange is managed at the data point level where data sourced at a sending application, i.e., the _publisher_, makes a set of data points available for publication. A receiving application, i.e., the _subscriber_, will select a subset of the available points for subscription. As new data is made available at the publisher, the subset of the data as selected by the subscriber is transmitted.  
+
+ One item of note is that with STTP the subscriber may or may not make the connection initiator.   A subscriber requests data once the connection is set up. System A can make a STTP connection to System B and at that point System B subscribes to System A.   This impacts very few implementation where firewall or other rules limit the direction of any new connection.
 
 ##### Data Point Metadata
 
-A critical part of the publish / subscribe process is defining the data points that are available for subscription. An STTP publisher will define a tabular list of available data point identifiers and associated descriptive information as the _metadata_ that is available to a subscriber.
+A critical part of the publish / subscribe process is defining the data points that are available for subscription. An STTP publisher will define a tabular list of available data point identifiers and associated descriptive information as the _meta-data_ that is available to a subscriber.
 
 Each data point includes a unique identifier; regardless of the binary transmission format, this identifier will exist as a statistically unique GUID in the defined metadata for the available data points. This makes the metadata from multiple publishers easier to merge into local repositories used by a subscriber.
 
 At a minimum, each row in the STTP publisher metadata will include the GUID based data point identifier, a short human readable alpha-numeric _tag_, the primitive data type used for the value of the data point, a description, the enabled state and timestamps for the creation, last update and deletion of the data point.
 
-Metadata in STTP is designed to be extensible. Different industries may require different kinds of available metadata in order to properly map and integrate with other protocols and environments. To accommodate the extensibility, other tabular datasets can be made available by a publisher as needed.
+It is expected that vendors and other stakeholders will publish standard grouping of metadata.    They may or may not be based on other standards like [Common Information Model][20b65317] CIM.  By defining standard sets of metadata it will allow for automatically syncing meta-data for like applications.
+
+Metadata in STTP is also designed to be extensible. Different industries may require different kinds of available metadata in order to properly map and integrate with other protocols and environments. To accommodate the extensibility, other tabular datasets can be made available by a publisher as needed.
 
 ##### Data Point Access Control
 
-STTP puts publishers in full control of access to data. A publisher can choose not to allow connections and/or expose any data to a subscriber that is not strongly identified. Publishers can choose to restrict data access at an individual data point level, a group level or at an identified subscriber level.
+STTP puts publishers in full control of access to data. A publisher may expose all data to every connection or alternatively can choose not to allow connections and/or expose any data to a subscriber that is not strongly identified (authenticated). Publishers can choose to restrict data access at an individual data point level, a group level or at an identified subscriber level.
 
-Selection of available points for an identified subscriber or a group can be controlled by an expression. Expression based access control means that the even as the data sources available to a publisher change, the expressions will still apply and need not be updated. For example, metadata will need to contain information about the primitive data type for a given data point - an expression based on this data type may look like the following:
+In order to support group level access, selection of available points for an identified subscriber or a group can be controlled by an expression. Expression based access control means that the even as the data sources available to a publisher change, the expressions will still apply and need not be updated. As an example, metadata will need to contain information about the primitive data type for a given data point - an expression based on this data type may look like the following:
 
 ```
 ALLOW WHERE DataType='BOOL'
@@ -511,27 +532,25 @@ For this expression, all data points as defined in the metadata that have a data
 
 #### Data Transport Channels
 
-Although not precluded from use over other data transports, the design of STTP is targeted and optimized for use over IP, specifically TCP/IP and UDP/IP. Even so, since the command/response implementation and data packet distribution of the STTP protocol is fairly simple, it is expected that commonly available middleware data transport layers, such as ZeroMQ or DDS, could easily support and transmit data using the STTP protocol should any of the messaging distribution and management benefits of these transport layers be useful to a particular deployment environment. However, these types of deployments are outside the scope of this documentation. If needed, STTP integrations with middleware layers should be added as reference implementation repositories to the STTP organizational site <sup>[[4](#user-content-ref4)]</sup>.
+Although not precluded from use over other data transports, the design of STTP is targeted and optimized for use over IP, specifically TCP/IP and UDP/IP. Even so, since the command/response implementation and data packet distribution of the STTP protocol is fairly simple, it is expected that commonly available middleware data transport layers, such as [ZeroMQ][864cf384] or [DDS][2514d076], could easily support and transmit data using the STTP protocol should any of the messaging distribution and management benefits of these transport layers be useful to a particular deployment environment. However, these types of deployments are outside the scope of this initial documentation.  STTP integrations with middleware layers should be added as reference implementation repositories to the STTP organizational site if they are utilized <sup>[[4](#user-content-ref4)]</sup>.
+
+  [8069efb5]: https://en.wikipedia.org/wiki/Transport_Layer_Security "TLS"
+  [c464180d]: https://en.wikipedia.org/wiki/X.509 "x509"
+  [df75d7bc]: https://en.wikipedia.org/wiki/Certificate_authority "CA"
 
 ## Establishing Connections
 
-It is expected that STTP will normally be used over Internet Protocol. In order to meet the entire set of capabilities as enumerated in this specification, a TCP/IP based connection shall be required. For simple STTP configurations, a single established TCP connection can be used to meet the requirements for both the _command channel_ and _data channel_ functions. Connections using UDP/IP can also be configured for data channel functions when used in conjunction with a TCP based command channel, however, use of UDP connections for STTP data transmission reduces the set of capabilities that can be supported. As an example, since UDP is a lossy transmission protocol, its use means that transmitted data can be dropped, so any capabilities that implement stateful compression and require delivery guarantees cannot be supported.
-
-> :information_source: UDP only style deliveries, either unicast or multicast, of data using STTP can only be accommodated with substantial capability restrictions. That is, with no reliable command channel, consumers of STTP data provided over a UDP only connection would be subject to publisher established formats, content and resolution of the data being delivered. Alternately, establishment of a UDP based command channel would require adjustments in protocol behavior to accommodate failures to send command requests and/or receive responses due to lack of delivery guarantees.  While it is expected that with the right set of initial assumptions and capability restrictions that STTP could effectively operate with a UDP only connection, the main text of this specification will intentionally remain silent on such details for the sake of simplicity, clarity and brevity.
-
-> :construction: Add an appendix to discuss how a UDP only STTP transmission should work so that needed caveats and capability restrictions can be established for this behavior. Describing this operation is important given that UDP only data transmissions for synchrophasors is widely used in production environments today. UDP only deployments, e.g., multicast, can also be very useful in lab environments for simplicity in data distribution. Regardless of the veracity and logic for the technical arguments that can be made to not use UDP, either by itself or in combination with TCP, by not defining the protocol behavior in these modes of operation there is increased risk of the protocol not being initially adopted or accepted. Having these behaviors documented will help alleviate any non-standard implementations that may crop up otherwise. Reference implementations will be adjusted to accommodate these use-cases as time allows, however UDP options will be implemented at lower priority. During code development, UDP use cases will be kept in-mind such that future iterations of the reference implementations can accommodate UDP based behaviors and functionality more readily.
-
-For STTP connections that are established using standard IP sockets, the actual details of establishing a socket connection are specific to an operating system and ultimately the programming language being used. However, the minimum information needed to create a socket is (1) an endpoint, i.e., the IP address and port number, (2) the desired IP transport protocol, e.g., TCP or UDP, and (3) the type connection to be established, i.e., a _server-style_ socket or a _client-style_ socket. A server-style socket is one that listens for connections from clients. A client-style socket is one that connects to a listening server socket. Client-style sockets are always the _initiators_ of any given connection, i.e., client sockets always "make the call" to server sockets to begin communications.
+For normal STTP connections that are established using IP sockets, the actual details of establishing a socket connection are specific to the operating system used as well as the specific programming language used. However, major implementations share much in common as to let us talk in generic terms here.  The minimum information needed to create a socket is (1) an endpoint, i.e., the IP address and port number, (2) the desired IP transport protocol, e.g., TCP or UDP, and (3) the type connection to be established, i.e., a _server-style_ socket or a _client-style_ socket. A server-style socket is one that listens for connections from clients. A client-style socket is one that connects to a listening server socket. Client-style sockets are always the _initiators_ of any given connection, i.e., client sockets always "make the call" to server sockets to begin communications.
 
 ### Forward Connections
 
-Under typical conditions STTP publishers, as data providers, will use server-style listening sockets, and STTP subscribers, as data consumers, will use client-style sockets to initiate connections to a publisher's listening socket. Establishing a server-style socket for a publisher and client-style sockets for any subscribers describes a connectivity model for STTP that is called a _forward connection_. Forward connections are expected to be the normal use case for STTP publisher/subscriber connections. However, for an STTP connection it does not matter which party, publisher or subscriber, is the server or the client from a socket perspective.
+As noted in the overview, there are times that we want the data sender in STTP to be the initiator of the socket connection for security reasons.  Under typical conditions STTP publishers, the data provider will set up a server-style listening sockets, and STTP subscribers, as data consumers, will use client-style sockets to initiate connections to a publisher's listening socket. Establishing a server-style socket for a publisher and client-style sockets for any subscribers describes a connectivity model for STTP that is called a _forward connection_. Forward connections are expected to be the normal use case for STTP publisher/subscriber connections. However, for an STTP connection it does not matter which party, publisher or subscriber, is the initiator of the socket connection.
 
 ### Reverse Connections
 
 In STTP it is perfectly valid for a publisher to initiate a client-style socket connection to a subscriber that is listening with an established server-style socket. This type of connectivity model is called a _reverse connection_. Since a client-style connection is the only type of socket that can initiate a connection, a reverse connection requires the publisher to be the initiator of a connection such that the target subscriber would be able to receive data.
 
-Reverse connections flip the normal responsibilities of a publish/subscribe messaging pattern by having parties that provision the data also the be the initiators of a connection. Data subscribers, which might otherwise come and go as needed, now become a persistent network resource that needs to be readily available for a connection from its publisher. Reverse connections can require more data flow planning and network engineering to ensure that connections are initiated from the proper locations while having the data reliably flow to the desired locations.
+Reverse connections flip the normal responsibilities of a publish/subscribe messaging pattern by having parties that provision the data also the be the initiators of a connection. Data subscribers, which might otherwise come and go as needed, now become a persistent network resource that needs to be readily available for a connection from its publisher. Reverse connections can require more data flow planning and network engineering to ensure that connections are initiated from the proper locations while having the data reliably flow to the desired locations.   Most often a _reverse connection_ is used to ensure connection is initiated from a environment of higher security to one of a lower security as is cyber security and NERC CIP best practice.
 
 Regardless of how a connection is established, forward or reverse, the functions, roles and responsibilities of the participants will not change, i.e., a publisher shall still be the provider of data and the subscriber shall still be the consumer of data. Additionally, any required protocol negotiations by the parties continues as normal once the connection has been established.
 
@@ -544,9 +563,10 @@ Regardless of how a connection is established, forward or reverse, the functions
 <sup>Figure 4</sup>
 </center>
 
+
 ### Bidirectional Data Exchange
 
-For simple TCP only based connectivity configurations, once a connection has been established between two systems a communications pathway exists such that data can flow bidirectionally. This is true regardless of which party uses a client or server socket or the connectivity model in use, i.e., a forward or reverse connection.
+For simple TCP only based connectivity configurations, once a connection has been established between two systems a communications pathway exists such that data can flow bidirectional. This is true regardless of which party uses a client or server socket or the connectivity model in use, i.e., a forward or reverse connection.
 
 Since data in a TCP based connection can easily move in both directions, both parties can simultaneously enable both publisher and subscriber functions. This allows STTP to be used in a data exchange _gateway_ capacity allowing for bidirectional data exchange with simplified connectivity requirements. The only decision two parties would need to make in this mode of operation is which STTP instance acts as a server and which instance acts as a client.
 
@@ -560,9 +580,17 @@ STTP data channel functionality is designed to be sent without the expectation o
 
 > :wrench: The initial subscriber command request sent to a publisher should include the UDP port that the subscriber wishes the publisher to use, see [operational modes negotiation](#operational-modes-negotiation). The destination UDP port is a local resource for the subscriber host machine and therefore under its control. However, UDP endpoints often need specific firewall rules to allow data transmission, thus requiring a preselected port to be established during the initial configuration process.
 
+It is expected that STTP will normally be used over Internet Protocol. In order to meet the entire set of capabilities as enumerated in this specification, a TCP/IP based connection shall be required for at least the _command channel_. A single TCP connection can be used to meet the requirements for both the _command channel_ and _data channel_ functions giving the full capability for both basic and advanced STTP functions. Alternatively a connections could use UDP/IP on a separate socket for _data channel_. Using UDP connections for  _data channel_ does reduce the set of capabilities that can be supported. As an example, since UDP is a **lossy** transmission protocol, so any capabilities that implement stateful connection such as advanced compression or function that require delivery guarantees cannot be supported using UDP _data channel_.
+
+> :information_source: UDP only style deliveries, either unicast or multicast, of data using STTP can only be accommodated with substantial capability restrictions. That is, with no reliable command channel, consumers of STTP data provided over a UDP only connection would be subject to publisher established formats, content and resolution of the data being delivered. Alternately, establishment of a UDP based command channel would require adjustments in protocol behavior to accommodate failures to send command requests and/or receive responses due to lack of delivery guarantees.  While it is expected that with the right set of initial assumptions and capability restrictions that STTP could effectively operate with a UDP only connection, the main text of this specification will intentionally remain silent on such details for the sake of simplicity, clarity and brevity.
+
+> :construction: Add an appendix to discuss how a UDP only STTP transmission should work so that needed caveats and capability restrictions can be established for this behavior. Describing this operation is important given that UDP only data transmissions for synchrophasors is widely used in production environments today. UDP only deployments, e.g., multicast, can also be very useful in lab environments for simplicity in data distribution. Regardless of the veracity and logic for the technical arguments that can be made to not use UDP, either by itself or in combination with TCP, by not defining the protocol behavior in these modes of operation there is increased risk of the protocol not being initially adopted or accepted. Having these behaviors documented will help alleviate any non-standard implementations that may crop up otherwise. Reference implementations will be adjusted to accommodate these use-cases as time allows, however UDP options will be implemented at lower priority. During code development, UDP use cases will be kept in-mind such that future iterations of the reference implementations can accommodate UDP based behaviors and functionality more readily.
+
+
 ### Secure Connections
 
-For data transmissions over the Internet or those that need to transmit sensitive data, a secured socket connection should be established for STTP communications. To secure a connection, a socket must be established with standard Transport Layer Security (TLS) using a signed X.509 certificate. TLS is used to encrypt, authenticate and attest to the integrity of the data being transmitted over STTP.
+For data transmissions over the Internet or those that need to transmit sensitive data, a secured socket connection should be established for STTP communications. To secure a connection, a socket must be established with standard [Transport Layer Security][8069efb5] (TLS) using a signed X.509 certificate. TLS is used to encrypt, authenticate and attest to the integrity of the data being transmitted over STTP.
+
 
 > :wrench: As of the writing of this specification, the latest available TLS version is 1.2, with the 1.3 version still in draft. The default stance for STTP implementations is to always default to the latest, hence most secure, version of TLS available. However, since different operating systems and programming languages may not be up-to-date with the latest TLS versions and different implementations of STTP need to be interoperable, the TLS version to use for any publisher/subscriber connection should be configurable. However, STTP implementations should log a warning if a connection is established using a version of TLS that is less than the latest supported version for the implementation.
 
@@ -570,9 +598,9 @@ TLS is a protocol layer that sits above TCP, as a result, secure connections are
 
 #### Certificate Validation
 
-The use of X.509 certificates are required in order to secure an STTP connection using TLS. For STTP, certificates are used to verify the identity of a connection, as well as to provide data encryption and integrity guarantees. For confidence in the certificates being used, STTP defines the operations needed to ensure that certificates are valid.
+The use of [X.509][c464180d] certificates are required in order to secure an STTP connection using TLS. For STTP, certificates are used to verify the identity of a connection, as well as to provide data encryption and integrity guarantees. For confidence in the certificates being used, STTP defines the operations needed to ensure that certificates are valid.
 
-STTP implementations should have the capability to use either self-signed certificates or those signed by a certificate authority (CA). For CA issued certificates, trust is delegated to the CA, which normally means the CA needs to be accessible during the validation process.
+STTP implementations have the capability to use either self-signed certificates or those signed by a [certificate authority][df75d7bc] (CA). For CA issued certificates, trust is delegated to the CA, which normally means the CA needs to be accessible during the validation process.
 
 For self-signed certificates, trust exists between the two parties exchanging certificates, which means each party needs to agree to keep the certificates private and to notify the other party if the host machine is ever known to be compromised, i.e., where an external party may have been able to gain access to the private keys stored for the certificate. Since trust for self-signed certificates is between the two parties exchanging data, STTP requires that the certificates be exchanged in advance - a self-signed cert sent during TLS negotiations must be considered untrusted. Self-signed certificates should always be exchanged out-of-band, i.e., not over the STTP protocol, and should never include the private keys.
 
@@ -582,7 +610,7 @@ Certificate validation is handled in terms of the type of socket connection that
 
 ##### Client Certificate Validation
 
-For server certificates issued by a CA that need validation, STTP implementations should support traditional client-style connections with TLS similar to how a browser connects to a secure site with HTTPS and validates the site's certificate. In this mode, when an STTP client-style socket connects to a server-style socket that has a CA issued certificate, with the certificate being provided by the server as part of the data in the TLS negotiation process, the client shall validate the server's certificate by (1) verifying the certificate's signature, (2) ensuring the certificate has not been revoked by checking the certificate revocation lists, and (3) checking that the information in the certificate information is valid, i.e., validating that one of the hostnames or IP addresses listed in the certificate subject field match the connection information for the server.
+For server certificates issued by a CA that need validation, STTP implementations supports traditional client-style connections with TLS similar to how a browser connects to a secure site with HTTPS and validates the site's certificate. In this mode, when an STTP client-style socket connects to a server-style socket that has a CA issued certificate, with the certificate being provided by the server as part of the data in the TLS negotiation process, the client shall validate the server's certificate by (1) verifying the certificate's signature, (2) ensuring the certificate has not been revoked by checking the certificate revocation lists, and (3) checking that the information in the certificate information is valid, i.e., validating that one of the hostnames or IP addresses listed in the certificate subject field match the connection information for the server.
 
 Validation of self-signed server certificates are similar to those for CA signed certificates but does not include steps that engage a CA. In this mode, when an STTP client-style socket connects to a server-style socket that has a self-signed certificate, the client shall validate the server's certificate by (1) verifying the certificate's signature, and (2) checking that the information in the certificate is valid, i.e., validating that one of the hostnames or IP addresses listed in the certificate subject field match the connection information for the server.
 
@@ -590,7 +618,7 @@ Validation of self-signed server certificates are similar to those for CA signed
 
 ##### Server Certificate Validation
 
-STTP implementations should support server-style connections with TLS with the ability to validate client certificates issued by a CA. In this mode, when an STTP server-style socket accepts a connection from a client-style socket that has a CA issued certificate, with the certificate being provided by the client as part of the data in the TLS negotiation process, the server shall validate the client's certificate by (1) verifying the certificate's signature, (2) ensuring the certificate has not been revoked by checking the certificate revocation lists, and (3) checking that the information in the certificate information is valid, i.e., validating that one of the hostnames or IP addresses listed in the certificate subject field match the connection information for the client.
+STTP implementations also support server-style connections with TLS, with the ability to validate client certificates issued by a CA. In this mode, when an STTP server-style socket accepts a connection from a client-style socket that has a CA issued certificate, with the certificate being provided by the client as part of the data in the TLS negotiation process, the server shall validate the client's certificate by (1) verifying the certificate's signature, (2) ensuring the certificate has not been revoked by checking the certificate revocation lists, and (3) checking that the information in the certificate information is valid, i.e., validating that one of the hostnames or IP addresses listed in the certificate subject field match the connection information for the client.
 
 Validation of self-signed client certificates are similar to those for CA signed certificates but does not include steps that engage a CA. In this mode, when an STTP server-style socket accepts a connection from a client-style socket that has a self-signed certificate, the server shall validate the client's certificate by (1) verifying the certificate's signature, and (2) checking that the information in the certificate is valid, i.e., validating that one of the hostnames or IP addresses listed in the certificate subject field match the connection information for the client.
 
@@ -604,17 +632,15 @@ STTP secures UDP traffic using the AES encryption algorithm and a 256-bit publis
 
 > :information_source: Although TLS is normally used with reliable IP transport protocols such as TCP, TLS has also been implemented for UDP using the Datagram Transport Layer Security (DTLS) protocol. This protocol could allow a UDP channel to be secured without having a preexisting TLS secured command channel and even provide security for UDP only style data deliveries. However, as of the writing of this specification, DTLS implementations were not widely available on the platforms and programming languages that were being targeted for initial STTP reference implementations.
 
-## Commands and Responses
+## Commands and Responses Overview
 
-STTP is implemented using functionality called the _command channel_ that is used to reliably negotiate session specific required communication, state and protocol parameters. Command channel functionality includes establishing communications with other STTP implementations, exchanging metadata on available data points and the ability to request data points for subscription. Any messages, such as commands, transmitted with the expectation of receiving a response will only be sent over the command channel, as such this functionality requires a reliable transmission protocol, e.g., TCP.
-
-STTP also defines functionality which is used to send messages without an expectation of receiving a response called the _data channel_. This functionality allows for transmission of messages over a lossy protocol, e.g., UDP. Data channel functionality is used to send compact, binary encoded data points of identifiable measured values along with timestamps accurate to one ten-millionth of a second and flags that can be used to indicate time and data quality.
+As described previously, STTP is implemented using a _command channel_ that is used to reliably negotiate session specific required communication, state and protocol parameters. Command channel functionality includes establishing communications with other STTP implementations, exchanging metadata on available data points and the ability to request data points for subscription. Any messages, such as commands, transmitted with the expectation of receiving a response will only be sent over the command channel, as such this functionality requires a reliable transmission protocol, e.g., TCP.
 
 This section describes the available commands and responses that define the functionality of STTP.
 
 ### Message Formats
 
-Commands and responses are defined as simple binary message structures that include a payload. The details for the payload of the message will depend on the specific command or response code.
+Commands and responses are defined as simple binary message structure that also may include a payload. The details for the payload of the message will depend on the specific command or response code.
 
 #### Message Payloads
 
@@ -669,7 +695,7 @@ Response;
 - The `length` field defines the length of the entire packet in bytes.
 - The `payload` field is a byte array representing the serialized payload associated with the `responseCode`.
 
-### Commands
+### Command Details
 
 The following table defines the commands available to STTP. Commands that expect a response define the command channel functions, those that do not define the data channel functions.
 
@@ -690,9 +716,9 @@ The following table defines the commands available to STTP. Commands that expect
 
 #### Begin Fragment Command
 
-If sending a packet that is larger than the negotiated maximum packet size, it must be fragmented. This command is the first in a series of fragment commands that define the entire fragment. 
+If sending a packet that is larger than the negotiated maximum packet size, it must be fragmented. This command is the first in a series of fragment commands that define the entire fragment.
 
-If the session supports it, fragmented data is commonly compress. It's possible that a compressed data fits into a single fragment, therefore this command will not be followed by subsequent `NextFragment` commands. 
+If the session supports it, fragmented data is commonly compress. It's possible that a compressed data fits into a single fragment, therefore this command will not be followed by subsequent `NextFragment` commands.
 
 Fragmented packets must be sent one at a time in sequence and cannot be interwoven with any other kind of command.
 
@@ -710,9 +736,9 @@ BeginFragmentCommand;
 
 #### Next Fragment Command
 
-This packet always follows `BeginFragment` and will be repeated in order until all of the data has been transmitted. 
+This packet always follows `BeginFragment` and will be repeated in order until all of the data has been transmitted.
 
-There is not a Finished command, therefore, once the total number of bytes have been transmitted as defined in `BeginFragment`. The command has completed. 
+There is not a Finished command, therefore, once the total number of bytes have been transmitted as defined in `BeginFragment`. The command has completed.
 
 ```C
 struct {
@@ -725,7 +751,7 @@ NextFragmentCommand;
 
 #### Get Metadata Schema Command
 
-Requests that the current version of the metadata database be sent, along with the schema. While this information is not required, 
+Requests that the current version of the metadata database be sent, along with the schema. While this information is not required,
 it's important to know this when checking if one's metadata is out of synchronization or if additional user defined metadata tables exist.
 
 ```C
