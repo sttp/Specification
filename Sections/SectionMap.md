@@ -86,3 +86,8 @@
 | [Encoding (3)](TSSCAlgorithm.md#encoding) | [TSSCAlgorithm.md](TSSCAlgorithm.md) |
 | [Decoding (3)](TSSCAlgorithm.md#decoding) | [TSSCAlgorithm.md](TSSCAlgorithm.md) |
 | [Data Point Metadata (3)](TSSCAlgorithm.md#data-point-metadata) | [TSSCAlgorithm.md](TSSCAlgorithm.md) |
+| [Appendix F - STTP Templates (2)](Templates.md#appendix-f---sttp-templates) | [Templates.md](Templates.md) |
+| [Overview (3)](Templates.md#overview) | [Templates.md](Templates.md) |
+| [PMU Template (3)](Templates.md#pmu-template) | [Templates.md](Templates.md) |
+| [Data Point Time Quality Flags - Move to appendix (3)](Templates.md#data-point-time-quality-flags---move-to-appendix) | [Templates.md](Templates.md) |
+| [Data Point Data Quality Flags - Move to appendix (3)](Templates.md#data-point-data-quality-flags---move-to-appendix) | [Templates.md](Templates.md) |

@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.8.14 - February 3, 2018</p>
+<p><strong>Version:</strong> 0.8.15 - February 10, 2018</p>
 <p><strong>Status:</strong> First Draft Release</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -807,38 +807,42 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </tr>
 <tr>
 <td style="text-align:center;">6</td>
-<td><a href="#commands-and-responses">Commands and Responses</a></td>
+<td><a href="#commands-and-responses">STTP Command Overview</a></td>
 </tr>
 <tr>
 <td style="text-align:center;">7</td>
-<td><a href="#data-point-structure">Data Point Structure</a></td>
+<td><a href="#commands">Commands Details</a></td>
 </tr>
 <tr>
 <td style="text-align:center;">8</td>
-<td><a href="#data-point-characteristics">Data Point Characteristics</a></td>
+<td><a href="#data-point-structure">Data Point Structure</a></td>
 </tr>
 <tr>
 <td style="text-align:center;">9</td>
-<td><a href="#metadata">Metadata</a></td>
+<td><a href="#data-point-characteristics">Data Point Characteristics</a></td>
 </tr>
 <tr>
 <td style="text-align:center;">10</td>
-<td><a href="#compression">Compression</a></td>
+<td><a href="#metadata">Metadata</a></td>
 </tr>
 <tr>
 <td style="text-align:center;">11</td>
-<td><a href="#security">Security</a></td>
+<td><a href="#compression">Compression</a></td>
 </tr>
 <tr>
 <td style="text-align:center;">12</td>
-<td><a href="#references-and-notes">References and Notes</a></td>
+<td><a href="#security">Security</a></td>
 </tr>
 <tr>
 <td style="text-align:center;">13</td>
-<td><a href="#contributors">Contributors and Reviewers</a></td>
+<td><a href="#references-and-notes">References and Notes</a></td>
 </tr>
 <tr>
 <td style="text-align:center;">14</td>
+<td><a href="#contributors">Contributors and Reviewers</a></td>
+</tr>
+<tr>
+<td style="text-align:center;">15</td>
 <td><a href="#major-version-history">Revision History</a></td>
 </tr>
 <tr>
@@ -859,7 +863,11 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 </tr>
 <tr>
 <td style="text-align:center;">E</td>
-<td><a href="#appendix-e---tssc-algorithm">Appendix E - TSSC Algorithm</a></td>
+<td><a href="#appendix-e---STTP-Templates">Appendix E - TSSC Algorithm</a></td>
+</tr>
+<tr>
+<td style="text-align:center;">F</td>
+<td><a href="#appendix-F---tssc-algorithm">Appendix F - STTP Templates</a></td>
 </tr>
 </tbody>
 </table>
@@ -875,7 +883,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <p><a href="#appendix-b---sttp-api-reference">Appendix B - STTP API Reference</a> provides instructions to enable software developers to integrate and use of STTP within other software systems.</p>
 <p><a href="#appendix-c---ieee-c37118-mapping">Appendix C - IEEE C37.118 Mapping</a> provides a detailed look at the process of transforming IEEE C37.118 into STTP as well as creating IEEE C37.118 streams from STTP.</p>
 <p><a href="#appendix-d---other-protocol-evaluations">Appendix D - Other Protocol Evaluations</a> provides insight into other protocols that were considered for suitability when developing the STTP use cases and functional requirements.</p>
-<p><a href="#appendix-e---tssc-algorithm">Appendix E - TSSC Algorithm</a> provides specification details for the Time-series Special Compression Algorithm (TSSC) which is used by STTP to archive very high compression ratios for streaming data.</p>
+<p><a href="#appendix-e---STTP-Templates">Appendix E - TSSC Algorithm</a> provides specification details for the Time-series Special Compression Algorithm (TSSC) which is used by STTP to archive very high compression ratios for streaming data.</p>
 <p>While the format and structure of this document, established to facilitate collaboration, is different than that used by standards bodies, it is hoped that the content within this document can meet all the information requirements needed to enable repackaging of this specification into draft standard formats.</p>
 <p><a href="https://smartgrid.ieee.org/resources/standards/ieee-approved-proposed-standards-related-to-smart-grid/762-c37-118-2005-ieee-standard-for-synchrophasors-for-power-systems" title="IEEE 37.118">IEEE 37.118</a> has enabled synchrophasors to be utilized across the electric utility landscape.   It has been the infrastructure on which so many advancements on grid monitoring, model validation, dynamic control and other uses.   The huge expansion in the use of 37.118 has exposed some limitation of its use.</p>
 <p>Streaming Telemetry Transport Protocol (STTP) looks to advance the work started by designers and users of 37.118 and other protocols and expand the tools available to use synchrophasor data at production scale.</p>
@@ -2076,7 +2084,7 @@ DataQualityFlags; // sizeof(uint8), 1-byte</code></pre>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> This mode was enabled in GEP to accommodate a smaller payload size. Specifically timestamps were transmitted as an offset to a base time that maintained two states. Also, GEP focused on 4-byte single-precision floating point numbers only. This along with some compact flags for quality and a 16-bit runtime ID got per data point size to around 9-bytes. It is expected that this mode of operation could still have value when data packets are sent over UDP, however, TCP transmissions would be best served using TSSC because of the gains that can be had with that algorithm.</p>
 </blockquote>
 <h3 id="fixed-size-encoding">Fixed Size Encoding</h3>
-<p>In order to accommodate advanced compression algorithms, e.g., <a href="#appendix-e---tssc-algorithm">TSSC compression</a>, an alternate data point encoding is used where values are serialized using the <code>FixedSizeDataPoint</code> structure, defined below. The <code>FixedSizeDataPoint</code> structure aligns data on a word boundary and has a fixed size, so no fields are considered optional. Instead when the <code>StateFlags</code> call for an excluded field, the <code>FixedSizeDataPoint</code> structure will simply zero out the values for the field which allows the repeating values to be <em>compressed out</em> of the final result.</p>
+<p>In order to accommodate advanced compression algorithms, e.g., <a href="#appendix-e---STTP-Templates">TSSC compression</a>, an alternate data point encoding is used where values are serialized using the <code>FixedSizeDataPoint</code> structure, defined below. The <code>FixedSizeDataPoint</code> structure aligns data on a word boundary and has a fixed size, so no fields are considered optional. Instead when the <code>StateFlags</code> call for an excluded field, the <code>FixedSizeDataPoint</code> structure will simply zero out the values for the field which allows the repeating values to be <em>compressed out</em> of the final result.</p>
 <pre><code class="C language-C">struct {
   uint32 id;
   uint64[8] value;  // Bytes of the value
@@ -2819,7 +2827,7 @@ AlgorithmEncodings;</code></pre>
 <p>The Deflate algorithm is technically a stateful algorithm, however, it is defined for use within STTP in either stateful or stateless modes. In a stateless mode, the Deflate algorithm is simply applied to each data packet with its default initial state. The Deflate algorithm is the only default compression option that is specified for STTP stateless compression.</p>
 <p>For the purposes of session negotiation the text name for the Deflate algorithm is <code>DEFLATE</code> and its version number is <code>1.0</code>.</p>
 <h4 id="time-series-special-compression">Time-series Special Compression</h4>
-<p>The Time-series Special Compression algorithm (TSSC) is an algorithm specifically designed for STTP that is used to quickly compress streaming time-series data with very good compression ratios. The TSSC algorithm is defined in <a href="#appendix-e---tssc-algorithm">Appendix E - TSSC Algorithm</a>.</p>
+<p>The Time-series Special Compression algorithm (TSSC) is an algorithm specifically designed for STTP that is used to quickly compress streaming time-series data with very good compression ratios. The TSSC algorithm is defined in <a href="#appendix-e---STTP-Templates">Appendix E - TSSC Algorithm</a>.</p>
 <p>TSSC is a stateful compression algorithm that is specifically designed to work with STTP streaming data packets. As such it is only designed for use in STTP when the data channel functions are established with a reliable transport protocol, e.g., TCP.</p>
 <p>For the purposes of session negotiation the text name for the Time-series Special Compression algorithm is <code>TSSC</code> and its version number is <code>1.0</code>.</p>
 <h2 id="security">Security</h2>
@@ -3463,5 +3471,60 @@ Publisher will likely want to validate size of historical requests, or least thr
 }
 
 /* CODE TRUNCATED */</code></pre>
+<h2 id="appendix-f---sttp-templates">Appendix F - STTP Templates</h2>
+<h3 id="overview-1">Overview</h3>
+<p>The base STTP protocol can be used for any type of time series data.  However, if every implementation of STTP is unique then sharing metadata in an automated fashion will be unique for each implementation.    In order to assist in standardization of the grouping of data and streamlining the structure of the metadata templates are defined.</p>
+<p>A template is a schema that defines how the base metadata will be organized and how the data structure should be sent. Since the STTP was initially designed to support synchrophasor data included below is a conversations about the elements of the PMU template   </p>
+<h3 id="pmu-template">PMU Template</h3>
+<p>todo - define Templates</p>
+<h3 id="data-point-time-quality-flags---move-to-appendix-1">Data Point Time Quality Flags - Move to appendix</h3>
+<p>Data points can also include a <code>TimeQualityFlags</code> structure in the serialized state data, defined below, that describes both the timestamp quality, defined with the <code>TimeQuality</code> enumeration value, as well as an indication of if a timestamp was not measured with an accurate time source.</p>
+<p>The time quality detail is included for devices that have access to a GPS or UTC time synchronization source, e.g., from an IRIG timecode signal. For timestamps that are acquired without an accurate time source, e.g., using the local system clock, the <code>TimeQuality</code> value should be set to <code>Locked</code> and the <code>TimeQualityFlags.NoAccurateTimeSource</code> should be set.</p>
+<pre><code class="C language-C">enum {
+  Locked = 0x0,                       // Clock locked, Normal operation
+  Failure =  0xF,                     // Clock fault, time not reliable
+  Unlocked10Seconds = 0xB,            // Clock unlocked, time within 10^1s
+  Unlocked1Second = 0xA,              // Clock unlocked, time within 10^0s
+  UnlockedPoint1Seconds = 0x9,        // Clock unlocked, time within 10^-1s
+  UnlockedPoint01Seconds = 0x8,       // Clock unlocked, time within 10^-2s
+  UnlockedPoint001Seconds = 0x7,      // Clock unlocked, time within 10^-3s
+  UnlockedPoint0001Seconds = 0x6,     // Clock unlocked, time within 10^-4s
+  UnlockedPoint00001Seconds = 0x5,    // Clock unlocked, time within 10^-5s
+  UnlockedPoint000001Seconds = 0x4,   // Clock unlocked, time within 10^-6s
+  UnlockedPoint0000001Seconds = 0x3,  // Clock unlocked, time within 10^-7s
+  UnlockedPoint00000001Seconds = 0x2, // Clock unlocked, time within 10^-8s
+  UnlockedPoint000000001Seconds = 0x1 // Clock unlocked, time within 10^-9s
+}
+TimeQuality; // 4-bits, 1-nibble
+
+enum {
+  None = 0,
+  TimeQualityMask = 0xF,        // Mask for TimeQuality  
+  NoAccurateTimeSource = 1 &lt;&lt; 7 // Accurate time source is unavailable
+}
+TimeQualityFlags; // sizeof(uint8), 1-byte</code></pre>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> The remaining available bits in the <code>TimeQualityFlags</code> enumeration could be made to directly map to IEEE C37.118 leap-second flags. Existing IEEE text could then be used to describe the function of these bits if deemed useful:</p>
+</blockquote>
+<pre><code class="C language-C">LeapsecondPending = 1 &lt;&lt; 4,   // Set before a leap second occurs and then cleared after
+LeapsecondOccurred = 1 &lt;&lt; 5,  // Set in the first second after the leap second occurs and remains set for 24 hours
+LeapsecondDirection = 1 &lt;&lt; 6, // Clear for add, set for delete</code></pre>
+<h3 id="data-point-data-quality-flags---move-to-appendix-1">Data Point Data Quality Flags - Move to appendix</h3>
+<p>A set of data quality flags are defined for STTP data point values in the <code>DataQualityFlags</code> enumeration, defined as follows:</p>
+<pre><code class="C language-C">enum {
+  Normal = 0,                 // Defines normal state
+  BadTime = 1 &lt;&lt; 0,           // Defines bad time state when set
+  BadValue = 1 &lt;&lt; 1,          // Defines bad value state when set
+  UnreasonableValue = 1 &lt;&lt; 2, // Defines unreasonable value state when set
+  CalculatedValue = 1 &lt;&lt; 3,   // Defines calculated value state when set
+  MissingValue = 1 &lt;&lt; 4,      // Defines missing value when set
+  ReservedFlag = 1 &lt;&lt; 5,      // Reserved flag
+  UserDefinedFlag1 = 1 &lt;&lt; 6,  // User defined flag 1
+  UserDefinedFlag2 = 1 &lt;&lt; 7   // User defined flag 2
+ }
+DataQualityFlags; // sizeof(uint8), 1-byte</code></pre>
+<blockquote>
+  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> These quality flags are intentionally simple to accommodate a very wide set of use cases and still provide some indication of data point value quality. More complex data qualities can exist as new data points.</p>
+</blockquote>
 </body>
 </html>
