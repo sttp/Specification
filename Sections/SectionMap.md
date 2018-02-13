@@ -29,8 +29,6 @@
 | [Data Point Identifier (3)](DataPointStructure.md#data-point-identifier) | [DataPointStructure.md](DataPointStructure.md) |
 | [Sttp Value Types (3)](DataPointStructure.md#sttp-value-types) | [DataPointStructure.md](DataPointStructure.md) |
 | [Encoding Methods (3)](DataPointStructure.md#encoding-methods) | [DataPointStructure.md](DataPointStructure.md) |
-| [Data Point Time Quality Flags - Move to appendix (3)](DataPointStructure.md#data-point-time-quality-flags---move-to-appendix) | [DataPointStructure.md](DataPointStructure.md) |
-| [Data Point Data Quality Flags - Move to appendix (3)](DataPointStructure.md#data-point-data-quality-flags---move-to-appendix) | [DataPointStructure.md](DataPointStructure.md) |
 | [Data Point Encoding Types (2)](DataPointEncodingTypes.md#data-point-encoding-types) | [DataPointEncodingTypes.md](DataPointEncodingTypes.md) |
 | [Basic Encoding (3)](DataPointEncodingTypes.md#basic-encoding) | [DataPointEncodingTypes.md](DataPointEncodingTypes.md) |
 | [Compact Encoding (3)](DataPointEncodingTypes.md#compact-encoding) | [DataPointEncodingTypes.md](DataPointEncodingTypes.md) |
