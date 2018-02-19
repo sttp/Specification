@@ -39,7 +39,7 @@ If no runtime ID is used -1 should be sent
 ### Data Point Identifier
 
 When identifying a Data Point, one of 4 mechanics are encouraged to identify the source of the time series data.   STTP expects a ID to be unique per data point.  Common ids include:
- 
+
 * [Guid] - Some kind of integer based identifier.
 * [String] - This is commonly referred to as a tag in a time series databases.
 * [SttpMarkup] - Essentially this is a connection string that combines a set of unique identifiers.
