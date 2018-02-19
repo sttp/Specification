@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.8.15 - February 10, 2018</p>
+<p><strong>Version:</strong> 0.8.16 - February 13, 2018</p>
 <p><strong>Status:</strong> First Draft Release</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -884,6 +884,7 @@ Copyright &copy; 2017, Grid Protection Alliance, Inc., All rights reserved.</p>
 <p><a href="#appendix-c---ieee-c37118-mapping">Appendix C - IEEE C37.118 Mapping</a> provides a detailed look at the process of transforming IEEE C37.118 into STTP as well as creating IEEE C37.118 streams from STTP.</p>
 <p><a href="#appendix-d---other-protocol-evaluations">Appendix D - Other Protocol Evaluations</a> provides insight into other protocols that were considered for suitability when developing the STTP use cases and functional requirements.</p>
 <p><a href="#appendix-e---STTP-Templates">Appendix E - TSSC Algorithm</a> provides specification details for the Time-series Special Compression Algorithm (TSSC) which is used by STTP to archive very high compression ratios for streaming data.</p>
+<p><a href="#appendix-F---tssc-algorithm">Appendix F - Templates</a> Provides an explanation of how templat4es can be used with STTP as well as some initial example templates</p>
 <p>While the format and structure of this document, established to facilitate collaboration, is different than that used by standards bodies, it is hoped that the content within this document can meet all the information requirements needed to enable repackaging of this specification into draft standard formats.</p>
 <p><a href="https://smartgrid.ieee.org/resources/standards/ieee-approved-proposed-standards-related-to-smart-grid/762-c37-118-2005-ieee-standard-for-synchrophasors-for-power-systems" title="IEEE 37.118">IEEE 37.118</a> has enabled synchrophasors to be utilized across the electric utility landscape.   It has been the infrastructure on which so many advancements on grid monitoring, model validation, dynamic control and other uses.   The huge expansion in the use of 37.118 has exposed some limitation of its use.</p>
 <p>Streaming Telemetry Transport Protocol (STTP) looks to advance the work started by designers and users of 37.118 and other protocols and expand the tools available to use synchrophasor data at production scale.</p>
@@ -1916,7 +1917,7 @@ RequestSucceeded;</code></pre>
 <h2 id="data-point-structure">Data Point Structure</h2>
 <p>When a subscriber has issued a <a href="#subscribe-command">subscribe command</a> to its publisher for select set of data points, the publisher will start sending <a href="#data-point-packet-commands">data point packet commands</a> each with a payload of several data point values serialized using the <code>DataPoint</code> structure, defined as follows:</p>
 <pre><code class="C language-C">struct {
-  int32 runtimeID;         // -1 if not specified, can optionally be sent instead of `id`. 
+  int32 runtimeID;         // -1 if not specified, can optionally be sent instead of `id`.
   SttpValue id;            // A point Identifier.
   SttpValue timestamp;     // A timestamp, SttpTimestamp is highly recommended for this field but not required.
   SttpValue value;         // The single value that represents this Data Point.
@@ -1966,9 +1967,9 @@ ValueTypeCode; // sizeof(uint4), 1-nibble</code></pre>
 <li><code>Bool</code>: <a href="https://en.wikipedia.org/wiki/Boolean_data_type">Boolean as 1-bit</a> (1-bit, zero is <code>false</code>, 1 is <code>true</code>)</li>
 <li><code>Guid</code>: <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">Globally Unique Identifer</a> (16-bytes, big-endian for all components)</li>
 <li><code>String</code> <a href="https://en.wikipedia.org/wiki/String_%28computer_science%29">Character String as <code>StringValue</code></a> (encoding is UTF8)</li>
-<li><code>SttpBuffer</code> <a href="https://en.wikipedia.org/wiki/Data_buffer">Untyped Data Buffer as <code>BufferValue</code></a> </li>
-<li><code>SttpMarkup</code> <a href="https://en.wikipedia.org/wiki/Data_buffer">Untyped Data Buffer as <code>BufferValue</code></a> </li>
-<li><code>SttpBulkTransport</code> <a href="https://en.wikipedia.org/wiki/Data_buffer">Untyped Data Buffer as <code>BufferValue</code></a> </li>
+<li><code>SttpBuffer</code> <a href="https://en.wikipedia.org/wiki/Data_buffer">Untyped Data Buffer as <code>BufferValue</code></a></li>
+<li><code>SttpMarkup</code> <a href="https://en.wikipedia.org/wiki/Data_buffer">Untyped Data Buffer as <code>BufferValue</code></a></li>
+<li><code>SttpBulkTransport</code> <a href="https://en.wikipedia.org/wiki/Data_buffer">Untyped Data Buffer as <code>BufferValue</code></a></li>
 </ul>
 <h3 id="encoding-methods">Encoding Methods</h3>
 <p>When encoding each of these values, a 4-bit ValueTypeCode will be written first, then the value itself will be written. The 4-bit prefix can be optimally eliminated, but a separate encoding algorithm must make that determination.</p>
@@ -1987,13 +1988,13 @@ Decode: invert bits 1-63 if bit0 is 1, then rotate right 1.</p>
 
 long UnPackSign(long value)
 {
-    if ((value &amp; 1) == 0) 
-        return (value &gt;&gt; 1) &amp; long.MaxValue; 
+    if ((value &amp; 1) == 0)
+        return (value &gt;&gt; 1) &amp; long.MaxValue;
     return (~value &gt;&gt; 1) | long.MinValue;
 }</code></pre>
 <p>After Packing the value, it is serialized using Write8BitSegments.</p>
 <h4 id="sttptime">SttpTime</h4>
-<p>SttpTime is a specially encoded timestamp based on Microsoft's .NET DateTime field, however, a leap second can be added at the end of every minute. There are approximately 145 billion seconds of space unused in the first 62-bits of the DateTime field. However, there are only 5 billion distinct minutes between year 1 and 9999. The space above DateTime.MaxValue has been allocated to a 61st second. </p>
+<p>SttpTime is a specially encoded timestamp based on Microsoft's .NET DateTime field, however, a leap second can be added at the end of every minute. There are approximately 145 billion seconds of space unused in the first 62-bits of the DateTime field. However, there are only 5 billion distinct minutes between year 1 and 9999. The space above DateTime.MaxValue has been allocated to a 61st second.</p>
 <p>SttpTime is encoded/decoded as a typical int64 consuming 8 bytes (as opposed to a variable length SttpValueTypeCode.Int64)</p>
 <h4 id="sttpbuffer">SttpBuffer</h4>
 <p>This value contains only a byte buffer, and is serialized using <code>BitByteBlock.Write(byte[] data);</code></p>
@@ -2003,7 +2004,7 @@ long UnPackSign(long value)
 <h4 id="sttpbulktransport">SttpBulkTransport</h4>
 <p>This value is a pointer type, and contains the following fields.</p>
 <pre><code class="C language-C">struct {
-  SttpValueTypeCode fundamentalType;  // The type of the underlying data. 
+  SttpValueTypeCode fundamentalType;  // The type of the underlying data.
   Guid bulkTransportID                // The ID that can be used to request this data.
   long length;                        // The length of the data.
 }
@@ -2014,55 +2015,6 @@ SttpBulkTransport;</code></pre>
 <li>Guid(bulkTransportID);</li>
 <li>Int64(length);</li>
 </ul>
-<h3 id="data-point-time-quality-flags---move-to-appendix">Data Point Time Quality Flags - Move to appendix</h3>
-<p>Data points can also include a <code>TimeQualityFlags</code> structure in the serialized state data, defined below, that describes both the timestamp quality, defined with the <code>TimeQuality</code> enumeration value, as well as an indication of if a timestamp was not measured with an accurate time source.</p>
-<p>The time quality detail is included for devices that have access to a GPS or UTC time synchronization source, e.g., from an IRIG timecode signal. For timestamps that are acquired without an accurate time source, e.g., using the local system clock, the <code>TimeQuality</code> value should be set to <code>Locked</code> and the <code>TimeQualityFlags.NoAccurateTimeSource</code> should be set.</p>
-<pre><code class="C language-C">enum {
-  Locked = 0x0,                       // Clock locked, Normal operation
-  Failure =  0xF,                     // Clock fault, time not reliable
-  Unlocked10Seconds = 0xB,            // Clock unlocked, time within 10^1s
-  Unlocked1Second = 0xA,              // Clock unlocked, time within 10^0s
-  UnlockedPoint1Seconds = 0x9,        // Clock unlocked, time within 10^-1s
-  UnlockedPoint01Seconds = 0x8,       // Clock unlocked, time within 10^-2s
-  UnlockedPoint001Seconds = 0x7,      // Clock unlocked, time within 10^-3s
-  UnlockedPoint0001Seconds = 0x6,     // Clock unlocked, time within 10^-4s
-  UnlockedPoint00001Seconds = 0x5,    // Clock unlocked, time within 10^-5s
-  UnlockedPoint000001Seconds = 0x4,   // Clock unlocked, time within 10^-6s
-  UnlockedPoint0000001Seconds = 0x3,  // Clock unlocked, time within 10^-7s
-  UnlockedPoint00000001Seconds = 0x2, // Clock unlocked, time within 10^-8s
-  UnlockedPoint000000001Seconds = 0x1 // Clock unlocked, time within 10^-9s
-}
-TimeQuality; // 4-bits, 1-nibble
-
-enum {
-  None = 0,
-  TimeQualityMask = 0xF,        // Mask for TimeQuality  
-  NoAccurateTimeSource = 1 &lt;&lt; 7 // Accurate time source is unavailable
-}
-TimeQualityFlags; // sizeof(uint8), 1-byte</code></pre>
-<blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/construction.png?v5" alt=":construction:" title=":construction:" class="emoji-img emoji"> The remaining available bits in the <code>TimeQualityFlags</code> enumeration could be made to directly map to IEEE C37.118 leap-second flags. Existing IEEE text could then be used to describe the function of these bits if deemed useful:</p>
-</blockquote>
-<pre><code class="C language-C">LeapsecondPending = 1 &lt;&lt; 4,   // Set before a leap second occurs and then cleared after
-LeapsecondOccurred = 1 &lt;&lt; 5,  // Set in the first second after the leap second occurs and remains set for 24 hours
-LeapsecondDirection = 1 &lt;&lt; 6, // Clear for add, set for delete</code></pre>
-<h3 id="data-point-data-quality-flags---move-to-appendix">Data Point Data Quality Flags - Move to appendix</h3>
-<p>A set of data quality flags are defined for STTP data point values in the <code>DataQualityFlags</code> enumeration, defined as follows:</p>
-<pre><code class="C language-C">enum {
-  Normal = 0,                 // Defines normal state
-  BadTime = 1 &lt;&lt; 0,           // Defines bad time state when set
-  BadValue = 1 &lt;&lt; 1,          // Defines bad value state when set
-  UnreasonableValue = 1 &lt;&lt; 2, // Defines unreasonable value state when set
-  CalculatedValue = 1 &lt;&lt; 3,   // Defines calculated value state when set
-  MissingValue = 1 &lt;&lt; 4,      // Defines missing value when set
-  ReservedFlag = 1 &lt;&lt; 5,      // Reserved flag
-  UserDefinedFlag1 = 1 &lt;&lt; 6,  // User defined flag 1
-  UserDefinedFlag2 = 1 &lt;&lt; 7   // User defined flag 2
- }
-DataQualityFlags; // sizeof(uint8), 1-byte</code></pre>
-<blockquote>
-  <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> These quality flags are intentionally simple to accommodate a very wide set of use cases and still provide some indication of data point value quality. More complex data qualities can exist as new data points.</p>
-</blockquote>
 <h2 id="data-point-encoding-types">Data Point Encoding Types</h2>
 <p>STTP supports various options for encoding data points within data packet commands. Different levels of encoding functionality allows data to be sent more efficiently and consume less space.</p>
 <blockquote>
@@ -3477,7 +3429,7 @@ Publisher will likely want to validate size of historical requests, or least thr
 <p>A template is a schema that defines how the base metadata will be organized and how the data structure should be sent. Since the STTP was initially designed to support synchrophasor data included below is a conversations about the elements of the PMU template   </p>
 <h3 id="pmu-template">PMU Template</h3>
 <p>todo - define Templates</p>
-<h3 id="data-point-time-quality-flags---move-to-appendix-1">Data Point Time Quality Flags - Move to appendix</h3>
+<h3 id="data-point-time-quality-flags---move-to-appendix">Data Point Time Quality Flags - Move to appendix</h3>
 <p>Data points can also include a <code>TimeQualityFlags</code> structure in the serialized state data, defined below, that describes both the timestamp quality, defined with the <code>TimeQuality</code> enumeration value, as well as an indication of if a timestamp was not measured with an accurate time source.</p>
 <p>The time quality detail is included for devices that have access to a GPS or UTC time synchronization source, e.g., from an IRIG timecode signal. For timestamps that are acquired without an accurate time source, e.g., using the local system clock, the <code>TimeQuality</code> value should be set to <code>Locked</code> and the <code>TimeQualityFlags.NoAccurateTimeSource</code> should be set.</p>
 <pre><code class="C language-C">enum {
@@ -3509,7 +3461,7 @@ TimeQualityFlags; // sizeof(uint8), 1-byte</code></pre>
 <pre><code class="C language-C">LeapsecondPending = 1 &lt;&lt; 4,   // Set before a leap second occurs and then cleared after
 LeapsecondOccurred = 1 &lt;&lt; 5,  // Set in the first second after the leap second occurs and remains set for 24 hours
 LeapsecondDirection = 1 &lt;&lt; 6, // Clear for add, set for delete</code></pre>
-<h3 id="data-point-data-quality-flags---move-to-appendix-1">Data Point Data Quality Flags - Move to appendix</h3>
+<h3 id="data-point-data-quality-flags---move-to-appendix">Data Point Data Quality Flags - Move to appendix</h3>
 <p>A set of data quality flags are defined for STTP data point values in the <code>DataQualityFlags</code> enumeration, defined as follows:</p>
 <pre><code class="C language-C">enum {
   Normal = 0,                 // Defines normal state
