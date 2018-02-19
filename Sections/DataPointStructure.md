@@ -8,11 +8,14 @@ struct {
   SttpValue id;            // A point Identifier.
   SttpValue timestamp;     // A timestamp, SttpTimestamp is highly recommended for this field but not required.
   SttpValue value;         // The single value that represents this Data Point.
-  uint64 quality;          // Unstructured quality bits. See another section for details on the acutal bits used.
+  uint64 quality;          // Unstructured quality bits. Quality bits use may be specified in template for standardization - See appendix F for examples.
   SttpValue ExtendedData;  // Additional data that can be sent if `value` is insufficient.
 }
 DataPoint;
 ```
+
+
+
 
 The actual number of `DataPoint` structures contained in the data point packet command depends the configured maximum payload size and the serialized size of the data point structures, see [Figure 6](#user-content-figure6).
 
@@ -25,19 +28,26 @@ The actual number of `DataPoint` structures contained in the data point packet c
 
 > :information_source: The maximum size of a `DataPoint` structure instance is unspecified, but controlled indirectly at the wire level protocol. With simple encoding techniques this size can be reduced down to a few bytes for most value types.
 
+
+### Runtime ID
+Runtime ID's are negotiated with the connection and are the default value type in the Data Point Structure.  The runtime ID is used to associate a group of communications under a single STTP connection.
+
+While the normal use case is to use RuntimeIDs, for systems that have an indefinite number of IDs, it's not practical to map every point to a Runtime ID. In this case, it's allowed to send the identifier with the measurement.
+
+If no runtime ID is used -1 should be sent
+
 ### Data Point Identifier
 
-When identifying a Data Point, one of 4 mechanics are encouraged to identify the source of the time series data.
-
+When identifying a Data Point, one of 4 mechanics are encouraged to identify the source of the time series data.   STTP expects a ID to be unique per data point.  Common ids include:
+ 
 * [Guid] - Some kind of integer based identifier.
 * [String] - This is commonly referred to as a tag in a time series databases.
 * [SttpMarkup] - Essentially this is a connection string that combines a set of unique identifiers.
 
-Runtime ID's are negotiated with the connection and are the default value type in the Data Point Structure.
+If using a template to standarize metadata the template may specify additional constraints on the ID.  See  [Appendix F - STTP Templates](Templates.md) for example templates
 
-While the normal use case is to use RuntimeIDs, for systems that have an indefinite number of IDs, it's not practical to map every point to a Runtime ID. In this case, it's allowed to send the identifier with the measurement.
 
-### Sttp Value Types
+### STTP Value Types
 
 The data types available to a `DataPoint` are described in the `ValueType` enumeration, defined below:
 
