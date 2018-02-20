@@ -758,7 +758,7 @@ p.avoid-page-break-inside {
 
 <p><a name="title-page"></a><br />
 <img src="https://raw.githubusercontent.com/sttp/Specification/master/Output/Images/sttp-logo-with-participants.png" alt="STTP" /></p>
-<p><strong>Version:</strong> 0.8.16 - February 13, 2018</p>
+<p><strong>Version:</strong> 0.8.17 - February 20, 2018</p>
 <p><strong>Status:</strong> First Draft Release</p>
 <p><strong>Abstract:</strong> This specification defines a <a href="https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern">publish-subscribe</a> data transfer protocol that has been optimized for exchanging streaming <a href="https://en.wikipedia.org/wiki/Time_series">time series</a> style data, such as <a href="https://en.wikipedia.org/wiki/Phasor_measurement_unit">synchrophasor</a> data that is used in the electric power industry, over <a href="https://en.wikipedia.org/wiki/Internet_Protocol">Internet Protocol</a> (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series <a href="https://en.wikipedia.org/wiki/Data_point">data points</a> at high speed, such as, hundreds of times per second per data point.</p>
 <p><br/><br />
@@ -1921,7 +1921,7 @@ RequestSucceeded;</code></pre>
   SttpValue id;            // A point Identifier.
   SttpValue timestamp;     // A timestamp, SttpTimestamp is highly recommended for this field but not required.
   SttpValue value;         // The single value that represents this Data Point.
-  uint64 quality;          // Unstructured quality bits. See another section for details on the acutal bits used.
+  uint64 quality;          // Unstructured quality bits. Quality bits use may be specified in template for standardization - See appendix F for examples.
   SttpValue ExtendedData;  // Additional data that can be sent if `value` is insufficient.
 }
 DataPoint;</code></pre>
@@ -1933,16 +1933,19 @@ DataPoint;</code></pre>
 <blockquote>
   <p><img src="https://github.global.ssl.fastly.net/images/icons/emoji/information_source.png?v5" alt=":information_source:" title=":information_source:" class="emoji-img emoji"> The maximum size of a <code>DataPoint</code> structure instance is unspecified, but controlled indirectly at the wire level protocol. With simple encoding techniques this size can be reduced down to a few bytes for most value types.</p>
 </blockquote>
+<h3 id="runtime-id">Runtime ID</h3>
+<p>Runtime ID's are negotiated with the connection and are the default value type in the Data Point Structure.  The runtime ID is used to associate a group of communications under a single STTP connection.</p>
+<p>While the normal use case is to use RuntimeIDs, for systems that have an indefinite number of IDs, it's not practical to map every point to a Runtime ID. In this case, it's allowed to send the identifier with the measurement.</p>
+<p>If no runtime ID is used -1 should be sent</p>
 <h3 id="data-point-identifier">Data Point Identifier</h3>
-<p>When identifying a Data Point, one of 4 mechanics are encouraged to identify the source of the time series data.</p>
+<p>When identifying a Data Point, one of 4 mechanics are encouraged to identify the source of the time series data.   STTP expects a ID to be unique per data point.  Common ids include:</p>
 <ul>
 <li>[Guid] - Some kind of integer based identifier.</li>
 <li>[String] - This is commonly referred to as a tag in a time series databases.</li>
 <li>[SttpMarkup] - Essentially this is a connection string that combines a set of unique identifiers.</li>
 </ul>
-<p>Runtime ID's are negotiated with the connection and are the default value type in the Data Point Structure.</p>
-<p>While the normal use case is to use RuntimeIDs, for systems that have an indefinite number of IDs, it's not practical to map every point to a Runtime ID. In this case, it's allowed to send the identifier with the measurement.</p>
-<h3 id="sttp-value-types">Sttp Value Types</h3>
+<p>If using a template to standarize metadata the template may specify additional constraints on the ID.  See  <a href="#appendix-F---tssc-algorithm">Appendix F - STTP Templates</a> for example templates</p>
+<h3 id="sttp-value-types">STTP Value Types</h3>
 <p>The data types available to a <code>DataPoint</code> are described in the <code>ValueType</code> enumeration, defined below:</p>
 <pre><code class="C language-C">enum {
   Null = 0,              // 0-bytes
@@ -2413,331 +2416,6 @@ and rules for how items can be converted to the desired type.  </p>
 <li>Conflict resolution</li>
 <li>Ownership control</li></ul></li>
 </ul>
-<h2 id="appendix-z---power-industry-examples-to-be-moved-later">Appendix Z - Power Industry Examples (To be moved later)</h2>
-<p>Here are some examples of metadata suitable for the electric power industry.</p>
-<h3 id="datapoint-table">DataPoint Table</h3>
-<p>A publisher might try the following DataPoint Table for the power industry.</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center;">Attribute Name</th>
-<th style="text-align:center;">Attribute Value Type</th>
-<th style="text-align:center;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center;">PointID</td>
-<td style="text-align:center;">Guid</td>
-<td style="text-align:center;">The GUID associated with the data point.</td>
-</tr>
-<tr>
-<td style="text-align:center;">PointTag</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">A string based unique identifier.</td>
-</tr>
-<tr>
-<td style="text-align:center;">Description</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">A description for this measurement</td>
-</tr>
-<tr>
-<td style="text-align:center;">ProducerTableName</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The name of the table within which the record for the resource that produced this data point resides.</td>
-</tr>
-<tr>
-<td style="text-align:center;">ProducerTableID</td>
-<td style="text-align:center;">Guid</td>
-<td style="text-align:center;">The primary key for the record within the Producer Table.</td>
-</tr>
-<tr>
-<td style="text-align:center;">SignalReference</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">A string based unique identifier</td>
-</tr>
-<tr>
-<td style="text-align:center;">SignalTypeID</td>
-<td style="text-align:center;">Integer</td>
-<td style="text-align:center;">A code describing the signal type</td>
-</tr>
-<tr>
-<td style="text-align:center;">Adder</td>
-<td style="text-align:center;">Float</td>
-<td style="text-align:center;">An adjustment factor</td>
-</tr>
-<tr>
-<td style="text-align:center;">Multiplier</td>
-<td style="text-align:center;">Float</td>
-<td style="text-align:center;">An adjustment factor</td>
-</tr>
-<tr>
-<td style="text-align:center;">Signal Type</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">Fixed set of signal types. I.E.: (STAT|FREQ|DFREQ|PM|PA|PR|PI|ANALOG|DIGITAL|CALC)</td>
-</tr>
-<tr>
-<td style="text-align:center;">Phase Designation</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The phase this field is computed from. Ex: A,B,C,0,+,-</td>
-</tr>
-<tr>
-<td style="text-align:center;">Engineering Units</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The base units of this field. (Ex: Volts, Amps, Watts)</td>
-</tr>
-<tr>
-<td style="text-align:center;">Engineering Scale</td>
-<td style="text-align:center;">Float</td>
-<td style="text-align:center;">The scaling factor of these units (Ex: 1, 1000, 1000,000)</td>
-</tr>
-<tr>
-<td style="text-align:center;">Channel Name</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">C37.118 Channel Name. For Digital types, an array of 16 elements are permitted. Array length shall be zero if this is not a C37.118 - derived data point.</td>
-</tr>
-<tr>
-<td style="text-align:center;">PositionIndex</td>
-<td style="text-align:center;">Integer</td>
-<td style="text-align:center;">C37.118 position index in a PMU frame. Zero for non-C37.118 data points.</td>
-</tr>
-</tbody>
-</table>
-<h3 id="pmu-table-a-resource-table-example">PMU Table (a Resource Table example)</h3>
-<table>
-<thead>
-<tr>
-<th style="text-align:center;">Attribute Name</th>
-<th style="text-align:center;">Attribute Value Type</th>
-<th style="text-align:center;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center;">ResourceID</td>
-<td style="text-align:center;">Guid</td>
-<td style="text-align:center;">The GUID associated with the resource.</td>
-</tr>
-<tr>
-<td style="text-align:center;">Acronym</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">A name of the device.</td>
-</tr>
-<tr>
-<td style="text-align:center;">Name</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">A friendly name of the device</td>
-</tr>
-<tr>
-<td style="text-align:center;">SubstationTableName</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The name of the table within which the record for the substation where this PMU resides.</td>
-</tr>
-<tr>
-<td style="text-align:center;">SubstationTableID</td>
-<td style="text-align:center;">Guid</td>
-<td style="text-align:center;">The primary key for the record within the substation table.</td>
-</tr>
-<tr>
-<td style="text-align:center;">CompanyTableName</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The name of the table within which the record for the company that owns this PMU.</td>
-</tr>
-<tr>
-<td style="text-align:center;">CompanyTableID</td>
-<td style="text-align:center;">Guid</td>
-<td style="text-align:center;">The primary key for the record within the company table.</td>
-</tr>
-<tr>
-<td style="text-align:center;">Protocol</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The protocol the device is communicating with</td>
-</tr>
-<tr>
-<td style="text-align:center;">FrameRate</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The sample rate</td>
-</tr>
-<tr>
-<td style="text-align:center;">FNOM</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">C37.118 Nominal Frequency</td>
-</tr>
-<tr>
-<td style="text-align:center;">IDCODE</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">C37.118 ID Code</td>
-</tr>
-<tr>
-<td style="text-align:center;">STN</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">C37.118 Station Name</td>
-</tr>
-<tr>
-<td style="text-align:center;">Nominal Voltage</td>
-<td style="text-align:center;">Float</td>
-<td style="text-align:center;">The factor required to convert this voltage to a per unit base.</td>
-</tr>
-<tr>
-<td style="text-align:center;">CT Ratio</td>
-<td style="text-align:center;">Float</td>
-<td style="text-align:center;">The ratio of a connected CT</td>
-</tr>
-<tr>
-<td style="text-align:center;">Rated MVA</td>
-<td style="text-align:center;">Float</td>
-<td style="text-align:center;">The nominal rating of this device</td>
-</tr>
-<tr>
-<td style="text-align:center;">Vendor</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The vendor of this device</td>
-</tr>
-<tr>
-<td style="text-align:center;">Model</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The model number of this device</td>
-</tr>
-<tr>
-<td style="text-align:center;">Equipment Type</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The type of equipment this device is monitoring (Ex: Line, Transformer)</td>
-</tr>
-<tr>
-<td style="text-align:center;">Serial Number</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">Serial numbers or other identifying information about this equipment)</td>
-</tr>
-<tr>
-<td style="text-align:center;">In Service Date</td>
-<td style="text-align:center;">Date</td>
-<td style="text-align:center;">The date this device was put in service</td>
-</tr>
-<tr>
-<td style="text-align:center;">Out Service Date</td>
-<td style="text-align:center;">Date</td>
-<td style="text-align:center;">The date this device was removed from service</td>
-</tr>
-</tbody>
-</table>
-<h3 id="substation-table-a-resource-table-example">Substation Table (a Resource Table example)</h3>
-<table>
-<thead>
-<tr>
-<th style="text-align:center;">Attribute Name</th>
-<th style="text-align:center;">Attribute Value Type</th>
-<th style="text-align:center;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center;">ResourceID</td>
-<td style="text-align:center;">Guid</td>
-<td style="text-align:center;">The GUID associated with the resource.</td>
-</tr>
-<tr>
-<td style="text-align:center;">Name</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">A friendly name of the substation.</td>
-</tr>
-<tr>
-<td style="text-align:center;">Latitude</td>
-<td style="text-align:center;">Float</td>
-<td style="text-align:center;">The latitude of the substation.</td>
-</tr>
-<tr>
-<td style="text-align:center;">Longitude</td>
-<td style="text-align:center;">Float</td>
-<td style="text-align:center;">The location of the substation.</td>
-</tr>
-<tr>
-<td style="text-align:center;">TimeZone</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The time zone for the substation.</td>
-</tr>
-</tbody>
-</table>
-<h3 id="phasor-table-a-cdsm-table-example">Phasor Table (a CDSM Table example)</h3>
-<p>The existence of this CDSM Table presumes the existence of a 'built-in' CDSM called 'Phasor'. For this example, assume that the Phasor CDSM is comprised of two fields: Magnitude (float) and Angle (float).</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center;">Attribute Name</th>
-<th style="text-align:center;">Attribute Value Type</th>
-<th style="text-align:center;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center;">CDSMID</td>
-<td style="text-align:center;">Guid</td>
-<td style="text-align:center;">The GUID associated with an entry in the Phasor CDSM.</td>
-</tr>
-<tr>
-<td style="text-align:center;">CDSMTag</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">A string based unique identifier for the Phasor.</td>
-</tr>
-<tr>
-<td style="text-align:center;">Description</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">A description for this phasor, e.g. 'Smith Substation North Bus Voltage'.</td>
-</tr>
-<tr>
-<td style="text-align:center;">IsCurrent</td>
-<td style="text-align:center;">Bit</td>
-<td style="text-align:center;">Set if this is a current phasor.</td>
-</tr>
-<tr>
-<td style="text-align:center;">VoltAssociation</td>
-<td style="text-align:center;">Guid</td>
-<td style="text-align:center;">The ID of the voltage phasor used to compute power. Ignore if IsCurrent is reset.</td>
-</tr>
-<tr>
-<td style="text-align:center;">AlternateVolt</td>
-<td style="text-align:center;">Guid</td>
-<td style="text-align:center;">An alternate voltage phasor, used when the primary voltage is unavailable. Ignore if IsCurrent is reset.</td>
-</tr>
-<tr>
-<td style="text-align:center;">LineTableName</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">The name of the table within which the record for the line associated with this current phasor resides. Ignore if IsCurrent is reset.</td>
-</tr>
-<tr>
-<td style="text-align:center;">LineTableID</td>
-<td style="text-align:center;">Guid</td>
-<td style="text-align:center;">The primary key for the record within the line table. Ignore if IsCurrent is reset.</td>
-</tr>
-</tbody>
-</table>
-<h3 id="vipair-table-a-cdsm-example">VIPair Table (a CDSM example)</h3>
-<p>The existence of this CDSM Table presumes the existence of a CDSM, 'built-in' or 'user-defined', called 'VIPair'. For this example, assume that the VIPair CDSM is comprised of two fields: Voltage (Phasor CDSM) and Current (Phasor CDSM).</p>
-<table>
-<thead>
-<tr>
-<th style="text-align:center;">Attribute Name</th>
-<th style="text-align:center;">Attribute Value Type</th>
-<th style="text-align:center;">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center;">CDSMID</td>
-<td style="text-align:center;">Guid</td>
-<td style="text-align:center;">The GUID associated with an entry in the VIPair CDSM.</td>
-</tr>
-<tr>
-<td style="text-align:center;">CDSMTag</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">A string based unique identifier for the VIPair.</td>
-</tr>
-<tr>
-<td style="text-align:center;">Description</td>
-<td style="text-align:center;">String</td>
-<td style="text-align:center;">A description for this VIPair, e.g. 'Smith-Jones Line'.</td>
-</tr>
-</tbody>
-</table>
 <h2 id="compression">Compression</h2>
 <p>Compression algorithms used with STTP can be either stateful, i.e., the compressor maintains its state through all compressed records, or stateless, i.e., the compressor compresses each data packet independently.</p>
 <p>Stateful compression algorithms provide the best possible compression for STTP data transmission but require use of a reliable transport protocol, e.g., TCP. Stateless compression methods are required when a lossy transport protocol is being used for data transmission, e.g., UDP.</p>
@@ -3427,8 +3105,330 @@ Publisher will likely want to validate size of historical requests, or least thr
 <h3 id="overview-1">Overview</h3>
 <p>The base STTP protocol can be used for any type of time series data.  However, if every implementation of STTP is unique then sharing metadata in an automated fashion will be unique for each implementation.    In order to assist in standardization of the grouping of data and streamlining the structure of the metadata templates are defined.</p>
 <p>A template is a schema that defines how the base metadata will be organized and how the data structure should be sent. Since the STTP was initially designed to support synchrophasor data included below is a conversations about the elements of the PMU template   </p>
-<h3 id="pmu-template">PMU Template</h3>
-<p>todo - define Templates</p>
+<p>Here are some examples of metadata suitable for the electric power industry.</p>
+<h3 id="datapoint-table">DataPoint Table</h3>
+<p>A publisher might try the following DataPoint Table for the power industry.</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">Attribute Name</th>
+<th style="text-align:center;">Attribute Value Type</th>
+<th style="text-align:center;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">PointID</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The GUID associated with the data point.</td>
+</tr>
+<tr>
+<td style="text-align:center;">PointTag</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A string based unique identifier.</td>
+</tr>
+<tr>
+<td style="text-align:center;">Description</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A description for this measurement</td>
+</tr>
+<tr>
+<td style="text-align:center;">ProducerTableName</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The name of the table within which the record for the resource that produced this data point resides.</td>
+</tr>
+<tr>
+<td style="text-align:center;">ProducerTableID</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The primary key for the record within the Producer Table.</td>
+</tr>
+<tr>
+<td style="text-align:center;">SignalReference</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A string based unique identifier</td>
+</tr>
+<tr>
+<td style="text-align:center;">SignalTypeID</td>
+<td style="text-align:center;">Integer</td>
+<td style="text-align:center;">A code describing the signal type</td>
+</tr>
+<tr>
+<td style="text-align:center;">Adder</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">An adjustment factor</td>
+</tr>
+<tr>
+<td style="text-align:center;">Multiplier</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">An adjustment factor</td>
+</tr>
+<tr>
+<td style="text-align:center;">Signal Type</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">Fixed set of signal types. I.E.: (STAT|FREQ|DFREQ|PM|PA|PR|PI|ANALOG|DIGITAL|CALC)</td>
+</tr>
+<tr>
+<td style="text-align:center;">Phase Designation</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The phase this field is computed from. Ex: A,B,C,0,+,-</td>
+</tr>
+<tr>
+<td style="text-align:center;">Engineering Units</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The base units of this field. (Ex: Volts, Amps, Watts)</td>
+</tr>
+<tr>
+<td style="text-align:center;">Engineering Scale</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">The scaling factor of these units (Ex: 1, 1000, 1000,000)</td>
+</tr>
+<tr>
+<td style="text-align:center;">Channel Name</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">C37.118 Channel Name. For Digital types, an array of 16 elements are permitted. Array length shall be zero if this is not a C37.118 - derived data point.</td>
+</tr>
+<tr>
+<td style="text-align:center;">PositionIndex</td>
+<td style="text-align:center;">Integer</td>
+<td style="text-align:center;">C37.118 position index in a PMU frame. Zero for non-C37.118 data points.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pmu-table-a-resource-table-example">PMU Table (a Resource Table example)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">Attribute Name</th>
+<th style="text-align:center;">Attribute Value Type</th>
+<th style="text-align:center;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">ResourceID</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The GUID associated with the resource.</td>
+</tr>
+<tr>
+<td style="text-align:center;">Acronym</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A name of the device.</td>
+</tr>
+<tr>
+<td style="text-align:center;">Name</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A friendly name of the device</td>
+</tr>
+<tr>
+<td style="text-align:center;">SubstationTableName</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The name of the table within which the record for the substation where this PMU resides.</td>
+</tr>
+<tr>
+<td style="text-align:center;">SubstationTableID</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The primary key for the record within the substation table.</td>
+</tr>
+<tr>
+<td style="text-align:center;">CompanyTableName</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The name of the table within which the record for the company that owns this PMU.</td>
+</tr>
+<tr>
+<td style="text-align:center;">CompanyTableID</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The primary key for the record within the company table.</td>
+</tr>
+<tr>
+<td style="text-align:center;">Protocol</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The protocol the device is communicating with</td>
+</tr>
+<tr>
+<td style="text-align:center;">FrameRate</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The sample rate</td>
+</tr>
+<tr>
+<td style="text-align:center;">FNOM</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">C37.118 Nominal Frequency</td>
+</tr>
+<tr>
+<td style="text-align:center;">IDCODE</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">C37.118 ID Code</td>
+</tr>
+<tr>
+<td style="text-align:center;">STN</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">C37.118 Station Name</td>
+</tr>
+<tr>
+<td style="text-align:center;">Nominal Voltage</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">The factor required to convert this voltage to a per unit base.</td>
+</tr>
+<tr>
+<td style="text-align:center;">CT Ratio</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">The ratio of a connected CT</td>
+</tr>
+<tr>
+<td style="text-align:center;">Rated MVA</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">The nominal rating of this device</td>
+</tr>
+<tr>
+<td style="text-align:center;">Vendor</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The vendor of this device</td>
+</tr>
+<tr>
+<td style="text-align:center;">Model</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The model number of this device</td>
+</tr>
+<tr>
+<td style="text-align:center;">Equipment Type</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The type of equipment this device is monitoring (Ex: Line, Transformer)</td>
+</tr>
+<tr>
+<td style="text-align:center;">Serial Number</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">Serial numbers or other identifying information about this equipment)</td>
+</tr>
+<tr>
+<td style="text-align:center;">In Service Date</td>
+<td style="text-align:center;">Date</td>
+<td style="text-align:center;">The date this device was put in service</td>
+</tr>
+<tr>
+<td style="text-align:center;">Out Service Date</td>
+<td style="text-align:center;">Date</td>
+<td style="text-align:center;">The date this device was removed from service</td>
+</tr>
+</tbody>
+</table>
+<h3 id="substation-table-a-resource-table-example">Substation Table (a Resource Table example)</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">Attribute Name</th>
+<th style="text-align:center;">Attribute Value Type</th>
+<th style="text-align:center;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">ResourceID</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The GUID associated with the resource.</td>
+</tr>
+<tr>
+<td style="text-align:center;">Name</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A friendly name of the substation.</td>
+</tr>
+<tr>
+<td style="text-align:center;">Latitude</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">The latitude of the substation.</td>
+</tr>
+<tr>
+<td style="text-align:center;">Longitude</td>
+<td style="text-align:center;">Float</td>
+<td style="text-align:center;">The location of the substation.</td>
+</tr>
+<tr>
+<td style="text-align:center;">TimeZone</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The time zone for the substation.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="phasor-table-a-cdsm-table-example">Phasor Table (a CDSM Table example)</h3>
+<p>The existence of this CDSM Table presumes the existence of a 'built-in' CDSM called 'Phasor'. For this example, assume that the Phasor CDSM is comprised of two fields: Magnitude (float) and Angle (float).</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">Attribute Name</th>
+<th style="text-align:center;">Attribute Value Type</th>
+<th style="text-align:center;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">CDSMID</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The GUID associated with an entry in the Phasor CDSM.</td>
+</tr>
+<tr>
+<td style="text-align:center;">CDSMTag</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A string based unique identifier for the Phasor.</td>
+</tr>
+<tr>
+<td style="text-align:center;">Description</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A description for this phasor, e.g. 'Smith Substation North Bus Voltage'.</td>
+</tr>
+<tr>
+<td style="text-align:center;">IsCurrent</td>
+<td style="text-align:center;">Bit</td>
+<td style="text-align:center;">Set if this is a current phasor.</td>
+</tr>
+<tr>
+<td style="text-align:center;">VoltAssociation</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The ID of the voltage phasor used to compute power. Ignore if IsCurrent is reset.</td>
+</tr>
+<tr>
+<td style="text-align:center;">AlternateVolt</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">An alternate voltage phasor, used when the primary voltage is unavailable. Ignore if IsCurrent is reset.</td>
+</tr>
+<tr>
+<td style="text-align:center;">LineTableName</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">The name of the table within which the record for the line associated with this current phasor resides. Ignore if IsCurrent is reset.</td>
+</tr>
+<tr>
+<td style="text-align:center;">LineTableID</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The primary key for the record within the line table. Ignore if IsCurrent is reset.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="vipair-table-a-cdsm-example">VIPair Table (a CDSM example)</h3>
+<p>The existence of this CDSM Table presumes the existence of a CDSM, 'built-in' or 'user-defined', called 'VIPair'. For this example, assume that the VIPair CDSM is comprised of two fields: Voltage (Phasor CDSM) and Current (Phasor CDSM).</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">Attribute Name</th>
+<th style="text-align:center;">Attribute Value Type</th>
+<th style="text-align:center;">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">CDSMID</td>
+<td style="text-align:center;">Guid</td>
+<td style="text-align:center;">The GUID associated with an entry in the VIPair CDSM.</td>
+</tr>
+<tr>
+<td style="text-align:center;">CDSMTag</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A string based unique identifier for the VIPair.</td>
+</tr>
+<tr>
+<td style="text-align:center;">Description</td>
+<td style="text-align:center;">String</td>
+<td style="text-align:center;">A description for this VIPair, e.g. 'Smith-Jones Line'.</td>
+</tr>
+</tbody>
+</table>
 <h3 id="data-point-time-quality-flags---move-to-appendix">Data Point Time Quality Flags - Move to appendix</h3>
 <p>Data points can also include a <code>TimeQualityFlags</code> structure in the serialized state data, defined below, that describes both the timestamp quality, defined with the <code>TimeQuality</code> enumeration value, as well as an indication of if a timestamp was not measured with an accurate time source.</p>
 <p>The time quality detail is included for devices that have access to a GPS or UTC time synchronization source, e.g., from an IRIG timecode signal. For timestamps that are acquired without an accurate time source, e.g., using the local system clock, the <code>TimeQuality</code> value should be set to <code>Locked</code> and the <code>TimeQualityFlags.NoAccurateTimeSource</code> should be set.</p>

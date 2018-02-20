@@ -26,8 +26,9 @@
 | [Command Details (3)](Commands.md#command-details) | [Commands.md](Commands.md) |
 | [Responses (3)](Responses.md#responses) | [Responses.md](Responses.md) |
 | [Data Point Structure (2)](DataPointStructure.md#data-point-structure) | [DataPointStructure.md](DataPointStructure.md) |
+| [Runtime ID (3)](DataPointStructure.md#runtime-id) | [DataPointStructure.md](DataPointStructure.md) |
 | [Data Point Identifier (3)](DataPointStructure.md#data-point-identifier) | [DataPointStructure.md](DataPointStructure.md) |
-| [Sttp Value Types (3)](DataPointStructure.md#sttp-value-types) | [DataPointStructure.md](DataPointStructure.md) |
+| [STTP Value Types (3)](DataPointStructure.md#sttp-value-types) | [DataPointStructure.md](DataPointStructure.md) |
 | [Encoding Methods (3)](DataPointStructure.md#encoding-methods) | [DataPointStructure.md](DataPointStructure.md) |
 | [Data Point Encoding Types (2)](DataPointEncodingTypes.md#data-point-encoding-types) | [DataPointEncodingTypes.md](DataPointEncodingTypes.md) |
 | [Basic Encoding (3)](DataPointEncodingTypes.md#basic-encoding) | [DataPointEncodingTypes.md](DataPointEncodingTypes.md) |
@@ -49,12 +50,6 @@
 | [Dataset Filtering (3)](Metadata.md#dataset-filtering) | [Metadata.md](Metadata.md) |
 | [Dataset Versioning (3)](Metadata.md#dataset-versioning) | [Metadata.md](Metadata.md) |
 | [Dataset Serialization (3)](Metadata.md#dataset-serialization) | [Metadata.md](Metadata.md) |
-| [Appendix Z - Power Industry Examples (To be moved later) (2)](Metadata.md#appendix-z---power-industry-examples-to-be-moved-later) | [Metadata.md](Metadata.md) |
-| [DataPoint Table (3)](Metadata.md#datapoint-table) | [Metadata.md](Metadata.md) |
-| [PMU Table (a Resource Table example) (3)](Metadata.md#pmu-table-a-resource-table-example) | [Metadata.md](Metadata.md) |
-| [Substation Table (a Resource Table example) (3)](Metadata.md#substation-table-a-resource-table-example) | [Metadata.md](Metadata.md) |
-| [Phasor Table (a CDSM Table example) (3)](Metadata.md#phasor-table-a-cdsm-table-example) | [Metadata.md](Metadata.md) |
-| [VIPair Table (a CDSM example) (3)](Metadata.md#vipair-table-a-cdsm-example) | [Metadata.md](Metadata.md) |
 | [Compression (2)](Compression.md#compression) | [Compression.md](Compression.md) |
 | [Compression Algorithms (3)](Compression.md#compression-algorithms) | [Compression.md](Compression.md) |
 | [Security (2)](Security.md#security) | [Security.md](Security.md) |
@@ -86,6 +81,10 @@
 | [Data Point Metadata (3)](TSSCAlgorithm.md#data-point-metadata) | [TSSCAlgorithm.md](TSSCAlgorithm.md) |
 | [Appendix F - STTP Templates (2)](Templates.md#appendix-f---sttp-templates) | [Templates.md](Templates.md) |
 | [Overview (3)](Templates.md#overview) | [Templates.md](Templates.md) |
-| [PMU Template (3)](Templates.md#pmu-template) | [Templates.md](Templates.md) |
+| [DataPoint Table (3)](Templates.md#datapoint-table) | [Templates.md](Templates.md) |
+| [PMU Table (a Resource Table example) (3)](Templates.md#pmu-table-a-resource-table-example) | [Templates.md](Templates.md) |
+| [Substation Table (a Resource Table example) (3)](Templates.md#substation-table-a-resource-table-example) | [Templates.md](Templates.md) |
+| [Phasor Table (a CDSM Table example) (3)](Templates.md#phasor-table-a-cdsm-table-example) | [Templates.md](Templates.md) |
+| [VIPair Table (a CDSM example) (3)](Templates.md#vipair-table-a-cdsm-example) | [Templates.md](Templates.md) |
 | [Data Point Time Quality Flags - Move to appendix (3)](Templates.md#data-point-time-quality-flags---move-to-appendix) | [Templates.md](Templates.md) |
 | [Data Point Data Quality Flags - Move to appendix (3)](Templates.md#data-point-data-quality-flags---move-to-appendix) | [Templates.md](Templates.md) |
