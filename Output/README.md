@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.8.17 - February 20, 2018
+**Version:** 0.8.18 - February 21, 2018
 
 **Status:** First Draft Release
 
@@ -97,7 +97,7 @@ While the format and structure of this document, established to facilitate colla
 
   Streaming Telemetry Transport Protocol (STTP) looks to advance the work started by designers and users of 37.118 and other protocols and expand the tools available to use synchrophasor data at production scale.
 
-  At the conclusion of the Advanced Synchrophasor Protocol (ASP) project in April 2019, Streaming Telemetry Transport Protocol (STTP) will be a well-tested, thoroughly vetted, production-grade protocol, supported by open source applications as well as commercial software from vendors participating in the project.  An open source tool suite for STTP will also be developed as part of the project (see [Appendix B](#appendix-b---sttp-api-reference)) that will include a test harness that will allow future users to test and validate STTP in their systems and API's.
+  At the conclusion of the Advanced Synchrophasor Protocol (ASP) project in April 2019, Streaming Telemetry Transport Protocol (STTP) will be a well-tested, thoroughly vetted, production-grade protocol, supported by open source applications as well as commercial software from vendors participating in the project.  An open source tool suite for STTP will also be developed as part of the project (see [Appendix B](#appendix-b---sttp-api-reference)) that will include a test harness that will allow future users to test and validate STTP in their systems and API's.  
 
 
 ## Business case
