@@ -6,7 +6,7 @@
   [05e3d650]: https://en.wikipedia.org/wiki/Datagram_Congestion_Control_Protocol "DCCP"
   [a387eef1]: https://en.wikipedia.org/wiki/Reliable_User_Datagram_Protocol "RUDP"
   [cf5b8463]: https://en.wikipedia.org/wiki/Internet_Protocol "IP"
-  [34be026c]: http://www.nerc.com/pa/RAPA/Pages/BES.aspx "BES
+  [34be026c]: http://www.nerc.com/pa/RAPA/Pages/BES.aspx "BES"
   [1e02e501]: https://en.wikipedia.org/wiki/Wide_area_network "WAN"
   [20b65317]: https://en.wikipedia.org/wiki/Common_Information_Model_(electricity) "CIM"
   [864cf384]: https://en.wikipedia.org/wiki/ZeroMQ "ZeroMQ"
