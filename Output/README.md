@@ -1,7 +1,7 @@
 <a name="title-page"></a>
 ![STTP](Images/sttp-logo-with-participants.png)
 
-**Version:** 0.8.16 - February 13, 2018
+**Version:** 0.8.18 - February 21, 2018
 
 **Status:** First Draft Release
 
@@ -97,7 +97,7 @@ While the format and structure of this document, established to facilitate colla
 
   Streaming Telemetry Transport Protocol (STTP) looks to advance the work started by designers and users of 37.118 and other protocols and expand the tools available to use synchrophasor data at production scale.
 
-  At the conclusion of the Advanced Synchrophasor Protocol (ASP) project in April 2019, Streaming Telemetry Transport Protocol (STTP) will be a well-tested, thoroughly vetted, production-grade protocol, supported by open source applications as well as commercial software from vendors participating in the project.  An open source tool suite for STTP will also be developed as part of the project (see [Appendix B](#appendix-b---sttp-api-reference)) that will include a test harness that will allow future users to test and validate STTP in their systems and API's.
+  At the conclusion of the Advanced Synchrophasor Protocol (ASP) project in April 2019, Streaming Telemetry Transport Protocol (STTP) will be a well-tested, thoroughly vetted, production-grade protocol, supported by open source applications as well as commercial software from vendors participating in the project.  An open source tool suite for STTP will also be developed as part of the project (see [Appendix B](#appendix-b---sttp-api-reference)) that will include a test harness that will allow future users to test and validate STTP in their systems and API's.  
 
 
 ## Business case
@@ -1168,11 +1168,14 @@ struct {
   SttpValue id;            // A point Identifier.
   SttpValue timestamp;     // A timestamp, SttpTimestamp is highly recommended for this field but not required.
   SttpValue value;         // The single value that represents this Data Point.
-  uint64 quality;          // Unstructured quality bits. See another section for details on the acutal bits used.
+  uint64 quality;          // Unstructured quality bits. Quality bits use may be specified in template for standardization - See appendix F for examples.
   SttpValue ExtendedData;  // Additional data that can be sent if `value` is insufficient.
 }
 DataPoint;
 ```
+
+
+
 
 The actual number of `DataPoint` structures contained in the data point packet command depends the configured maximum payload size and the serialized size of the data point structures, see [Figure 6](#user-content-figure6).
 
@@ -1185,19 +1188,26 @@ The actual number of `DataPoint` structures contained in the data point packet c
 
 > :information_source: The maximum size of a `DataPoint` structure instance is unspecified, but controlled indirectly at the wire level protocol. With simple encoding techniques this size can be reduced down to a few bytes for most value types.
 
+
+### Runtime ID
+Runtime ID's are negotiated with the connection and are the default value type in the Data Point Structure.  The runtime ID is used to associate a group of communications under a single STTP connection.
+
+While the normal use case is to use RuntimeIDs, for systems that have an indefinite number of IDs, it's not practical to map every point to a Runtime ID. In this case, it's allowed to send the identifier with the measurement.
+
+If no runtime ID is used -1 should be sent
+
 ### Data Point Identifier
 
-When identifying a Data Point, one of 4 mechanics are encouraged to identify the source of the time series data.
+When identifying a Data Point, one of 4 mechanics are encouraged to identify the source of the time series data.   STTP expects a ID to be unique per data point.  Common ids include:
 
 * [Guid] - Some kind of integer based identifier.
 * [String] - This is commonly referred to as a tag in a time series databases.
 * [SttpMarkup] - Essentially this is a connection string that combines a set of unique identifiers.
 
-Runtime ID's are negotiated with the connection and are the default value type in the Data Point Structure.
+If using a template to standarize metadata the template may specify additional constraints on the ID.  See  [Appendix F - STTP Templates](#appendix-F---tssc-algorithm) for example templates
 
-While the normal use case is to use RuntimeIDs, for systems that have an indefinite number of IDs, it's not practical to map every point to a Runtime ID. In this case, it's allowed to send the identifier with the measurement.
 
-### Sttp Value Types
+### STTP Value Types
 
 The data types available to a `DataPoint` are described in the `ValueType` enumeration, defined below:
 
@@ -1657,93 +1667,6 @@ Note: These may end up being client side filters to simplify the wireline protoc
   * Merging considerations
   * Conflict resolution
   * Ownership control
-
-## Appendix Z - Power Industry Examples (To be moved later)
-
-Here are some examples of metadata suitable for the electric power industry.
-
-### DataPoint Table
-
-A publisher might try the following DataPoint Table for the power industry.
-
-| Attribute Name   | Attribute Value Type | Description |
-|:----------------:|:--------------------:|:-----------:|
-| PointID          | Guid    | The GUID associated with the data point. |
-| PointTag         | String  | A string based unique identifier. |
-| Description      | String  | A description for this measurement |
-| ProducerTableName| String  | The name of the table within which the record for the resource that produced this data point resides. |
-| ProducerTableID  | Guid    | The primary key for the record within the Producer Table. |
-| SignalReference  | String  | A string based unique identifier |
-| SignalTypeID     | Integer | A code describing the signal type |
-| Adder            | Float   | An adjustment factor |
-| Multiplier       | Float   | An adjustment factor |
-| Signal Type      | String  | Fixed set of signal types. I.E.: (STAT\|FREQ\|DFREQ\|PM\|PA\|PR\|PI\|ANALOG\|DIGITAL\|CALC) |
-| Phase Designation| String  | The phase this field is computed from. Ex: A,B,C,0,+,-
-| Engineering Units| String  | The base units of this field. (Ex: Volts, Amps, Watts)
-| Engineering Scale| Float   | The scaling factor of these units (Ex: 1, 1000, 1000,000)
-| Channel Name     | String  | C37.118 Channel Name. For Digital types, an array of 16 elements are permitted. Array length shall be zero if this is not a C37.118 - derived data point.|
-| PositionIndex    | Integer | C37.118 position index in a PMU frame. Zero for non-C37.118 data points. |
-
-### PMU Table (a Resource Table example)
-
-| Attribute Name  | Attribute Value Type | Description |
-|:--------------: |:--------------------:|:-----------:|
-| ResourceID      | Guid   | The GUID associated with the resource. |
-| Acronym         | String | A name of the device. |
-| Name            | String | A friendly name of the device |
-| SubstationTableName| String | The name of the table within which the record for the substation where this PMU resides. |
-| SubstationTableID  | Guid    | The primary key for the record within the substation table. |
-| CompanyTableName| String | The name of the table within which the record for the company that owns this PMU. |
-| CompanyTableID  | Guid   | The primary key for the record within the company table. |
-| Protocol        | String | The protocol the device is communicating with |
-| FrameRate       | String | The sample rate |
-| FNOM            | String | C37.118 Nominal Frequency |
-| IDCODE          | String | C37.118 ID Code |
-| STN             | String | C37.118 Station Name |
-| Nominal Voltage | Float  | The factor required to convert this voltage to a per unit base. |
-| CT Ratio        | Float  | The ratio of a connected CT |
-| Rated MVA       | Float  | The nominal rating of this device |
-| Vendor          | String | The vendor of this device |
-| Model           | String | The model number of this device |
-| Equipment Type  | String | The type of equipment this device is monitoring (Ex: Line, Transformer) |
-| Serial Number   | String | Serial numbers or other identifying information about this equipment) |
-| In Service Date | Date   | The date this device was put in service |
-| Out Service Date| Date   | The date this device was removed from service |
-
-### Substation Table (a Resource Table example)
-
-| Attribute Name  | Attribute Value Type | Description |
-|:--------------: |:--------------------:|:-----------:|
-| ResourceID      | Guid   | The GUID associated with the resource. |
-| Name            | String | A friendly name of the substation. |
-| Latitude        | Float  | The latitude of the substation. |
-| Longitude       | Float  | The location of the substation. |
-| TimeZone        | String | The time zone for the substation. |
-
-### Phasor Table (a CDSM Table example)
-
-The existence of this CDSM Table presumes the existence of a 'built-in' CDSM called 'Phasor'. For this example, assume that the Phasor CDSM is comprised of two fields: Magnitude (float) and Angle (float).
-
-| Attribute Name   | Attribute Value Type | Description |
-|:----------------:|:--------------------:|:-----------:|
-| CDSMID           | Guid   | The GUID associated with an entry in the Phasor CDSM. |
-| CDSMTag          | String | A string based unique identifier for the Phasor. |
-| Description      | String | A description for this phasor, e.g. 'Smith Substation North Bus Voltage'. |
-| IsCurrent        | Bit    | Set if this is a current phasor. |
-| VoltAssociation  | Guid   | The ID of the voltage phasor used to compute power. Ignore if IsCurrent is reset. |
-| AlternateVolt    | Guid   | An alternate voltage phasor, used when the primary voltage is unavailable. Ignore if IsCurrent is reset. |
-| LineTableName    | String | The name of the table within which the record for the line associated with this current phasor resides. Ignore if IsCurrent is reset. |
-| LineTableID      | Guid    | The primary key for the record within the line table. Ignore if IsCurrent is reset. |
-
-### VIPair Table (a CDSM example)
-
-The existence of this CDSM Table presumes the existence of a CDSM, 'built-in' or 'user-defined', called 'VIPair'. For this example, assume that the VIPair CDSM is comprised of two fields: Voltage (Phasor CDSM) and Current (Phasor CDSM).
-
-| Attribute Name   | Attribute Value Type | Description |
-|:----------------:|:--------------------:|:-----------:|
-| CDSMID           | Guid   | The GUID associated with an entry in the VIPair CDSM. |
-| CDSMTag          | String | A string based unique identifier for the VIPair. |
-| Description      | String | A description for this VIPair, e.g. 'Smith-Jones Line'. |
 
 ## Compression
 
@@ -2565,9 +2488,93 @@ A template is a schema that defines how the base metadata will be organized and 
 
 
 
-### PMU Template
 
-todo - define Templates
+
+Here are some examples of metadata suitable for the electric power industry.
+
+### DataPoint Table
+
+A publisher might try the following DataPoint Table for the power industry.
+
+| Attribute Name   | Attribute Value Type | Description |
+|:----------------:|:--------------------:|:-----------:|
+| PointID          | Guid    | The GUID associated with the data point. |
+| PointTag         | String  | A string based unique identifier. |
+| Description      | String  | A description for this measurement |
+| ProducerTableName| String  | The name of the table within which the record for the resource that produced this data point resides. |
+| ProducerTableID  | Guid    | The primary key for the record within the Producer Table. |
+| SignalReference  | String  | A string based unique identifier |
+| SignalTypeID     | Integer | A code describing the signal type |
+| Adder            | Float   | An adjustment factor |
+| Multiplier       | Float   | An adjustment factor |
+| Signal Type      | String  | Fixed set of signal types. I.E.: (STAT\|FREQ\|DFREQ\|PM\|PA\|PR\|PI\|ANALOG\|DIGITAL\|CALC) |
+| Phase Designation| String  | The phase this field is computed from. Ex: A,B,C,0,+,-
+| Engineering Units| String  | The base units of this field. (Ex: Volts, Amps, Watts)
+| Engineering Scale| Float   | The scaling factor of these units (Ex: 1, 1000, 1000,000)
+| Channel Name     | String  | C37.118 Channel Name. For Digital types, an array of 16 elements are permitted. Array length shall be zero if this is not a C37.118 - derived data point.|
+| PositionIndex    | Integer | C37.118 position index in a PMU frame. Zero for non-C37.118 data points. |
+
+### PMU Table (a Resource Table example)
+
+| Attribute Name  | Attribute Value Type | Description |
+|:--------------: |:--------------------:|:-----------:|
+| ResourceID      | Guid   | The GUID associated with the resource. |
+| Acronym         | String | A name of the device. |
+| Name            | String | A friendly name of the device |
+| SubstationTableName| String | The name of the table within which the record for the substation where this PMU resides. |
+| SubstationTableID  | Guid    | The primary key for the record within the substation table. |
+| CompanyTableName| String | The name of the table within which the record for the company that owns this PMU. |
+| CompanyTableID  | Guid   | The primary key for the record within the company table. |
+| Protocol        | String | The protocol the device is communicating with |
+| FrameRate       | String | The sample rate |
+| FNOM            | String | C37.118 Nominal Frequency |
+| IDCODE          | String | C37.118 ID Code |
+| STN             | String | C37.118 Station Name |
+| Nominal Voltage | Float  | The factor required to convert this voltage to a per unit base. |
+| CT Ratio        | Float  | The ratio of a connected CT |
+| Rated MVA       | Float  | The nominal rating of this device |
+| Vendor          | String | The vendor of this device |
+| Model           | String | The model number of this device |
+| Equipment Type  | String | The type of equipment this device is monitoring (Ex: Line, Transformer) |
+| Serial Number   | String | Serial numbers or other identifying information about this equipment) |
+| In Service Date | Date   | The date this device was put in service |
+| Out Service Date| Date   | The date this device was removed from service |
+
+### Substation Table (a Resource Table example)
+
+| Attribute Name  | Attribute Value Type | Description |
+|:--------------: |:--------------------:|:-----------:|
+| ResourceID      | Guid   | The GUID associated with the resource. |
+| Name            | String | A friendly name of the substation. |
+| Latitude        | Float  | The latitude of the substation. |
+| Longitude       | Float  | The location of the substation. |
+| TimeZone        | String | The time zone for the substation. |
+
+### Phasor Table (a CDSM Table example)
+
+The existence of this CDSM Table presumes the existence of a 'built-in' CDSM called 'Phasor'. For this example, assume that the Phasor CDSM is comprised of two fields: Magnitude (float) and Angle (float).
+
+| Attribute Name   | Attribute Value Type | Description |
+|:----------------:|:--------------------:|:-----------:|
+| CDSMID           | Guid   | The GUID associated with an entry in the Phasor CDSM. |
+| CDSMTag          | String | A string based unique identifier for the Phasor. |
+| Description      | String | A description for this phasor, e.g. 'Smith Substation North Bus Voltage'. |
+| IsCurrent        | Bit    | Set if this is a current phasor. |
+| VoltAssociation  | Guid   | The ID of the voltage phasor used to compute power. Ignore if IsCurrent is reset. |
+| AlternateVolt    | Guid   | An alternate voltage phasor, used when the primary voltage is unavailable. Ignore if IsCurrent is reset. |
+| LineTableName    | String | The name of the table within which the record for the line associated with this current phasor resides. Ignore if IsCurrent is reset. |
+| LineTableID      | Guid    | The primary key for the record within the line table. Ignore if IsCurrent is reset. |
+
+### VIPair Table (a CDSM example)
+
+The existence of this CDSM Table presumes the existence of a CDSM, 'built-in' or 'user-defined', called 'VIPair'. For this example, assume that the VIPair CDSM is comprised of two fields: Voltage (Phasor CDSM) and Current (Phasor CDSM).
+
+| Attribute Name   | Attribute Value Type | Description |
+|:----------------:|:--------------------:|:-----------:|
+| CDSMID           | Guid   | The GUID associated with an entry in the VIPair CDSM. |
+| CDSMTag          | String | A string based unique identifier for the VIPair. |
+| Description      | String | A description for this VIPair, e.g. 'Smith-Jones Line'. |
+
 
 
 
