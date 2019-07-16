@@ -1,5 +1,7 @@
 ![STTP](Sections/Images/sttp-logo-with-title.png)
 
+> :information_source: This specification effort has been superceded by the [IEEE 2664](https://standards.ieee.org/project/2664.html) effort to create a standard for the Streaming Telemetry Transport Protocol. This document created here should not be consider exhaustive, but will be left online for context and reference. Another document that was published by PNNL provides good information on the protocol as it compares to other standard streaming protocols used for synchrophasor data: https://www.osti.gov/servlets/purl/1504742
+
 This specification defines a [publish-subscribe](https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern) data transfer protocol that has been optimized for exchanging streaming [time series](https://en.wikipedia.org/wiki/Time_series) style data, such as [synchrophasor](https://en.wikipedia.org/wiki/Phasor_measurement_unit) data that is used in the electric power industry, over [Internet Protocol](https://en.wikipedia.org/wiki/Internet_Protocol) (IP). The protocol supports transferring both real-time and historical time series data at full or down-sampled resolutions. Protocol benefits are realized at scale when multiplexing very large numbers of time series [data points](https://en.wikipedia.org/wiki/Data_point) at high speed, such as, hundreds of times per second per data point.
 
 Ideal use cases for STTP will include those that need to securely exchange large numbers of continuously measured data.
