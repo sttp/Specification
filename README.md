@@ -1,6 +1,6 @@
 ![STTP](Sections/Images/sttp-logo-with-title.png)
 
-> :information_source: _Development of this specification has been superceded by the [IEEE 2664](https://standards.ieee.org/project/2664.html) effort to create a standard for the Streaming Telemetry Transport Protocol. The document created here should not be considered exhaustive, but will be left online for context and reference. Another document that was published by PNNL provides good information on the protocol as it compares to other standard streaming protocols used for synchrophasor data_: https://www.osti.gov/servlets/purl/1504742
+> :information_source: _Development of this specification has been superceded by the [IEEE 2664](https://standards.ieee.org/project/2664.html) effort to create a standard for the Streaming Telemetry Transport Protocol. The document will be left online for context and reference. Another document that was published by PNNL provides good information on the protocol as it compares to other standard streaming protocols used for synchrophasor data_: https://www.osti.gov/servlets/purl/1504742
 
 ---
 
